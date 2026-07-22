@@ -122,6 +122,30 @@ body::before {
     border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
   }
 
+  /* Experience-timeline milestone node. Its state is toggled on the DOM by the
+     scroll handler (data-reached / data-leading), in sync with the travelling
+     marker. Inactive by default; no permanent/static active state. */
+  .exp-node {
+    background-color: var(--color-line);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .exp-node {
+      transition:
+        background-color 0.25s ease,
+        transform 0.25s ease;
+    }
+  }
+  .exp-node[data-reached="true"] {
+    background-color: var(--color-accent);
+  }
+  .exp-node[data-leading="true"] {
+    transform: scale(1.25);
+  }
+  /* Ring the card whose node the marker is currently at. */
+  .exp-node[data-leading="true"] ~ .exp-card {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
+  }
+
   /* Small pill/tag used for skills and tech chips. */
   .chip {
     display: inline-flex;
