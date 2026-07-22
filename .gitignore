@@ -1,0 +1,63 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files — never commit real secrets; the example (names only) IS committed
+.env*
+!.env.example
+
+# editor / OS cruft (never commit swap or backup files)
+Thumbs.db
+*.swp
+*~
+.idea/
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# documents — never commit PDFs (e.g. a private/unredacted CV) by default.
+# If a redacted, public-download CV is later added deliberately, force-add that
+# exact file (git add -f) or add a specific allowlist entry for it here.
+*.pdf
+
+# internal project brief and AI/dev instructions — not for the public repo
+CLAUDE.md
+AGENTS.md
+/.claude/
+
+# test / automation artefacts (if ever added inside the repo)
+/test-results/
+/playwright-report/
+/playwright/.cache/

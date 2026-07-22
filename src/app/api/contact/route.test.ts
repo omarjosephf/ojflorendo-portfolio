@@ -1,0 +1,170 @@
+// @vitest-environment node
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { NextRequest } from "next/server";
+import { POST } from "./route";
+import { LIMITS } from "@/lib/contact/schema";
+
+const validBody = {
+  name: "Jane Recruiter",
+  email: "jane@example.com",
+  company: "Acme",
+  enquiryType: "job",
+  subject: "Frontend role",
+  message: "We have an opening that fits your profile nicely.",
+  consent: true,
+};
+
+// Each test uses a distinct client IP so the module-level rate limiter cannot
+// cause cross-test interference — deterministic isolation, no test-only bypass.
+function post(ip: string, body: unknown, raw?: string): NextRequest {
+  return new NextRequest("http://localhost/api/contact", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-forwarded-for": ip },
+    body: raw ?? JSON.stringify(body),
+  });
+}
+
+/** Flatten captured console.error arguments into one searchable string. */
+function loggedText(spy: ReturnType<typeof vi.spyOn>): string {
+  return spy.mock.calls
+    .flat()
+    .map((a: unknown) => (typeof a === "string" ? a : JSON.stringify(a)))
+    .join(" ");
+}
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe("POST /api/contact", () => {
+  it("valid mock-mode request returns ok/delivered:false and makes no network call", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const res = await POST(post("t-valid", validBody));
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({
+      ok: true,
+      delivered: false,
+      mode: "mock",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("silently accepts a honeypot submission, delivering nothing and making no network call", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const res = await POST(
+      post("t-honeypot", { ...validBody, website: "http://spam.example" }),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.delivered).toBe(false);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("returns 413 for an oversized valid JSON body (unrelated large field)", async () => {
+    const oversized = { ...validBody, filler: "x".repeat(40 * 1024) };
+    const res = await POST(post("t-big-json", oversized));
+    expect(res.status).toBe(413);
+    await expect(res.json()).resolves.toEqual({
+      ok: false,
+      message: "Request body is too large.",
+    });
+  });
+
+  it("returns 413 (not 400) for an oversized non-JSON body", async () => {
+    const res = await POST(post("t-big-raw", null, "x".repeat(40 * 1024)));
+    expect(res.status).toBe(413);
+  });
+
+  it("returns 400 for malformed JSON that is within the size limit", async () => {
+    const res = await POST(post("t-badjson", null, "{ not valid json"));
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects missing / too-short fields with 422 and field errors", async () => {
+    const res = await POST(
+      post("t-missing", { ...validBody, name: "", subject: "" }),
+    );
+    expect(res.status).toBe(422);
+    const json = await res.json();
+    expect(json.ok).toBe(false);
+    expect(json.fieldErrors.name).toBeDefined();
+    expect(json.fieldErrors.subject).toBeDefined();
+  });
+
+  it("rejects an invalid email server-side", async () => {
+    const res = await POST(post("t-email", { ...validBody, email: "nope" }));
+    expect(res.status).toBe(422);
+    expect((await res.json()).fieldErrors.email).toBeDefined();
+  });
+
+  it("enforces consent server-side", async () => {
+    const res = await POST(post("t-consent", { ...validBody, consent: false }));
+    expect(res.status).toBe(422);
+    expect((await res.json()).fieldErrors.consent).toBeDefined();
+  });
+
+  it("enforces field length limits server-side", async () => {
+    const res = await POST(
+      post("t-limit", { ...validBody, message: "x".repeat(LIMITS.message + 1) }),
+    );
+    expect(res.status).toBe(422);
+    expect((await res.json()).fieldErrors.message).toBeDefined();
+  });
+
+  it("returns 429 once the rate limit is exceeded", async () => {
+    const ip = "t-ratelimit";
+    const statuses: number[] = [];
+    for (let i = 0; i < 6; i++) {
+      statuses.push((await POST(post(ip, validBody))).status);
+    }
+    expect(statuses.slice(0, 5)).toEqual([200, 200, 200, 200, 200]);
+    expect(statuses[5]).toBe(429);
+  });
+
+  it("returns a controlled 502 and leaks no secret/message/stack when the transport reports failure", async () => {
+    vi.stubEnv("RESEND_API_KEY", "secret-key-value");
+    vi.stubEnv("CONTACT_TO_EMAIL", "to@example.com");
+    vi.stubEnv("CONTACT_FROM_EMAIL", "from@example.com");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await POST(post("t-fail502", validBody));
+    expect(res.status).toBe(502);
+
+    const responseText = JSON.stringify(await res.json());
+    expect(responseText).not.toContain("secret-key-value");
+    expect(responseText.toLowerCase()).not.toContain("stack");
+
+    const logs = loggedText(errSpy);
+    expect(logs).not.toContain("secret-key-value");
+    expect(logs).not.toContain(validBody.message);
+  });
+
+  it("returns a controlled 500 and leaks no secret/message/stack when the transport throws", async () => {
+    vi.stubEnv("RESEND_API_KEY", "secret-key-value");
+    vi.stubEnv("CONTACT_TO_EMAIL", "to@example.com");
+    vi.stubEnv("CONTACT_FROM_EMAIL", "from@example.com");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("boom secret-key-value")),
+    );
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await POST(post("t-fail500", validBody));
+    expect(res.status).toBe(500);
+
+    const responseText = JSON.stringify(await res.json());
+    expect(responseText).not.toContain("secret-key-value");
+    expect(responseText).not.toContain("boom");
+
+    const logs = loggedText(errSpy);
+    expect(logs).not.toContain("secret-key-value");
+    expect(logs).not.toContain("boom");
+    expect(logs).not.toContain(validBody.message);
+  });
+});

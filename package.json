@@ -1,0 +1,68 @@
+{
+  "name": "ojflorendo-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portfolio, CV and personal platform of OJ Florendo — built with Next.js, TypeScript and Tailwind CSS.",
+  "author": "OJ Florendo <ojflorendo.connect@gmail.com>",
+  "license": "UNLICENSED",
+  "keywords": [
+    "portfolio",
+    "cv",
+    "oj-florendo",
+    "nextjs",
+    "react",
+    "typescript",
+    "tailwindcss",
+    "threejs"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "overrides": {
+    "sharp": "^0.35.3",
+    "postcss": "^8.5.10"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "npm run typecheck:app && npm run typecheck:tests",
+    "typecheck:app": "tsc --noEmit",
+    "typecheck:tests": "tsc -p tsconfig.tests.json",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:ci": "npm audit --audit-level=moderate && npm run lint && npm run typecheck:app && npm run typecheck:tests && npm run test:unit && npm run build && npm run test:e2e"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^1.25.0",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.185.1",
+    "@vitejs/plugin-react": "^6.0.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

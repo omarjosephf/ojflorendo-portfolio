@@ -1,0 +1,26 @@
+# Normalise all text files to LF in the repository for consistent, cross-platform diffs.
+* text=auto eol=lf
+
+# Explicit text types (kept LF regardless of local autocrlf).
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+*.json  text eol=lf
+*.css   text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.svg   text eol=lf
+
+# Binary assets — never diffed or line-ending converted.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
