@@ -38,9 +38,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Fail on moderate+ advisories (low is non-blocking noise).
+      # Enforce the normal audit gate, allowing only the exact, active,
+      # owner-approved EXC-0001 development-tooling advisory.
       - name: Dependency audit
-        run: npm audit --audit-level=moderate
+        run: node scripts/verify-dependency-audit.mjs
 
       - name: Lint
         run: npm run lint
