@@ -1,28 +1,25 @@
 import type { SiteConfig } from "@/types";
 
 /**
- * Single source of truth for identity, links and contact values (CLAUDE.md §5).
- * Do not display a street address or phone number anywhere (CLAUDE.md §3/§14).
+ * Single source of truth for identity, links and contact values.
+ * Do not display a street address or private phone number anywhere.
  */
 export const site: SiteConfig = {
-  name: "OJ Florendo",
-  headline:
-    "Building practical digital solutions with software, AI, data, and design.",
-  descriptor:
-    "Final-Year Computing & IT Student | AI & Python Training | Data Analysis | Digital Technology",
+  name: "OJ Florendo Rayatchi",
+  headline: "I build practical digital products with software and AI.",
+  descriptor: "Software Developer · AI-Focused Builder · Creative Developer",
   location: "Windsor, Berkshire, United Kingdom",
   email: "ojflorendo.connect@gmail.com",
   about: [
-    "I'm a final-year BSc Computing and IT (Software) student at the Open University, working across software, AI, data analysis and digital marketing. I enjoy turning technical ideas into clear, useful things — whether that's a Python example, a data explanation, or a well-structured web page.",
-    "Alongside my degree I've delivered professional training in Python, data science and AI, developed course and marketing content for executive training programmes, and run day-to-day e-commerce and social content for small business brands. I'm building a portfolio of software, website, AI and data projects, and I'm open to junior, internship, part-time, remote, freelance and collaborative opportunities.",
+    "I am a software developer, AI-focused builder, and creative developer with experience across web development, Python, data, UX/UI, professional training, digital marketing, e-commerce, and social-media operations.",
+    "My path into technology was not straightforward. Over time, I discovered that I am most motivated when I am turning ideas into working products, solving practical problems, and learning through the process of building. Artificial intelligence has become an important part of that direction—not as a substitute for judgement, but as a tool for researching, prototyping, debugging, and working more effectively.",
+    "I care about the people who will use what I create, not only the code behind it. I aim to communicate honestly, take responsibility for the final result, and build solutions that are clear, useful, accessible, and dependable.",
   ],
-  // No public, phone-free CV has been supplied yet, so the "View CV" control is
-  // hidden (the private CV must NOT be published). Once a redacted, phone-free
-  // PDF is added under public/documents/, set this to its path, e.g.
-  // "/documents/oj-florendo-cv.pdf".
+  // The private CV must never be published. Set this only after a separate review
+  // of an explicitly public, phone-free PDF under public/documents/.
   cvPath: null,
-  // Drop a photo into public/images/profile/ and set this to e.g.
-  // "/images/profile/omar.jpg" to replace the monogram placeholder in the hero.
+  // A real profile photograph remains pending. The assistant avatar is reserved
+  // for OJ Assistant and must not silently replace the human profile image.
   profileImage: null,
   socials: [
     {

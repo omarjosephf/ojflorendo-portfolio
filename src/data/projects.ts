@@ -1,97 +1,97 @@
 import type { ProjectItem } from "@/types";
 
-/**
- * Real projects only (CLAUDE.md §3/§9 — do not invent projects or outcomes).
- * The portfolio site itself is the first genuine featured project and has a full
- * case study. To add a future project, append a new object here.
- */
+/** Real projects only. Do not invent projects, clients, metrics, or outcomes. */
 export const projects: ProjectItem[] = [
   {
     slug: "personal-portfolio-website",
-    title: "Personal Portfolio Website",
+    title: "Personal Portfolio & Professional Platform",
     summary:
-      "A responsive portfolio and CV website presenting my experience, skills, qualifications and future projects.",
+      "A responsive portfolio and personal platform designed to present my work, experience, qualifications, and services while establishing a secure foundation for future AI and content features.",
     description:
-      "Designed and built as my first featured project: a modern, accessible, security-conscious personal site with a procedural 3D hero, typed content model, strict security headers and a Content Security Policy.",
-    status: "In development",
+      "A responsive, accessible, and security-conscious platform for presenting verified work, experience, qualifications, and services, with structured content and a foundation for future AI and publishing features.",
+    status: "Live",
     technologies: [
       "Next.js",
+      "React",
       "TypeScript",
       "Tailwind CSS",
-      "Framer Motion",
-      "Three.js",
-      "React Three Fiber",
-      "Claude Code",
+      "Vitest",
+      "Playwright",
+      "Vercel",
+      "Resend",
+      "AI-assisted engineering",
     ],
     image: null,
-    liveUrl: null,
-    githubUrl: null,
+    liveUrl: "https://ojfr.me/",
+    githubUrl: "https://github.com/omarjosephf/ojflorendo-portfolio",
     featured: true,
-    ariaLabel: "Personal Portfolio Website case study",
+    ariaLabel: "Personal Portfolio & Professional Platform case study",
     caseStudy: {
       tagline:
-        "Building a fast, accessible and security-conscious personal site — my first featured project.",
+        "Building an accessible and security-conscious professional platform with room for future AI and content features.",
       overview:
-        "This portfolio is a single-page personal website with a dedicated case-study route. It presents who I am, my skills and experience, and my work, and gives visitors clear, safe ways to get in touch. I built it as a real product: designed, engineered, tested and documented, with accessibility and security treated as first-class requirements rather than afterthoughts.",
+        "This portfolio is a single-page professional platform with a dedicated case-study route. It presents my identity, capabilities, experience, qualifications, services, and work, and gives visitors clear, safe ways to get in touch. I developed it as a real product, with accessibility, security, performance, maintainability, and truthful representation treated as first-class requirements.",
       context:
-        "As a final-year Computing and IT student looking for junior, internship and freelance opportunities, I needed a professional online presence that I fully control. It had to load quickly, work for everyone, be safe to put my name behind, and be easy to keep extending as I complete more projects.",
+        "As a final-year Computing and IT student pursuing junior, internship, part-time, freelance, and collaborative opportunities, I needed a professional online presence that I control. It had to communicate clearly to employers and potential clients, remain useful without unnecessary tracking, and provide a dependable foundation for future portfolio projects, content, and a narrow AI guide.",
       goals: [
-        "Present my profile, skills, experience and qualifications clearly and honestly.",
-        "Make it genuinely accessible (keyboard, screen reader, reduced motion) and responsive across phones, tablets and large monitors.",
-        "Keep it fast, with a small, secure attack surface and no unnecessary tracking.",
-        "Structure content as typed data so future projects and case studies are easy to add.",
+        "Present my profile, capabilities, experience, qualifications, services, and work clearly and honestly.",
+        "Provide an accessible and responsive experience across keyboard, screen-reader, reduced-motion, mobile, tablet, and desktop use.",
+        "Maintain a small, security-conscious attack surface without unnecessary tracking or persistent user data.",
+        "Keep public content in typed data so future projects and case studies can be added coherently.",
       ],
       role:
-        "I was the sole developer and designer. I built the site using AI-assisted development (Claude Code) as a pair-programmer — I set the direction and requirements, made the design and architecture decisions, reviewed the generated code, and did the configuration, testing and verification myself. It is honest to say the work was AI-assisted; it would be dishonest to claim every line was typed by hand without help, or that no judgement or review was involved.",
+        "I developed this portfolio through an AI-assisted engineering workflow. Claude Code and ChatGPT supported research, planning, implementation, debugging, and review. I directed the product decisions, approved the changes, verified the output, and remain responsible for the final result. AI-generated suggestions were treated as untrusted until inspected and tested; architecture, security controls, content, release decisions, and acceptance criteria remained under my authority.",
       process: [
-        "Planned the scope, content model and a security-first, phased build before writing code.",
-        "Built the foundation: typed content data, the design system, security headers and a nonce-based Content Security Policy.",
-        "Implemented the sections, the procedural 3D hero, the experience timeline and the contact flow.",
-        "Measured performance with a repeatable browser harness, then optimised based on the findings.",
-        "Verified accessibility, security headers, the CSP and behaviour across target viewports.",
+        "Defined the product scope, audience, content model, and security-first delivery plan before implementation.",
+        "Built the typed content foundation, design system, security headers, and nonce-based Content Security Policy.",
+        "Implemented the main sections, procedural 3D hero, experience timeline, project case study, and secure contact boundary.",
+        "Measured and improved interaction performance, preserving progressive enhancement and reduced-motion support.",
+        "Used local verification, remote CI, preview QA, explicit release approvals, and production smoke testing before publication.",
       ],
       architecture: [
-        "Next.js App Router with React Server Components by default; client components only where interactivity is needed.",
-        "All content lives in typed data modules, kept separate from presentation.",
-        "A per-request nonce Content Security Policy is generated in a proxy (Next.js 16's replacement for middleware); other security headers are set in the Next config.",
-        "Fonts are self-hosted at build time, so there is no runtime request to a third-party font service.",
-        "The 3D scene is a dynamically-imported client component; the contact route is a server route with a swappable email transport.",
+        "Next.js App Router with React Server Components by default and client components only where interaction requires them.",
+        "Typed content modules kept separate from presentation components.",
+        "A per-request nonce Content Security Policy generated in the Next.js proxy, with complementary security headers configured centrally.",
+        "Build-time font optimisation and no runtime third-party font dependency.",
+        "A dynamically imported 3D scene as progressive enhancement and a server-side contact route with a swappable email transport.",
       ],
       features: [
-        "A dark, restrained design system with a teal/blue accent.",
-        "A procedural “Digital Core” 3D hero with an attractive CSS fallback.",
-        "An experience timeline with a scroll-linked progress marker.",
-        "An accessible contact form with server-side validation, plus direct email, LinkedIn and GitHub links.",
-        "Responsive layouts from small phones to large monitors, with no horizontal overflow.",
+        "Responsive and accessible interface with clear navigation and calls to action.",
+        "Project case studies and structured, typed public content.",
+        "Secure contact handling with server-side validation and honest mock-delivery behaviour.",
+        "Technical SEO, metadata routes, structured data, and social preview support.",
+        "Automated unit and browser testing.",
+        "Strict Content Security Policy, reduced-motion support, and progressive enhancement.",
       ],
       accessibilitySecurity: [
-        "Targets WCAG 2.2 AA: semantic landmarks, a single logical H1, a skip link, full keyboard support, visible focus and reduced-motion handling; automated axe checks report no violations.",
-        "Decorative elements (the 3D canvas, timeline marker and nodes) are hidden from assistive technology.",
-        "Strict Content Security Policy with a per-request nonce and no unsafe-inline scripts, plus HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy and Permissions-Policy.",
-        "No secrets in the codebase; the contact form uses a honeypot and rate limiting and never exposes an email key to the browser.",
+        "Semantic landmarks, a logical heading structure, skip navigation, keyboard support, visible focus, and reduced-motion handling are verified through automated and manual checks.",
+        "Decorative 3D and timeline elements are kept out of the accessibility tree.",
+        "A strict nonce-based Content Security Policy is combined with HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, and Permissions-Policy.",
+        "The contact boundary uses bounded server-side validation, a honeypot, rate limiting, plain-text email output, generic errors, and server-only credentials.",
       ],
       performance: [
-        "The 3D scene is dynamically imported, capped to a lower frame rate, and fully paused when it is off-screen or the tab is hidden.",
-        "Removed a large number of expensive backdrop-filter blurs and permanent compositor layers that were contributing to scroll and interaction lag.",
-        "Replaced a per-event scroll listener with a requestAnimationFrame-throttled one, and drives the timeline with compositor-friendly transforms instead of per-frame React updates.",
-        "Optimisations were validated with a repeatable before/after browser profiling harness. A production Lighthouse audit on the deployed site is planned as a later step, since a software-rendered local environment is not representative.",
+        "The 3D scene is dynamically imported, frame-rate-capped, and paused when it is off-screen or the tab is hidden.",
+        "Expensive visual effects and unnecessary compositor layers were reduced after profiling.",
+        "Scroll-linked behaviour uses requestAnimationFrame throttling and compositor-friendly transforms rather than per-frame React updates.",
+        "Performance choices preserve readable content and navigation when WebGL or animation is unavailable.",
       ],
       challenges: [
         {
           title: "A strict CSP versus a modern framework",
-          body: "Enforcing a nonce-based Content Security Policy with no unsafe-inline scripts means pages are rendered per request rather than as a static export, and required rendering some animated elements on the client so their inline styles are applied via the CSSOM rather than blocked at parse. I chose to keep the strict policy and accept the rendering trade-off rather than weaken security.",
+          body: "A nonce-based Content Security Policy without unsafe-inline scripts requires per-request rendering and deliberate handling of client-side styles. I kept the strict policy and accepted the rendering trade-off rather than weakening the security boundary.",
         },
         {
-          title: "An impressive 3D hero that stays responsive",
-          body: "A continuously rendering WebGL scene can hurt scrolling and input responsiveness. I kept the visual but made it demand-driven, frame-rate-capped and paused when not visible, prioritising interaction responsiveness over decorative movement.",
+          title: "A distinctive 3D hero that remains responsive",
+          body: "A continuously rendering WebGL scene can harm scrolling and input responsiveness. I kept the visual as progressive enhancement, capped its work, and paused it when it was not useful.",
         },
       ],
       outcome:
-        "The result is a running, accessible, security-conscious portfolio that I control and can keep extending. It passes linting, type-checking and a production build, reports no accessibility violations in automated checks, and serves a tested set of security headers with an enforced CSP. I have deliberately not invented metrics such as visitor counts, client names or business results — this case study describes the engineering, not marketing claims.",
+        "The result is a live, accessible, security-conscious professional platform that I control and can extend incrementally. It has passed the project quality gates, remote CI, preview review, owner QA, production publication, and post-deployment smoke testing. This case study deliberately avoids invented visitor metrics, client outcomes, or unsupported expertise claims.",
       lessons: [
-        "Read the framework's own documentation first — this project uses a Next.js version with real breaking changes from older guides.",
-        "Measure before optimising: profiling showed the real cost was in compositing (backdrop blur and layers), not only the 3D scene.",
-        "Security and accessibility are easier when designed in from the start than bolted on later.",
+        "Use primary framework documentation and verify assumptions against the installed version.",
+        "Measure before optimising; visible symptoms do not always reveal the main performance cost.",
+        "Security, privacy, and accessibility are easier to maintain when included in the product design from the beginning.",
+        "Small, reviewable releases produce clearer evidence and safer rollback than large, mixed changes.",
       ],
       stack: [
         "Next.js (App Router)",
@@ -102,13 +102,16 @@ export const projects: ProjectItem[] = [
         "Three.js",
         "React Three Fiber",
         "Drei",
-        "Claude Code (AI-assisted development)",
+        "Vitest",
+        "Playwright",
+        "Vercel",
+        "Resend",
+        "AI-assisted engineering with human review",
       ],
     },
   },
 ];
 
-/** Look up a project by its slug. */
 export function getProjectBySlug(slug: string): ProjectItem | undefined {
-  return projects.find((p) => p.slug === slug);
+  return projects.find((project) => project.slug === slug);
 }

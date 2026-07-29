@@ -27,11 +27,12 @@ test.describe("Contact form", () => {
     });
     await page.goto("/#contact");
 
-    await page.getByRole("button", { name: /send message/i }).click();
+    await page.getByRole("button", { name: /send project enquiry/i }).click();
     await expect(page.getByText(/please enter your name/i)).toBeVisible();
     expect(apiCalls).toBe(0);
 
     // The form must stay accessible once validation errors are shown.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   });
@@ -39,7 +40,7 @@ test.describe("Contact form", () => {
   test("an invalid email is rejected on the client", async ({ page }) => {
     await page.goto("/#contact");
     await fillValidExcept(page, { email: "not-an-email" });
-    await page.getByRole("button", { name: /send message/i }).click();
+    await page.getByRole("button", { name: /send project enquiry/i }).click();
     await expect(page.getByText(/valid email address/i)).toBeVisible();
   });
 
@@ -48,7 +49,7 @@ test.describe("Contact form", () => {
   }) => {
     await page.goto("/#contact");
     await fillValidExcept(page);
-    await page.getByRole("button", { name: /send message/i }).click();
+    await page.getByRole("button", { name: /send project enquiry/i }).click();
 
     await expect(page.getByText(/thanks for reaching out/i)).toBeVisible();
     await expect(page.getByText(/nothing was actually sent/i)).toBeVisible();

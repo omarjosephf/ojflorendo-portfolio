@@ -137,7 +137,7 @@ export function ContactForm() {
           onClick={() => setStatus("idle")}
           className="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent/60"
         >
-          Send another message
+          Send another enquiry
         </button>
       </div>
     );
@@ -150,7 +150,7 @@ export function ContactForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="glass rounded-2xl p-6 sm:p-8">
       <p className="font-heading text-lg font-semibold text-ink">
-        Send a message
+        Send a project enquiry
       </p>
       <p className="mt-1 text-sm text-muted">
         Fields marked <span className="text-accent">*</span> are required.
@@ -364,7 +364,7 @@ export function ContactForm() {
           ) : (
             <Send className="h-4 w-4" aria-hidden="true" />
           )}
-          {submitting ? "Sending…" : "Send message"}
+          {submitting ? "Sending…" : "Send project enquiry"}
         </button>
         {/* polite live region for submission progress */}
         <span role="status" aria-live="polite" className="sr-only">

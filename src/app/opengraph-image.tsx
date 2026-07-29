@@ -1,11 +1,10 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/data/site";
 
-export const alt = `${site.name} — Portfolio & CV`;
+export const alt = `${site.name} — Software Developer & AI-Focused Builder`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Branded Open Graph card (CLAUDE.md §13). Project-created, no external assets.
 export default function OpengraphImage() {
   return new ImageResponse(
     (
@@ -42,12 +41,12 @@ export default function OpengraphImage() {
             OJ
           </div>
           <div style={{ display: "flex", fontSize: "22px", color: "#98a6b5" }}>
-            Portfolio &amp; CV
+            Software · AI · Creative Development
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontSize: "76px", fontWeight: 700 }}>
+          <div style={{ display: "flex", fontSize: "62px", fontWeight: 700 }}>
             {site.name}
           </div>
           <div
@@ -56,11 +55,10 @@ export default function OpengraphImage() {
               marginTop: "20px",
               fontSize: "34px",
               color: "#98a6b5",
-              maxWidth: "900px",
+              maxWidth: "920px",
             }}
           >
-            Building practical digital solutions with software, AI, data, and
-            design.
+            {site.headline}
           </div>
         </div>
 

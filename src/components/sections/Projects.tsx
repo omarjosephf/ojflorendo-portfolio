@@ -11,9 +11,7 @@ function StatusBadge({ status }: { status: ProjectItem["status"] }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
-        isLive
-          ? "bg-accent/15 text-accent"
-          : "bg-surface-2 text-muted"
+        isLive ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted"
       }`}
     >
       {!isLive ? <Hourglass className="h-3 w-3" aria-hidden="true" /> : null}
@@ -25,13 +23,12 @@ function StatusBadge({ status }: { status: ProjectItem["status"] }) {
 function ProjectCard({ project }: { project: ProjectItem }) {
   return (
     <article className="glass hover-card flex flex-col overflow-hidden rounded-2xl">
-      {/* Decorative banner (no image supplied yet) */}
       <div className="flex h-40 items-center justify-center bg-gradient-to-br from-surface-2 to-surface">
         <Sparkles className="h-10 w-10 text-accent" aria-hidden="true" />
       </div>
 
       <div className="flex flex-1 flex-col p-6">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-start justify-between gap-3">
           <h3 className="font-heading text-lg font-semibold text-ink">
             {project.title}
           </h3>
@@ -43,14 +40,13 @@ function ProjectCard({ project }: { project: ProjectItem }) {
         </p>
 
         <ul className="mt-4 flex flex-wrap gap-2">
-          {project.technologies.map((tech) => (
-            <li key={tech} className="chip">
-              {tech}
+          {project.technologies.map((technology) => (
+            <li key={technology} className="chip">
+              {technology}
             </li>
           ))}
         </ul>
 
-        {/* Case-study link + any real URLs. No dead buttons (CLAUDE.md §9). */}
         {(project.caseStudy || project.liveUrl || project.githubUrl) && (
           <div className="mt-6 flex flex-wrap gap-3">
             {project.caseStudy ? (
@@ -100,7 +96,7 @@ export function Projects() {
       id="projects"
       eyebrow="Projects"
       title="Selected work"
-      intro="Real projects only. This site is the first — more, built with Claude Code, are on the way."
+      intro="Projects built to solve real problems. This portfolio is the first—more software, automation, and AI work is in development."
     >
       <div className="grid gap-6 md:grid-cols-2">
         {projects.map((project) => (
@@ -109,18 +105,17 @@ export function Projects() {
           </Reveal>
         ))}
 
-        {/* Honest "coming soon" state — not a fake project (CLAUDE.md §3/§9) */}
         <Reveal delay={1}>
           <div className="flex h-full min-h-[16rem] flex-col items-center justify-center rounded-2xl border border-dashed border-line p-6 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-accent">
               <Sparkles className="h-6 w-6" aria-hidden="true" />
             </span>
             <h3 className="mt-4 font-heading text-lg font-semibold text-ink">
-              More projects coming soon
+              More purposeful projects are in development
             </h3>
-            <p className="mt-2 max-w-xs text-sm text-muted">
-              New software, website, AI and data projects will appear here as I
-              build them.
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted">
+              Each will be published with an honest description of its status,
+              decisions, limitations, and lessons learned.
             </p>
           </div>
         </Reveal>

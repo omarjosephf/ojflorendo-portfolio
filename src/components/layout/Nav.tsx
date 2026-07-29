@@ -84,6 +84,63 @@ export function Nav() {
     return () => window.removeEventListener("hashchange", normalizeHash);
   }, [pathname]);
 
+  // Browser scroll restoration can win over a fragment after a full reload or
+  // App Router round trip. Re-assert the current target after the home
+  // sections mount and after fonts settle, while leaving ordinary same-page
+  // hash clicks to the browser's smooth-scroll behaviour.
+  useEffect(() => {
+    if (!onHome) return;
+
+    let cancelled = false;
+    let firstFrame = 0;
+    let secondFrame = 0;
+
+    const restoreHashPosition = () => {
+      const rawFragment = window.location.hash.slice(
+        window.location.hash.lastIndexOf("#") + 1,
+      );
+      if (!rawFragment) return;
+
+      let targetId = rawFragment;
+      try {
+        targetId = decodeURIComponent(rawFragment);
+      } catch {
+        // Keep the literal fragment when it is not valid percent-encoding.
+      }
+
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      if (firstFrame) cancelAnimationFrame(firstFrame);
+      if (secondFrame) cancelAnimationFrame(secondFrame);
+
+      firstFrame = requestAnimationFrame(() => {
+        secondFrame = requestAnimationFrame(() => {
+          if (cancelled) return;
+
+          const root = document.documentElement;
+          const previousScrollBehavior = root.style.scrollBehavior;
+          root.style.scrollBehavior = "auto";
+          target.scrollIntoView({ block: "start" });
+          root.style.scrollBehavior = previousScrollBehavior;
+        });
+      });
+    };
+
+    restoreHashPosition();
+    window.addEventListener("pageshow", restoreHashPosition);
+    void document.fonts.ready.then(() => {
+      if (!cancelled) restoreHashPosition();
+    });
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("pageshow", restoreHashPosition);
+      if (firstFrame) cancelAnimationFrame(firstFrame);
+      if (secondFrame) cancelAnimationFrame(secondFrame);
+    };
+  }, [onHome, pathname]);
+
   // Subtle header background once the page is scrolled. rAF-throttled and only
   // updates state when the boolean actually flips — never a per-frame setState.
   useEffect(() => {

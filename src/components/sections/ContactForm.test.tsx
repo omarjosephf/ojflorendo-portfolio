@@ -18,7 +18,7 @@ describe("ContactForm (client validation)", () => {
 
   it("shows required-field errors and does not submit when empty", async () => {
     render(<ContactForm />);
-    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+    fireEvent.click(screen.getByRole("button", { name: /send project enquiry/i }));
 
     expect(await screen.findByText(/please enter your name/i)).toBeInTheDocument();
     expect(screen.getByText(/enter your email address/i)).toBeInTheDocument();
@@ -47,7 +47,7 @@ describe("ContactForm (client validation)", () => {
       target: { value: "A message long enough to pass validation." },
     });
     fireEvent.click(screen.getByLabelText(/happy for OJ Florendo/i));
-    fireEvent.click(screen.getByRole("button", { name: /send message/i }));
+    fireEvent.click(screen.getByRole("button", { name: /send project enquiry/i }));
 
     expect(await screen.findByText(/valid email address/i)).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();

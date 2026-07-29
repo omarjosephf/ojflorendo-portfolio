@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
 import { SITE_URL } from "@/lib/site-url";
 import { SkipLink } from "@/components/layout/SkipLink";
@@ -21,9 +22,8 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-const title = `${site.name} — Portfolio & CV`;
-const description =
-  "Portfolio, CV and personal platform of OJ Florendo — a final-year Computing & IT (Software) student building practical digital solutions with software, AI, data and design.";
+const title = "OJ Florendo Rayatchi | Software Developer & AI-Focused Builder";
+const description = positioning.seoDescription;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -36,10 +36,12 @@ export const metadata: Metadata = {
   authors: [{ name: site.name }],
   creator: site.name,
   keywords: [
+    "OJ Florendo Rayatchi",
     "OJ Florendo",
-    "OJ Florendo portfolio",
+    "software developer",
+    "AI-focused builder",
+    "creative developer",
     "portfolio",
-    "software engineering",
     "Python",
     "AI training",
     "data analysis",
@@ -75,8 +77,6 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Reading a request header opts the render into dynamic rendering, which is
-  // required for the per-request nonce set by src/proxy.ts (see SECURITY.md, G2).
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
