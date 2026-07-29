@@ -1,67 +1,64 @@
 import type { SkillGroup } from "@/types";
 
-/**
- * Skills grouped per CLAUDE.md §9: Software/Technical, AI/Training,
- * Data/Analysis, Digital Marketing/Operations. Tags only — never percentage bars.
- * Content is taken verbatim from the verified skills list (CLAUDE.md §4).
- */
 export const skillGroups: SkillGroup[] = [
   {
-    title: "Software & Technical",
-    summary: "Languages, tools and front-end fundamentals I build with.",
+    title: "Software and web development",
+    summary:
+      "Responsive, accessible interfaces and practical applications built with a maintainable technical foundation.",
     skills: [
-      "Python",
-      "Java",
+      "Next.js",
+      "React",
+      "TypeScript",
       "HTML",
       "CSS",
       "JavaScript",
-      "TypeScript",
-      "UX/UI",
-      "Jupyter Notebook",
+      "Python",
+      "Accessibility-conscious implementation",
+      "Technical SEO foundations",
+      "Testing and technical documentation",
     ],
   },
   {
-    title: "AI & Training",
-    summary: "Prompting, AI tooling and explaining technical topics clearly.",
+    title: "AI-assisted product development",
+    summary:
+      "Focused AI exploration with defined purposes, human review, and honest limitations.",
     skills: [
-      "Prompt engineering",
-      "OpenAI & ChatGPT tools",
-      "AI-assisted content development",
-      "Course outlines",
-      "Lesson summaries",
-      "Presentations",
-      "Learner support",
-      "Chatbot concepts",
-      "Technical explanations for professional audiences",
+      "Narrow AI assistant prototypes",
+      "Prompt and knowledge-workflow design",
+      "AI-assisted research workflows",
+      "Content workflows",
+      "Small automation prototypes",
+      "Responsible AI feature exploration",
+      "Human-reviewed AI-assisted engineering",
     ],
   },
   {
-    title: "Data & Analysis",
-    summary: "Exploring data and turning it into reporting and insight.",
+    title: "UX, data, and communication",
+    summary:
+      "Technical work supported by user-focused structure, data skills, and clear explanation.",
     skills: [
-      "Data analysis",
+      "Wireframes and interface prototypes",
+      "User-focused content structure",
+      "Data organisation and analysis",
       "Microsoft Excel",
       "Power BI",
-      "Machine-learning fundamentals",
+      "Training materials",
+      "Technical explanations",
+      "AI, Python, data, and prompt-engineering training",
     ],
   },
   {
-    title: "Digital Marketing & Operations",
-    summary: "Content, brand presentation and e-commerce operations.",
+    title: "Digital and commercial operations",
+    summary:
+      "Practical digital support informed by e-commerce, content, marketing, and day-to-day operations.",
     skills: [
-      "Canva",
-      "Buffer",
-      "Content calendars",
-      "Product photography",
-      "E-commerce content",
-      "Live-selling content",
-      "Brand presentation",
-      "Facebook",
-      "Instagram",
-      "TikTok",
-      "LinkedIn",
-      "Twitter/X",
-      "Threads",
+      "E-commerce operations support",
+      "Social-media content planning",
+      "Digital marketing content",
+      "Training content",
+      "Product presentation",
+      "Workflow organisation",
+      "Cross-functional digital support",
     ],
   },
 ];

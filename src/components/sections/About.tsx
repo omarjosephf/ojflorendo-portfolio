@@ -5,18 +5,22 @@ import { Reveal } from "@/components/ui/Reveal";
 
 const highlights = [
   { icon: GraduationCap, label: "Final-year BSc Computing & IT (Software)" },
-  { icon: BadgeCheck, label: "PCEP – Certified Entry-Level Python Programmer" },
-  { icon: Presentation, label: "Delivered AI, Python & data training" },
+  { icon: BadgeCheck, label: "Software developer and AI-focused builder" },
+  { icon: Presentation, label: "Delivered AI, Python and data training" },
   { icon: MapPin, label: "Windsor, Berkshire · Remote-friendly" },
 ];
 
 export function About() {
   return (
-    <Section id="about" eyebrow="About" title="A bit about me">
+    <Section
+      id="about"
+      eyebrow="About"
+      title="Building with purpose, learning through execution."
+    >
       <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
-        <Reveal className="max-w-[62ch] space-y-5 text-base leading-relaxed text-muted sm:text-lg">
-          {site.about.map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
+        <Reveal className="max-w-[65ch] space-y-5 text-base leading-relaxed text-muted sm:text-lg">
+          {site.about.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
           ))}
         </Reveal>
 

@@ -1,16 +1,12 @@
+import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
 import { SITE_URL } from "@/lib/site-url";
 import type { ProjectItem } from "@/types";
 
-/**
- * Person + WebSite structured data (schema.org) for SEO and rich results
- * (CLAUDE.md §13). Built only from trusted, self-authored static content — no
- * user input ever reaches this object. Rendered by <StructuredData/>.
- */
 export function buildStructuredData() {
   const sameAs = site.socials
-    .filter((s) => s.external)
-    .map((s) => s.href);
+    .filter((social) => social.external)
+    .map((social) => social.href);
 
   return {
     "@context": "https://schema.org",
@@ -19,9 +15,10 @@ export function buildStructuredData() {
         "@type": "Person",
         "@id": `${SITE_URL}/#person`,
         name: site.name,
+        alternateName: positioning.professionalName,
         url: SITE_URL,
-        jobTitle: "Computing & IT (Software) Student; AI, Python & Data Trainer",
-        description: site.headline,
+        jobTitle: site.descriptor,
+        description: positioning.seoDescription,
         email: `mailto:${site.email}`,
         address: {
           "@type": "PostalAddress",
@@ -36,7 +33,8 @@ export function buildStructuredData() {
         "@id": `${SITE_URL}/#website`,
         url: SITE_URL,
         name: `${site.name} — Portfolio`,
-        description: site.headline,
+        alternateName: `${positioning.professionalName} Portfolio`,
+        description: positioning.seoDescription,
         inLanguage: "en-GB",
         publisher: { "@id": `${SITE_URL}/#person` },
       },
@@ -44,10 +42,6 @@ export function buildStructuredData() {
   } as const;
 }
 
-/**
- * CreativeWork structured data for a project case study. Built only from
- * trusted, self-authored static content.
- */
 export function buildCaseStudyJsonLd(project: ProjectItem) {
   const url = `${SITE_URL}/projects/${project.slug}`;
   return {
@@ -59,7 +53,12 @@ export function buildCaseStudyJsonLd(project: ProjectItem) {
     url,
     inLanguage: "en-GB",
     keywords: project.technologies.join(", "),
-    author: { "@type": "Person", name: site.name, url: SITE_URL },
+    author: {
+      "@type": "Person",
+      name: site.name,
+      alternateName: positioning.professionalName,
+      url: SITE_URL,
+    },
     isPartOf: { "@id": `${SITE_URL}/#website` },
   } as const;
 }
