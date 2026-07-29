@@ -52,10 +52,12 @@ next-env.d.ts
 # exact file (git add -f) or add a specific allowlist entry for it here.
 *.pdf
 
-# internal project brief and AI/dev instructions — not for the public repo
-CLAUDE.md
-AGENTS.md
+# Public repository guidance is tracked at the root. Ignore only private/local
+# AI-tooling instructions and state; never copy their contents into tracked files.
+/CLAUDE.local.md
+/AGENTS.local.md
 /.claude/
+/.agents/
 
 # test / automation artefacts (if ever added inside the repo)
 /test-results/

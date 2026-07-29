@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X, FileText } from "lucide-react";
 import { site } from "@/data/site";
@@ -13,6 +14,11 @@ import { SocialIcon } from "@/components/ui/SocialIcon";
 const sectionIds = site.nav.map((item) => item.targetId);
 
 export function Nav() {
+  // Active state is a pure function of the current route + the section in view.
+  // The landing sections only exist on "/"; on any sub-route (a case study)
+  // no section is visible, so no nav item is active.
+  const pathname = usePathname();
+  const onHome = pathname === "/";
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string>("");
   const [scrolled, setScrolled] = useState(false);
@@ -23,7 +29,14 @@ export function Nav() {
   const close = useCallback(() => setOpen(false), []);
 
   // Highlight the nav link for the section currently in view.
+  //
+  // This Nav lives in the root layout and never unmounts, but the landing
+  // sections mount/unmount with the page. Keying the effect on `onHome` rebinds
+  // the observer to the live DOM after returning from a sub-route — without it,
+  // the observer keeps watching detached nodes and `active` freezes on whatever
+  // section was last in view (the v1.1 "Projects stays active" bug).
   useEffect(() => {
+    if (!onHome) return;
     const targets = sectionIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
@@ -40,7 +53,36 @@ export function Nav() {
     );
     targets.forEach((t) => observer.observe(t));
     return () => observer.disconnect();
-  }, []);
+  }, [onHome]);
+
+  // Effective highlight: only ever active while the landing sections exist.
+  // Off-route this is "" without mutating state, so no nav item is highlighted
+  // on a case study and there is no stale value to clear.
+  const activeSection = onHome ? active : "";
+
+  // Hash hygiene: a URL fragment is singular by definition. Next's App Router
+  // can concatenate a repeated fragment when a hash link (e.g. "/#projects") is
+  // followed after a sub-route round trip, yielding "/#projects#projects" — and
+  // it does so via the History API, which fires no `hashchange`. So we re-run
+  // this on every route transition (keyed on `pathname`), collapsing any
+  // multi-'#' hash to its last fragment in place: no extra history entry, no
+  // re-scroll. A `hashchange` listener covers native/same-route changes. A
+  // well-formed single hash is left untouched.
+  useEffect(() => {
+    const normalizeHash = () => {
+      const { hash, pathname: path, search } = window.location;
+      if (hash.indexOf("#", 1) === -1) return; // 0 or 1 fragment: nothing to do
+      const last = hash.slice(hash.lastIndexOf("#") + 1);
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `${path}${search}${last ? `#${last}` : ""}`,
+      );
+    };
+    normalizeHash();
+    window.addEventListener("hashchange", normalizeHash);
+    return () => window.removeEventListener("hashchange", normalizeHash);
+  }, [pathname]);
 
   // Subtle header background once the page is scrolled. rAF-throttled and only
   // updates state when the boolean actually flips — never a per-frame setState.
@@ -114,7 +156,7 @@ export function Nav() {
           {/* Desktop navigation */}
           <ul className="hidden items-center gap-1 md:flex">
             {site.nav.map((item) => {
-              const isActive = active === item.targetId;
+              const isActive = activeSection === item.targetId;
               return (
                 <li key={item.targetId}>
                   <Link
