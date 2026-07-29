@@ -1,15 +1,15 @@
 # Security
 
-This document describes the security posture of the OJ Florendo portfolio
-site and the deliberate decisions behind it. No website can be guaranteed impossible
-to attack; the goal here is defence in depth, a minimal attack surface, secure
-defaults, and an ongoing maintenance process.
+This document describes the security posture of the OJ Florendo portfolio and
+the deliberate decisions behind it. No website can be guaranteed impossible to
+attack; the goal is defence in depth, a minimal attack surface, secure defaults,
+and an ongoing maintenance process.
 
 ## Supported versions
 
-This is a single-application website deployed from the `main` branch. Only the
-**latest deployed version** receives security fixes; older commits, tags and
-preview deployments are not maintained.
+This is a single-application website deployed from the protected `main` branch.
+Only the **latest deployed version** receives security fixes; older commits, tags,
+and preview deployments are not maintained.
 
 | Version | Supported |
 | --- | --- |
@@ -18,21 +18,26 @@ preview deployments are not maintained.
 
 ## Reporting a vulnerability
 
-If you find a security issue, please email **ojflorendo.connect@gmail.com** with
-a description and clear steps to reproduce. Please do **not** open a public issue
-for security-sensitive reports.
+If you find a security issue, email **ojflorendo.connect@gmail.com** with a
+description and clear reproduction steps. Do **not** open a public issue for a
+security-sensitive report.
 
-You can expect an acknowledgement of your report and, where a fix is needed,
-coordinated disclosure once it has been deployed. Please allow a reasonable
-period to investigate and remediate before any public disclosure.
+Reports are acknowledged privately. Where a fix is needed, disclosure is
+coordinated after remediation and production verification.
+
+Do not include real secrets, credentials, access tokens, or personal data in a
+report; a clear description and reproduction steps are sufficient.
 
 ## Security model
 
-Version 1 is **static-first**: no user accounts, authentication, database, admin
-dashboard, file uploads, payments, comments, CMS, arbitrary redirects, or
-user-generated HTML. There is **no user input** on the site — contact is via
-`mailto:`, LinkedIn and GitHub only (see "Contact form", below). This deliberately
-keeps the attack surface small.
+Version 1.1 remains **static-first** in architecture: there are no user accounts,
+authentication, database, admin dashboard, uploads, payments, comments, CMS,
+arbitrary redirects, or user-generated HTML.
+
+The only public input boundary is `POST /api/contact`. Submitted contact data is
+validated and used only to attempt an email delivery. It is not stored in a
+project database, local storage, or browser storage, and submitted HTML is never
+rendered.
 
 ## HTTP response headers
 
@@ -53,10 +58,9 @@ Static headers are set for every response in `next.config.ts`:
 ## Content Security Policy (CSP)
 
 The CSP is generated **per request with a fresh nonce** in `src/proxy.ts`
-(Next.js 16 renamed `middleware` → `proxy`). It follows the official Next.js CSP
-guide:
+(Next.js 16 renamed `middleware` to `proxy`):
 
-```
+```text
 default-src 'self';
 script-src 'self' 'nonce-<per-request>' 'strict-dynamic';
 style-src 'self' 'nonce-<per-request>';
@@ -70,92 +74,112 @@ frame-ancestors 'none';
 upgrade-insecure-requests;   (production only)
 ```
 
-- **No `'unsafe-inline'` for scripts** in production — the nonce + `strict-dynamic`
-  policy is the primary XSS defence. No wildcard script sources are used.
-- `img-src` allows `blob:`/`data:` for the WebGL `<canvas>` and data URIs.
-- Development additionally allows `'unsafe-eval'` (React dev overlay), inline
-  styles, and `ws:`/`wss:` (Turbopack HMR) — production does not.
-- Fonts are self-hosted via `next/font`, so no external font origin is needed.
+- Production does not allow `'unsafe-inline'` scripts or wildcard script sources.
+- `img-src` allows `blob:` and `data:` for the WebGL canvas and data URIs.
+- Development additionally allows the minimum origins needed for React and
+  Turbopack development tooling; production does not inherit those relaxations.
+- Fonts are self-hosted through `next/font`.
 
-### Consequence: dynamic rendering (documented tradeoff — G2)
+### Dynamic-rendering trade-off
 
-Nonces require the HTML to be generated per request, so the page is
-**server-rendered (dynamic)** rather than a static export. The site is still
-"static-first" in substance (no DB / auth / user input). Experimental hash-based
-CSP (SRI) — which would preserve static generation — is intentionally **not** used
-because it is experimental.
+Per-request nonces require server-rendered HTML rather than a static export. The
+site remains static-first in product architecture: it has no accounts, database,
+or persistent application data. Experimental hash-based CSP is not used.
 
 ## Notable coding decisions
 
-- **`dangerouslySetInnerHTML` (single, documented exception — G12).** The only use
-  is in `src/components/ui/StructuredData.tsx` to emit JSON-LD, which is the
-  official Next.js pattern. It is safe because the payload is 100% static,
-  self-authored data (no user input), `<` is escaped to `<`, it is a
-  non-executable `application/ld+json` data block, and it carries the CSP nonce.
-  There is no other use of `dangerouslySetInnerHTML`, `eval`, or `new Function`.
+- **`dangerouslySetInnerHTML` has one documented use.**
+  `src/components/ui/StructuredData.tsx` emits static, self-authored JSON-LD using
+  the official Next.js pattern. The payload has no user input, escapes `<` before
+  embedding, uses the non-executable `application/ld+json` type, and carries the
+  request nonce. No other use of `dangerouslySetInnerHTML`, `eval`, or
+  `new Function` is permitted without R2 review.
 
-## Secrets
+## Secrets and environment variables
 
-- No secrets are used or committed in v1. `.env*` is git-ignored (`.env.example`,
-  names only, is committed).
-- Any future secret (e.g. a contact-email provider key) must be **server-only**
-  (no `NEXT_PUBLIC_` prefix) and stored in Vercel environment variables — never in
-  the repo. `NEXT_PUBLIC_*` values are visible to visitors.
-- If a secret is ever exposed, revoke and rotate it immediately.
+- Real `.env*` files are ignored; `.env.example` contains names and safe
+  descriptions only.
+- Contact delivery may use three server-only variables:
+  `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, and `CONTACT_FROM_EMAIL`.
+- These values must never use a `NEXT_PUBLIC_` prefix, enter source control,
+  appear in logs or screenshots, or be pasted into project documentation.
+- Production secret creation or modification requires separate explicit owner
+  approval.
+- An exposed secret must be revoked and rotated immediately.
 
-## Contact form (deferred — G10)
+## Contact-form boundary
 
-v1 ships email + LinkedIn + GitHub actions only. A functional form will only be
-added later via an approved secure approach (a reputable hosted provider with spam
-protection and an exact CSP allowlist entry, **or** a Next.js server route with
-server-side validation, length limits, rate limiting, bot protection and
-server-only email credentials). Client-side validation alone will never be trusted,
-and submitted HTML will never be rendered.
+The contact form is implemented through `POST /api/contact` with these controls:
+
+- a hard **32 KiB raw-body cap** is enforced before JSON parsing;
+- the server independently validates and normalises every field;
+- enquiry types are allowlisted and field lengths are bounded;
+- explicit reply consent is required;
+- a hidden honeypot absorbs obvious automated submissions without sending;
+- a best-effort in-memory limit allows five attempts per 60 seconds per server
+  instance; it is deliberately documented as non-distributed;
+- email output is plain text; submitted HTML is not rendered;
+- message bodies, provider response bodies, secrets, and thrown errors are not
+  logged;
+- client and server errors use fixed, generic messages; and
+- responses use `Cache-Control: no-store`.
+
+When all three server-only variables are configured, the server calls the Resend
+HTTP API. When any variable is absent, the safe mock transport validates the flow
+but sends no email and returns `delivered: false`. The UI explicitly states that
+nothing was sent, so mock mode does not create a false-success claim.
+
+This boundary and its limitations are recorded in
+`docs/adr/0001-contact-form-email-boundary.md`.
 
 ## Privacy
 
-- The owner's **phone number and street address are never displayed**.
-- The **private CV is never published** — only a redacted, phone-free public CV may
-  be placed in `public/documents/`, and the "View CV" control stays hidden until it
-  exists (G5).
-- No cookies, analytics, fingerprinting or tracking in v1.
+- The owner's private phone number and street address are never displayed.
+- The private CV is never published. Only an explicitly reviewed public CV may be
+  placed under `public/`; the CV control remains hidden until one exists.
+- Contact data is collected only to reply to the enquiry and is not persisted by
+  the application.
+- No cookies, behavioural analytics, fingerprinting, or ad tracking are used in
+  the current release.
+- Logs, screenshots, test artefacts, and support reports are subject to the same
+  privacy rules as source code.
 
-## Dependencies & supply chain
+## Dependencies and supply chain
 
 - Dependencies are kept minimal; `package-lock.json` is committed and CI uses
-  `npm ci`. Dependabot watches `npm` and `github-actions` weekly, and CI fails on
-  high/critical advisories (`npm audit --audit-level=high`).
-- **`npm audit` currently reports 0 vulnerabilities.**
+  `npm ci`.
+- Dependabot monitors npm and GitHub Actions.
+- The release gate runs `npm audit --audit-level=moderate`; high or critical
+  findings block release, while moderate findings require explicit review and
+  disposition.
+- GitHub Actions use least-privilege permissions and immutable full-SHA pins.
+- Do not use `npm audit fix --force` as an unreviewed remediation.
 
 ### Temporary dependency overrides
 
-The `overrides` block in `package.json` forces two transitive dependencies to
-patched versions in response to published advisories:
+The `overrides` block in `package.json` currently forces patched transitive
+versions in response to published advisories:
 
 | Package | Overridden to | Advisory |
 | --- | --- | --- |
 | `sharp` | `^0.35.3` | GHSA-f88m-g3jw-g9cj (bundled libvips) |
 | `postcss` | `^8.5.10` | GHSA-qx2v-qp2m-jg93 |
 
-Both were pinned inside Next.js's own dependency tree (`sharp@^0.34.5`,
-`postcss@8.4.31`), and no non-breaking Next.js patch resolved them, so overrides
-to API-compatible patched versions were the smallest safe fix (no downgrade of
-Next.js/React, no `npm audit fix --force`). The overrides were **regression-tested**
-(audit, lint, typecheck, build, production routes, security headers, accessibility
-and responsive checks all passed). **They should be removed once the installed
-Next.js release officially depends on patched `sharp`/`postcss` versions** — re-run
-`npm audit` after removing to confirm.
+The overrides are temporary. They must be reviewed when Next.js changes, removed
+when the installed dependency tree is natively patched, and regression-tested
+with the complete release gate. Dependency audit results must be recorded as
+execution evidence rather than maintained as a potentially stale statement in
+this document.
 
-## Account & platform hardening (owner actions — G6)
+## Account and platform hardening (owner actions)
 
-The repository ships CI (`.github/workflows/ci.yml`, read-only token) and Dependabot
-config, but the following must be enabled by the account owner:
+The repository ships CI and Dependabot configuration, but the owner must maintain:
 
-- **GitHub:** enable 2FA, secret scanning + push protection, Dependabot alerts,
-  branch protection on `main`, and require the CI check to pass before merge.
-- **Vercel:** enable 2FA, deploy production only from protected `main`, store any
-  secrets in Vercel env vars, and verify the security headers after deploy.
-- **Domain/registrar:** enable 2FA, registrar lock, auto-renew and DNSSEC; verify
-  DNS before removing old projects to reduce takeover risk.
+- GitHub MFA, secret scanning, push protection, Dependabot alerts, protected
+  `main`, and required CI before merge;
+- Vercel MFA, production deployment only from protected `main`, server-only
+  secret storage, and post-deploy header verification; and
+- registrar MFA, registrar lock, auto-renewal, DNSSEC where supported, and safe
+  verification before removing old domain bindings or deployments.
 
-Platform protection does not replace secure application code or account security.
+Platform protection does not replace secure application code.
