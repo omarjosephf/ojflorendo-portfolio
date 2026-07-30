@@ -1,36 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useMemo, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { AdaptiveDpr, Line } from "@react-three/drei";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 
-/**
- * Drives the demand-rendered canvas at a capped frame rate while `active`, and
- * stops entirely otherwise. Capping to ~30fps roughly halves GPU work versus a
- * continuous 60fps loop with no visible difference for the slow rotation, and
- * stopping when off-screen/hidden/reduced-motion frees the main thread and GPU.
- */
-function FrameLimiter({ fps, active }: { fps: number; active: boolean }) {
-  const invalidate = useThree((s) => s.invalidate);
-  useEffect(() => {
-    if (!active) return;
-    let raf = 0;
-    let last = 0;
-    const interval = 1000 / fps;
-    const loop = (t: number) => {
-      raf = requestAnimationFrame(loop);
-      if (t - last >= interval) {
-        last = t;
-        invalidate();
-      }
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [active, fps, invalidate]);
-  return null;
-}
+import { FrameLimiter } from "@/components/three/FrameLimiter";
+import {
+  useCompactViewport,
+  useSceneActive,
+} from "@/components/three/hooks";
 
 /** Evenly distribute `n` points on a sphere of radius `r` (Fibonacci sphere). */
 function fibonacciSphere(n: number, r: number): Float32Array {
@@ -141,32 +121,8 @@ function CoreScene({ animate, mobile }: { animate: boolean; mobile: boolean }) {
  */
 export function DigitalCore() {
   const reduce = useReducedMotion();
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(true);
-  const [mobile] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(max-width: 767px)").matches,
-  );
-
-  useEffect(() => {
-    const onVisibility = () => setActive(!document.hidden);
-    document.addEventListener("visibilitychange", onVisibility);
-
-    let io: IntersectionObserver | undefined;
-    if (wrapRef.current && typeof IntersectionObserver !== "undefined") {
-      io = new IntersectionObserver(
-        ([entry]) => setActive(entry.isIntersecting && !document.hidden),
-        { threshold: 0.05 },
-      );
-      io.observe(wrapRef.current);
-    }
-
-    return () => {
-      document.removeEventListener("visibilitychange", onVisibility);
-      io?.disconnect();
-    };
-  }, []);
+  const mobile = useCompactViewport();
+  const { ref: wrapRef, active } = useSceneActive<HTMLDivElement>();
 
   const animate = !reduce && active;
 

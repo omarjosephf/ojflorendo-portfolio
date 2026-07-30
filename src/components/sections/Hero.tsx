@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/Container";
 import { Avatar } from "@/components/ui/Avatar";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 import { DigitalCoreLazy } from "@/components/three/DigitalCoreLazy";
+import { ParticleWaveLazy } from "@/components/three/ParticleWaveLazy";
 
 const roles = site.descriptor.split("·").map((role) => role.trim());
 
@@ -15,7 +16,13 @@ export function Hero() {
       aria-labelledby="hero-heading"
       className="relative overflow-hidden pt-28 pb-16 sm:pt-32 lg:pt-36 lg:pb-24"
     >
-      <Container>
+      {/* Decorative background layer. Static gradient with no JS/WebGL; the
+          particle wave is layered over it when WebGL is available. */}
+      <div className="hero-wave" aria-hidden="true">
+        <ParticleWaveLazy />
+      </div>
+
+      <Container className="relative z-10">
         <div className="grid items-center gap-10 sm:gap-12 md:grid-cols-2 md:gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
