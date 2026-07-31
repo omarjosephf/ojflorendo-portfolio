@@ -51,6 +51,8 @@ next-env.d.ts
 # If a redacted, public-download CV is later added deliberately, force-add that
 # exact file (git add -f) or add a specific allowlist entry for it here.
 *.pdf
+# Exact reviewed public CV permitted by the approved publication plan.
+!/public/documents/OJ_Florendo_Rayatchi_Public_CV.pdf
 
 # Public repository guidance is tracked at the root. Ignore only private/local
 # AI-tooling instructions and state; never copy their contents into tracked files.

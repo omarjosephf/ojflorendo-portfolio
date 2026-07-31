@@ -135,8 +135,9 @@ This boundary and its limitations are recorded in
 ## Privacy
 
 - The owner's private phone number and street address are never displayed.
-- The private CV is never published. Only an explicitly reviewed public CV may be
-  placed under `public/`; the CV control remains hidden until one exists.
+- The private CV is never published. The reviewed, phone-free public CV is
+  available at `public/documents/OJ_Florendo_Rayatchi_Public_CV.pdf`; its editable
+  public-safe source is maintained under `docs/cv/`.
 - Contact data is collected only to reply to the enquiry and is not persisted by
   the application.
 - No cookies, behavioural analytics, fingerprinting, or ad tracking are used in
