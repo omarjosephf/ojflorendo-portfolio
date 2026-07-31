@@ -45,13 +45,24 @@ function CoreScene({ animate, mobile }: { animate: boolean; mobile: boolean }) {
     return lines;
   }, [positions, count]);
 
-  useFrame((_, delta) => {
-    if (animate && group.current) {
-      // Clamp delta so resuming after a pause (scroll away/back) can't jump.
-      const dt = Math.min(delta, 0.05);
-      group.current.rotation.y += dt * 0.15;
-      group.current.rotation.x += dt * 0.04;
-    }
+  // Wall-clock reference, so rotation speed never depends on frame timing.
+  // Seeded on the first frame rather than during render, which must stay pure.
+  const lastTick = useRef(0);
+
+  useFrame(() => {
+    const now = performance.now() / 1000;
+    if (lastTick.current === 0) lastTick.current = now;
+    const wall = now - lastTick.current;
+    lastTick.current = now;
+    if (!animate || !group.current) return;
+
+    // Wall-clock rather than the render delta: a delta clamped near the frame
+    // interval makes any late frame lose time, which shows up as the rotation
+    // subtly speeding up and slowing down. The clamp here is only to stop a
+    // backgrounded tab from jumping the rotation forward on return.
+    const dt = Math.min(wall, 0.25);
+    group.current.rotation.y += dt * 0.15;
+    group.current.rotation.x += dt * 0.04;
   });
 
   return (
@@ -139,7 +150,9 @@ export function DigitalCore() {
         style={{ pointerEvents: "none" }}
       >
         <CoreScene animate={animate} mobile={mobile} />
-        <FrameLimiter fps={mobile ? 24 : 30} active={animate} />
+        {/* Same rate as the site background, on the opposite phase, so the two
+            scenes on this page never render on the same animation frame. */}
+        <FrameLimiter fps={mobile ? 20 : 24} active={animate} />
         <AdaptiveDpr pixelated />
       </Canvas>
     </div>

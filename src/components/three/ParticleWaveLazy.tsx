@@ -11,11 +11,11 @@ const ParticleWave = dynamic(
 );
 
 /**
- * Mounts the hero's particle wave only where WebGL is actually available.
+ * Mounts the site-wide particle wave only where WebGL is actually available.
  *
  * There is no JS-rendered fallback on purpose: the wave is a decorative
- * enhancement layered over the static `.hero-wave` gradient, so with no JS or no
- * WebGL the hero keeps that gradient and loses nothing else.
+ * enhancement over the static `body::before` glow, so with no JS or no WebGL
+ * every page keeps that background and loses nothing else.
  */
 export function ParticleWaveLazy() {
   const [webgl, setWebgl] = useState(false);

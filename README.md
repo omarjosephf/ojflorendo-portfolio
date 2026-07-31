@@ -42,9 +42,10 @@ and security treated as first-class requirements.
   Education and Contact, all driven by typed content data.
 - **Procedural “Digital Core” 3D hero** — a dynamically-loaded WebGL scene with
   an attractive CSS fallback; paused when off-screen or the tab is hidden.
-- **Procedural particle-wave hero background** — a shader-driven point field
-  that reacts gently to the pointer, layered over a static CSS gradient that
-  serves as its no-JS / no-WebGL state (see `docs/adr/0002-hero-particle-wave.md`).
+- **Procedural particle-wave background** — a shader-driven point field fixed
+  behind every page, sitting in the lower half like a shoreline and reacting
+  gently to the pointer, over a static CSS gradient that serves as its no-JS /
+  no-WebGL state (see `docs/adr/0002-hero-particle-wave.md`).
 - **Interactive experience timeline** — a scroll-linked progress marker that
   highlights the most relevant role, with a static reduced-motion presentation.
 - **Accessible contact form** — full server-side validation, plus direct email,

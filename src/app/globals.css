@@ -43,12 +43,13 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Subtle ambient background glow behind the whole page. */
+/* Subtle ambient background glow behind the whole page. Sits behind the
+   particle-wave layer, and is the sole background when WebGL is unavailable. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
   background:
     radial-gradient(
       42rem 30rem at 78% -6%,
@@ -287,45 +288,23 @@ body::before {
 }
 
 /* ------------------------------------------------------------------ *
- * Hero "particle wave" background layer.
+ * Site-wide "particle wave" background layer.
  *
- * The gradients below are the static no-JS / no-WebGL state; the WebGL points
- * are layered on top inside the same element, so both are masked identically.
- * The mask keeps the wave faint behind the heading, solid across the middle,
- * and dissolved at the bottom edge so it blends into the next section.
+ * Fixed to the viewport and sitting behind all content, so the same background
+ * runs consistently down every page. Fixed (not absolute) is deliberate: the
+ * layer never moves relative to the viewport, so scrolling cannot force it to
+ * re-rasterise. There is no mask here either — an earlier masked, scrolling
+ * version of this layer was a significant scroll-jank source. The equivalent
+ * softening is done in the shader, which is free.
+ *
+ * The no-JS / no-WebGL state is the `body::before` ambient glow, which sits
+ * one level further back.
  * ------------------------------------------------------------------ */
-.hero-wave {
-  position: absolute;
+.site-wave {
+  position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(
-      58rem 20rem at 50% 94%,
-      color-mix(in srgb, var(--color-accent) 10%, transparent),
-      transparent 72%
-    ),
-    radial-gradient(
-      42rem 15rem at 20% 86%,
-      color-mix(in srgb, var(--color-sky) 9%, transparent),
-      transparent 70%
-    );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 18%,
-    #000 45%,
-    #000 84%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 18%,
-    #000 45%,
-    #000 84%,
-    transparent 100%
-  );
 }
 
 /* Respect users who prefer reduced motion (CLAUDE.md §11). */

@@ -11,6 +11,21 @@ import {
   useCompactViewport,
   useSceneActive,
 } from "@/components/three/hooks";
+import {
+  BAND_HIGH,
+  BAND_LOW,
+  CAMERA,
+  CAMERA_POSITION,
+  CAMERA_TARGET,
+  COMPACT,
+  DESKTOP,
+  PLANE_Z,
+  fadeFarOf,
+  halfDepthOf,
+  halfWidthOf,
+  horizontalScale,
+  type WaveConfig,
+} from "@/components/three/wave-geometry";
 
 /**
  * All wave motion happens on the GPU: the vertex shader displaces a flat point
@@ -45,7 +60,7 @@ const vertexShader = /* glsl */ `
     // A localised ripple that follows the pointer and decays with distance.
     float pointerDistance = distance(pos.xz, uPointer);
     float falloff = exp(-pointerDistance * 0.09);
-    wave += sin(pointerDistance * 0.45 - uTime * 2.2) * falloff * uPointerStrength * 1.1;
+    wave += sin(pointerDistance * 0.45 - uTime * 2.2) * falloff * uPointerStrength * 0.6;
 
     // Settle the wave flat towards the horizon. Distant water reads as calm
     // anyway, and at this shallow viewing angle un-settled far crests project
@@ -76,6 +91,9 @@ const fragmentShader = /* glsl */ `
   uniform float uOpacity;
   uniform float uFadeNear;
   uniform float uFadeFar;
+  uniform float uViewportHeightPx;
+  uniform float uBandLow;
+  uniform float uBandHigh;
 
   varying float vHeight;
   varying float vDepth;
@@ -83,79 +101,33 @@ const fragmentShader = /* glsl */ `
   varying float vEdge;
 
   void main() {
-    // Soft round points — square ones read as a pixel grid.
+    // Soft round points. The falloff is deliberately wide and gradual: small
+    // hard-edged bright dots on a dark field are exactly what starbursts and
+    // smears for readers with astigmatism.
     vec2 offset = gl_PointCoord - 0.5;
     float radial = dot(offset, offset);
     if (radial > 0.25) discard;
-    float alpha = smoothstep(0.25, 0.02, radial);
+    float alpha = smoothstep(0.25, 0.06, radial) * 0.85;
 
     vec3 color = mix(uColorTrough, uColorCrest, clamp(vHeight * 0.5 + 0.5, 0.0, 1.0));
-    color += uColorCrest * vGlow * 0.35;
+    color += uColorCrest * vGlow * 0.15;
 
     // Dissolve towards the horizon so the grid has no visible far edge.
     float fade = 1.0 - smoothstep(uFadeNear, uFadeFar, vDepth);
 
-    gl_FragColor = vec4(color, alpha * uOpacity * fade * vEdge * (1.0 + vGlow * 0.6));
+    // Confine the water to the lower half of the viewport, like a shoreline
+    // seen from the beach. Done in screen space rather than by moving the
+    // camera, so the band lands identically on any viewport shape — and it
+    // leaves the upper half, where most reading happens, completely clear.
+    float ny = gl_FragCoord.y / max(uViewportHeightPx, 1.0);
+    float band = 1.0 - smoothstep(uBandLow, uBandHigh, ny);
+
+    gl_FragColor = vec4(
+      color,
+      alpha * uOpacity * fade * vEdge * band * (1.0 + vGlow * 0.25)
+    );
   }
 `;
-
-/**
- * Scene framing. The camera sits just above the plane looking along it, so the
- * grid recedes to a horizon near the middle of the hero. The field is stretched
- * to the viewport's aspect ratio at runtime, so only the depth fade ever ends
- * it — its lateral edges stay outside the frustum on any screen shape.
- */
-const CAMERA = { fov: 55, near: 0.1, far: 160 } as const;
-const CAMERA_POSITION = [0, 3.4, 10] as const;
-const CAMERA_TARGET = [0, 0.5, -16] as const;
-const PLANE_Z = -18;
-
-type WaveConfig = {
-  columns: number;
-  rows: number;
-  spacing: number;
-  size: number;
-  fps: number;
-};
-
-const DESKTOP: WaveConfig = {
-  columns: 164,
-  rows: 78,
-  spacing: 0.62,
-  size: 2.4,
-  fps: 30,
-};
-
-const COMPACT: WaveConfig = {
-  columns: 112,
-  rows: 56,
-  spacing: 0.62,
-  size: 2.2,
-  fps: 24,
-};
-
-const halfWidthOf = (c: WaveConfig) => ((c.columns - 1) * c.spacing) / 2;
-const halfDepthOf = (c: WaveConfig) => ((c.rows - 1) * c.spacing) / 2;
-
-/**
- * Distance at which the field has fully dissolved. Derived from the geometry so
- * it always lands just short of the real far edge — the grid must never end in
- * a visible straight line.
- */
-const fadeFarOf = (c: WaveConfig) =>
-  CAMERA_POSITION[2] - PLANE_Z + halfDepthOf(c) - 2;
-
-/**
- * How far the field must be stretched horizontally to reach past the frustum at
- * the current aspect ratio. Without this the plane's lateral edges are visible
- * on 16:9 and ultrawide desktops, and on phones held in landscape — the field
- * is sized for the viewport rather than assuming one.
- */
-function horizontalScale(config: WaveConfig, aspect: number): number {
-  const fovRadians = (CAMERA.fov * Math.PI) / 180;
-  const required = Math.tan(fovRadians / 2) * aspect * fadeFarOf(config);
-  return Math.max(1, required / halfWidthOf(config));
-}
 
 /** A flat grid of points on the XZ plane, centred on the origin. */
 function buildGrid(
@@ -190,12 +162,14 @@ const ndc = new THREE.Vector2();
 type PointerState = { x: number; y: number; strength: number };
 
 /**
- * Tracks the pointer in -1..1 canvas space without re-rendering React. The
- * canvas itself is `pointer-events: none` so it can never intercept a click on
- * the hero's buttons — the position is read from `window` instead.
+ * Tracks the pointer in -1..1 viewport space without re-rendering React.
+ *
+ * The canvas is fixed to the viewport, so viewport coordinates *are* canvas
+ * coordinates. That removes the `getBoundingClientRect` this used to do — and
+ * with it the scroll listener that called it, which forced a synchronous layout
+ * on every scroll event and was a major source of scroll jank.
  */
 function usePointerField(enabled: boolean) {
-  const canvas = useThree((state) => state.gl.domElement);
   const pointer = useRef<PointerState>({ x: 0, y: 0, strength: 0 });
 
   useEffect(() => {
@@ -204,23 +178,10 @@ function usePointerField(enabled: boolean) {
       return;
     }
 
-    // Cache the rect: reading it on every pointermove forces a layout pass.
-    let rect = canvas.getBoundingClientRect();
-    const measure = () => {
-      rect = canvas.getBoundingClientRect();
-    };
-
     const onMove = (event: PointerEvent) => {
-      if (rect.width === 0 || rect.height === 0) return;
-      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
-      const inside = x >= -1 && x <= 1 && y >= -1 && y <= 1;
-
-      pointer.current.strength = inside ? 1 : 0;
-      if (inside) {
-        pointer.current.x = x;
-        pointer.current.y = y;
-      }
+      pointer.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.current.y = (event.clientY / window.innerHeight) * 2 - 1;
+      pointer.current.strength = 1;
     };
 
     const onLeave = () => {
@@ -228,17 +189,13 @@ function usePointerField(enabled: boolean) {
     };
 
     window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("scroll", measure, { passive: true });
-    window.addEventListener("resize", measure);
     document.addEventListener("pointerleave", onLeave);
 
     return () => {
       window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("scroll", measure);
-      window.removeEventListener("resize", measure);
       document.removeEventListener("pointerleave", onLeave);
     };
-  }, [canvas, enabled]);
+  }, [enabled]);
 
   return pointer;
 }
@@ -257,9 +214,17 @@ function createUniforms(config: WaveConfig) {
     uAmplitude: { value: 1.35 },
     uColorCrest: { value: new THREE.Color("#2dd4bf") },
     uColorTrough: { value: new THREE.Color("#38bdf8") },
-    uOpacity: { value: 0.5 },
+    // Deliberately restrained. This is background texture behind body copy on
+    // every page — the content is the subject, never this. Paired with normal
+    // (non-additive) blending, this reads as a calm, flat texture rather than
+    // the glowing points it used to be. This is the main dial if the balance
+    // needs adjusting.
+    uOpacity: { value: 0.32 },
     uFadeNear: { value: 10 },
     uFadeFar: { value: fadeFarOf(config) },
+    uViewportHeightPx: { value: 1 },
+    uBandLow: { value: BAND_LOW },
+    uBandHigh: { value: BAND_HIGH },
   };
 }
 
@@ -270,7 +235,7 @@ function WaveField({
   animate: boolean;
   config: WaveConfig;
 }) {
-  // ~5.4k points on phones, ~11.7k on desktop — one draw call either way.
+  // ~3.9k points on phones, ~7.4k on desktop — one draw call either way.
   const positions = useMemo(
     () => buildGrid(config.columns, config.rows, config.spacing),
     [config],
@@ -290,6 +255,11 @@ function WaveField({
   // Where the ripple is heading, in the plane's local XZ space.
   const desired = useRef(new THREE.Vector2());
 
+  // Wall-clock reference for the animation, so speed never depends on frame
+  // rate. Seeded on the first frame rather than during render, which must stay
+  // pure.
+  const lastTick = useRef(0);
+
   // Uniforms are mutated every frame, so they are reached through the material
   // ref — the sanctioned mutable escape hatch — rather than a memoised object.
   const materialRef = useRef<THREE.ShaderMaterial>(null);
@@ -302,8 +272,9 @@ function WaveField({
     const material = materialRef.current;
     if (!material) return;
     material.uniforms.uPixelRatio.value = dpr;
+    material.uniforms.uViewportHeightPx.value = size.height * dpr;
     invalidate();
-  }, [dpr, invalidate]);
+  }, [dpr, size.height, invalidate]);
 
   // Mobile browsers drop WebGL contexts under memory pressure or when a tab is
   // backgrounded. three re-initialises the renderer itself, but a demand-rendered
@@ -320,9 +291,24 @@ function WaveField({
     if (!material) return;
     const uniforms = material.uniforms;
 
-    // Clamp so resuming after a pause (scroll away and back) can't jump.
+    // Advance the wave on wall-clock time, not on frame timing.
+    //
+    // This used to accumulate the render delta clamped to 50ms. At 24fps a
+    // frame is 41.7ms, so any late frame — a scroll hitch, a GC pause — landed
+    // over the clamp and the wave quietly lost time, then ran true again once
+    // frames settled. That reads as the wave drifting faster and slower every
+    // few seconds. Wall-clock time makes the speed constant no matter how the
+    // frames fall. The generous clamp only exists to stop a backgrounded tab
+    // from jumping the wave forward on return; it is far above normal jitter.
+    const now = performance.now() / 1000;
+    if (lastTick.current === 0) lastTick.current = now;
+    const wall = now - lastTick.current;
+    lastTick.current = now;
+    if (animate) uniforms.uTime.value += Math.min(wall, 0.25);
+
+    // Keep using the render delta for smoothing, where frame-rate proportional
+    // easing is what we actually want.
     const dt = Math.min(delta, 0.05);
-    if (animate) uniforms.uTime.value += dt;
 
     // Project the pointer onto the wave plane, so the ripple lands under the
     // cursor. A linear screen-space mapping is badly wrong at this shallow
@@ -365,7 +351,11 @@ function WaveField({
         fragmentShader={fragmentShader}
         transparent
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        // Normal rather than additive blending. Additive makes every point a
+        // small light source that blooms where points overlap — the brightest,
+        // most eye-catching thing on screen, and the hardest to look past for
+        // readers with astigmatism. Normal blending keeps it flat and calm.
+        blending={THREE.NormalBlending}
       />
     </points>
   );
@@ -375,15 +365,21 @@ const GL = { antialias: false, powerPreference: "high-performance" } as const;
 const CANVAS_STYLE = { pointerEvents: "none" } as const;
 
 /**
- * Ambient "particle wave" behind the hero. Decorative only: `aria-hidden`, never
- * interactive, and the hero reads identically without it (the static CSS glow on
- * `.hero-wave` is the no-JS / no-WebGL state).
+ * Ambient "particle wave" behind the whole site. Decorative only: `aria-hidden`,
+ * never interactive, and every page reads identically without it (the static
+ * `body::before` glow is the no-JS / no-WebGL state).
  *
- * Performance controls mirror the Digital Core — capped DPR (1 on phones, ≤1.5
- * on desktop), no antialiasing, no post-processing or shadows, demand rendering
- * throttled to 24–30fps, and the loop stops entirely when the hero scrolls out
- * of view or the tab is hidden. Under `prefers-reduced-motion` a single static
- * frame is rendered and the pointer listeners are never attached.
+ * This is a *fixed* viewport layer, not a scrolling one, and that is a
+ * performance decision as much as a visual one: a fixed canvas does not move
+ * relative to the viewport, so scrolling never re-rasterises it, and the scene
+ * needs no element measurement (see `usePointerField`).
+ *
+ * Because it is on screen the whole time it runs to a tight budget — DPR pinned
+ * to 1, ~7.4k points desktop / ~3.9k compact in a single draw call, no
+ * antialiasing, no post-processing, no shadows, demand rendering throttled to
+ * 24–30fps, and the loop stopped entirely when the tab is hidden. Under
+ * `prefers-reduced-motion` one static frame is drawn and no pointer listener is
+ * attached.
  */
 export function ParticleWave() {
   const reduce = useReducedMotion();
@@ -394,10 +390,12 @@ export function ParticleWave() {
   const animate = !reduce && active;
 
   return (
-    <div ref={ref} aria-hidden="true" className="absolute inset-0">
+    <div ref={ref} aria-hidden="true" className="site-wave">
       <Canvas
         frameloop="demand"
-        dpr={compact ? 1 : [1, 1.5]}
+        // Pinned to 1. This is a soft, out-of-focus dot field where a higher
+        // ratio is not visible, but costs 2.25x the fragments at 1.5.
+        dpr={1}
         camera={CAMERA}
         gl={GL}
         style={CANVAS_STYLE}
@@ -410,7 +408,9 @@ export function ParticleWave() {
         }}
       >
         <WaveField animate={animate} config={config} />
-        <FrameLimiter fps={config.fps} active={animate} />
+        {/* Half-interval offset: the Digital Core renders on the alternate
+            frames, so no single frame ever pays for both scenes. */}
+        <FrameLimiter fps={config.fps} active={animate} phase={0.5} />
         <AdaptiveDpr pixelated />
       </Canvas>
     </div>
