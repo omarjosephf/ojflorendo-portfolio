@@ -46,6 +46,9 @@ and security treated as first-class requirements.
   highlights the most relevant role, with a static reduced-motion presentation.
 - **Accessible contact form** — full server-side validation, plus direct email,
   LinkedIn and GitHub actions.
+- **Curated OJ Assistant beta** — deterministic, reviewed portfolio answers
+  processed entirely in the browser with no model API, transcript storage,
+  inference charge, or private-data source.
 - **Project case studies** — dedicated, data-driven routes with structured data.
 - **Responsive** — from small phones to large monitors, with no horizontal
   overflow.
@@ -69,6 +72,9 @@ and security treated as first-class requirements.
   interactivity is required (3D hero, navigation, timeline, contact form).
 - **Content is data, not markup** — all copy lives in typed modules under
   `src/data`, kept separate from presentation.
+- **OJ Assistant is a local curated client island** — it selects reviewed answers
+  from a typed public manifest and makes no model, server, provider, storage, or
+  analytics request.
 - **Security at the edge of the app** — a per-request nonce Content Security
   Policy is generated in `src/proxy.ts` (Next.js 16’s replacement for
   middleware); other security headers are set in `next.config.ts`.
@@ -80,7 +86,7 @@ flowchart TD
   V["Visitor browser"] -->|HTTPS| P["Proxy: per-request nonce + CSP"]
   P --> A["Next.js App Router"]
   A --> RSC["Server Components<br/>(sections from typed data)"]
-  A --> CC["Client islands<br/>(3D hero, nav, timeline, form)"]
+  A --> CC["Client islands<br/>(3D hero, nav, timeline, form, curated assistant)"]
   RSC --> D[("Typed content<br/>src/data")]
   A --> CS["Case-study routes<br/>/projects/[slug]"]
   CC -->|"POST JSON"| API["/api/contact route"]
@@ -192,6 +198,7 @@ src/
 │   ├── robots.ts  sitemap.ts  manifest.ts
 │   ├── opengraph-image.tsx  icon.svg  not-found.tsx
 ├── components/
+│   ├── assistant/                # curated local portfolio guide
 │   ├── layout/                   # nav, footer, skip link
 │   ├── sections/                 # hero, about, now, skills, experience, …
 │   ├── case-study/               # reusable case-study template

@@ -34,10 +34,16 @@ Version 1.1 remains **static-first** in architecture: there are no user accounts
 authentication, database, admin dashboard, uploads, payments, comments, CMS,
 arbitrary redirects, or user-generated HTML.
 
-The only public input boundary is `POST /api/contact`. Submitted contact data is
-validated and used only to attempt an email delivery. It is not stored in a
-project database, local storage, or browser storage, and submitted HTML is never
-rendered.
+The only server-side public input boundary is `POST /api/contact`. Submitted
+contact data is validated and used only to attempt an email delivery. It is not
+stored in a project database, local storage, or browser storage, and submitted
+HTML is never rendered.
+
+`OJ Assistant` is an optional browser-only curated guide. It does not call a
+language model, assistant API, provider, web search, analytics service, or
+telemetry endpoint. Visitor text is bounded, is not rendered, transmitted,
+logged, retained, or placed in browser storage, and is used only to select fixed
+owner-approved public answers and allowlisted internal links.
 
 ## HTTP response headers
 
