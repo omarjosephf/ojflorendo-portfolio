@@ -26,13 +26,24 @@ const blockedRequestPatterns: readonly RegExp[] = [
   /\b(environment\s+variables?|env\s+vars?|api\s*keys?|access\s*tokens?|passwords?|secrets?)\b/i,
   /\b(private\s+(cv|resume|phone|address|document|file|report|repository|repo))\b/i,
   /\b(street\s+address|home\s+address|personal\s+phone)\b/i,
+  // The plainest private-contact probes carry no "private"/"personal"
+  // qualifier: "What is your phone number?" matched nothing above. Nothing
+  // could leak either way — the number is simply absent from the manifest —
+  // but the threat model credits these refusal patterns with covering this
+  // case, so they must actually cover it.
+  /\b(phone|mobile|cell|telephone)\s*numbers?\b/i,
+  /\bwhere\s+(?:do(?:es)?)\s+(?:he|she|they|oj)\s+live\b/i,
   /\b(unpublished|confidential)\s+(project|client|document|work|information)\b/i,
   /\b(chat\s+transcript|internal\s+chat|private\s+conversation)\b/i,
 ];
 
 const personalDataPatterns: readonly RegExp[] = [
   /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
-  /(?:\+?\d[\d\s().-]{8,}\d)/,
+  // Count digits rather than characters. The previous form allowed separators
+  // to pad the length, so an ordinary date range ("2019 - 2023", 8 digits)
+  // tripped the privacy response and a visitor asking about OJ's timeline got
+  // a warning instead of an answer. Real numbers carry at least nine digits.
+  /(?:\+?\d(?:[\s().-]*\d){8,})/,
   /\b(?:password|passcode|pin|credit\s*card|bank\s*account)\s*[:=]/i,
 ];
 
