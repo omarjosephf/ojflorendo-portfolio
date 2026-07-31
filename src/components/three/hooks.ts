@@ -1,6 +1,41 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { hasWebGL } from "@/lib/webgl";
+
+/** Viewports at or below this width are treated as phones. */
+export const COMPACT_QUERY = "(max-width: 767px)";
+
+/**
+ * Whether a decorative WebGL scene should mount at all.
+ *
+ * Phone-sized viewports skip WebGL entirely and keep the CSS presentations that
+ * already exist as the documented no-WebGL state: the `body::before` glow behind
+ * the wave, and `DigitalCoreFallback` behind the hero core. Nothing else is lost.
+ *
+ * Both scenes share one ~234 KiB three.js chunk that costs roughly 1.1s of script
+ * evaluation on a throttled mobile CPU. That dominated Total Blocking Time and
+ * held mobile Lighthouse Performance between 65 and 80. Skipping it on phones
+ * measured 91-93 with TBT 28-62ms across five runs, while desktop keeps both
+ * scenes and stays at 100. Phones also get the battery and heat back.
+ *
+ * Known limitation: a phone held in landscape is wider than the breakpoint and
+ * still loads WebGL. That matches the breakpoint the scenes already use for their
+ * compact tuning; introducing a second, different heuristic would be worse.
+ */
+export function useSceneEnabled(): boolean {
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia(COMPACT_QUERY).matches) return;
+    // Defer a frame so the hero paints first and we never call setState
+    // synchronously inside the effect body.
+    const id = requestAnimationFrame(() => setEnabled(hasWebGL()));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  return enabled;
+}
 
 /**
  * Tracks whether a 3D scene should be running: true only while its wrapper is
