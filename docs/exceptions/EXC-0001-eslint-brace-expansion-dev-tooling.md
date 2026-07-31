@@ -3,7 +3,7 @@
 - **Status:** Active
 - **Date approved:** 2026-07-29
 - **Expiry:** 2026-08-12 (inclusive)
-- **Owner:** Omar Joseph Florendo
+- **Owner:** OJ Florendo
 - **Risk class:** R2
 - **Linked follow-up issue:** [ISSUE-0001 — Remediate legacy ESLint brace-expansion advisory](../issues/0001-remediate-eslint-brace-expansion.md)
 

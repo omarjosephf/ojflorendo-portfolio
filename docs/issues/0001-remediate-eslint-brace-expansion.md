@@ -1,7 +1,7 @@
 # ISSUE-0001 — Remediate legacy ESLint brace-expansion advisory
 
 - **Status:** Open
-- **Owner:** Omar Joseph Florendo
+- **Owner:** OJ Florendo
 - **Created:** 2026-07-29
 - **Due no later than:** 2026-08-12
 - **Related exception:** [EXC-0001](../exceptions/EXC-0001-eslint-brace-expansion-dev-tooling.md)
