@@ -15,9 +15,9 @@ export const site: SiteConfig = {
     "My path into technology was not straightforward. Over time, I discovered that I am most motivated when I am turning ideas into working products, solving practical problems, and learning through the process of building. Artificial intelligence has become an important part of that direction—not as a substitute for judgement, but as a tool for researching, prototyping, debugging, and working more effectively.",
     "I care about the people who will use what I create, not only the code behind it. I aim to communicate honestly, take responsibility for the final result, and build solutions that are clear, useful, accessible, and dependable.",
   ],
-  // The private CV must never be published. Set this only after a separate review
-  // of an explicitly public, phone-free PDF under public/documents/.
-  cvPath: null,
+  // This path points only to the separately reviewed, phone-free public CV.
+  // The editable DOCX source is stored under docs/cv/ for controlled updates.
+  cvPath: "/documents/OJ_Florendo_Rayatchi_Public_CV.pdf",
   // A real profile photograph remains pending. The assistant avatar is reserved
   // for OJ Assistant and must not silently replace the human profile image.
   profileImage: null,
