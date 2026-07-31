@@ -142,6 +142,12 @@ See [`SECURITY.md`](SECURITY.md) for the full posture and disclosure policy.
   when off-screen or the tab is hidden**, with a device-appropriate pixel-ratio
   cap. All wave motion runs in a vertex shader, so per-frame CPU cost does not
   scale with particle count.
+- **Phones do not load WebGL at all.** Below 768px both scenes fall back to the
+  CSS presentations that already serve as the no-JS state, so the shared 234 KiB
+  three.js chunk is never requested. That moved mobile Lighthouse Performance
+  from 65–80 to 91–93 (Total Blocking Time 464–662ms → 28–62ms) while desktop
+  stays at 100 with both scenes running. See
+  [`docs/adr/0003-no-webgl-on-phones.md`](docs/adr/0003-no-webgl-on-phones.md).
 - Decorative animations use **compositor-friendly transforms/opacity**; the
   timeline is driven by motion values rather than per-frame React state.
 - Expensive backdrop blur and permanent compositor layers were removed to keep
