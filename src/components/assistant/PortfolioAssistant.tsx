@@ -69,7 +69,11 @@ export function PortfolioAssistant() {
           aria-modal="false"
           className="glass fixed bottom-20 left-4 right-4 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl shadow-2xl shadow-black/40 sm:left-auto sm:w-[27rem]"
         >
-          <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line/70 bg-surface px-5 py-4">
+          {/* A plain div, not <header>: inside this dialog a <header> maps to a
+              second `banner` landmark alongside the site nav, which axe flags as
+              landmark-no-duplicate-banner and which reads as two banners to a
+              screen reader. */}
+          <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line/70 bg-surface px-5 py-4">
             <div className="flex min-w-0 items-start gap-3">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-accent/30 bg-accent/10 text-accent">
                 <Bot className="h-5 w-5" aria-hidden="true" />
@@ -96,7 +100,7 @@ export function PortfolioAssistant() {
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
-          </header>
+          </div>
 
           <div className="space-y-5 p-5">
             <div className="rounded-xl border border-line/70 bg-night/40 p-4 text-sm leading-6 text-muted">

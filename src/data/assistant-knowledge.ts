@@ -11,6 +11,14 @@ export interface AssistantKnowledgeEntry {
   readonly links: readonly AssistantLink[];
   readonly reviewedOn: string;
   readonly ownerApproved: true;
+  /**
+   * A general entry answers broad "who is OJ" style questions. Its keywords
+   * include conversational lead-ins ("tell me about oj") that also prefix
+   * topic questions ("tell me about oj's projects"), so a general entry is
+   * only selected when no specific topic matches. See the matcher in
+   * `src/lib/portfolio-assistant.ts`.
+   */
+  readonly general?: boolean;
 }
 
 /**
@@ -35,6 +43,7 @@ export const assistantKnowledge: readonly AssistantKnowledgeEntry[] = [
     links: [{ label: "Read about OJ", href: "/#about" }],
     reviewedOn: "2026-07-30",
     ownerApproved: true,
+    general: true,
   },
   {
     id: "projects",

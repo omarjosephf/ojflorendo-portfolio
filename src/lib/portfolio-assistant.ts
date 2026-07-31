@@ -108,9 +108,17 @@ export function answerPortfolioQuestion(rawInput: string): AssistantResult {
   const ranked = assistantKnowledge
     .map((entry) => ({ entry, score: scoreEntry(query, entry) }))
     .sort((left, right) => right.score - left.score);
-  const best = ranked[0];
 
-  if (!best || best.score < 2) return unknownResponse();
+  // A specific topic always beats a general entry. General entries keep
+  // conversational lead-ins as keywords ("tell me about oj"), which also prefix
+  // topic questions ("tell me about oj's projects") and would otherwise outscore
+  // the topic itself. Fall back to the general entry only when nothing specific
+  // matches, so broad questions still get a useful answer.
+  const best =
+    ranked.find((candidate) => !candidate.entry.general && candidate.score >= 2) ??
+    ranked.find((candidate) => candidate.score >= 2);
+
+  if (!best) return unknownResponse();
 
   return {
     status: "matched",
