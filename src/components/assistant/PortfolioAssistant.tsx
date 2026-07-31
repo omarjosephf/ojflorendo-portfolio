@@ -23,6 +23,17 @@ import {
   type AssistantResult,
 } from "@/lib/portfolio-assistant";
 
+/**
+ * Opaque, deliberately not `.glass`. The panel sits over arbitrary page content,
+ * and `.glass` is 90% opacity with no backdrop blur, so hero headings read
+ * straight through the answer text. Blur is reserved for the sticky header by
+ * design (see globals.css), so a solid surface is the correct fix here.
+ */
+const PANEL_CLASS =
+  "fixed bottom-20 left-4 right-4 max-h-[calc(100vh-7rem)] overflow-y-auto " +
+  "rounded-2xl border border-line/70 bg-surface shadow-2xl shadow-black/40 " +
+  "sm:left-auto sm:w-[27rem]";
+
 export function PortfolioAssistant() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -67,7 +78,7 @@ export function PortfolioAssistant() {
           aria-labelledby={titleId}
           aria-describedby={descriptionId}
           aria-modal="false"
-          className="glass fixed bottom-20 left-4 right-4 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl shadow-2xl shadow-black/40 sm:left-auto sm:w-[27rem]"
+          className={PANEL_CLASS}
         >
           {/* A plain div, not <header>: inside this dialog a <header> maps to a
               second `banner` landmark alongside the site nav, which axe flags as
