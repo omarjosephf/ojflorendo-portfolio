@@ -1,36 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useMemo, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { AdaptiveDpr, Line } from "@react-three/drei";
 import { useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 
-/**
- * Drives the demand-rendered canvas at a capped frame rate while `active`, and
- * stops entirely otherwise. Capping to ~30fps roughly halves GPU work versus a
- * continuous 60fps loop with no visible difference for the slow rotation, and
- * stopping when off-screen/hidden/reduced-motion frees the main thread and GPU.
- */
-function FrameLimiter({ fps, active }: { fps: number; active: boolean }) {
-  const invalidate = useThree((s) => s.invalidate);
-  useEffect(() => {
-    if (!active) return;
-    let raf = 0;
-    let last = 0;
-    const interval = 1000 / fps;
-    const loop = (t: number) => {
-      raf = requestAnimationFrame(loop);
-      if (t - last >= interval) {
-        last = t;
-        invalidate();
-      }
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [active, fps, invalidate]);
-  return null;
-}
+import { FrameLimiter } from "@/components/three/FrameLimiter";
+import {
+  useCompactViewport,
+  useSceneActive,
+} from "@/components/three/hooks";
 
 /** Evenly distribute `n` points on a sphere of radius `r` (Fibonacci sphere). */
 function fibonacciSphere(n: number, r: number): Float32Array {
@@ -65,13 +45,24 @@ function CoreScene({ animate, mobile }: { animate: boolean; mobile: boolean }) {
     return lines;
   }, [positions, count]);
 
-  useFrame((_, delta) => {
-    if (animate && group.current) {
-      // Clamp delta so resuming after a pause (scroll away/back) can't jump.
-      const dt = Math.min(delta, 0.05);
-      group.current.rotation.y += dt * 0.15;
-      group.current.rotation.x += dt * 0.04;
-    }
+  // Wall-clock reference, so rotation speed never depends on frame timing.
+  // Seeded on the first frame rather than during render, which must stay pure.
+  const lastTick = useRef(0);
+
+  useFrame(() => {
+    const now = performance.now() / 1000;
+    if (lastTick.current === 0) lastTick.current = now;
+    const wall = now - lastTick.current;
+    lastTick.current = now;
+    if (!animate || !group.current) return;
+
+    // Wall-clock rather than the render delta: a delta clamped near the frame
+    // interval makes any late frame lose time, which shows up as the rotation
+    // subtly speeding up and slowing down. The clamp here is only to stop a
+    // backgrounded tab from jumping the rotation forward on return.
+    const dt = Math.min(wall, 0.25);
+    group.current.rotation.y += dt * 0.15;
+    group.current.rotation.x += dt * 0.04;
   });
 
   return (
@@ -141,32 +132,8 @@ function CoreScene({ animate, mobile }: { animate: boolean; mobile: boolean }) {
  */
 export function DigitalCore() {
   const reduce = useReducedMotion();
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(true);
-  const [mobile] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(max-width: 767px)").matches,
-  );
-
-  useEffect(() => {
-    const onVisibility = () => setActive(!document.hidden);
-    document.addEventListener("visibilitychange", onVisibility);
-
-    let io: IntersectionObserver | undefined;
-    if (wrapRef.current && typeof IntersectionObserver !== "undefined") {
-      io = new IntersectionObserver(
-        ([entry]) => setActive(entry.isIntersecting && !document.hidden),
-        { threshold: 0.05 },
-      );
-      io.observe(wrapRef.current);
-    }
-
-    return () => {
-      document.removeEventListener("visibilitychange", onVisibility);
-      io?.disconnect();
-    };
-  }, []);
+  const mobile = useCompactViewport();
+  const { ref: wrapRef, active } = useSceneActive<HTMLDivElement>();
 
   const animate = !reduce && active;
 
@@ -183,7 +150,9 @@ export function DigitalCore() {
         style={{ pointerEvents: "none" }}
       >
         <CoreScene animate={animate} mobile={mobile} />
-        <FrameLimiter fps={mobile ? 24 : 30} active={animate} />
+        {/* Same rate as the site background, on the opposite phase, so the two
+            scenes on this page never render on the same animation frame. */}
+        <FrameLimiter fps={mobile ? 20 : 24} active={animate} />
         <AdaptiveDpr pixelated />
       </Canvas>
     </div>

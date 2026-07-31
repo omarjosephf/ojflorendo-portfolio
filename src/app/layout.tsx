@@ -9,6 +9,7 @@ import { SkipLink } from "@/components/layout/SkipLink";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { StructuredData } from "@/components/ui/StructuredData";
+import { ParticleWaveLazy } from "@/components/three/ParticleWaveLazy";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -85,6 +86,9 @@ export default async function RootLayout({
       className={`${inter.variable} ${spaceGrotesk.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
+        {/* Decorative site-wide background, fixed behind all content. Loads
+            only where WebGL exists; otherwise the body::before glow stands in. */}
+        <ParticleWaveLazy />
         <SkipLink />
         <Nav />
         <main id="main" className="flex-1">

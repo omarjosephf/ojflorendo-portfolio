@@ -42,6 +42,10 @@ and security treated as first-class requirements.
   Education and Contact, all driven by typed content data.
 - **Procedural “Digital Core” 3D hero** — a dynamically-loaded WebGL scene with
   an attractive CSS fallback; paused when off-screen or the tab is hidden.
+- **Procedural particle-wave background** — a shader-driven point field fixed
+  behind every page, sitting in the lower half like a shoreline and reacting
+  gently to the pointer, over a static CSS gradient that serves as its no-JS /
+  no-WebGL state (see `docs/adr/0002-hero-particle-wave.md`).
 - **Interactive experience timeline** — a scroll-linked progress marker that
   highlights the most relevant role, with a static reduced-motion presentation.
 - **Accessible contact form** — full server-side validation, plus direct email,
@@ -134,8 +138,10 @@ See [`SECURITY.md`](SECURITY.md) for the full posture and disclosure policy.
 
 ## Performance considerations
 
-- The 3D scene is **dynamically imported**, frame-rate capped, and **paused when
-  off-screen or the tab is hidden**, with a device-appropriate pixel-ratio cap.
+- Both 3D scenes are **dynamically imported**, frame-rate capped, and **paused
+  when off-screen or the tab is hidden**, with a device-appropriate pixel-ratio
+  cap. All wave motion runs in a vertex shader, so per-frame CPU cost does not
+  scale with particle count.
 - Decorative animations use **compositor-friendly transforms/opacity**; the
   timeline is driven by motion values rather than per-frame React state.
 - Expensive backdrop blur and permanent compositor layers were removed to keep
@@ -195,7 +201,8 @@ src/
 │   ├── layout/                   # nav, footer, skip link
 │   ├── sections/                 # hero, about, now, skills, experience, …
 │   ├── case-study/               # reusable case-study template
-│   ├── three/                    # Digital Core 3D scene + fallback
+│   ├── three/                    # Digital Core + particle wave scenes, shared
+│   │                             #   frame limiter/hooks, CSS fallback
 │   └── ui/                       # small reusable pieces
 ├── data/                         # typed content (site, skills, experience, …)
 ├── lib/                          # contact schema, email transport, helpers
