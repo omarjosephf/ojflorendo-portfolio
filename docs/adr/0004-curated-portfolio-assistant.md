@@ -1,4 +1,4 @@
-# ADR 0003: Curated no-inference portfolio assistant
+# ADR-0004: Curated no-inference portfolio assistant
 
 - **Status:** Accepted
 - **Date:** 2026-07-30
