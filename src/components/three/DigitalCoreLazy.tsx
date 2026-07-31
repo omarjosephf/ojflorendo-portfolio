@@ -3,22 +3,13 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { DigitalCoreFallback } from "@/components/three/DigitalCoreFallback";
+import { hasWebGL } from "@/lib/webgl";
 
 // Load the heavy 3D bundle only on the client, after the hero text is painted.
 const DigitalCore = dynamic(
   () => import("@/components/three/DigitalCore").then((m) => m.DigitalCore),
   { ssr: false },
 );
-
-/** Detect WebGL support once; fall back to the CSS core when unavailable. */
-function hasWebGL(): boolean {
-  try {
-    const canvas = document.createElement("canvas");
-    return !!(canvas.getContext("webgl2") || canvas.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Hero visual: the CSS "Digital Core" is always rendered as an attractive

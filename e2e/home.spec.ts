@@ -42,6 +42,17 @@ test.describe("Homepage", () => {
     expect(await hasNoHorizontalOverflow(page)).toBe(true);
   });
 
+  test("the decorative background never intercepts pointer input", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    // The particle-wave canvas is fixed over the whole viewport on every page.
+    // Playwright's actionability check fails if another element would receive
+    // the click, so this asserts the canvas stays pointer-events: none.
+    await page.getByRole("link", { name: "Discuss your project" }).click();
+    await expect(page).toHaveURL(/#contact$/);
+  });
+
   test("the project case-study route loads", async ({ page }) => {
     const response = await page.goto("/projects/personal-portfolio-website");
     expect(response?.status()).toBe(200);
