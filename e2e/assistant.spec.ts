@@ -49,6 +49,39 @@ test.describe("OJ Assistant curated beta", () => {
     await expect(toggle).toBeFocused();
   });
 
+  test("requests the 3D portrait only after the assistant is opened", async ({
+    page,
+  }) => {
+    const imageRequests: string[] = [];
+    page.on("request", (request) => {
+      const url = request.url();
+      if (url.includes("oj-assistant-avatar") || url.includes("Turnaround")) {
+        imageRequests.push(decodeURIComponent(url));
+      }
+    });
+
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    // Closed state: the compact 2D avatar may load, the 3D portrait must not.
+    expect(imageRequests.some((u) => u.includes("oj-assistant-avatar-3d"))).toBe(
+      false,
+    );
+
+    await page.getByRole("button", { name: /open oj assistant/i }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(
+      page.getByAltText(/3D illustrated avatar of OJ Florendo/i),
+    ).toBeVisible();
+    await page.waitForLoadState("networkidle");
+
+    expect(imageRequests.some((u) => u.includes("oj-assistant-avatar-3d"))).toBe(
+      true,
+    );
+    // The turnaround reference sheet is a source asset and must never ship.
+    expect(imageRequests.some((u) => u.includes("Turnaround"))).toBe(false);
+  });
+
   test("is accessible and does not overflow on a phone viewport", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });

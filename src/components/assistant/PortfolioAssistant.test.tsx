@@ -56,6 +56,40 @@ describe("PortfolioAssistant", () => {
     expect(toggle).toHaveFocus();
   });
 
+  it("shows only the decorative 2D avatar until the assistant is opened", async () => {
+    render(<PortfolioAssistant />);
+
+    // The entry control's avatar is decorative: the visible label already says
+    // "Ask OJ Assistant", so it must expose no accessible name.
+    const decorative = document.querySelectorAll('img[alt=""]');
+    expect(decorative).toHaveLength(1);
+    expect(decorative[0].getAttribute("src")).toContain(
+      "oj-assistant-avatar-2d",
+    );
+
+    // The 3D portrait must not be in the document before opening, so it is
+    // never requested on a page the visitor does not interact with.
+    expect(
+      screen.queryByAltText(/3D illustrated avatar of OJ Florendo/i),
+    ).not.toBeInTheDocument();
+    expect(document.body.innerHTML).not.toContain("oj-assistant-avatar-3d");
+
+    await openAssistant();
+
+    const portrait = screen.getByAltText(/3D illustrated avatar of OJ Florendo/i);
+    expect(portrait).toBeInTheDocument();
+    expect(portrait.getAttribute("src")).toContain("oj-assistant-avatar-3d");
+  });
+
+  it("discloses that the avatar is an artistic representation, not a photograph", async () => {
+    render(<PortfolioAssistant />);
+    await openAssistant();
+
+    expect(
+      screen.getByText(/artistic digital representation of oj florendo/i),
+    ).toBeInTheDocument();
+  });
+
   it("uses the safe refusal for private or injected requests", async () => {
     render(<PortfolioAssistant />);
     await openAssistant();

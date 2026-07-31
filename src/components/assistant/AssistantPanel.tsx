@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bot, Send, ShieldCheck, X } from "lucide-react";
+import { Send, ShieldCheck, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { suggestedAssistantQuestions } from "@/data/assistant-knowledge";
 import {
@@ -72,9 +72,23 @@ export function AssistantPanel({
           screen reader. */}
       <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line/70 bg-surface px-5 py-4">
         <div className="flex min-w-0 items-start gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-accent/30 bg-accent/10 text-accent">
-            <Bot className="h-5 w-5" aria-hidden="true" />
-          </span>
+          {/* A plain <img> for the same reason as the entry control: next/image
+              emits an inline style attribute that this site's nonce-based
+              `style-src` blocks, and the asset is already a pre-sized 192px
+              WebP (7.6 KB) shown at 40px.
+
+              This one carries meaningful alt text because it is the only place
+              the assistant's visual identity is described. It lives in the
+              lazily-loaded panel chunk, so it is requested only after a visitor
+              opens the assistant. */}
+          <img
+            src="/images/profile/oj-assistant-avatar-3d.webp"
+            alt="3D illustrated avatar of OJ Florendo"
+            width={40}
+            height={40}
+            decoding="async"
+            className="h-10 w-10 shrink-0 rounded-xl border border-accent/30 bg-accent/10 object-cover"
+          />
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 id={titleId} className="font-heading text-base font-semibold text-ink">
@@ -86,6 +100,9 @@ export function AssistantPanel({
             </div>
             <p id={descriptionId} className="mt-1 text-xs leading-5 text-muted">
               Reviewed portfolio answers, not a general-purpose chatbot.
+            </p>
+            <p className="mt-1 text-[0.7rem] leading-4 text-muted/80">
+              Artistic digital representation of OJ Florendo.
             </p>
           </div>
         </div>

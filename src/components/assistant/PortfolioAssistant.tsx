@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { MessageCircle } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 /**
@@ -59,9 +58,29 @@ export function PortfolioAssistant() {
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label="Open OJ Assistant"
-        className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent px-4 py-3 font-heading text-sm font-semibold text-night shadow-xl shadow-black/30 transition-transform hover:-translate-y-0.5"
+        className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent py-2 pl-2 pr-4 font-heading text-sm font-semibold text-night shadow-xl shadow-black/30 transition-transform hover:-translate-y-0.5"
       >
-        <MessageCircle className="h-5 w-5" aria-hidden="true" />
+        {/* A plain <img>, deliberately not next/image.
+            next/image renders an inline `style` attribute, which this site's
+            `style-src 'self' 'nonce-...'` policy blocks — it produced a real CSP
+            violation on every page. Weakening the CSP to accommodate it is not
+            acceptable, and the optimiser would add nothing here: the asset is
+            already a pre-sized 128px WebP (4.5 KB) shown at 28px, which stays
+            crisp past 4x DPR.
+
+            Decorative on purpose: the adjacent visible label already says
+            "Ask OJ Assistant", so meaningful alt text would make a screen
+            reader announce the same thing twice. The identity image that does
+            carry alt text lives in the panel. */}
+        <img
+          src="/images/profile/oj-assistant-avatar-2d.webp"
+          alt=""
+          width={28}
+          height={28}
+          loading="lazy"
+          decoding="async"
+          className="h-7 w-7 rounded-full bg-night/20 object-cover"
+        />
         Ask OJ Assistant
       </button>
     </div>

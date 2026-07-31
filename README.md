@@ -52,7 +52,9 @@ and security treated as first-class requirements.
   LinkedIn and GitHub actions.
 - **Curated OJ Assistant beta** — deterministic, reviewed portfolio answers
   processed entirely in the browser with no model API, transcript storage,
-  inference charge, or private-data source.
+  inference charge, or private-data source. It carries an artistic digital
+  avatar of OJ; the panel, matcher, knowledge manifest and larger portrait load
+  only when a visitor opens it.
 - **Project case studies** — dedicated, data-driven routes with structured data.
 - **Responsive** — from small phones to large monitors, with no horizontal
   overflow.

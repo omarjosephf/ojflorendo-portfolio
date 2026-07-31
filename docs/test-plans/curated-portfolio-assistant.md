@@ -36,6 +36,22 @@
 - The panel has no horizontal overflow at a representative phone viewport and remains scrollable at high zoom.
 - The main portfolio remains navigable when the assistant is closed or JavaScript is unavailable.
 
+## Avatar imagery
+
+- The compact 2D avatar renders on the closed entry control and exposes **no**
+  accessible name, because the adjacent visible label already identifies it.
+- The static 3D portrait renders in the opened panel with the alternative text
+  "3D illustrated avatar of OJ Florendo".
+- The 3D portrait is **not requested** before the assistant is opened; an
+  end-to-end test records image requests to prove this.
+- The turnaround reference sheet is never requested and is not committed.
+- The identity area discloses "Artistic digital representation of OJ Florendo".
+- Both images are plain `<img>` elements with explicit `width` and `height`, so
+  no layout shift occurs. `next/image` is deliberately not used: it emits an
+  inline `style` attribute that the site's nonce-based `style-src` blocks.
+- Broken or blocked imagery does not prevent any assistant function.
+- Published derivatives carry no EXIF, ICC, XMP, IPTC or C2PA metadata.
+
 ## Documentation and privacy review
 
 - Scan the manifest, ADR, threat model, tests, and screenshots for private phone numbers, street addresses, secrets, machine paths, internal reports, and unpublished claims.

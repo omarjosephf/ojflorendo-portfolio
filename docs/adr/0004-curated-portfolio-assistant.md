@@ -1,10 +1,15 @@
 # ADR-0004: Curated no-inference portfolio assistant
 
 - **Status:** Accepted
-- **Date:** 2026-07-30
+- **Date:** 2026-07-30 (revised 2026-07-31 for the approved avatar integration)
 - **Owner:** OJ Florendo
 - **Risk class:** R2
-- **Related policy:** Project Zero Engineering Handbook v1.0.0 and approved v1.1.0 assistant amendment candidate
+- **Governing policy:** Project Zero Engineering Handbook **v1.0.0**
+
+> The handbook version governing this implementation is v1.0.0, confirmed by the
+> owner on 31 July 2026. A separate, unresolved governance question exists about
+> whether v1.1.0 supersedes it; that question is deliberately out of scope here
+> and is **not** resolved by this ADR.
 
 ## Context
 
@@ -27,6 +32,45 @@ Implement **OJ Assistant - Curated Beta** as a deterministic client-side guide:
 9. State clearly that the assistant is curated, deterministic, limited, and not OJ.
 10. Provide direct links to portfolio sections and the contact route, and keep the main site fully useful when JavaScript or the assistant is unavailable.
 11. Keep the feature removable by reverting the assistant commit or removing its root-layout entry point.
+12. Give the assistant a visual identity using two owner-supplied artistic portraits of OJ: a 2D avatar on the entry control and a static 3D portrait in the opened panel.
+
+### Cost, rate limiting and provider posture
+
+- **Provider cost is zero because no provider is used.** There is no account, key, quota or bill to manage.
+- **Network rate limiting is not applicable**: no assistant request crosses a network boundary, so there is nothing to rate limit.
+- Client-side work is instead bounded by the 280-character input limit and by deterministic local matching over a small frozen manifest.
+
+### Avatar decision
+
+- Both portraits are **owner-supplied artistic digital representations**, not photographs, and are disclosed as such in the assistant identity area.
+- The compact 2D avatar is the assistant's primary identity on the entry control. It is a 128px WebP derivative (4.5 KB) rendered at 28px.
+- The static 3D portrait is the secondary representation inside the opened panel. It is a 192px WebP derivative (7.6 KB) rendered at 40px and is **requested only after the assistant is opened**, so it costs a non-interacting visitor nothing.
+- Delivery is progressive and performance-sensitive: the panel, matcher, knowledge manifest and 3D portrait all load on first open.
+- **No interactive 3D avatar is included.** No WebGL, model, canvas renderer, animation, voice, lip-sync or 360 viewer.
+- The turnaround sheet remains a **source and reference asset only**. It is not committed to the repository and is not a production dependency.
+- The assistant remains fully functional without avatar imagery, and the website remains fully functional without the assistant.
+- Derivatives are generated locally with the already-declared `sharp` dependency. **No dependency was added.**
+
+#### Why the avatars are plain `<img>` and not `next/image`
+
+`next/image` renders an inline `style` attribute on the element it produces. This
+site enforces `style-src 'self' 'nonce-...'` with no `'unsafe-inline'`, so that
+attribute is blocked and the browser reports a Content Security Policy violation
+on every page carrying the assistant.
+
+This had never surfaced before because `Avatar.tsx` only renders `next/image`
+when `site.profileImage` is set, and it is `null` — the avatars are the first
+images the site has actually rendered through the optimiser.
+
+Weakening the CSP to accommodate the optimiser was rejected: the policy is a
+deliberate security control and must not be relaxed for a presentational
+convenience. The optimiser would also add nothing here, because both assets are
+already pre-sized WebP derivatives generated at build-preparation time and shown
+far below their intrinsic size.
+
+Plain `<img>` elements with explicit `width` and `height` therefore satisfy the
+same requirements — optimized delivery, no layout shift, no external origin —
+with no policy change and less client JavaScript.
 
 ## Alternatives considered
 
@@ -83,6 +127,7 @@ Viable and lower risk, but less discoverable and less interactive. The selected 
 
 - Remove `<PortfolioAssistant />` from `src/app/layout.tsx` to disable the entry point.
 - Revert the assistant release commit or pull request.
+- The avatar assets are isolated under `public/images/profile/` and are referenced only by the assistant, so removing the assistant removes their only consumer.
 - Keep the rest of the portfolio unchanged.
 - A future generative provider requires a new R2 decision, provider/cost review, threat-model update, privacy review, secrets plan, limits, and explicit owner approval.
 

@@ -159,12 +159,12 @@ export const assistantKnowledge: readonly AssistantKnowledgeEntry[] = [
       "client",
     ],
     answer:
-      "OJ is available for clearly scoped small-to-medium projects, prototypes, training engagements, and ongoing digital support. Public service areas include professional websites and interfaces, Python and data support, structured technical training, and practical digital operations. Every enquiry is reviewed individually so scope, timeline, and outcome remain realistic.",
+      "OJ is available for clearly scoped small-to-medium projects, prototypes, training engagements, and ongoing digital support. The four published service areas are professional websites and interfaces, Python and data work with training, digital content and operations, and carefully scoped AI prototypes. Every enquiry is reviewed individually so scope, timeline, and outcome remain realistic.",
     links: [
       { label: "Review services", href: "/#services" },
       { label: "Discuss an enquiry", href: "/#contact" },
     ],
-    reviewedOn: "2026-07-30",
+    reviewedOn: "2026-07-31",
     ownerApproved: true,
   },
   {
@@ -248,11 +248,15 @@ export const assistantKnowledge: readonly AssistantKnowledgeEntry[] = [
       "inference",
       "privacy",
       "stored",
+      "avatar",
+      "picture",
+      "photo",
+      "image",
     ],
     answer:
-      "OJ Assistant is a curated, deterministic portfolio guide. It selects reviewed answers stored with this website; it does not call an AI model, browse the web, send prompts to a server, retain conversations, or use visitor text for training. It can only answer a small set of approved public portfolio topics.",
+      "OJ Assistant is a curated, deterministic portfolio guide. It selects reviewed answers stored with this website; it does not call an AI model, browse the web, send prompts to a server, retain conversations, or use visitor text for training. It can only answer a small set of approved public portfolio topics, and it is not OJ. The avatar shown is an artistic digital representation of OJ, not a photograph.",
     links: [{ label: "Explore the portfolio", href: "/#about" }],
-    reviewedOn: "2026-07-30",
+    reviewedOn: "2026-07-31",
     ownerApproved: true,
   },
 ];
