@@ -112,9 +112,13 @@ export function TurnstileWidget({
     <div className="mt-5">
       <div ref={containerRef} />
       {failed ? (
-        <p className="mt-2 text-sm text-muted">
-          The verification check couldn&apos;t load. You can still send this
-          form, or email me directly.
+        // Must not promise the form will go through: with the check enforced,
+        // a submission carrying no token is refused server-side. Point at the
+        // two routes that actually work — reload, or the direct email button.
+        <p role="alert" className="mt-2 text-sm text-red-300">
+          The verification check couldn&apos;t load, so this form can&apos;t be
+          sent right now. Please reload the page, or use the email button
+          instead.
         </p>
       ) : null}
     </div>
