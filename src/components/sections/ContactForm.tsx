@@ -9,6 +9,7 @@ import {
   type EnquiryType,
   type FieldErrors,
 } from "@/lib/contact/schema";
+import { TurnstileWidget } from "@/components/sections/TurnstileWidget";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -44,13 +45,18 @@ const FIELD_ORDER: (keyof FieldErrors)[] = [
   "consent",
 ];
 
-export function ContactForm() {
+export function ContactForm({ nonce }: { nonce?: string } = {}) {
   const uid = useId();
   const [values, setValues] = useState<FormValues>(EMPTY);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<Status>("idle");
   const [serverError, setServerError] = useState("");
   const [delivered, setDelivered] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+
+  // Absent until the owner configures Turnstile, in which case the widget is not
+  // rendered and the server-side check is likewise disabled.
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const fid = (name: string) => `${uid}-${name}`;
 
@@ -79,7 +85,7 @@ export function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values }),
+        body: JSON.stringify({ ...values, turnstileToken }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -352,6 +358,14 @@ export function ContactForm() {
           ) : null}
         </div>
       </div>
+
+      {turnstileSiteKey ? (
+        <TurnstileWidget
+          siteKey={turnstileSiteKey}
+          nonce={nonce}
+          onToken={setTurnstileToken}
+        />
+      ) : null}
 
       <div className="mt-6 flex items-center gap-4">
         <button

@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { ArrowUpRight, Mail } from "lucide-react";
 import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
@@ -6,8 +7,11 @@ import { Reveal } from "@/components/ui/Reveal";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 import { ContactForm } from "@/components/sections/ContactForm";
 
-export function Contact() {
+export async function Contact() {
   const externalSocials = site.socials.filter((social) => social.external);
+  // The Turnstile script must carry the per-request nonce so it satisfies the
+  // strict CSP, the same way `src/app/layout.tsx` supplies it to StructuredData.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
     <Section
@@ -18,7 +22,7 @@ export function Contact() {
     >
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
         <Reveal>
-          <ContactForm />
+          <ContactForm nonce={nonce} />
         </Reveal>
 
         <Reveal delay={1}>

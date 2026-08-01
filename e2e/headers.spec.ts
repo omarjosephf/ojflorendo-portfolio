@@ -22,6 +22,18 @@ test.describe("Security response headers", () => {
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("base-uri 'self'");
 
+    // Turnstile (ADR-0005) is allowed to frame and be called, by exact origin.
+    expect(csp).toContain("frame-src https://challenges.cloudflare.com");
+    expect(csp).toContain("connect-src 'self' https://challenges.cloudflare.com");
+
+    // Adding Turnstile must never relax the policy. Scripts stay nonce-only, and
+    // no directive may be opened to a wildcard.
+    expect(csp, "no inline scripts/styles in production").not.toContain(
+      "'unsafe-inline'",
+    );
+    expect(csp, "no eval in production").not.toContain("'unsafe-eval'");
+    expect(csp, "no wildcard source").not.toMatch(/(^|[\s;])\*/);
+
     const hsts = headers["strict-transport-security"];
     expect(hsts, "Strict-Transport-Security present").toBeTruthy();
     expect(hsts).toContain("max-age=");

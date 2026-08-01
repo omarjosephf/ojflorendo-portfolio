@@ -1,8 +1,26 @@
 // @vitest-environment node
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import { POST } from "./route";
 import { LIMITS } from "@/lib/contact/schema";
+
+// Screening performs a DNS lookup. Mock it so these tests never touch the
+// network — otherwise the suite is slow and flaky in CI.
+const resolveMx = vi.fn();
+const resolve4 = vi.fn();
+vi.mock("node:dns", () => ({
+  promises: {
+    resolveMx: (...args: unknown[]) => resolveMx(...args),
+    resolve4: (...args: unknown[]) => resolve4(...args),
+  },
+}));
+
+beforeEach(() => {
+  resolveMx.mockReset();
+  resolve4.mockReset();
+  // Default: the sender's domain accepts mail.
+  resolveMx.mockResolvedValue([{ exchange: "mx.example.com", priority: 10 }]);
+});
 
 const validBody = {
   name: "Jane Recruiter",
@@ -169,6 +187,108 @@ describe("POST /api/contact", () => {
     expect(logs).not.toContain("secret-key-value");
     expect(logs).not.toContain("boom");
     expect(logs).not.toContain(validBody.message);
+  });
+
+  it("rejects the submission when Turnstile is enforced and denies the token", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "0x-test-secret");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ success: false }), { status: 200 }),
+      ),
+    );
+
+    const res = await POST(
+      post("t-turnstile-denied", { ...validBody, turnstileToken: "bad" }),
+    );
+
+    expect(res.status).toBe(403);
+    const body = (await res.json()) as { ok: boolean };
+    expect(body.ok).toBe(false);
+  });
+
+  it("rejects a submission with no token once Turnstile is enforced", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "0x-test-secret");
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const res = await POST(post("t-turnstile-missing", validBody));
+
+    expect(res.status).toBe(403);
+    // A missing token is decided locally; Cloudflare is never called.
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("accepts the submission when Turnstile confirms the token", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "0x-test-secret");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 }),
+      ),
+    );
+
+    const res = await POST(
+      post("t-turnstile-ok", { ...validBody, turnstileToken: "good" }),
+    );
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({
+      ok: true,
+      delivered: false,
+      mode: "mock",
+    });
+  });
+
+  it("allows the submission but warns when Turnstile is unreachable", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "0x-test-secret");
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")));
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "info").mockImplementation(() => {});
+
+    const res = await POST(
+      post("t-turnstile-down", { ...validBody, turnstileToken: "any" }),
+    );
+
+    // Fail open: an outage at Cloudflare must not cost a genuine enquiry.
+    expect(res.status).toBe(200);
+    expect(loggedText(warnSpy)).toContain("turnstile_unavailable");
+  });
+
+  it("rejects a disposable email address with a field error", async () => {
+    const res = await POST(
+      post("t-disposable", { ...validBody, email: "throwaway@mailinator.com" }),
+    );
+
+    expect(res.status).toBe(422);
+    const body = (await res.json()) as { fieldErrors?: { email?: string } };
+    expect(body.fieldErrors?.email).toMatch(/permanent email/i);
+  });
+
+  it("rejects an email domain that cannot receive mail", async () => {
+    resolveMx.mockRejectedValue(Object.assign(new Error(), { code: "ENOTFOUND" }));
+    resolve4.mockRejectedValue(Object.assign(new Error(), { code: "ENOTFOUND" }));
+
+    const res = await POST(
+      post("t-undeliverable", { ...validBody, email: "jane@no-such.invalid" }),
+    );
+
+    expect(res.status).toBe(422);
+    const body = (await res.json()) as { fieldErrors?: { email?: string } };
+    expect(body.fieldErrors?.email).toMatch(/couldn't verify that email domain/i);
+  });
+
+  it("rejects a link-flooded message", async () => {
+    const message = Array.from(
+      { length: 12 },
+      (_, i) => `https://spam${i}.example`,
+    ).join(" ");
+
+    const res = await POST(post("t-linkflood", { ...validBody, message }));
+
+    expect(res.status).toBe(422);
+    const body = (await res.json()) as { fieldErrors?: { message?: string } };
+    expect(body.fieldErrors?.message).toMatch(/fewer links/i);
   });
 
   it("returns a controlled 500 and leaks no secret/message/stack when the transport itself throws", async () => {

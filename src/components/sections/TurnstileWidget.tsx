@@ -1,0 +1,122 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+/**
+ * Cloudflare Turnstile widget, rendered explicitly.
+ *
+ * Renders nothing unless `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is configured, so the
+ * form behaves exactly as before until the owner sets it up.
+ *
+ * CSP: `api.js` carries the per-request nonce, which Turnstile propagates to the
+ * resources it loads. Combined with the existing `'strict-dynamic'` policy this
+ * needs no `'unsafe-inline'`. The challenge itself renders in a
+ * challenges.cloudflare.com iframe, which is why `frame-src` allows that origin
+ * (see `src/proxy.ts` and ADR-0005).
+ */
+
+const SCRIPT_SRC =
+  "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+const SCRIPT_ID = "cf-turnstile-script";
+
+interface TurnstileApi {
+  render: (
+    container: HTMLElement,
+    options: {
+      sitekey: string;
+      callback: (token: string) => void;
+      "expired-callback": () => void;
+      "error-callback": () => void;
+      theme?: "auto" | "light" | "dark";
+    },
+  ) => string;
+  remove: (widgetId: string) => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileApi;
+  }
+}
+
+/** Load api.js once per document, carrying the CSP nonce. */
+function ensureScript(nonce: string | undefined): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.turnstile) return resolve();
+
+    const existing = document.getElementById(SCRIPT_ID);
+    if (existing) {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(), { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = SCRIPT_ID;
+    script.src = SCRIPT_SRC;
+    script.async = true;
+    if (nonce) script.nonce = nonce;
+    script.addEventListener("load", () => resolve(), { once: true });
+    script.addEventListener("error", () => reject(), { once: true });
+    document.head.appendChild(script);
+  });
+}
+
+export function TurnstileWidget({
+  siteKey,
+  nonce,
+  onToken,
+}: {
+  siteKey: string;
+  nonce?: string;
+  onToken: (token: string) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let widgetId: string | undefined;
+    let cancelled = false;
+    const container = containerRef.current;
+    if (!container) return;
+
+    ensureScript(nonce)
+      .then(() => {
+        if (cancelled || !window.turnstile) return;
+        widgetId = window.turnstile.render(container, {
+          sitekey: siteKey,
+          callback: (token) => onToken(token),
+          // A stale token must not be submitted; clear it and let the widget retry.
+          "expired-callback": () => onToken(""),
+          "error-callback": () => {
+            onToken("");
+            setFailed(true);
+          },
+          theme: "dark",
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+
+    return () => {
+      cancelled = true;
+      if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
+    };
+    // `onToken` is a stable setter from the parent; re-rendering the widget on
+    // every keystroke would reset the challenge.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [siteKey, nonce]);
+
+  return (
+    <div className="mt-5">
+      <div ref={containerRef} />
+      {failed ? (
+        <p className="mt-2 text-sm text-muted">
+          The verification check couldn&apos;t load. You can still send this
+          form, or email me directly.
+        </p>
+      ) : null}
+    </div>
+  );
+}
