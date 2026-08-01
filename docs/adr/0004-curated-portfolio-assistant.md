@@ -4,12 +4,19 @@
 - **Date:** 2026-07-30 (revised 2026-07-31 for the approved avatar integration)
 - **Owner:** OJ Florendo
 - **Risk class:** R2
-- **Governing policy:** Project Zero Engineering Handbook **v1.0.0**
+- **Governing policy:** Project Zero Engineering Handbook **v1.1.0**
 
-> The handbook version governing this implementation is v1.0.0, confirmed by the
-> owner on 31 July 2026. A separate, unresolved governance question exists about
-> whether v1.1.0 supersedes it; that question is deliberately out of scope here
-> and is **not** resolved by this ADR.
+> Implementation began under v1.0.0, which the owner confirmed as governing on
+> 31 July 2026 while an authority conflict was unresolved. That conflict was
+> settled on 1 August 2026: **v1.1.0 was ratified as the single governing
+> version** and v1.0.0 was superseded (see `docs/adr/0000-handbook-adoption.md`).
+>
+> The change does not alter this decision. v1.1.0 is strictly additive on the
+> security, privacy, accessibility and risk requirements this ADR relies on, and
+> it governs this feature explicitly: **Track C** covers the instructor-required
+> AI assistant beta, and **§49.5** covers avatars and related assets. Under
+> v1.0.0 the assistant fell under a blanket expansion prohibition, so v1.1.0 is
+> the version that actually authorises it.
 
 ## Context
 

@@ -3,7 +3,7 @@
 - **Status:** Accepted for implementation
 - **Date:** 2026-07-30 (revised 2026-07-31 for the avatar integration)
 - **Risk class:** R2
-- **Governing policy:** Project Zero Engineering Handbook v1.0.0
+- **Governing policy:** Project Zero Engineering Handbook v1.1.0 (ratified 2026-08-01, superseding v1.0.0)
 - **Assets:** truthful public identity, private-information boundary, site integrity, visitor privacy, approved knowledge, accessibility, application availability, and the owner's likeness as represented by the avatar imagery
 - **Trust boundary:** visitor input enters a browser-only deterministic component; no assistant request crosses a network boundary
 
