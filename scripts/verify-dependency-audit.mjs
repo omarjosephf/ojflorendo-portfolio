@@ -3,24 +3,38 @@
 import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
-const EXCEPTION_ID = "EXC-0001";
-const ADVISORY_ID = "GHSA-mh99-v99m-4gvg";
-const ADVISORY_URL = `https://github.com/advisories/${ADVISORY_ID}`;
-const EXCEPTION_PATH =
-  "docs/exceptions/EXC-0001-eslint-brace-expansion-dev-tooling.md";
-const PACKAGE_LOCK_PATH = "package-lock.json";
-const EXPIRES_AFTER_UTC = Date.parse("2026-08-13T00:00:00.000Z");
+/**
+ * Dependency audit gate.
+ *
+ * Both the production-only and the full audit must be completely clean. There is
+ * no active dependency exception: EXC-0001 was closed on 2026-08-01 once
+ * GHSA-mh99-v99m-4gvg was backported to the 1.x line and `brace-expansion` moved
+ * to a patched version on every path.
+ *
+ * This script deliberately does NOT hardcode a list of expected advisories. The
+ * previous version asserted an exact set of nine audit entries, and when the
+ * advisory was re-scoped upstream that list stopped matching and the gate failed
+ * on `main` for reasons unrelated to any change in this repository. Asserting
+ * "clean" is both simpler and more durable than asserting "exactly these known
+ * problems".
+ *
+ * The one specific guard retained is a regression check that no `brace-expansion`
+ * instance slips back below its patched version, since that advisory previously
+ * required an exception and a false fix attempt.
+ */
 
-const EXPECTED_VULNERABILITY_NAMES = new Set([
-  "@eslint/config-array",
-  "@eslint/eslintrc",
-  "brace-expansion",
-  "eslint",
-  "eslint-config-next",
-  "eslint-plugin-import",
-  "eslint-plugin-jsx-a11y",
-  "eslint-plugin-react",
-  "minimatch",
+const PACKAGE_LOCK_PATH = "package-lock.json";
+
+/**
+ * First patched version per major line for GHSA-mh99-v99m-4gvg. Any
+ * `brace-expansion` in the tree must be at or above the entry for its major.
+ */
+const BRACE_EXPANSION_MINIMUMS = new Map([
+  [1, "1.1.17"],
+  [2, "2.1.3"],
+  [3, "3.0.3"],
+  [4, "5.0.8"],
+  [5, "5.0.8"],
 ]);
 
 function fail(message) {
@@ -81,64 +95,46 @@ function runNpmAudit(args) {
   }
 }
 
-function validateExceptionRecord(text, now = Date.now()) {
-  assert(text.includes(`- **Status:** Active`), `${EXCEPTION_ID} is not active.`);
-  assert(
-    text.includes(`- **Expiry:** 2026-08-12 (inclusive)`),
-    `${EXCEPTION_ID} expiry does not match the approved date.`,
-  );
-  assert(text.includes(ADVISORY_ID), `${EXCEPTION_ID} advisory ID is missing.`);
-  assert(
-    text.includes("`brace-expansion@1.1.16`"),
-    `${EXCEPTION_ID} package version is missing.`,
-  );
-  assert(
-    text.includes("`minimatch@3.1.5`"),
-    `${EXCEPTION_ID} dependency path is missing.`,
-  );
-  assert(
-    now < EXPIRES_AFTER_UTC,
-    `${EXCEPTION_ID} expired after 2026-08-12 UTC.`,
-  );
+/** Compare dotted numeric versions. Returns true when `version` >= `minimum`. */
+function isAtLeast(version, minimum) {
+  const a = String(version).split(".").map(Number);
+  const b = String(minimum).split(".").map(Number);
+  for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
+    const left = a[i] ?? 0;
+    const right = b[i] ?? 0;
+    if (left !== right) return left > right;
+  }
+  return true;
 }
 
 function validatePackageLock(lock) {
   const packages = lock?.packages;
   assert(packages && typeof packages === "object", "Invalid package-lock.json.");
 
-  assert(
-    packages["node_modules/brace-expansion"]?.version === "1.1.16",
-    "Expected legacy brace-expansion@1.1.16 was not found at the approved path.",
-  );
-  assert(
-    packages["node_modules/minimatch"]?.version === "3.1.5",
-    "Expected minimatch@3.1.5 was not found at the approved path.",
-  );
-  assert(
-    packages[
-      "node_modules/@typescript-eslint/typescript-estree/node_modules/brace-expansion"
-    ]?.version === "5.0.8",
-    "The compatible nested brace-expansion path is not patched to 5.0.8.",
+  const found = Object.entries(packages).filter(
+    ([path, value]) =>
+      (path === "node_modules/brace-expansion" ||
+        path.endsWith("/node_modules/brace-expansion")) &&
+      value?.version,
   );
 
-  const braceVersions = new Set(
-    Object.entries(packages)
-      .filter(([path, value]) => {
-        return (
-          path.endsWith("/node_modules/brace-expansion") ||
-          path === "node_modules/brace-expansion"
-        ) && value?.version;
-      })
-      .map(([, value]) => value.version),
+  assert(
+    found.length > 0,
+    "No brace-expansion entry found in package-lock.json; the regression guard cannot run.",
   );
 
-  const unexpected = [...braceVersions].filter(
-    (version) => version !== "1.1.16" && version !== "5.0.8",
-  );
-  assert(
-    unexpected.length === 0,
-    `Unexpected brace-expansion version(s): ${unexpected.join(", ")}`,
-  );
+  for (const [path, value] of found) {
+    const major = Number(String(value.version).split(".")[0]);
+    const minimum = BRACE_EXPANSION_MINIMUMS.get(major);
+    assert(
+      minimum !== undefined,
+      `brace-expansion@${value.version} at ${path} has an unrecognised major; add its patched minimum to BRACE_EXPANSION_MINIMUMS.`,
+    );
+    assert(
+      isAtLeast(value.version, minimum),
+      `brace-expansion@${value.version} at ${path} is below the patched minimum ${minimum} for GHSA-mh99-v99m-4gvg.`,
+    );
+  }
 }
 
 function counts(report) {
@@ -154,182 +150,64 @@ function counts(report) {
   };
 }
 
-function validateProductionAudit(report, exitCode) {
+function validateCleanAudit(report, exitCode, label) {
   const vulnerabilityCounts = counts(report);
   const vulnerabilities = report?.vulnerabilities ?? {};
 
-  assert(exitCode === 0, "Production-only npm audit did not exit successfully.");
+  assert(exitCode === 0, `${label} npm audit did not exit successfully.`);
   assert(
     Object.keys(vulnerabilities).length === 0,
-    "Production-only audit contains vulnerability entries.",
+    `${label} audit contains vulnerability entries: ${Object.keys(vulnerabilities).join(", ")}`,
   );
   assert(
     Object.values(vulnerabilityCounts).every((value) => value === 0),
-    `Production-only audit is not clean: ${JSON.stringify(vulnerabilityCounts)}`,
+    `${label} audit is not clean: ${JSON.stringify(vulnerabilityCounts)}`,
   );
-}
-
-function collectAdvisoryObjects(vulnerabilities) {
-  const objects = [];
-  for (const vulnerability of Object.values(vulnerabilities)) {
-    for (const via of vulnerability?.via ?? []) {
-      if (via && typeof via === "object") objects.push(via);
-    }
-  }
-  return objects;
-}
-
-function validateFullAudit(report, exitCode) {
-  const vulnerabilities = report?.vulnerabilities;
-  assert(
-    vulnerabilities && typeof vulnerabilities === "object",
-    "Full audit vulnerability data is missing.",
-  );
-
-  const names = new Set(Object.keys(vulnerabilities));
-  const missing = [...EXPECTED_VULNERABILITY_NAMES].filter(
-    (name) => !names.has(name),
-  );
-  const extra = [...names].filter(
-    (name) => !EXPECTED_VULNERABILITY_NAMES.has(name),
-  );
-
-  assert(missing.length === 0, `Expected audit entries missing: ${missing.join(", ")}`);
-  assert(extra.length === 0, `Unexpected audit entries found: ${extra.join(", ")}`);
-  assert(exitCode === 1, "Full audit unexpectedly exited successfully.");
-
-  for (const [name, vulnerability] of Object.entries(vulnerabilities)) {
-    assert(
-      vulnerability.severity === "high",
-      `${name} has unexpected severity '${vulnerability.severity}'.`,
-    );
-
-    for (const via of vulnerability.via ?? []) {
-      if (typeof via === "string") {
-        assert(
-          EXPECTED_VULNERABILITY_NAMES.has(via),
-          `${name} references unexpected audit dependency '${via}'.`,
-        );
-      }
-    }
-  }
-
-  const advisoryObjects = collectAdvisoryObjects(vulnerabilities);
-  assert(
-    advisoryObjects.length === 1,
-    `Expected exactly one root advisory, found ${advisoryObjects.length}.`,
-  );
-
-  const advisory = advisoryObjects[0];
-  assert(advisory.name === "brace-expansion", "Unexpected advisory package.");
-  assert(advisory.severity === "high", "Unexpected advisory severity.");
-  assert(advisory.url === ADVISORY_URL, "Unexpected advisory URL.");
-  assert(advisory.range === "<=5.0.7", "Unexpected advisory affected range.");
-
-  const vulnerabilityCounts = counts(report);
-  assert(
-    vulnerabilityCounts.info === 0 &&
-      vulnerabilityCounts.low === 0 &&
-      vulnerabilityCounts.moderate === 0 &&
-      vulnerabilityCounts.high === 9 &&
-      vulnerabilityCounts.critical === 0 &&
-      vulnerabilityCounts.total === 9,
-    `Full audit counts do not match ${EXCEPTION_ID}: ${JSON.stringify(
-      vulnerabilityCounts,
-    )}`,
-  );
-}
-
-function approvedFixture() {
-  const vulnerabilities = {};
-  for (const name of EXPECTED_VULNERABILITY_NAMES) {
-    vulnerabilities[name] = {
-      name,
-      severity: "high",
-      via: name === "brace-expansion" ? [
-        {
-          source: 123456,
-          name: "brace-expansion",
-          dependency: "brace-expansion",
-          title: "DoS via unbounded expansion length",
-          url: ADVISORY_URL,
-          severity: "high",
-          range: "<=5.0.7",
-        },
-      ] : ["brace-expansion"],
-      effects: [],
-      range: "*",
-      nodes: [`node_modules/${name}`],
-      fixAvailable: false,
-    };
-  }
-
-  return {
-    auditReportVersion: 2,
-    vulnerabilities,
-    metadata: {
-      vulnerabilities: {
-        info: 0,
-        low: 0,
-        moderate: 0,
-        high: 9,
-        critical: 0,
-        total: 9,
-      },
-    },
-  };
 }
 
 function runSelfTest() {
-  const exceptionText = [
-    "- **Status:** Active",
-    "- **Expiry:** 2026-08-12 (inclusive)",
-    ADVISORY_ID,
-    "`brace-expansion@1.1.16`",
-    "`minimatch@3.1.5`",
-  ].join("\n");
-
-  validateExceptionRecord(exceptionText, Date.parse("2026-07-29T00:00:00Z"));
-  validateProductionAudit(
-    {
-      vulnerabilities: {},
-      metadata: {
-        vulnerabilities: {
-          info: 0,
-          low: 0,
-          moderate: 0,
-          high: 0,
-          critical: 0,
-          total: 0,
-        },
-      },
-    },
+  // A clean report passes.
+  validateCleanAudit(
+    { vulnerabilities: {}, metadata: { vulnerabilities: { info: 0, low: 0, moderate: 0, high: 0, critical: 0, total: 0 } } },
     0,
+    "Self-test",
   );
-  validateFullAudit(approvedFixture(), 1);
 
-  let rejectedExtra = false;
+  // A dirty report must be rejected.
+  let rejected = false;
   try {
-    const fixture = approvedFixture();
-    fixture.vulnerabilities["unexpected-package"] = {
-      severity: "critical",
-      via: [],
-    };
-    validateFullAudit(fixture, 1);
+    validateCleanAudit(
+      {
+        vulnerabilities: { "brace-expansion": { severity: "high" } },
+        metadata: { vulnerabilities: { info: 0, low: 0, moderate: 0, high: 1, critical: 0, total: 1 } },
+      },
+      1,
+      "Self-test",
+    );
   } catch {
-    rejectedExtra = true;
+    rejected = true;
   }
-  assert(rejectedExtra, "Self-test failed to reject an unexpected advisory.");
+  assert(rejected, "Self-test failed to reject a dirty audit report.");
 
-  let rejectedExpiry = false;
+  // The regression guard must reject a vulnerable version and accept a patched one.
+  let guardRejected = false;
   try {
-    validateExceptionRecord(exceptionText, EXPIRES_AFTER_UTC);
+    validatePackageLock({
+      packages: { "node_modules/brace-expansion": { version: "1.1.16" } },
+    });
   } catch {
-    rejectedExpiry = true;
+    guardRejected = true;
   }
-  assert(rejectedExpiry, "Self-test failed to reject an expired exception.");
+  assert(guardRejected, "Self-test failed to reject vulnerable brace-expansion@1.1.16.");
 
-  console.log("EXC-0001 dependency-audit validator self-test passed.");
+  validatePackageLock({
+    packages: {
+      "node_modules/brace-expansion": { version: "1.1.18" },
+      "node_modules/x/node_modules/brace-expansion": { version: "5.0.9" },
+    },
+  });
+
+  console.log("Dependency audit gate self-test passed.");
 }
 
 function main() {
@@ -338,11 +216,7 @@ function main() {
     return;
   }
 
-  const exceptionText = readFileSync(EXCEPTION_PATH, "utf8");
-  const packageLock = JSON.parse(readFileSync(PACKAGE_LOCK_PATH, "utf8"));
-
-  validateExceptionRecord(exceptionText);
-  validatePackageLock(packageLock);
+  validatePackageLock(JSON.parse(readFileSync(PACKAGE_LOCK_PATH, "utf8")));
 
   const production = runNpmAudit([
     "audit",
@@ -350,16 +224,15 @@ function main() {
     "--audit-level=moderate",
     "--json",
   ]);
-  validateProductionAudit(production.report, production.exitCode);
+  validateCleanAudit(production.report, production.exitCode, "Production-only");
   console.log("Production dependency audit passed with 0 vulnerabilities.");
 
   const full = runNpmAudit(["audit", "--audit-level=moderate", "--json"]);
-  validateFullAudit(full.report, full.exitCode);
-
+  validateCleanAudit(full.report, full.exitCode, "Full");
+  console.log("Full dependency audit passed with 0 vulnerabilities.");
   console.log(
-    `Full dependency audit contains only the active ${EXCEPTION_ID} scope (${ADVISORY_ID}).`,
+    "Dependency audit gate passed with no active exception (EXC-0001 closed 2026-08-01).",
   );
-  console.log("Dependency audit gate passed with the approved temporary exception.");
 }
 
 try {
