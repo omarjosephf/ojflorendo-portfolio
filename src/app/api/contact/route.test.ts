@@ -145,7 +145,10 @@ describe("POST /api/contact", () => {
     expect(logs).not.toContain(validBody.message);
   });
 
-  it("returns a controlled 500 and leaks no secret/message/stack when the transport throws", async () => {
+  it("returns a controlled 502 and leaks nothing when the network request fails", async () => {
+    // The transport absorbs network failures and timeouts into ok:false, so a
+    // rejected fetch surfaces as the accurate "couldn't be sent" 502 rather than
+    // a generic 500 (ADR-0001 item 13).
     vi.stubEnv("RESEND_API_KEY", "secret-key-value");
     vi.stubEnv("CONTACT_TO_EMAIL", "to@example.com");
     vi.stubEnv("CONTACT_FROM_EMAIL", "from@example.com");
@@ -155,8 +158,8 @@ describe("POST /api/contact", () => {
     );
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    const res = await POST(post("t-fail500", validBody));
-    expect(res.status).toBe(500);
+    const res = await POST(post("t-fail-network", validBody));
+    expect(res.status).toBe(502);
 
     const responseText = JSON.stringify(await res.json());
     expect(responseText).not.toContain("secret-key-value");
@@ -166,5 +169,40 @@ describe("POST /api/contact", () => {
     expect(logs).not.toContain("secret-key-value");
     expect(logs).not.toContain("boom");
     expect(logs).not.toContain(validBody.message);
+  });
+
+  it("returns a controlled 500 and leaks no secret/message/stack when the transport itself throws", async () => {
+    // The transport is not expected to throw, but the route's catch is a
+    // deliberate backstop. Replace the transport with one that rejects so that
+    // backstop stays covered rather than becoming untested dead code.
+    vi.resetModules();
+    vi.doMock("@/lib/email", () => ({
+      getEmailTransport: () => ({
+        mode: "resend",
+        send: () => Promise.reject(new Error("boom secret-key-value")),
+      }),
+    }));
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      // Fresh module instance (and therefore a fresh rate limiter).
+      const { POST: postWithThrowingTransport } = await import("./route");
+      const res = await postWithThrowingTransport(
+        post("t-fail500", validBody),
+      );
+      expect(res.status).toBe(500);
+
+      const responseText = JSON.stringify(await res.json());
+      expect(responseText).not.toContain("secret-key-value");
+      expect(responseText).not.toContain("boom");
+
+      const logs = loggedText(errSpy);
+      expect(logs).not.toContain("secret-key-value");
+      expect(logs).not.toContain("boom");
+      expect(logs).not.toContain(validBody.message);
+    } finally {
+      vi.doUnmock("@/lib/email");
+      vi.resetModules();
+    }
   });
 });

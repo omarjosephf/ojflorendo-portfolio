@@ -2,6 +2,10 @@
 
 - Status: Accepted
 - Date: 2026-07-28
+- Amended: 2026-08-01 — delivery timeout, non-throwing transport failures,
+  partial-configuration warning, and the `send.ojfr.me` sending identity
+  (decision points 12–15). The boundary itself is unchanged; these record
+  operating limits ahead of enabling real delivery.
 - Owner: OJ Florendo
 
 ## Context
@@ -41,6 +45,21 @@ The contact boundary is:
     claim that mock-mode submissions were sent.
 11. The application does not persist contact messages in a project database,
     browser storage, or local storage.
+12. A single delivery attempt is bounded by a 10-second timeout
+    (`AbortSignal.timeout`). An unresponsive provider must not hold a serverless
+    function open to its platform limit while a visitor waits.
+13. `send()` never throws. Timeouts and network failures resolve as
+    `{ ok: false, delivered: false }`, so the route returns its accurate
+    "couldn't be sent" 502 rather than a generic 500. The route's own `catch`
+    remains a backstop. The thrown error is never inspected, so it cannot reach a
+    log.
+14. A **partially** configured environment (some but not all three variables)
+    logs a fixed warning naming only the **missing variable names**, then falls
+    back to mock. Variable names are already public in `.env.example`; values are
+    secrets and are never logged. All three absent is the expected local default
+    and is not warned about.
+15. The verified sending identity is the **`send.ojfr.me` subdomain**, not the
+    apex. `CONTACT_FROM_EMAIL` must be an address on that verified domain.
 
 ## Alternatives considered
 
@@ -63,6 +82,22 @@ backup, and incident obligations are unnecessary for the current product.
 Deferred. It adds a third-party dependency, cost, data-flow review, and operational
 work not justified by current traffic. Reconsider if abuse, scale, or paid/authenticated
 functionality changes the threat model.
+
+### Sending from the apex domain instead of a subdomain
+
+Rejected. Sending from `ojfr.me` directly would give a slightly tidier From
+address, but it places Resend's MX and SPF records on the root domain, where they
+constrain any future mail on `ojfr.me` and expose the apex's sending reputation to
+the contact form. Resend itself recommends a sending subdomain. `ojfr.me` carries
+no MX or TXT records today, so the subdomain was adopted while the choice was
+still free. The From address is not visitor-facing: replies are routed by
+`reply_to` to the enquirer.
+
+### Unbounded delivery attempt
+
+Rejected once real delivery became imminent. Without a timeout an unresponsive
+provider holds the function open to the platform limit, and the visitor sees only
+a spinner. A bounded attempt fails fast into the existing honest error path.
 
 ## Security and privacy impact
 
@@ -90,6 +125,14 @@ explicitly accept the visible mock-mode limitation.
 Failure diagnostics are limited to fixed categories. Operational review must not
 request or expose submitted messages or secret values.
 
+Enabling delivery is an owner-only task and cannot be automated: DNS for
+`ojfr.me` is held at **Hostinger**, not Vercel, and the API key and inbox address
+are production secrets. The procedure is recorded in
+`docs/runbooks/contact-email-delivery.md`. A misconfigured or unverified sending
+domain surfaces as a Resend 403, which reaches visitors as the generic
+"couldn't be sent" message — so delivery must be confirmed with a real
+submission after configuration, not assumed from a green build.
+
 ## Consequences and trade-offs
 
 - The current design minimises stored personal data and dependencies.
@@ -113,6 +156,7 @@ privacy, CSP/network impact, failure behaviour, tests, documentation, and rollba
 - `src/lib/contact/schema.ts`
 - `src/lib/email/index.ts`
 - `src/components/sections/ContactForm.tsx`
+- `docs/runbooks/contact-email-delivery.md`
 - `.env.example`
 - `SECURITY.md`
 - `docs/ENGINEERING_HANDBOOK.md`, Sections 22, 24, 27, 30, and 52

@@ -14,10 +14,14 @@ import { ENQUIRY_TYPES } from "@/lib/contact/schema";
  * Resend (called through the HTTP API with `fetch`, so no SDK dependency and no
  * effect on the browser CSP).
  *
- * Future environment variables (server-only — never `NEXT_PUBLIC_`):
+ * Environment variables (server-only — never `NEXT_PUBLIC_`):
  *   RESEND_API_KEY      — Resend API key
  *   CONTACT_TO_EMAIL    — inbox that receives enquiries
- *   CONTACT_FROM_EMAIL  — verified sender address
+ *   CONTACT_FROM_EMAIL  — sender address on the verified sending domain
+ *
+ * All three are required together; a partial set falls back to mock and warns.
+ * `send()` never throws: delivery failures and timeouts resolve as
+ * `{ ok: false, delivered: false }` so the route can report them accurately.
  */
 
 export type EmailMode = "mock" | "resend";
@@ -63,6 +67,13 @@ const mockTransport: EmailTransport = {
   },
 };
 
+/**
+ * Upper bound on a single delivery attempt. Without it, an unresponsive provider
+ * holds the serverless function open to its platform limit while the visitor
+ * waits on a spinner. Ten seconds is far above Resend's normal response time.
+ */
+const RESEND_TIMEOUT_MS = 10_000;
+
 /** Real transport via the Resend HTTP API (server-side fetch; secret-gated). */
 function createResendTransport(
   apiKey: string,
@@ -72,23 +83,32 @@ function createResendTransport(
   return {
     mode: "resend",
     async send(input) {
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from,
-          to: [to],
-          reply_to: input.email,
-          subject: `[Portfolio] ${enquiryLabel(input.enquiryType)}: ${input.subject}`,
-          text: buildText(input),
-        }),
-      });
-      // Do not log the response body (may echo submitted content).
-      if (!res.ok) return { ok: false, delivered: false, mode: "resend" };
-      return { ok: true, delivered: true, mode: "resend" };
+      try {
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from,
+            to: [to],
+            reply_to: input.email,
+            subject: `[Portfolio] ${enquiryLabel(input.enquiryType)}: ${input.subject}`,
+            text: buildText(input),
+          }),
+          signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+        });
+        // Do not read or log the response body (may echo submitted content).
+        if (!res.ok) return { ok: false, delivered: false, mode: "resend" };
+        return { ok: true, delivered: true, mode: "resend" };
+      } catch {
+        // Timeout or network failure. Never inspect or log the thrown error — it
+        // can carry request detail. Reporting ok:false (rather than throwing)
+        // lets the route return its accurate "couldn't be sent" 502 instead of a
+        // generic 500, and keeps the route's own catch as a true backstop.
+        return { ok: false, delivered: false, mode: "resend" };
+      }
     },
   };
 }
@@ -99,5 +119,23 @@ export function getEmailTransport(): EmailTransport {
   const to = process.env.CONTACT_TO_EMAIL;
   const from = process.env.CONTACT_FROM_EMAIL;
   if (apiKey && to && from) return createResendTransport(apiKey, to, from);
+
+  // Partially configured almost always means a missing or misspelled variable in
+  // the hosting environment. Without this, delivery degrades silently to mock and
+  // the only symptom is visitors being told nothing was sent. Log variable NAMES
+  // only — never values — so the cause is visible in server logs. Names are
+  // already public in `.env.example`; the values are secrets.
+  const missing = [
+    apiKey ? null : "RESEND_API_KEY",
+    to ? null : "CONTACT_TO_EMAIL",
+    from ? null : "CONTACT_FROM_EMAIL",
+  ].filter((name): name is string => name !== null);
+
+  // All three absent is the expected local/dev default, not a misconfiguration.
+  if (missing.length < 3) {
+    console.warn(
+      `[contact] email delivery is NOT configured: missing ${missing.join(", ")}. Falling back to the mock transport — no email will be sent.`,
+    );
+  }
   return mockTransport;
 }
