@@ -8,6 +8,7 @@ import { SITE_URL } from "@/lib/site-url";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
+import { PortfolioAssistant } from "@/components/assistant/PortfolioAssistant";
 import { StructuredData } from "@/components/ui/StructuredData";
 import { ParticleWaveLazy } from "@/components/three/ParticleWaveLazy";
 
@@ -95,6 +96,7 @@ export default async function RootLayout({
           {children}
         </main>
         <Footer />
+        <PortfolioAssistant />
         <StructuredData nonce={nonce} />
       </body>
     </html>

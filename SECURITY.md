@@ -34,10 +34,25 @@ Version 1.1 remains **static-first** in architecture: there are no user accounts
 authentication, database, admin dashboard, uploads, payments, comments, CMS,
 arbitrary redirects, or user-generated HTML.
 
-The only public input boundary is `POST /api/contact`. Submitted contact data is
-validated and used only to attempt an email delivery. It is not stored in a
-project database, local storage, or browser storage, and submitted HTML is never
-rendered.
+The only server-side public input boundary is `POST /api/contact`. Submitted
+contact data is validated and used only to attempt an email delivery. It is not
+stored in a project database, local storage, or browser storage, and submitted
+HTML is never rendered.
+
+`OJ Assistant` is an optional browser-only curated guide. It does not call a
+language model, assistant API, provider, web search, analytics service, or
+telemetry endpoint. Visitor text is bounded to 280 characters, appears only as
+the controlled value of its own input, and is never echoed into answer content,
+markup, attributes or URLs. It is not transmitted, logged, retained, or placed
+in browser storage, and is used only to select fixed owner-approved public
+answers and internal links with hard-coded destinations.
+
+The assistant's avatar imagery consists of owner-supplied **artistic digital
+representations**, not photographs, and is disclosed as such in the interface.
+The published image derivatives are served from this origin only and carry no
+EXIF, ICC, XMP, IPTC or C2PA metadata; provenance is recorded in
+`public/images/profile/README.md`. The imagery is presentational, so the
+assistant remains fully usable if it fails to load.
 
 ## HTTP response headers
 
