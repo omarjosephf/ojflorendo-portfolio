@@ -11,6 +11,25 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    # Two major upgrades are deliberately deferred (2026-08-02). Both were
+    # attempted, both broke the gate, and both are blocked on upstream support
+    # rather than on anything in this repository. Minor and patch updates still
+    # flow normally, so security fixes are not blocked.
+    ignore:
+      # TypeScript 7.0 disables ESLint: typescript-eslint 8.65.0 declares
+      # `typescript: ">=4.8.4 <6.1.0"` and refuses to load. `tsc --noEmit` still
+      # passes under 7.0, so the breakage is invisible to typechecking alone.
+      # The project runs 6.0.3, the newest release inside the supported range.
+      # Revisit when typescript-eslint supports TS >= 7.1 (their issue #10940).
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # ESLint 10 removes `context.getFilename()`, which the eslint-plugin-react
+      # bundled inside eslint-config-next still calls, so linting crashes. Not
+      # fixable here: that plugin arrives transitively with the pinned Next
+      # version. Revisit when eslint-config-next ships an ESLint 10 compatible
+      # eslint-plugin-react.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
