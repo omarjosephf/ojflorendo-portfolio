@@ -1,7 +1,7 @@
 # Project Zero Engineering Handbook
 
-**Version:** 1.1.0-rc1  
-**Status:** Release candidate — awaiting final owner ratification  
+**Version:** 1.1.0  
+**Status:** Ratified and governing — the single authoritative version  
 **Owner:** OJ Florendo  
 **Project:** OJ Florendo Rayatchi Portfolio & Platform  
 **Canonical repository path:** `docs/ENGINEERING_HANDBOOK.md`  
@@ -1777,6 +1777,12 @@ Privacy-reviewed: Yes / No / Not applicable
 ---
 
 # Changelog
+
+## 1.1.0 — ratified 1 August 2026
+
+- Promoted the 28 July 2026 release candidate to the ratified, governing version.
+- Removed the `-rc1` suffix and the "awaiting final owner ratification" status. That wording appeared in **both** the v1.0.0 and v1.1.0 documents and was a template artefact, not evidence of adoption status; retaining it repeatedly caused sessions to mistake the governing version.
+- v1.1.0 is now the **single** governing version. v1.0.0 is superseded and retained only as history. See `docs/adr/0000-handbook-adoption.md`.
 
 ## 1.1.0-rc1 — 28 July 2026
 
