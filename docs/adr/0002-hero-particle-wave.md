@@ -1,7 +1,8 @@
 # ADR-0002: Site-wide particle-wave background
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-07-31
+- Ratified: 2026-08-02 by OJ Florendo
 - Owner: OJ Florendo
 
 ## Context

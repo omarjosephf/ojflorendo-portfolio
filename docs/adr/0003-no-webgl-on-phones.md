@@ -1,7 +1,8 @@
 # ADR-0003: No WebGL scenes on phone-sized viewports
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-07-31
+- Ratified: 2026-08-02 by OJ Florendo
 - Owner: OJ Florendo
 - Risk class: R2 (user-visible presentation change on mobile)
 

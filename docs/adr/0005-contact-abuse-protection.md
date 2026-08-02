@@ -1,7 +1,11 @@
 # ADR-0005: Contact-form abuse protection
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-08-02
+- Ratified: 2026-08-02 by OJ Florendo, including the fail-open trade-off:
+  availability of the contact route is preferred over strict enforcement, so a
+  failure of Cloudflare, DNS or our own configuration admits the enquiry rather
+  than blocking a genuine client.
 - Owner: OJ Florendo
 
 ## Context
