@@ -50,9 +50,22 @@ plain text, and submitted HTML is never rendered (ADR-0001 items 7 and 11).
      address record per RFC 5321).
 4. **Every check fails open.** A DNS outage, a timeout, an unreachable
    Cloudflare, a non-2xx reply or an unrecognised response shape all allow the
-   submission through. Only an explicit negative verdict refuses it. Losing a
-   genuine client to our own infrastructure is worse than admitting one spam
-   message.
+   submission through. Only an explicit negative verdict *about the visitor*
+   refuses it. Losing a genuine client to our own infrastructure is worse than
+   admitting one spam message.
+
+   This explicitly includes **our own misconfiguration**. Cloudflare answers
+   HTTP 200 with `success: false` for a bad secret exactly as it does for a bad
+   token, so the two are separated by `error-codes`:
+   `missing-input-secret`, `invalid-input-secret`, `bad-request` and
+   `internal-error` are not the visitor's fault and fail open with a loud
+   `turnstile_misconfigured` error log. Everything else refuses the submission.
+
+   Learned in production on 2 August 2026: a single mistyped secret took the
+   entire contact form offline behind "we couldn't confirm you're human", and
+   because provider error codes were not logged, the cause was invisible.
+   `error-codes` is a fixed Cloudflare enum describing our own request — it
+   carries no visitor content and no secret — so it is now logged.
 5. **Fail-open events are logged as fixed categories** (`turnstile_unavailable`)
    with no token, secret or provider body, consistent with ADR-0001 item 8.
 6. **Refusal messages are actionable rather than opaque.** The commonest cause

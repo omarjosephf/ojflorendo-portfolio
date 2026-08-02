@@ -114,10 +114,22 @@ export async function POST(req: NextRequest) {
     (body as Record<string, unknown>)?.turnstileToken,
     clientIp(req),
   );
-  if (turnstile.outcome === "unavailable") {
-    // Fixed category only — no token, secret or provider body.
+  if (turnstile.outcome === "misconfigured") {
+    // Loud, because the bot check is silently doing nothing until it is fixed.
+    // `errorCodes` is Cloudflare's fixed enum describing OUR request — no secret
+    // and no visitor content — and it names the exact fault (ADR-0005).
+    console.error(
+      "[contact] TURNSTILE MISCONFIGURED — bot protection is NOT active. Check TURNSTILE_SECRET_KEY.",
+      { category: "turnstile_misconfigured", errorCodes: turnstile.errorCodes },
+    );
+  } else if (turnstile.outcome === "unavailable") {
     console.warn("[contact] turnstile unavailable; allowing submission", {
       category: "turnstile_unavailable",
+    });
+  } else if (turnstile.outcome === "rejected") {
+    console.warn("[contact] turnstile rejected the submission", {
+      category: "turnstile_rejected",
+      errorCodes: turnstile.errorCodes,
     });
   }
   if (!turnstile.ok) {

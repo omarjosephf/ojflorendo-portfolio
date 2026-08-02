@@ -240,6 +240,41 @@ describe("POST /api/contact", () => {
     });
   });
 
+  it("lets the enquiry through and shouts when OUR Turnstile secret is wrong", async () => {
+    // Cloudflare answers 200 + success:false for a bad secret exactly as it does
+    // for a bad token. Blaming the visitor would block every genuine enquiry
+    // behind "we couldn't confirm you're human" — a total contact outage caused
+    // by one mistyped variable.
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "0x-wrong-secret");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            success: false,
+            "error-codes": ["invalid-input-secret"],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "info").mockImplementation(() => {});
+
+    const res = await POST(
+      post("t-turnstile-badsecret", { ...validBody, turnstileToken: "good" }),
+    );
+
+    expect(res.status).toBe(200);
+
+    // The operator must be able to find this, and the code must name the fault.
+    const logged = loggedText(errorSpy);
+    expect(logged).toContain("turnstile_misconfigured");
+    expect(logged).toContain("invalid-input-secret");
+    // Never the secret itself.
+    expect(logged).not.toContain("0x-wrong-secret");
+  });
+
   it("allows the submission but warns when Turnstile is unreachable", async () => {
     vi.stubEnv("TURNSTILE_SECRET_KEY", "0x-test-secret");
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")));
