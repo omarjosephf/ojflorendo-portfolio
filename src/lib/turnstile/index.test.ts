@@ -118,12 +118,57 @@ describe("verifyTurnstile", () => {
     ).toBe(false);
   });
 
-  it("rejects a token Cloudflare denies", async () => {
+  it("rejects a token Cloudflare denies, reporting the code", async () => {
     resolves(
       jsonResponse({ success: false, "error-codes": ["invalid-input-response"] }),
     );
 
     await expect(verifyTurnstile(TOKEN)).resolves.toEqual({
+      ok: false,
+      outcome: "rejected",
+      errorCodes: ["invalid-input-response"],
+    });
+  });
+
+  it("rejects a replayed token", async () => {
+    // Tokens are single-use; a replay is the visitor's problem, not ours.
+    resolves(
+      jsonResponse({ success: false, "error-codes": ["timeout-or-duplicate"] }),
+    );
+
+    await expect(verifyTurnstile(TOKEN)).resolves.toMatchObject({
+      ok: false,
+      outcome: "rejected",
+    });
+  });
+
+  // Cloudflare answers HTTP 200 + success:false for OUR mistakes too, so these
+  // must never be blamed on the visitor — a mistyped secret would otherwise
+  // block every genuine enquiry with "we couldn't confirm you're human".
+  it.each([
+    "invalid-input-secret",
+    "missing-input-secret",
+    "bad-request",
+    "internal-error",
+  ])("fails OPEN when Cloudflare reports %s", async (code) => {
+    resolves(jsonResponse({ success: false, "error-codes": [code] }));
+
+    await expect(verifyTurnstile(TOKEN)).resolves.toEqual({
+      ok: true,
+      outcome: "misconfigured",
+      errorCodes: [code],
+    });
+  });
+
+  it("still rejects when a visitor-fault code accompanies no config fault", async () => {
+    resolves(
+      jsonResponse({
+        success: false,
+        "error-codes": ["invalid-input-response", "timeout-or-duplicate"],
+      }),
+    );
+
+    await expect(verifyTurnstile(TOKEN)).resolves.toMatchObject({
       ok: false,
       outcome: "rejected",
     });

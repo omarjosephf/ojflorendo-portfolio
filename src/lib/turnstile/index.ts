@@ -33,8 +33,10 @@ export type TurnstileOutcome =
   | "verified"
   /** Enforcing, but the submission carried no token. */
   | "missing-token"
-  /** Cloudflare explicitly rejected the token. */
+  /** Cloudflare rejected the visitor's token. */
   | "rejected"
+  /** OUR credentials or request were wrong; allowed through by the fail-open policy. */
+  | "misconfigured"
   /** Could not reach a verdict; allowed through by the fail-open policy. */
   | "unavailable";
 
@@ -42,6 +44,35 @@ export interface TurnstileResult {
   /** true when the submission may proceed. */
   ok: boolean;
   outcome: TurnstileOutcome;
+  /**
+   * Cloudflare's `error-codes`, when it returned any.
+   *
+   * Safe to log: a fixed enum describing OUR request, never visitor content and
+   * never a secret. Without it a misconfiguration is undiagnosable in production,
+   * which is exactly how a wrong secret key silently blocked every enquiry.
+   */
+  errorCodes?: string[];
+}
+
+/**
+ * Failures that mean the request WE sent was wrong, or Cloudflare itself broke —
+ * not that the visitor is a bot.
+ *
+ * Cloudflare answers HTTP 200 with `success: false` for these just as it does for
+ * a genuinely bad token, so they must be separated by code. Treating them as a
+ * failed challenge would blame the visitor for our mistake and block every
+ * enquiry the moment a key is mistyped.
+ */
+const NOT_THE_VISITORS_FAULT = new Set([
+  "missing-input-secret",
+  "invalid-input-secret",
+  "bad-request",
+  "internal-error",
+]);
+
+function readErrorCodes(data: unknown): string[] {
+  const raw = (data as { "error-codes"?: unknown } | null)?.["error-codes"];
+  return Array.isArray(raw) ? raw.filter((c): c is string => typeof c === "string") : [];
 }
 
 /** True when a secret is configured and submissions are therefore checked. */
@@ -82,13 +113,21 @@ export async function verifyTurnstile(
     // not that the visitor is a bot. Fail open and let the caller warn.
     if (!res.ok) return { ok: true, outcome: "unavailable" };
 
-    // Cloudflare's own JSON, not visitor content. Read `success` only; never log
-    // the body, which echoes error codes tied to our configuration.
+    // Cloudflare's own JSON, not visitor content.
     const data: unknown = await res.json();
     const success = (data as { success?: unknown } | null)?.success;
 
     if (success === true) return { ok: true, outcome: "verified" };
-    if (success === false) return { ok: false, outcome: "rejected" };
+
+    if (success === false) {
+      const errorCodes = readErrorCodes(data);
+      // Our key or our request was wrong. Let the enquiry through and let the
+      // caller shout about it — never make a genuine client pay for it.
+      if (errorCodes.some((code) => NOT_THE_VISITORS_FAULT.has(code))) {
+        return { ok: true, outcome: "misconfigured", errorCodes };
+      }
+      return { ok: false, outcome: "rejected", errorCodes };
+    }
 
     // Unrecognised shape — no verdict, so do not punish the visitor.
     return { ok: true, outcome: "unavailable" };
