@@ -6,6 +6,7 @@
   partial-configuration warning, and the `send.ojfr.me` sending identity
   (decision points 12–15). The boundary itself is unchanged; these record
   operating limits ahead of enabling real delivery.
+  **Amendment ratified 2026-08-02 by OJ Florendo.**
 - Owner: OJ Florendo
 
 ## Context
