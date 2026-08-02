@@ -3,7 +3,7 @@
 // matching `src/app/api/contact/route.test.ts`. It also keeps `AbortSignal` and
 // `DOMException` identical to production; jsdom's differ.
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getEmailTransport } from "./index";
+import { getEmailTransport, senderIdentity } from "./index";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -73,6 +73,21 @@ function loggedText(spy: ReturnType<typeof vi.spyOn>): string {
     .map((a: unknown) => (typeof a === "string" ? a : JSON.stringify(a)))
     .join(" ");
 }
+
+describe("senderIdentity", () => {
+  it("names a bare address so it is not treated as an anonymous sender", () => {
+    expect(senderIdentity("enquiries@send.ojfr.me")).toBe(
+      "OJ Florendo Portfolio <enquiries@send.ojfr.me>",
+    );
+  });
+
+  it("respects a display name already configured in the environment", () => {
+    expect(senderIdentity("Enquiries <enquiries@send.ojfr.me>")).toBe(
+      "Enquiries <enquiries@send.ojfr.me>",
+    );
+  });
+
+});
 
 describe("getEmailTransport", () => {
   it("returns the mock transport when no secrets are configured", () => {
@@ -152,7 +167,8 @@ describe("resend transport", () => {
     await getEmailTransport().send(message);
     const body = sentBody(fetchSpy);
 
-    expect(body.from).toBe("enquiries@send.example.com");
+    // Named sender: a bare address from a young domain gets filtered as spam.
+    expect(body.from).toBe("OJ Florendo Portfolio <enquiries@send.example.com>");
     expect(body.to).toEqual(["inbox@example.com"]);
     // Replies must reach the enquirer, not the configured sender address.
     expect(body.reply_to).toBe(message.email);
@@ -161,6 +177,9 @@ describe("resend transport", () => {
     expect(body.text).toContain(message.email);
     // ADR-0001 item 7: outbound email is plain text; submitted HTML is never rendered.
     expect(body).not.toHaveProperty("html");
+    // The enquirer's name must never reach the From header — that is a header
+    // injection surface, and they already appear in reply_to, subject and body.
+    expect(body.from).not.toContain(message.name);
   });
 
   it("bounds the attempt with an abort signal so a hung provider cannot hang the request", async () => {

@@ -42,6 +42,30 @@ function enquiryLabel(value: ContactInput["enquiryType"]): string {
   return ENQUIRY_TYPES.find((t) => t.value === value)?.label ?? value;
 }
 
+/**
+ * Display name for the sender.
+ *
+ * A bare address from a young domain is markedly more likely to be filtered as
+ * spam than a named sender, and enquiries landing in a spam folder are lost
+ * clients. Observed in production on 2026-08-02: Gmail filed the first real
+ * deliveries as spam.
+ *
+ * Deliberately a FIXED constant, never the enquirer's name. Interpolating
+ * submitted text into a mail header is an injection surface, and it buys
+ * nothing — the enquirer already appears in `reply_to`, the subject and the
+ * body.
+ */
+const SENDER_DISPLAY_NAME = "OJ Florendo Portfolio";
+
+/**
+ * Present the configured address as a named sender. If `CONTACT_FROM_EMAIL`
+ * already carries its own display name (`Something <a@b.c>`), it is respected
+ * as configured.
+ */
+export function senderIdentity(from: string): string {
+  return from.includes("<") ? from : `${SENDER_DISPLAY_NAME} <${from}>`;
+}
+
 function buildText(input: ContactInput): string {
   return [
     `Enquiry type: ${enquiryLabel(input.enquiryType)}`,
@@ -91,7 +115,7 @@ function createResendTransport(
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from,
+            from: senderIdentity(from),
             to: [to],
             reply_to: input.email,
             subject: `[Portfolio] ${enquiryLabel(input.enquiryType)}: ${input.subject}`,
