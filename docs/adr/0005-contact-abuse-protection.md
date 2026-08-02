@@ -59,7 +59,19 @@ plain text, and submitted HTML is never rendered (ADR-0001 items 7 and 11).
    of an undeliverable domain is a typo by a real client. Obscuring which check
    fired would protect nothing here — these are not credential oracles — and
    would cost genuine enquiries.
-7. **CSP is extended, not relaxed** (`src/proxy.ts`): `frame-src` and
+7. **Token lifecycle is managed in the UI.** A Turnstile token is single-use and
+   expires after five minutes, so:
+   - the submit control is disabled until a token exists, because a tokenless
+     submission is certain to be refused and the visitor did nothing to cause it;
+   - the token is dropped and a replacement requested after **every** failed
+     attempt. Without this, a submission rejected for any reason — a mistyped
+     email domain, say — leaves the visitor replaying a spent token, which
+     Cloudflare rejects as `timeout-or-duplicate`, locking them out of the form
+     until they think to reload the page.
+
+   Both were real defects observed in production on 2 August 2026 and are
+   regression-tested in `ContactForm.turnstile.test.tsx`.
+8. **CSP is extended, not relaxed** (`src/proxy.ts`): `frame-src` and
    `connect-src` gain the exact origin `https://challenges.cloudflare.com`.
    `script-src` is unchanged — `api.js` carries the per-request nonce, which
    Turnstile propagates to what it loads and `'strict-dynamic'` then trusts. **No
