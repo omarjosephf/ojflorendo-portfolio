@@ -18,6 +18,14 @@ export function proxy(request: NextRequest) {
   const isDev = process.env.NODE_ENV === "development";
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
+  // Cloudflare Turnstile (ADR-0005). The bot check renders in an iframe served
+  // from this origin, and the widget calls back to it. `script-src` needs no
+  // entry: api.js carries the nonce above and Turnstile propagates it to what it
+  // loads, which `'strict-dynamic'` then trusts. Nothing here relaxes the policy
+  // — no `'unsafe-inline'` is introduced, and the widget's own styles live
+  // inside the Cloudflare-origin iframe, not this document.
+  const turnstile = "https://challenges.cloudflare.com";
+
   // `img-src blob: data:` — allows <canvas>/WebGL textures and data URIs.
   // Dev-only relaxations: `'unsafe-eval'` (React dev error overlay uses eval),
   // `'unsafe-inline'` styles, and websocket `connect-src` for Turbopack HMR.
@@ -27,7 +35,8 @@ export function proxy(request: NextRequest) {
     `style-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-inline'" : ""}`,
     `img-src 'self' blob: data:`,
     `font-src 'self'`,
-    `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+    `connect-src 'self' ${turnstile}${isDev ? " ws: wss:" : ""}`,
+    `frame-src ${turnstile}`,
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,

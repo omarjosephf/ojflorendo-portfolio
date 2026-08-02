@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { validateContact } from "@/lib/contact/schema";
+import { screenContact } from "@/lib/contact/screening";
 import { getEmailTransport } from "@/lib/email";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { verifyTurnstile } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -101,6 +103,51 @@ export async function POST(req: NextRequest) {
         ok: false,
         error: "Please check the highlighted fields and try again.",
         fieldErrors: result.errors,
+      },
+      422,
+    );
+  }
+
+  // Bot check. A no-op unless TURNSTILE_SECRET_KEY is configured, and it fails
+  // open on any infrastructure problem — see ADR-0005.
+  const turnstile = await verifyTurnstile(
+    (body as Record<string, unknown>)?.turnstileToken,
+    clientIp(req),
+  );
+  if (turnstile.outcome === "unavailable") {
+    // Fixed category only — no token, secret or provider body.
+    console.warn("[contact] turnstile unavailable; allowing submission", {
+      category: "turnstile_unavailable",
+    });
+  }
+  if (!turnstile.ok) {
+    return json(
+      {
+        ok: false,
+        error:
+          "We couldn't confirm you're human. Please complete the check and try again.",
+      },
+      403,
+    );
+  }
+
+  // Plausibility screening. Every check fails open (ADR-0005). Messages are
+  // deliberately actionable: the commonest cause of an undeliverable domain is a
+  // typo by a real client, and secrecy here would protect nothing.
+  const screening = await screenContact(result.data);
+  if (!screening.ok) {
+    const fieldErrors =
+      screening.outcome === "link-flood"
+        ? { message: "Please include fewer links in your message." }
+        : screening.outcome === "disposable-domain"
+          ? { email: "Please use a permanent email address so I can reply." }
+          : { email: "We couldn't verify that email domain. Please check it." };
+
+    return json(
+      {
+        ok: false,
+        error: "Please check the highlighted fields and try again.",
+        fieldErrors,
       },
       422,
     );

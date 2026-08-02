@@ -109,3 +109,90 @@ Remove the three variables in Vercel and redeploy. The form reverts to mock
 mode: it keeps validating and honestly reports that nothing was sent, with the
 direct email, LinkedIn and GitHub actions still available. The DNS records can be
 left in place harmlessly.
+
+---
+
+# Part 2 — Abuse protection (ADR-0005)
+
+Independent of Part 1. The form works without any of this; these steps reduce
+spam and protect the domain from being spoofed.
+
+## 7. Enable Cloudflare Turnstile
+
+Free, and it does **not** require moving DNS off Hostinger.
+
+1. Create a Cloudflare account and open **Turnstile**.
+2. Add a widget. Domain: `ojfr.me`. Widget mode: **Managed**.
+3. Copy the **Site Key** and the **Secret Key**.
+4. In Vercel → **Production**, add:
+
+   | Variable | Value |
+   | --- | --- |
+   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | the Site Key |
+   | `TURNSTILE_SECRET_KEY` | the Secret Key |
+
+5. **Redeploy.** The site key is compiled into the browser bundle at build time,
+   so an environment change alone will not take effect.
+6. Load the contact form and confirm the check appears above the submit button.
+
+Until both variables exist the check stays switched off and the form behaves
+exactly as before — a missed step degrades quietly, it does not break contact.
+
+## 8. Lock down the apex domain against spoofing
+
+`ojfr.me` currently publishes no SPF, DKIM or DMARC, so anyone can forge mail
+that claims to come from it. These records fix that.
+
+**Order matters.** DMARC on the apex is inherited by `send.ojfr.me`. Tightening
+it before Resend is verified would cause your own enquiry mail to be rejected.
+
+**Step 8a — now.** In Hostinger hPanel → DNS Zone Editor, add:
+
+| Type | Name | Value |
+| --- | --- | --- |
+| TXT | `@` | `v=spf1 -all` |
+| TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:<your inbox>` |
+
+`v=spf1 -all` states that the apex itself sends no mail, which is true — sending
+happens from `send.ojfr.me`. `p=none` is monitor-only and changes no delivery.
+
+**Step 8b — only after Part 1 is verified and a real test enquiry has arrived.**
+Change the `_dmarc` record to:
+
+```
+v=DMARC1; p=reject; rua=mailto:<your inbox>
+```
+
+Do not skip the wait. If DKIM or SPF alignment is wrong, `p=reject` will silently
+destroy your own enquiries.
+
+## 9. Harden the inbox
+
+The published address is where malware and phishing actually arrive — no code in
+this repository can prevent that. These controls matter more than anything above.
+
+1. **Enable 2-Step Verification** on the Google account, and prefer an
+   authenticator app or passkey over SMS.
+2. **Review recovery options** — a stale recovery phone or address is a common
+   account-takeover route.
+3. **Add a filter** for form mail: match the `From` address you set as
+   `CONTACT_FROM_EMAIL`, apply a label such as `Enquiries`, and never
+   auto-forward it onward.
+4. **Never open unexpected attachments**, especially archives, documents
+   prompting to "enable content", or anything ending `.html`, `.iso` or `.zip`.
+   Gmail scans attachments, but scanning is not a guarantee.
+5. **Treat urgency as a warning sign.** Payment-detail changes, "confirm your
+   account" links and deadline pressure are the standard phishing patterns
+   aimed at freelancers.
+6. Verify unfamiliar companies independently — search the company, check the
+   domain matches the sender, and confirm the person exists on LinkedIn. The
+   form cannot do this for you, and neither can any automated check.
+
+## What this protects, and what it does not
+
+- Turnstile stops most automated spam reaching the form.
+- Screening removes throwaway addresses, undeliverable domains and link floods.
+- SPF/DMARC stop others forging mail from your domain.
+- **None of it makes the site or the inbox impossible to attack**, and none of it
+  can tell whether a well-formed enquiry from a real address is a genuine client
+  or a time-waster. That judgement stays human.

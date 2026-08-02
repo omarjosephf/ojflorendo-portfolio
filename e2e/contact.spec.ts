@@ -54,4 +54,26 @@ test.describe("Contact form", () => {
     await expect(page.getByText(/thanks for reaching out/i)).toBeVisible();
     await expect(page.getByText(/nothing was actually sent/i)).toBeVisible();
   });
+
+  test("Turnstile is absent — and costs nothing — until it is configured", async ({
+    page,
+  }) => {
+    // The bot check is opt-in (ADR-0005). Unconfigured, the form must behave
+    // exactly as before and must not fetch anything from Cloudflare. This guards
+    // the graceful-degradation promise: enabling Turnstile is the owner's step,
+    // and forgetting it must never break the contact route.
+    const cloudflareRequests: string[] = [];
+    page.on("request", (req) => {
+      if (req.url().includes("challenges.cloudflare.com")) {
+        cloudflareRequests.push(req.url());
+      }
+    });
+
+    await page.goto("/#contact");
+    await fillValidExcept(page);
+    await page.getByRole("button", { name: /send project enquiry/i }).click();
+
+    await expect(page.getByText(/thanks for reaching out/i)).toBeVisible();
+    expect(cloudflareRequests).toEqual([]);
+  });
 });
