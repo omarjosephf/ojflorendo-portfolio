@@ -30,6 +30,8 @@ interface TurnstileApi {
       theme?: "auto" | "light" | "dark";
     },
   ) => string;
+  /** Issues a fresh token. Required after any submission — tokens are single-use. */
+  reset: (widgetId: string) => void;
   remove: (widgetId: string) => void;
 }
 
@@ -66,16 +68,28 @@ export function TurnstileWidget({
   siteKey,
   nonce,
   onToken,
+  onUnavailable,
+  resetSignal = 0,
 }: {
   siteKey: string;
   nonce?: string;
   onToken: (token: string) => void;
+  /** Called when the check cannot run at all (script blocked, or widget error). */
+  onUnavailable?: () => void;
+  /**
+   * Increment to issue a fresh token. A Turnstile token is single-use and
+   * expires after five minutes, so the widget MUST be reset after every
+   * submission attempt — otherwise a visitor whose submission was rejected
+   * (a mistyped email, say) resubmits the spent token, Cloudflare returns
+   * `timeout-or-duplicate`, and they are locked out of the form.
+   */
+  resetSignal?: number;
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<string | undefined>(undefined);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    let widgetId: string | undefined;
     let cancelled = false;
     const container = containerRef.current;
     if (!container) return;
@@ -83,7 +97,7 @@ export function TurnstileWidget({
     ensureScript(nonce)
       .then(() => {
         if (cancelled || !window.turnstile) return;
-        widgetId = window.turnstile.render(container, {
+        widgetIdRef.current = window.turnstile.render(container, {
           sitekey: siteKey,
           callback: (token) => onToken(token),
           // A stale token must not be submitted; clear it and let the widget retry.
@@ -91,22 +105,39 @@ export function TurnstileWidget({
           "error-callback": () => {
             onToken("");
             setFailed(true);
+            onUnavailable?.();
           },
           theme: "dark",
         });
       })
       .catch(() => {
-        if (!cancelled) setFailed(true);
+        if (cancelled) return;
+        setFailed(true);
+        onUnavailable?.();
       });
 
     return () => {
       cancelled = true;
-      if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
+      const id = widgetIdRef.current;
+      if (id && window.turnstile) window.turnstile.remove(id);
+      widgetIdRef.current = undefined;
     };
     // `onToken` is a stable setter from the parent; re-rendering the widget on
     // every keystroke would reset the challenge.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [siteKey, nonce]);
+
+  useEffect(() => {
+    // Skip the initial render — the widget issues its first token on its own.
+    if (resetSignal === 0) return;
+    const id = widgetIdRef.current;
+    if (!id || !window.turnstile) return;
+    // Drop the spent token immediately so it can never be resubmitted while the
+    // replacement is still being issued.
+    onToken("");
+    window.turnstile.reset(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetSignal]);
 
   return (
     <div className="mt-5">

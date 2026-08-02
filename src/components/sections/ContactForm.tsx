@@ -53,10 +53,30 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
   const [serverError, setServerError] = useState("");
   const [delivered, setDelivered] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetSignal, setTurnstileResetSignal] = useState(0);
+  const [turnstileUnavailable, setTurnstileUnavailable] = useState(false);
 
   // Absent until the owner configures Turnstile, in which case the widget is not
   // rendered and the server-side check is likewise disabled.
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  // With Turnstile enforced, submitting before the check has produced a token is
+  // guaranteed to be refused server-side. Block it in the UI rather than letting
+  // a visitor hit a "couldn't confirm you're human" error they did nothing to cause.
+  const awaitingVerification = Boolean(turnstileSiteKey) && turnstileToken === "";
+  // Once the check has failed outright the widget shows its own explanation, so
+  // the button hint must stop claiming a check is still running.
+  const showVerifyHint = awaitingVerification && !turnstileUnavailable;
+
+  /**
+   * A token is spent by any submission attempt. Drop it here rather than relying
+   * on the widget to clear it, so a spent token can never be resubmitted even if
+   * the reset does not complete, then ask for a replacement.
+   */
+  function refreshTurnstile() {
+    setTurnstileToken("");
+    setTurnstileResetSignal((n) => n + 1);
+  }
 
   const fid = (name: string) => `${uid}-${name}`;
 
@@ -98,8 +118,15 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
         setDelivered(Boolean(data.delivered));
         setStatus("success");
         setValues(EMPTY);
+        setTurnstileToken("");
         return;
       }
+
+      // Past this point the attempt failed, and the token it carried is spent.
+      // Every failure path must get a fresh one, or a corrected resubmission is
+      // refused as a replay and the visitor can never send the form.
+      refreshTurnstile();
+
       if (res.status === 422 && data.fieldErrors) {
         setErrors(data.fieldErrors);
         setStatus("idle");
@@ -112,6 +139,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
       );
       setStatus("error");
     } catch {
+      refreshTurnstile();
       setServerError(
         "Sorry — the message couldn't be sent. Please check your connection or email me directly.",
       );
@@ -364,25 +392,37 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
           siteKey={turnstileSiteKey}
           nonce={nonce}
           onToken={setTurnstileToken}
+          onUnavailable={() => setTurnstileUnavailable(true)}
+          resetSignal={turnstileResetSignal}
         />
       ) : null}
 
       <div className="mt-6 flex items-center gap-4">
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || awaitingVerification}
+          aria-describedby={showVerifyHint ? `${uid}-verify-hint` : undefined}
           className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-night transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {submitting ? (
+          {submitting || awaitingVerification ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
             <Send className="h-4 w-4" aria-hidden="true" />
           )}
           {submitting ? "Sending…" : "Send project enquiry"}
         </button>
+        {showVerifyHint ? (
+          <span id={`${uid}-verify-hint`} className="text-sm text-muted">
+            Just running a quick security check…
+          </span>
+        ) : null}
         {/* polite live region for submission progress */}
         <span role="status" aria-live="polite" className="sr-only">
-          {submitting ? "Sending your message" : ""}
+          {submitting
+            ? "Sending your message"
+            : showVerifyHint
+              ? "Waiting for the security check to finish before you can send"
+              : ""}
         </span>
       </div>
     </form>
