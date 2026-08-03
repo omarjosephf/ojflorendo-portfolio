@@ -23,9 +23,27 @@ function StatusBadge({ status }: { status: ProjectItem["status"] }) {
 function ProjectCard({ project }: { project: ProjectItem }) {
   return (
     <article className="glass hover-card flex flex-col overflow-hidden rounded-2xl">
-      <div className="flex h-40 items-center justify-center bg-gradient-to-br from-surface-2 to-surface">
-        <Sparkles className="h-10 w-10 text-accent" aria-hidden="true" />
-      </div>
+      {/* A real screenshot when one exists, otherwise the abstract placeholder.
+          Plain <img> with explicit dimensions: next/image is not compatible
+          with this site's CSP, and the file is pre-sized at build time. */}
+      {project.image ? (
+        <img
+          src={project.image}
+          // Decorative relative to the card: the heading, description and
+          // technologies immediately below already name the project, so an
+          // alt description here would only repeat them to a screen reader.
+          alt=""
+          width={1104}
+          height={320}
+          loading="lazy"
+          decoding="async"
+          className="h-40 w-full object-cover object-top"
+        />
+      ) : (
+        <div className="flex h-40 items-center justify-center bg-gradient-to-br from-surface-2 to-surface">
+          <Sparkles className="h-10 w-10 text-accent" aria-hidden="true" />
+        </div>
+      )}
 
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-start justify-between gap-3">

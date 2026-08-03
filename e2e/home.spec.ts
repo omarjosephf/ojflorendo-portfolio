@@ -61,6 +61,30 @@ test.describe("Homepage", () => {
     );
   });
 
+  test("project card imagery loads and is not blocked by the CSP", async ({
+    page,
+  }) => {
+    const watcher = await watchPage(page);
+    await page.goto("/", { waitUntil: "networkidle" });
+
+    const image = page.locator('#projects img[src^="/images/projects/"]').first();
+    await expect(image).toBeVisible();
+
+    // The card is below the fold and the image is `loading="lazy"`, so it is
+    // deliberately not fetched until it approaches the viewport. Scrolling is
+    // what makes this a test of the image rather than of lazy loading.
+    await image.scrollIntoViewIfNeeded();
+
+    // `complete` alone is true for a failed load, so poll the decoded size:
+    // a broken image reports naturalWidth 0. This is what would catch a bad
+    // path, a missing file, or a CSP block.
+    await expect
+      .poll(() => image.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0);
+
+    expect(await watcher.cspViolations()).toEqual([]);
+  });
+
   test("axe: no accessibility violations on desktop and mobile", async ({
     page,
   }) => {
