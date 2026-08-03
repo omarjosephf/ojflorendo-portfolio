@@ -257,13 +257,16 @@ redacted, public CV (if any) is present under `public/`.
 
 ## Roadmap
 
-- Grow the platform beyond the portfolio: project write-ups, learning notes and
-  updates over time.
-- Add real project case studies as new work ships.
-- Provide a redacted, phone-free public CV for download.
-- Enable live contact-email delivery via the configured transport.
-- Continue accessibility, performance and SEO refinement, including a deployed
-  Lighthouse audit.
+**Shipped:** the redacted, phone-free public CV, and live contact-email delivery
+with bot protection, submission screening and full SPF/DKIM/DMARC authentication.
+
+**Next:** more real projects, each with a live demo, public source and a case
+study matching the depth of the existing one. Site features are deliberately
+frozen while that work happens — the portfolio's constraint is the body of work
+it presents, not the site presenting it.
+
+Ongoing: accessibility, performance and security maintenance, and dependency
+updates.
 
 ## Author
 
