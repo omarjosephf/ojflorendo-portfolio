@@ -10,13 +10,23 @@ const categories: CredentialCategory[] = [
   "Additional professional development",
 ];
 
+/**
+ * The intro previously said credential links "appear only after their source
+ * evidence has been reviewed". Once some credentials carried links, that wording
+ * implied the remaining ones were still unreviewed. They are not — those issuers
+ * simply publish no public verification page, which is ordinary and worth
+ * stating plainly rather than leaving as an apparent gap.
+ */
+const INTRO =
+  "My credentials support my experience across Python, data, UX/UI, business intelligence, communication, and prompt engineering. Where an issuer publishes a public verification page, I link to it directly. Not every training provider offers one.";
+
 export function Education() {
   return (
     <Section
       id="education"
       eyebrow="Education & credentials"
       title="Verified learning and professional development"
-      intro="My credentials support my experience across Python, data, UX/UI, business intelligence, communication, and prompt engineering. Credential links and public PDFs appear only after their source evidence has been reviewed."
+      intro={INTRO}
     >
       <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <Reveal>

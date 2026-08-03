@@ -18,8 +18,19 @@ export const education: EducationItem[] = [
 
 /**
  * Credential titles, issuers, and dates preserve the currently verified public
- * repository record. Links and PDFs remain absent until their source artefacts
- * receive a separate privacy, metadata, and issuer review.
+ * repository record.
+ *
+ * `verificationUrl` points at issuer-hosted verification rather than a PDF in
+ * `public/`. That is deliberate: an issuer page cannot be forged, and it keeps
+ * documents bearing the owner's legal name off this domain. The certificates
+ * still show that name on the issuer's own page, which the Credentials section
+ * discloses in copy rather than hiding.
+ *
+ * `certificatePath` stays unused. Publishing the PDFs was considered and
+ * rejected for the reason above.
+ *
+ * Only credentials with a genuine issuer verification page carry a link; the UI
+ * hides the control for the rest, so no dead affordance is ever rendered.
  */
 export const certifications: CertificationItem[] = [
   {
@@ -27,6 +38,8 @@ export const certifications: CertificationItem[] = [
     issuer: "Python Institute",
     date: "July 2025",
     category: "Professional certification",
+    verificationUrl:
+      "https://www.credly.com/badges/b5083af9-8ffe-4e08-9a86-44737803367e/public_url",
   },
   {
     title: "Business Intelligence: Data Analysis and Reporting Techniques",
@@ -45,6 +58,11 @@ export const certifications: CertificationItem[] = [
     issuer: "Codecademy",
     date: "July 2025",
     category: "Additional professional development",
+    // This URL contains the owner's legal given names in the profile segment.
+    // Included with explicit owner approval, consistent with the disclosure in
+    // the Credentials section.
+    verificationUrl:
+      "https://www.codecademy.com/profiles/OmarJoseph/certificates/822ee70576844e219dc4d00edf39aac6",
   },
   {
     title: "One Million Prompters: Prompt Engineering",
@@ -57,5 +75,7 @@ export const certifications: CertificationItem[] = [
     issuer: "IESE Business School, University of Navarra",
     date: "July 2025",
     category: "Additional professional development",
+    verificationUrl:
+      "https://www.coursera.org/account/accomplishments/verify/9WSR9EX8UQ25",
   },
 ];

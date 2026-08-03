@@ -21,7 +21,9 @@ export const projects: ProjectItem[] = [
       "Resend",
       "AI-assisted engineering",
     ],
-    image: null,
+    // Pre-sized at 2x the rendered 552x160 card area. Cards fall back to the
+    // abstract placeholder when this is null.
+    image: "/images/projects/personal-portfolio-website.webp",
     liveUrl: "https://ojfr.me/",
     githubUrl: "https://github.com/omarjosephf/ojflorendo-portfolio",
     featured: true,

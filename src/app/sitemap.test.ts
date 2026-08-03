@@ -24,4 +24,14 @@ describe("sitemap", () => {
       expect(entry.url.startsWith("http")).toBe(true);
     }
   });
+
+  // Regression guard. Every entry previously carried `lastModified: new Date()`,
+  // so each deployment claimed the whole site had changed — which teaches search
+  // engines to ignore the field. No page here has a real content date, so none
+  // may assert one.
+  it("never claims a modification date it cannot evidence", () => {
+    for (const entry of entries) {
+      expect(entry.lastModified).toBeUndefined();
+    }
+  });
 });

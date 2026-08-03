@@ -18,9 +18,11 @@ export const site: SiteConfig = {
   // This path points only to the separately reviewed, phone-free public CV.
   // The editable DOCX source is stored under docs/cv/ for controlled updates.
   cvPath: "/documents/OJ_Florendo_Rayatchi_Public_CV.pdf",
-  // A real profile photograph remains pending. The assistant avatar is reserved
-  // for OJ Assistant and must not silently replace the human profile image.
-  profileImage: null,
+  // A real photograph of OJ, pre-cropped to a square and sized at build time
+  // (256px covers the 64px avatar at up to 4x device pixel ratio). The assistant
+  // avatars under the same directory are illustrations reserved for OJ
+  // Assistant and must never stand in for the human profile image.
+  profileImage: "/images/profile/oj-profile.webp",
   socials: [
     {
       label: "LinkedIn",
