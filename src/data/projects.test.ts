@@ -20,6 +20,32 @@ describe("getProjectBySlug", () => {
     expect(project?.technologies).not.toContain("Claude Code");
   });
 
+  it("returns the live document assistant with a case study", () => {
+    const project = getProjectBySlug("cited");
+    expect(project).toBeDefined();
+    expect(project?.title).toBe("Cited — Document Assistant");
+    expect(project?.status).toBe("Live");
+    expect(project?.githubUrl).toBe("https://github.com/omarjosephf/cited");
+    expect(project?.caseStudy).toBeDefined();
+  });
+
+  // The project's own premise is that a claim you cannot check is not worth
+  // making. Quoting its evaluation scores without the size of the set they came
+  // from would be exactly the failure it was built to avoid, so the qualifier
+  // is load-bearing content, not padding.
+  it("qualifies the evaluation figures it quotes", () => {
+    const outcome = getProjectBySlug("cited")?.caseStudy?.outcome;
+    expect(outcome).toContain("fifteen questions");
+    expect(outcome).toContain("not enough to show the system generalises");
+  });
+
+  it("discloses AI assistance without listing the tool as a skill", () => {
+    for (const project of projects) {
+      expect(project.caseStudy?.role).toMatch(/AI-assisted engineering/i);
+      expect(project.technologies).not.toContain("Claude Code");
+    }
+  });
+
   it("returns undefined for an unknown slug", () => {
     expect(getProjectBySlug("does-not-exist")).toBeUndefined();
   });

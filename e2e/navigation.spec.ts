@@ -117,12 +117,23 @@ function expectSingleHash(page: Page) {
 
 const CASE_STUDY = /\/projects\/personal-portfolio-website$/;
 
+/**
+ * The portfolio case study specifically, not "whichever case study is first".
+ *
+ * These tests assert a round trip to CASE_STUDY above, so the link they click
+ * has to be the one that goes there. A looser pattern matched every project
+ * card, which was unambiguous only while exactly one project had a case study —
+ * it broke the moment a second was added, in a way that looked like a
+ * navigation regression rather than an over-broad locator.
+ */
+const PORTFOLIO_CASE_STUDY_LINK = /Read the Personal Portfolio .* case study/i;
+
 test.describe("Case study round trip (v1.1)", () => {
   test("active re-derives from the visible section and the hash stays single", async ({
     page,
   }) => {
     await page.goto("/#projects");
-    await page.getByRole("link", { name: /Read the .* case study/i }).click();
+    await page.getByRole("link", { name: PORTFOLIO_CASE_STUDY_LINK }).click();
     await expect(page).toHaveURL(CASE_STUDY);
 
     // No landing nav item is active on a sub-route.
@@ -150,7 +161,7 @@ test.describe("Case study round trip (v1.1)", () => {
         .getByRole("link", { name: "Projects", exact: true })
         .click();
       await expect(page, `cycle ${i}: at projects`).toHaveURL(/\/#projects$/);
-      await page.getByRole("link", { name: /Read the .* case study/i }).click();
+      await page.getByRole("link", { name: PORTFOLIO_CASE_STUDY_LINK }).click();
       await expect(page, `cycle ${i}: case study`).toHaveURL(CASE_STUDY);
       await page.getByRole("link", { name: /Back to all projects/i }).click();
       await expect(page, `cycle ${i}: back`).toHaveURL(/\/#projects$/);
@@ -175,7 +186,7 @@ test.describe("Case study round trip (v1.1)", () => {
     await expect(page).toHaveURL(/\/#projects$/);
     expectSingleHash(page);
 
-    await page.getByRole("link", { name: /Read the .* case study/i }).click();
+    await page.getByRole("link", { name: PORTFOLIO_CASE_STUDY_LINK }).click();
     await expect(page).toHaveURL(CASE_STUDY);
     expectSingleHash(page);
     await expect(anyActive(page)).toHaveCount(0); // no nav item active on sub-route
@@ -226,7 +237,7 @@ test.describe("Case study round trip (v1.1)", () => {
     expectSingleHash(page);
 
     // Open the case study, then return.
-    await page.getByRole("link", { name: /Read the .* case study/i }).click();
+    await page.getByRole("link", { name: PORTFOLIO_CASE_STUDY_LINK }).click();
     await expect(page).toHaveURL(CASE_STUDY);
     expectSingleHash(page);
 
@@ -247,7 +258,7 @@ test.describe("Case study round trip (v1.1)", () => {
     page,
   }) => {
     await page.goto("/#projects");
-    await page.getByRole("link", { name: /Read the .* case study/i }).click();
+    await page.getByRole("link", { name: PORTFOLIO_CASE_STUDY_LINK }).click();
     await expect(page).toHaveURL(CASE_STUDY);
     await page.getByRole("link", { name: /Back to all projects/i }).click();
     await expect(page).toHaveURL(/\/#projects$/);

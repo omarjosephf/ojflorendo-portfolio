@@ -1,6 +1,12 @@
 # Curated portfolio assistant threat model
 
-- **Status:** Accepted for implementation
+> **Superseded 2026-08-28** by
+> [`retrieval-grounded-portfolio-assistant.md`](retrieval-grounded-portfolio-assistant.md).
+> This model's central claim — that no assistant request crosses a network
+> boundary — no longer holds under ADR-0006. Retained as history; do not rely
+> on its conclusions.
+
+- **Status:** Superseded
 - **Date:** 2026-07-30 (revised 2026-07-31 for the avatar integration)
 - **Risk class:** R2
 - **Governing policy:** Project Zero Engineering Handbook v1.1.0 (ratified 2026-08-01, superseding v1.0.0)

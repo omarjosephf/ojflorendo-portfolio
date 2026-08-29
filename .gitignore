@@ -53,6 +53,12 @@ next-env.d.ts
 *.pdf
 # Exact reviewed public CV permitted by the approved publication plan.
 !/public/documents/OJ_Florendo_Rayatchi_Public_CV.pdf
+# The assistant corpus copy of that same reviewed CV. A test asserts it stays
+# byte-identical to the file above, and its digest is part of the committed
+# corpus checksum — so leaving it ignored made the recorded checksum
+# unreproducible from a clean checkout. Exact path only: the blanket rule above
+# still applies to every other PDF.
+!/content/assistant/OJ_Florendo_Rayatchi_Public_CV.pdf
 
 # Public repository guidance is tracked at the root. Ignore only private/local
 # AI-tooling instructions and state; never copy their contents into tracked files.

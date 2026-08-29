@@ -1,6 +1,6 @@
 # ADR-0004: Curated no-inference portfolio assistant
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR-0006](0006-retrieval-grounded-portfolio-assistant.md) (proposed 2026-08-28)
 - **Date:** 2026-07-30 (revised 2026-07-31 for the approved avatar integration)
 - **Owner:** OJ Florendo
 - **Risk class:** R2
@@ -17,6 +17,17 @@
 > AI assistant beta, and **§49.5** covers avatars and related assets. Under
 > v1.0.0 the assistant fell under a blanket expansion prohibition, so v1.1.0 is
 > the version that actually authorises it.
+
+> **Superseded 2026-08-28.** ADR-0006 replaces deterministic answering with
+> retrieval-grounded answering over an owner-approved portfolio corpus, using
+> the exact process this ADR required for that change: *"A future generative
+> provider requires a new R2 decision, provider/cost review, threat-model
+> update, privacy review, secrets plan, limits, and explicit owner approval."*
+> The reasoning below is retained as the record of why the curated design was
+> chosen first and what was given up to move past it. Two things this ADR
+> claimed remain true and were carried forward: the manifest is a public-claims
+> source requiring owner review, and the site must stay fully useful when the
+> assistant is not.
 
 ## Context
 
