@@ -283,6 +283,13 @@ prompt is good at.
 - Anti-extraction has a threshold **measured against the real corpus**, not
   assumed. The obvious metric — verbatim fraction of the answer — was measured
   and rejected, because legitimate grounded answers score 1.00 on it.
+- **Breadth is counted in documents, not passages** (corrected 29 August 2026).
+  The first frozen release run refused a correct answer to the critical question
+  *"Tell me about Cited."*, because retrieval returns chunks and a broad question
+  about one project legitimately draws on two chunks of that project's single
+  document. The real violation spanned two documents and is still caught; the
+  threshold value of 2 is unchanged, only its unit. Measurement, residual
+  limitation and regression coverage: evaluation spec v2.1 §3 D2.
 - Enforcement is a trust boundary of its own: a bug in `policy.py` is now a
   product-identity or privacy bug. It is tested accordingly, including against
   the real answers that motivated it.

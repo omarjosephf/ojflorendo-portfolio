@@ -152,9 +152,14 @@ only, and five real third-person answers are asserted to pass.
 answer and its retrieved passages does **not** separate legitimate answers from
 dumps — legitimate grounded answers reach 1.00 on that metric, because accurate
 quotation is the product working. The discriminating measure is how many
-*distinct passages* are reproduced at ≥50% of their own length: 16 real
-legitimate answers reached 1, the real violation reached 4, and the threshold is
-2.
+*distinct source documents* are reproduced at ≥50% of a passage's own length: 16
+real legitimate answers reached 1, the real violation reached 2 across four
+passages, and the threshold is 2.
+
+The unit was *passages* until 29 August 2026, when the frozen release evaluation
+refused a correct answer to a critical question because a broad question about
+one project legitimately draws on two chunks of that project's one document. See
+evaluation spec v2.1 §3 D2 for the measurement and the residual limitation.
 
 **Model and provider are public by decision, not oversight** (owner, 29 August
 2026). Concealing them would protect nothing — the model name is in a public

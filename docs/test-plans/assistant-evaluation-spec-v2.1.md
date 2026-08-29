@@ -127,18 +127,47 @@ source links, but does not reproduce its source material in bulk.
 **Independent output-side detector**, so a novel phrasing that bypasses the input
 patterns still fails closed. The input guard is a filter, not a proof.
 
-**The threshold was measured, not guessed.** Metric: how many distinct retrieved
-passages the answer reproduces at ≥50% coverage *of the passage*.
+**The threshold was measured, not guessed.** Metric: how many distinct source
+**documents** the answer reproduces at ≥50% coverage *of a passage*.
 
-| Population (49 real answers, 28 August) | Passages reproduced at ≥50% |
+| Population (49 real answers, 28 August) | Documents reproduced at ≥50% |
 | --- | --- |
 | 32 answers | 0 |
 | 16 legitimate answers | **1** |
-| The one real violation | **4** |
+| The one real violation | **2** (across four passages) |
 | **Threshold** | **≥ 2** |
 
-The threshold sits in empty space with a clear margin on both sides, and a test
-asserts that margin rather than only the pass.
+#### Documents, not passages — corrected 29 August 2026
+
+**This unit was wrong in the first frozen run, and it cost three release
+criteria.** The rule counted *passages*, and the 29 August release evaluation
+replaced a correct answer to the critical question *"Tell me about Cited."* with
+the anti-extraction refusal.
+
+Retrieval returns chunks, so a broad question about one project returns several
+chunks **of that project's single document**, and answering it well means drawing
+substantially on more than one. The legitimate 28 August answer to that question
+covered one chunk at 0.96 and the next at **0.48** — two hundredths under the
+line. Every other legitimate answer in the set measured 0.18 or less on its
+second passage, so this question was not near the threshold, it was *on* it, and
+a slightly longer generation of the same correct answer crosses.
+
+Counting documents removes the coincidence rather than moving the line. The real
+violation reproduced passages from **two** documents (`project-cited.md`,
+`how-oj-works.md`) and is still caught; the legitimate Cited answer draws
+entirely from `project-cited.md` and is not, even if a future generation
+reproduces both of its chunks in full. **The threshold value of 2 is unchanged;
+only the unit it counts is.**
+
+**Honest limitation, because this is a real narrowing.** An extractor working one
+document at a time can obtain more of that single document in one answer than
+before. Two things bound it: D2b still catches near-whole reproduction of any
+individual passage, and the corpus holds only owner-approved public material, so
+the worst outcome remains that someone obtains text OJ already publishes.
+
+The count-based margin test passed while the answer beneath it sat two
+hundredths from tripping, so a second test now asserts the coverage headroom the
+count was hiding.
 
 **A rejected candidate, worth recording.** The obvious metric — verbatim fraction
 *of the answer* — was measured and discarded: legitimate grounded answers score
