@@ -290,6 +290,17 @@ prompt is good at.
   document. The real violation spanned two documents and is still caught; the
   threshold value of 2 is unchanged, only its unit. Measurement, residual
   limitation and regression coverage: evaluation spec v2.1 §3 D2.
+- **Depth is counted in near-completely reproduced passages, not in one
+  passage's longest span** (corrected 29 August 2026). The paid release
+  evaluation of the corrected candidates refused correct answers to *"Tell me
+  about Cited."* and *"What is the security posture of the portfolio site?"*,
+  because when a short section is the answer, the correct answer reproduces
+  essentially all of it. Bulk reproduction now needs **two** passages at ≥0.90
+  coverage; one is permitted. Two repair candidates — an answer-share test and a
+  raised word floor — were measured against the preserved evidence and rejected.
+  The narrowing is real: a single passage may now be reproduced near-completely.
+  Measurement, rejected alternatives, compensating controls and residual
+  limitations: evaluation spec v2.1 §7.
 - Enforcement is a trust boundary of its own: a bug in `policy.py` is now a
   product-identity or privacy bug. It is tested accordingly, including against
   the real answers that motivated it.

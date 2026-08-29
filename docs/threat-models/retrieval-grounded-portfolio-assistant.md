@@ -161,6 +161,27 @@ refused a correct answer to a critical question because a broad question about
 one project legitimately draws on two chunks of that project's one document. See
 evaluation spec v2.1 §3 D2 for the measurement and the residual limitation.
 
+**The depth half of the control was replaced on 29 August 2026.** It fired when
+one passage's longest contiguous span reached 90% of it and ran to 45 words, and
+in the paid release evaluation it refused correct answers to two questions whose
+answers are short corpus sections. Depth is now *two or more passages* at ≥0.90
+aggregate coverage, in any documents. **This narrows the control and is recorded
+as a narrowing, not as a neutral change:** one retrieved passage may now be
+reproduced near-completely in a single answer, with or without padding. The
+compensating controls are breadth, the stricter missing-attribution fallback, the
+pre-model question guards, the daily call ceiling, and a corpus of
+owner-approved public material only.
+
+**Cumulative one-passage-at-a-time extraction is not prevented in this
+release.** The rule is evaluated per answer and permits one near-completely
+reproduced passage, and there is no cross-request extraction state, so repeated
+requests can obtain different individual passages over time. This release does
+not claim to stop that. Adding session-level or cumulative tracking would
+introduce persistence and architecture the release does not have and is out of
+scope; the exposure is bounded by the corpus being owner-approved public
+material and by the controls listed above. Measurement, the two rejected repair
+candidates, and the fragment-length limitation: evaluation spec v2.1 §7.
+
 **Model and provider are public by decision, not oversight** (owner, 29 August
 2026). Concealing them would protect nothing — the model name is in a public
 repository — while costing the assistant its most credible technical answer. What
