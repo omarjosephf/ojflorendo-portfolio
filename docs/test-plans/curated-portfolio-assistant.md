@@ -1,6 +1,11 @@
 # Curated portfolio assistant test plan
 
-- **Status:** Accepted for implementation
+> **Superseded 2026-08-28** by
+> [`retrieval-grounded-portfolio-assistant.md`](retrieval-grounded-portfolio-assistant.md).
+> Retained as history. The checks below assume a browser-only deterministic
+> matcher that ADR-0006 retires.
+
+- **Status:** Superseded
 - **Date:** 2026-07-30
 - **Risk class:** R2
 

@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Send, ShieldCheck, X } from "lucide-react";
+import { Loader2, Send, ShieldCheck, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { suggestedAssistantQuestions } from "@/data/assistant-knowledge";
 import {
-  ASSISTANT_INPUT_LIMIT,
-  answerPortfolioQuestion,
-  type AssistantResult,
-} from "@/lib/portfolio-assistant";
+  assistantFallbackLinks,
+  suggestedAssistantQuestions,
+} from "@/data/assistant-navigation";
+import { boundInput, screenQuestion } from "@/lib/assistant/guard";
+import { ASSISTANT_INPUT_LIMIT, type AssistantResult } from "@/lib/assistant/types";
 
 /**
  * Opaque, deliberately not `.glass`. The panel sits over arbitrary page content,
@@ -28,12 +28,14 @@ interface AssistantPanelProps {
 }
 
 /**
- * The assistant's entire interface and knowledge.
+ * The assistant interface.
  *
- * Split out from the toggle so it forms its own chunk: the reviewed answer
- * manifest and the matcher are only downloaded and evaluated when a visitor
- * actually opens the assistant. Most visitors never do, and this component sits
- * on every page, so shipping it eagerly cost every page load for nothing.
+ * Answers come from a retrieval service over OJ's approved corpus, reached
+ * through this site's own `/api/assistant` route. The panel renders exactly
+ * three outcomes and has no path that answers from anywhere else — the
+ * deterministic matcher it replaced is gone rather than kept as a fallback,
+ * because two knowledge sources behind one interface drift apart and the
+ * visitor cannot tell which one they got.
  */
 export function AssistantPanel({
   titleId,
@@ -42,20 +44,72 @@ export function AssistantPanel({
 }: AssistantPanelProps) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<AssistantResult | null>(null);
+  const [pending, setPending] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  /**
+   * Identifies the in-flight request. A response whose token no longer matches
+   * is discarded, so a slow first answer cannot overwrite a faster second one —
+   * which would show the visitor an answer to a question they had moved on from.
+   */
+  const requestToken = useRef(0);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  const ask = (question: string) => {
-    setResult(answerPortfolioQuestion(question));
+  // Abandon any in-flight result when the panel closes, so a late response
+  // cannot set state on the way out.
+  useEffect(() => () => void (requestToken.current += 1), []);
+
+  const ask = async (rawQuestion: string) => {
+    const question = boundInput(rawQuestion);
+    if (!question || pending) return;
+
+    // The visitor's own personal or credential data resolves here, in the
+    // browser, and is never transmitted. Nothing else is decided locally:
+    // questions about OJ and probes of the privacy boundary go to the service,
+    // which is the single authority for product policy (ADR-0006 D14).
+    const blocked = screenQuestion(question);
+    if (blocked) {
+      setResult(blocked);
+      setQuery("");
+      return;
+    }
+
+    const token = ++requestToken.current;
+    setPending(true);
+    setResult(null);
     setQuery("");
+
+    try {
+      const response = await fetch("/api/assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const body: unknown = await response.json();
+
+      if (token !== requestToken.current) return;
+
+      // The route always answers with one of the three states. Anything else is
+      // treated as unavailable rather than rendered.
+      const state = (body as AssistantResult | null)?.state;
+      if (state === "answered" || state === "not-covered") {
+        setResult(body as AssistantResult);
+      } else {
+        setResult({ state: "unavailable" });
+      }
+    } catch {
+      if (token !== requestToken.current) return;
+      setResult({ state: "unavailable" });
+    } finally {
+      if (token === requestToken.current) setPending(false);
+    }
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    ask(query);
+    void ask(query);
   };
 
   return (
@@ -75,12 +129,7 @@ export function AssistantPanel({
           {/* A plain <img> for the same reason as the entry control: next/image
               emits an inline style attribute that this site's nonce-based
               `style-src` blocks, and the asset is already a pre-sized 192px
-              WebP (7.6 KB) shown at 40px.
-
-              This one carries meaningful alt text because it is the only place
-              the assistant's visual identity is described. It lives in the
-              lazily-loaded panel chunk, so it is requested only after a visitor
-              opens the assistant. */}
+              WebP (7.6 KB) shown at 40px. */}
           <img
             src="/images/profile/oj-assistant-avatar-3d.webp"
             alt="3D illustrated avatar of OJ Florendo"
@@ -90,16 +139,16 @@ export function AssistantPanel({
             className="h-10 w-10 shrink-0 rounded-xl border border-accent/30 bg-accent/10 object-cover"
           />
           <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 id={titleId} className="font-heading text-base font-semibold text-ink">
-                OJ Assistant
-              </h2>
-              <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wider text-accent">
-                Curated beta
-              </span>
-            </div>
+            <h2 id={titleId} className="font-heading text-base font-semibold text-ink">
+              OJ Assistant
+            </h2>
+            {/* The permanent capability disclosure. Not a maturity label: it
+                states what the assistant does, what bounds it, and that it is
+                not OJ — obligations that hold for as long as the feature
+                exists, rather than until it stops being new. */}
             <p id={descriptionId} className="mt-1 text-xs leading-5 text-muted">
-              Reviewed portfolio answers, not a general-purpose chatbot.
+              Answers from OJ&apos;s approved portfolio content, with sources.
+              Not OJ.
             </p>
             <p className="mt-1 text-[0.7rem] leading-4 text-muted/80">
               Artistic digital representation of OJ Florendo.
@@ -120,12 +169,16 @@ export function AssistantPanel({
         <div className="rounded-xl border border-line/70 bg-night/40 p-4 text-sm leading-6 text-muted">
           <div className="flex items-center gap-2 font-medium text-ink">
             <ShieldCheck className="h-4 w-4 text-accent" aria-hidden="true" />
-            Private by design
+            How your question is handled
           </div>
+          {/* This replaced copy claiming the text never left the browser. That
+              was true of the deterministic assistant and became false the moment
+              answering moved to a model, so it changed in the same release. */}
           <p className="mt-1">
-            Your text stays in this browser, is not sent or saved, and is used
-            only to select fixed public answers. Do not enter personal or
-            sensitive information.
+            Your question is sent to OJ&apos;s server and an AI provider to be
+            answered from his approved documents. It is not stored, logged, or
+            used for training. Please don&apos;t enter personal or sensitive
+            information.
           </p>
         </div>
 
@@ -138,8 +191,9 @@ export function AssistantPanel({
               <button
                 key={question}
                 type="button"
-                onClick={() => ask(question)}
-                className="rounded-full border border-line bg-surface-2 px-3 py-2 text-left text-xs font-medium text-ink transition-colors hover:border-accent/50"
+                onClick={() => void ask(question)}
+                disabled={pending}
+                className="rounded-full border border-line bg-surface-2 px-3 py-2 text-left text-xs font-medium text-ink transition-colors hover:border-accent/50 disabled:opacity-50"
               >
                 {question}
               </button>
@@ -159,16 +213,23 @@ export function AssistantPanel({
               onChange={(event) => setQuery(event.target.value)}
               maxLength={ASSISTANT_INPUT_LIMIT}
               autoComplete="off"
-              placeholder="Projects, skills, experience, education..."
+              placeholder="Projects, skills, experience, services..."
               className="min-w-0 flex-1 rounded-xl border border-line bg-night px-3 py-2.5 text-sm text-ink placeholder:text-muted/70"
             />
             <button
               type="submit"
               aria-label="Ask OJ Assistant"
               className="inline-flex items-center justify-center rounded-xl bg-accent px-3 text-night transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={!query.trim()}
+              disabled={!query.trim() || pending}
             >
-              <Send className="h-4 w-4" aria-hidden="true" />
+              {pending ? (
+                <Loader2
+                  className="h-4 w-4 motion-safe:animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <Send className="h-4 w-4" aria-hidden="true" />
+              )}
             </button>
           </div>
           <p className="text-right text-[0.7rem] text-muted">
@@ -176,34 +237,142 @@ export function AssistantPanel({
           </p>
         </form>
 
+        {/* One live region covering loading, answer, non-answer and failure, so
+            a screen-reader user hears each transition without the panel
+            stealing focus mid-question. */}
         <div aria-live="polite" aria-atomic="true">
-          {result ? (
-            <article className="rounded-xl border border-line bg-surface-2 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
-                {result.title}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-ink">{result.answer}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {result.links.map((link) => (
-                  <Link
-                    key={`${result.title}-${link.href}`}
-                    href={link.href}
-                    onClick={onClose}
-                    className="rounded-full border border-line bg-night px-3 py-2 text-xs font-medium text-ink transition-colors hover:border-accent/50"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </article>
+          {pending ? (
+            <p className="text-sm leading-6 text-muted">
+              Looking through OJ&apos;s approved content…
+            </p>
+          ) : result ? (
+            <AssistantOutcome result={result} onNavigate={onClose} />
           ) : (
             <p className="text-sm leading-6 text-muted">
-              Choose a suggestion or ask a short question. Unknown topics are
-              redirected to OJ rather than answered with a guess.
+              Choose a suggestion or ask a short question. Anything outside OJ&apos;s
+              approved content is answered honestly rather than guessed at.
             </p>
           )}
         </div>
       </div>
     </section>
+  );
+}
+
+function FallbackLinks({ onNavigate }: { readonly onNavigate: () => void }) {
+  return (
+    <div className="mt-4 flex flex-wrap gap-2">
+      {assistantFallbackLinks.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          onClick={onNavigate}
+          className="rounded-full border border-line bg-night px-3 py-2 text-xs font-medium text-ink transition-colors hover:border-accent/50"
+        >
+          {link.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Renders one outcome.
+ *
+ * Every branch that is not a grounded answer offers the way to OJ. A visitor who
+ * is told "I can't help with that" and given no route onward has been failed
+ * twice.
+ */
+function AssistantOutcome({
+  result,
+  onNavigate,
+}: {
+  readonly result: AssistantResult;
+  readonly onNavigate: () => void;
+}) {
+  if (result.state === "answered") {
+    return (
+      <article className="rounded-xl border border-line bg-surface-2 p-4">
+        {/* Model output, rendered as a React text node. No Markdown renderer and
+            no dangerouslySetInnerHTML on this path: generated text is untrusted
+            input like any other. */}
+        <p className="text-sm leading-6 text-ink">{result.answer}</p>
+
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+          {result.citations.length === 1 ? "Source" : "Sources"}
+        </p>
+        <ul className="mt-2 space-y-2">
+          {result.citations.map((citation, index) => (
+            <li
+              key={`${citation.label}-${index}`}
+              className="border-l-2 border-line pl-3 text-xs leading-5 text-muted"
+            >
+              <span className="block italic">“{citation.quote}”</span>
+              {/* An unmapped source keeps its name and loses its link. The
+                  citation string is never used to build an href — it is looked
+                  up in the corpus allowlist — so the failure mode here is a
+                  missing link, never an attacker-chosen one. */}
+              {citation.href ? (
+                <Link
+                  href={citation.href}
+                  onClick={onNavigate}
+                  className="mt-1 inline-block font-medium text-ink underline decoration-accent/50 underline-offset-2"
+                >
+                  {citation.label}
+                </Link>
+              ) : (
+                <span className="mt-1 inline-block font-medium text-ink">
+                  {citation.label}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </article>
+    );
+  }
+
+  if (result.state === "not-covered") {
+    return (
+      <article className="rounded-xl border border-line bg-surface-2 p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+          Not in OJ&apos;s approved content
+        </p>
+        <p className="mt-2 text-sm leading-6 text-ink">{result.answer}</p>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          OJ can answer this himself — the contact section reaches him directly.
+        </p>
+        <FallbackLinks onNavigate={onNavigate} />
+      </article>
+    );
+  }
+
+  if (result.state === "blocked") {
+    return (
+      <article className="rounded-xl border border-line bg-surface-2 p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+          Please protect your privacy
+        </p>
+        <p className="mt-2 text-sm leading-6 text-ink">{result.answer}</p>
+        <FallbackLinks onNavigate={onNavigate} />
+      </article>
+    );
+  }
+
+  // Unavailable. Outage, timeout, and daily-allowance exhaustion are one state
+  // on purpose: to a visitor they all mean "not now", and the distinction is
+  // operator information. There is deliberately nothing here that answers
+  // anyway.
+  return (
+    <article className="rounded-xl border border-line bg-surface-2 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+        Assistant unavailable
+      </p>
+      <p className="mt-2 text-sm leading-6 text-ink">
+        I can&apos;t answer right now. Rather than guess, here are the parts of
+        the site that cover this — and OJ is reachable directly.
+      </p>
+      <FallbackLinks onNavigate={onNavigate} />
+    </article>
   );
 }

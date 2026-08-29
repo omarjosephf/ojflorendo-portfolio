@@ -112,6 +112,116 @@ export const projects: ProjectItem[] = [
       ],
     },
   },
+  {
+    slug: "cited",
+    title: "Cited — Document Assistant",
+    summary:
+      "A document assistant that answers questions from a set of documents and shows the exact passage each answer came from, or states plainly that the documents do not cover it.",
+    description:
+      "A retrieval-augmented document assistant built around a single guarantee: every quoted citation is verified locally against the passage the model was actually sent, and questions the documents cannot answer are refused rather than guessed at. Answer quality, refusal behaviour, and citation integrity are scored by a committed evaluation set rather than asserted.",
+    status: "Live",
+    technologies: [
+      "Python",
+      "FastAPI",
+      "Anthropic API",
+      "ONNX",
+      "NumPy",
+      "Docker",
+      "Fly.io",
+      "pytest",
+      "AI-assisted engineering",
+    ],
+    // No bespoke card image yet; the grid falls back to the abstract placeholder.
+    image: null,
+    liveUrl: "https://cited-demo.fly.dev",
+    githubUrl: "https://github.com/omarjosephf/cited",
+    featured: true,
+    ariaLabel: "Cited — Document Assistant case study",
+    caseStudy: {
+      tagline:
+        "Answers you can check: every citation is verified against the passage the model was sent, and questions the documents cannot answer are refused.",
+      overview:
+        "Cited answers questions about a set of documents and shows the exact passage each answer came from. When the documents do not contain the answer, it says so instead of producing a plausible one. It is deployed as a small containerised web service with a command-line interface, and every claim made about its quality is reproducible from the repository with a single command.",
+      context:
+        "Most demonstrations of this kind answer confidently whether or not they should, and ask you to trust a citation the model generated about itself. Ordinary search has the opposite problem: it returns a list of documents and leaves the reading to you. I wanted to build the version that is actually useful in a working context — one that returns the answer, shows its source, and is honest about the limits of what it was given — and to hold it to a standard where the honesty is measured rather than claimed.",
+      goals: [
+        "Return answers grounded in supplied documents, with the source passage shown alongside each answer.",
+        "Refuse questions the documents cannot answer, and treat wrongly refusing an answerable question as an equally real failure.",
+        "Make every quality claim reproducible from a committed question set with one command.",
+        "Keep running costs and the operational attack surface small enough for a public demo to be safe to expose.",
+      ],
+      role:
+        "I designed, built, evaluated, and deployed this project through an AI-assisted engineering workflow, with Claude Code supporting research, implementation, and review. The architectural decisions, the measurements that drove them, the honesty standard applied to the documentation, and the release itself were mine, and I remain accountable for the result. AI-generated work was treated as untrusted until read and tested — a discipline this project depends on more than most, since its entire premise is that a confident answer is not the same as a correct one.",
+      process: [
+        "Proved the embedding stack ran on the target platform before writing any code that depended on it.",
+        "Built ingestion, chunking, and retrieval, and measured retrieval quality before adding a language model.",
+        "Added answering with citations computed by the API, then added a local verification step that re-checks every quote independently.",
+        "Scored the system against a committed question set, which surfaced three real bugs — including one that was in the scoring rather than the model.",
+        "Containerised the service, sized the deployment against measurements, and added the protections a publicly reachable paid endpoint needs.",
+      ],
+      architecture: [
+        "Documents are read into passages that remain individually citable, with paths relative to the corpus root so identically named files stay distinguishable.",
+        "Embeddings run locally through ONNX rather than a hosted API, so retrieval adds no per-query cost and introduces no second vendor.",
+        "Retrieval is NumPy cosine similarity behind a Retriever interface — at this corpus size a vector database is complexity without benefit, and the interface keeps the upgrade cheap.",
+        "Answering uses the Anthropic API's native citations, computed against the passages actually supplied, then re-verifies every quote locally so the guarantee lives in this repository rather than in a vendor's feature list.",
+        "The HTTP layer owns transport, protection, and presentation only; it decides nothing about answers, which keeps the core usable as a library and makes a different deployment a wrapper rather than a rewrite.",
+      ],
+      features: [
+        "Question answering with the source passage shown for every claim.",
+        "Measured refusal: unanswerable questions are declined, and wrongly refused answerable questions are scored as failures too.",
+        "Local citation verification that discards and counts any quote not present in the passage sent.",
+        "A committed evaluation set scored by one command, with failing cases printed.",
+        "A command-line interface whose retrieval and indexing commands run with no API key and at no cost.",
+        "A containerised HTTP service with rate limiting, a daily answer budget, and a question length cap.",
+      ],
+      accessibilitySecurity: [
+        "The service sends a nonce-based Content Security Policy alongside HSTS, X-Content-Type-Options, and Referrer-Policy.",
+        "Spend is bounded in three independent ways — request rate, a daily answer budget, and a cap on the size of any single question — and the documentation is explicit that only a provider-level spend cap truly bounds the loss, because the in-process budget resets on restart.",
+        "The build fails if a secret reaches a tracked file, and a test guards the corpus against ignore rules that could silently empty it.",
+        "The demo interface is deliberately small and has the basics right — a language attribute, a single main heading, visible focus styling, and colour-scheme support — but it has not been through a full accessibility audit, and I would not describe it as meeting the standard the rest of my work is held to until it has.",
+      ],
+      performance: [
+        "The embedding stack runs through ONNX rather than PyTorch — 223 MB against roughly 2 GB — and was verified working on the target Python version and platform before anything depended on it.",
+        "Embeddings are computed locally, so the retrieval path costs nothing per query and does not depend on a second provider being available.",
+        "Claude Haiku 4.5 answers from four short passages at roughly a fifth of the cost of an Opus-tier model, on the reasoning that reading four short passages is comprehension rather than reasoning — a judgement the evaluation set then checked rather than assumed.",
+        "The deployed machine was sized against measurements rather than assumptions, after an initial guess proved wrong.",
+      ],
+      challenges: [
+        {
+          title: "A similarity threshold cannot tell you what is answerable",
+          body: "The plan was to refuse questions whose best retrieval score fell below a cutoff. Measurement killed it: the lowest-scoring answerable question scored 0.666 while the highest-scoring unanswerable one scored 0.755, because that question was topically adjacent to a document without being covered by it. The ranges overlap, so no cutoff separates them. Embedding similarity measures topical relatedness, not answerability — a property of the technique, not a threshold left untuned — so refusal became a judgement the model makes after reading the passages, with a score threshold surviving only as a cheap pre-filter for the obviously unrelated.",
+        },
+        {
+          title: "Trusting a citation the model wrote about itself",
+          body: "Asking a model to include its source and hoping produces citations that look right and cannot be checked. Citations here are computed by the API against the documents actually supplied, and then every quote is re-verified locally against the passage that was sent; a quote that does not appear in it is discarded and counted. That check has never fired, which is exactly the point — it is the mechanism by which I would find out if it stopped being true.",
+        },
+        {
+          title: "An unstable score that was not the model's fault",
+          body: "Answering accuracy oscillated between 93% and 100% across runs, which looked like model variance. It was not: the scoring was inferring refusals rather than detecting them, so borderline phrasings were graded inconsistently. Introducing an explicit refusal marker stabilised the figure at 100% across five consecutive runs. The lesson generalised — before trusting a measurement, check that the instrument is measuring what you think it is.",
+        },
+      ],
+      outcome:
+        "The result is a deployed, publicly reachable service with a reproducible quality claim: 100% retrieval hit rate and 80% top-1 on the committed question set, 100% answering accuracy, all unanswerable questions correctly refused, none wrongly refused, and zero citations rejected as unverifiable. The scope of that claim is stated plainly rather than glossed: it is fifteen questions against a ten-chunk corpus, which is enough to catch regressions and has already found three real bugs, but not enough to show the system generalises. A larger corpus is the obvious next test, and the evaluation set is the thing that would tell me if it failed.",
+      lessons: [
+        "Measure the assumption before building on it — the refusal threshold was a reasonable plan that measurement disproved in an afternoon.",
+        "An unstable metric is often a broken instrument rather than a broken system; check the scoring before concluding anything about the model.",
+        "A guarantee that lives in a vendor's feature list is not yours; re-verifying it locally is what makes it something you can actually promise.",
+        "Being honest about the limits of a result costs nothing and is the only thing that makes the result worth quoting — a project premised on checkable claims cannot open with an unverifiable one.",
+      ],
+      stack: [
+        "Python",
+        "FastAPI",
+        "Anthropic API (Claude Haiku 4.5)",
+        "fastembed / ONNX Runtime",
+        "NumPy",
+        "Docker",
+        "Fly.io",
+        "pytest",
+        "GitHub Actions",
+        "AI-assisted engineering with human review",
+      ],
+    },
+  },
 ];
 
 export function getProjectBySlug(slug: string): ProjectItem | undefined {

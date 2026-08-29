@@ -34,18 +34,67 @@ Version 1.1 remains **static-first** in architecture: there are no user accounts
 authentication, database, admin dashboard, uploads, payments, comments, CMS,
 arbitrary redirects, or user-generated HTML.
 
-The only server-side public input boundary is `POST /api/contact`. Submitted
-contact data is validated and used only to attempt an email delivery. It is not
-stored in a project database, local storage, or browser storage, and submitted
-HTML is never rendered.
+There are two server-side public input boundaries: `POST /api/contact` and
+`POST /api/assistant`. Submitted contact data is validated and used only to
+attempt an email delivery. It is not stored in a project database, local
+storage, or browser storage, and submitted HTML is never rendered.
 
-`OJ Assistant` is an optional browser-only curated guide. It does not call a
-language model, assistant API, provider, web search, analytics service, or
-telemetry endpoint. Visitor text is bounded to 280 characters, appears only as
-the controlled value of its own input, and is never echoed into answer content,
-markup, attributes or URLs. It is not transmitted, logged, retained, or placed
-in browser storage, and is used only to select fixed owner-approved public
-answers and internal links with hard-coded destinations.
+`OJ Assistant` answers from a set of owner-approved documents using retrieval
+and a language model, reached through this site's own `POST /api/assistant`
+route. It is optional: the site is fully usable without it, and unsetting one
+environment variable disables it.
+
+**Visitor questions leave the browser.** This is a deliberate change from the
+earlier browser-only assistant, and the interface says so rather than implying
+otherwise. A question is sent to this site's server and from there,
+server-to-server, to the retrieval service and its model provider. It is **not**
+stored, **not** written to any log in either repository, **not** used for
+training, and **no** conversation history is kept. The visitor's IP address is
+not forwarded.
+
+One category of input never leaves the browser at all: apparent personal,
+financial or credential data the visitor typed about themselves is detected
+client-side and answered locally, so it reaches no provider. That is the only
+thing decided in the browser, and it is the one guarantee no server-side control
+can offer — by the time a server can apply one, the data has already been sent.
+
+Prompt-injection and policy probes are **not** handled in the browser. Product
+policy has a single authority — the assistant service — so a probe is sent to it
+like any other question and may reach the model provider, consuming a rate-limit
+slot and a paid call. The controls that bound that spend are described below.
+
+Controls at the route boundary: a raw-body byte cap enforced before JSON
+parsing, runtime schema validation, a 280-character bound applied server-side, a
+best-effort in-memory per-instance throttle, an abort timeout, a server-only
+shared secret, and strict validation of the service response before any of it is
+rendered. Missing or partial configuration fails closed rather than calling the
+service unauthenticated.
+
+Model output is treated as untrusted text. It renders through React text nodes
+with no Markdown renderer and no `dangerouslySetInnerHTML` on this path.
+Citation sources are **never** used to build URLs: they are looked up in a
+committed allowlist derived from the corpus, and an unrecognised source renders
+as plain text with no link, so the failure mode is a missing link rather than an
+attacker-chosen one.
+
+Prompt injection is **contained rather than prevented**, and the containment is
+structural: the assistant has no tools, so a successful injection can produce
+text and never an action. The system prompt's data-not-instructions clause and
+the corpus holding no secret worth extracting are defence in depth on top of
+that, not the guarantee. The browser guard is deliberately not among them: it no
+longer screens probes, and a control that does not run must not be counted.
+
+Spend is bounded in layers, each described by what it actually guarantees: the
+route throttle is best-effort and per-instance (not distributed, not an edge
+limiter); the shared secret means only this site can spend the service's budget;
+the service enforces its own per-IP rate limit and a daily answer allowance. The
+daily allowance is **not** a monetary ceiling — it lives in process memory and
+resets on restart, which under a scale-to-zero deployment happens routinely. The
+provider-side account spend cap is the only hard financial limit.
+
+The corpus is authored in this repository and reaches the service as a
+deterministic checksummed artifact. The service verifies the checksum at startup
+and refuses to serve content that is not what was reviewed.
 
 The assistant's avatar imagery consists of owner-supplied **artistic digital
 representations**, not photographs, and is disclosed as such in the interface.
