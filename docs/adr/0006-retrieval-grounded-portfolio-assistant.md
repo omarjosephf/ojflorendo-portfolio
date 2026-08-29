@@ -379,8 +379,34 @@ would be a new feature during a release freeze.
 
 ### D12 — Maturity labelling and the live handbook conflict
 
-**This is an unresolved governance conflict and is recorded as one rather than
-worked around.**
+**Resolved 29 August 2026: the amendment this decision depended on exists.**
+Handbook **v1.2.0 is ratified and governing** (ADR-0000), and §49.1 no longer
+conditions the authorisation on "beta" permanently. The conflict recorded below
+is retained as the reasoning that produced the amendment.
+
+**What that does and does not unblock, stated precisely because the difference
+decides a release.** §49.1 now permits a label-free *stable* release only once
+the graduation criteria below are met; until then the feature is experimental
+and **must** carry a label under §49.6. One of those criteria is a production
+soak, so graduation cannot complete before first publication. The intended
+sequence is therefore: publish with an honest maturity label, soak, graduate,
+then remove the label — not publish unlabelled on day one.
+
+**Consequence for the current candidate.** The UI carries no maturity label and
+a test asserts its absence (`carries no maturity badge`). That is correct for a
+graduated product and premature for this one. Adding a label, and inverting that
+test, is required before production publication and is tracked as release work
+rather than as a defect in this decision.
+
+**Graduation status, 29 August 2026:** §49.1 amended and ratified — **met**;
+`npm run test:ci` green on the candidate — **met**; evaluation thresholds across
+three consecutive runs — **1 of 3**, with zero unverifiable citations so far.
+The remainder are manual QA, citation-to-URL mapping, accessibility, cold-start
+latency, the verified spend cap and the production soak.
+
+---
+
+**The original conflict, recorded as it stood.**
 
 - §49.1 authorises the assistant *"only as a narrow, optional **beta**"*. Read
   strictly, "beta" is a condition of the authorisation, not a UI string.

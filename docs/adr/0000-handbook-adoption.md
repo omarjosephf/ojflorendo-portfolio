@@ -1,6 +1,6 @@
-# ADR-0000: Adopt Project Zero Engineering Handbook v1.1.0
+# ADR-0000: Adopt Project Zero Engineering Handbook (v1.1.0, then v1.2.0)
 
-- Status: Accepted — adopted, and amended 2026-08-01
+- Status: Accepted — adopted 2026-07-28, amended 2026-08-01, v1.2.0 ratified 2026-08-29
 - Date: 2026-07-28 (amended 2026-08-01)
 - Owner: OJ Florendo
 
@@ -131,6 +131,45 @@ separately controlled.
 - v1.0.0 remains available in Git history but is no longer citable as governing.
 - Repository adoption is incomplete until the corrected file and this amended ADR
   are committed and published through the approved workflow.
+
+### Ratification, 29 August 2026 — v1.2.0 supersedes v1.1.0
+
+OJ Florendo explicitly ratified **Engineering Handbook v1.2.0** on 29 August
+2026. It is now the governing policy and is committed at
+`docs/ENGINEERING_HANDBOOK.md`.
+
+- **Effective date:** 29 August 2026
+- **Effective checksum (SHA-256 of the governing file):**
+  `370cdb24f867c66514544f38aae0c816114c70c8062e04bc3195af3a94e73dfb`
+
+**Why the amendment was required rather than an exception.** v1.1.0 §49.1
+authorised the portfolio assistant *"only as a narrow, optional beta"*. Read
+strictly, as §3 requires, "beta" was a condition of the authorisation rather
+than a UI string, and §46 forecloses using an exception to make a permanent
+policy change. Removing that permanent condition therefore needed a version.
+
+**What v1.2.0 changes**, all confined to assistant maturity and lifecycle
+policy: §49.1 replaces the permanent "beta" condition with a narrow, optional
+feature that may graduate to a label-free stable release on recorded evidence;
+§49.6 turns maturity labels into a stage with a graduation mechanism; §48
+Track C describes the assistant as a product rather than as coursework; §10's
+ADR trigger no longer assumes a beta; and §52 adds an adoption checklist. The
+authority model, risk classification, security, privacy, accessibility,
+performance, cost-control, evaluation, testing, release, rollback,
+production-control and truthful-representation requirements of v1.1.0 are
+preserved unchanged.
+
+**Obligations added, not only removed.** Dropping the label is conditioned on a
+permanent truthful capability disclosure, ADR-recorded graduation criteria, a
+green gate, and explicit owner approval.
+
+**Adoption steps.** All five supersession conditions in the handbook's Document
+control section are complete: ratified, committed at the canonical path,
+guidance files verified (`CLAUDE.md` and `AGENTS.md` reference the handbook by
+path, not by version, so neither needed editing), this ADR records the effective
+date and checksum, and conflicting documentation is reconciled in ADR-0006 D12.
+
+**v1.1.0 remains in Git history** and is no longer citable as governing.
 
 ## Rollback or migration
 
