@@ -11,7 +11,6 @@ import { Footer } from "@/components/layout/Footer";
 import { PortfolioAssistant } from "@/components/assistant/PortfolioAssistant";
 import { StructuredData } from "@/components/ui/StructuredData";
 import { ParticleWaveLazy } from "@/components/three/ParticleWaveLazy";
-import { MobileWaveLazy } from "@/components/canvas/MobileWaveLazy";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -90,9 +89,9 @@ export default async function RootLayout({
       <body className="flex min-h-full flex-col">
         {/* Decorative site-wide background, fixed behind all content. Loads
             only where WebGL exists; otherwise the ambient body::before /
-            body::after glow layers stand in. */}
+            body::after glow layers stand in — which is what phones currently
+            get, the Canvas-2D wave having been withdrawn (ADR-0008). */}
         <ParticleWaveLazy />
-        <MobileWaveLazy />
         <SkipLink />
         <Nav />
         <main id="main" className="flex-1">
