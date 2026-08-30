@@ -44,24 +44,86 @@ body {
 }
 
 /* Subtle ambient background glow behind the whole page. Sits behind the
-   particle-wave layer, and is the sole background when WebGL is unavailable. */
-body::before {
+   particle-wave layer, and is the sole background when WebGL is unavailable.
+   Split across two pseudo-elements so each gradient can drift independently on
+   phones (see the ambient-drift block below); on every other viewport the pair
+   renders exactly as the single layer it replaced. */
+body::before,
+body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(
-      42rem 30rem at 78% -6%,
-      color-mix(in srgb, var(--color-sky) 12%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      38rem 28rem at 6% 8%,
-      color-mix(in srgb, var(--color-accent) 10%, transparent),
-      transparent 70%
-    );
   pointer-events: none;
+}
+body::before {
+  background: radial-gradient(
+    42rem 30rem at 78% -6%,
+    color-mix(in srgb, var(--color-sky) 12%, transparent),
+    transparent 70%
+  );
+}
+body::after {
+  background: radial-gradient(
+    38rem 28rem at 6% 8%,
+    color-mix(in srgb, var(--color-accent) 10%, transparent),
+    transparent 70%
+  );
+}
+
+/* Ambient motion for phones only (ADR-0003 amendment).
+ *
+ * Phones do not mount either WebGL scene, so without this the background is the
+ * one genuinely static surface on the site. These two layers drift instead, on
+ * long out-of-phase cycles in opposing directions.
+ *
+ * Deliberately transform-only. `background-position` would repaint a
+ * full-viewport layer every frame; `filter` and `opacity` are more expensive
+ * still and neither is needed. A composited translate costs the main thread
+ * nothing, which is the entire point on the device class ADR-0003 protects.
+ *
+ * The base `scale(1.18)` is overscan, not an effect: it guarantees the layer
+ * still covers the viewport at maximum drift so no transparent edge is ever
+ * exposed. At 6% travel that leaves 3% of margin in hand. Scale is constant and
+ * only the position animates, so the gradients never change size or peak
+ * brightness — motion here is drift, not brightness.
+ *
+ * Amplitude is set to be perceptible rather than technically-present: an
+ * earlier pass drifted ~19px over 44s (~0.9px/s), which measured perfectly and
+ * was near-invisible. These values travel roughly 47px on a 390px viewport.
+ * Amplitude and duration are the two dials if that judgement needs revisiting.
+ *
+ * The breakpoint intentionally matches COMPACT_QUERY in
+ * `src/components/three/hooks.ts`. Above it the WebGL particle wave renders at
+ * z-index -1, i.e. on top of these layers, so animating there would spend GPU
+ * on something no visitor can see. Keep the two values in step. */
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+  body::before,
+  body::after {
+    will-change: transform;
+  }
+  body::before {
+    animation: ambient-drift-a 44s ease-in-out infinite alternate;
+  }
+  body::after {
+    animation: ambient-drift-b 61s ease-in-out infinite alternate;
+  }
+}
+@keyframes ambient-drift-a {
+  from {
+    transform: translate3d(-6%, -3.5%, 0) scale(1.18);
+  }
+  to {
+    transform: translate3d(6%, 4.5%, 0) scale(1.18);
+  }
+}
+@keyframes ambient-drift-b {
+  from {
+    transform: translate3d(5.5%, 6%, 0) scale(1.18);
+  }
+  to {
+    transform: translate3d(-5.5%, -5%, 0) scale(1.18);
+  }
 }
 
 ::selection {
@@ -297,8 +359,8 @@ body::before {
  * version of this layer was a significant scroll-jank source. The equivalent
  * softening is done in the shader, which is free.
  *
- * The no-JS / no-WebGL state is the `body::before` ambient glow, which sits
- * one level further back.
+ * The no-JS / no-WebGL state is the `body::before` / `body::after` ambient
+ * glow, which sits one level further back.
  * ------------------------------------------------------------------ */
 .site-wave {
   position: fixed;
