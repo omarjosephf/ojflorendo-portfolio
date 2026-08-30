@@ -58,6 +58,66 @@ test.describe("Homepage", () => {
     await expect(page.locator("canvas")).not.toHaveCount(0);
   });
 
+  test("the phone ambient background visibly moves (ADR-0003 follow-up)", async ({
+    page,
+  }) => {
+    // A version of this animation shipped that passed every gate and was
+    // invisible: the gradients were wider than the phone, so drifting them
+    // changed no pixel by more than 3/255. Cost was measured, effect was not.
+    // This asserts the effect, by diffing two frames half a cycle apart.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.waitForLoadState("load");
+
+    // Freeze everything, then seek only the ambient layers, so the hero rings
+    // and scroll reveals cannot contribute to the difference.
+    const seek = (time: number) =>
+      page.evaluate((t) => {
+        for (const a of document.getAnimations()) {
+          a.pause();
+          // `animationName` lives on CSSAnimation, not the Animation base type.
+          const name = a instanceof CSSAnimation ? a.animationName : "";
+          if (name.startsWith("ambient-drift")) a.currentTime = t;
+        }
+      }, time);
+
+    await seek(0);
+    const first = (await page.screenshot()).toString("base64");
+    await seek(22000); // half of the 44s cycle: maximum displacement
+    const second = (await page.screenshot()).toString("base64");
+
+    const maxChange = await page.evaluate(async ([a, b]) => {
+      const load = (data: string) =>
+        new Promise<HTMLImageElement>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = `data:image/png;base64,${data}`;
+        });
+      const pixels = (img: HTMLImageElement) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        return ctx.getImageData(0, 0, canvas.width, canvas.height);
+      };
+      const [ia, ib] = await Promise.all([load(a), load(b)]);
+      const [pa, pb] = [pixels(ia), pixels(ib)];
+      let max = 0;
+      for (let i = 0; i < pa.data.length; i += 4) {
+        for (let k = 0; k < 3; k++) {
+          const d = Math.abs(pa.data[i + k] - pb.data[i + k]);
+          if (d > max) max = d;
+        }
+      }
+      return max;
+    }, [first, second]);
+
+    // Measured at 8-9 levels; the invisible version measured 3-4. Five is the
+    // midpoint, far enough from both to be a real signal rather than noise.
+    expect(maxChange).toBeGreaterThanOrEqual(5);
+  });
+
   test("the decorative background never intercepts pointer input", async ({
     page,
   }) => {

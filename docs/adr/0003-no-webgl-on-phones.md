@@ -179,6 +179,54 @@ close to invisible, which would have satisfied every gate while failing the
 request that prompted the change. Amplitude was raised to travel roughly 47 px
 on a 390 px viewport; the performance evidence above is from the raised values.
 
+### Follow-up — 30 August 2026: the first version was invisible
+
+The amendment above shipped and the owner could not see any change on his phone.
+He was right, and the gates were wrong: every check passed while the feature did
+not work.
+
+The cause was a measurement that answered the wrong question. `Paint=0` proves
+the animation is cheap; it says nothing about whether a human can see it. The
+desktop gradients are 42rem wide — 672px against a 390px phone, 1.7x the screen.
+Translating something that much larger than the viewport changes almost no
+pixel. Measured against rendered frames, a half cycle moved the worst-affected
+pixel by **3 levels out of 255** and shifted 1.9% of the screen by 3 or more.
+Below the threshold of perception, at any travel distance the overscan allows.
+
+Travel distance was never the governing variable, so the earlier "amplitude
+raised from 19px to 47px" adjustment could not have fixed it. Blob size relative
+to the viewport is the variable, together with how steeply the gradient falls
+off and how far down the page it reaches.
+
+Phones now get their own gradient geometry — smaller radii (26rem/22rem), a
+steeper stop (50% rather than 70%) and lower centres so the glow extends down
+the page instead of hugging the top — with travel widened to 14% and overscan
+raised to `scale(1.34)` to match. The values were chosen by measuring ten
+candidates against rendered frames, not by arithmetic.
+
+| Rendered-frame change, 390x844, half cycle | Before | After |
+| --- | --- | --- |
+| Largest change to any pixel | 3-4 / 255 | **8-9 / 255** |
+| Screen area changing by >= 3 levels | 1.9% | **32%** |
+| Screen area changing by >= 6 levels | 1.5% | **12.7%** |
+
+Peak alpha is unchanged at 12%/10%: the glow is no brighter than it has ever
+been, there is simply less of it moving further over a shorter ramp. Raising
+contrast was considered and rejected against the owner's astigmatism constraint.
+
+Performance is unaffected. The trace still records **Paint=0, Layout=0** in
+steady state, and mobile best-of-5 is **93, 93, 94, 93, 93**. Two runs during
+this work scored 64 and 67; their `scriptEvaluation` was 1436 ms against 321 ms
+on a good run, a 4.5x inflation of JavaScript this change does not touch, with
+every other category inflated in proportion. That is host CPU contention, not a
+regression — a CSS cost would raise `styleLayout` and `paintCompositeRender`
+while leaving script evaluation flat. Recorded rather than discarded.
+
+**Process lesson, worth more than the fix.** A feature can pass a full
+verification gate and still not work, when every gate measures cost and none
+measures effect. The visibility harness that produced the table above now exists
+because arithmetic and a paint trace both said "fine" about something invisible.
+
 ### Rollback
 
 Delete the `@media (max-width: 767px)` animation block in `src/app/globals.css`.
