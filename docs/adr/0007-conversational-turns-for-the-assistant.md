@@ -1,6 +1,8 @@
 # ADR-0007: Conversational turns for the portfolio assistant
 
-- **Status:** Proposed — awaiting owner acceptance
+- **Status:** **Accepted** — owner-approved 30 August 2026 and released to
+  production the same day. E5 and E9 were approved as separate decisions
+  before release, as this record required.
 - **Date:** 2026-08-30
 - **Owner:** OJ Florendo
 - **Risk class:** R2 (implementation), with the extraction consequence in E5
