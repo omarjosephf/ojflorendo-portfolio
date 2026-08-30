@@ -1,5 +1,9 @@
 import { resolveCorpusSource } from "@/data/assistant-corpus";
-import type { AssistantCitation, AssistantResult } from "./types";
+import type {
+  AssistantCitation,
+  AssistantHistoryTurn,
+  AssistantResult,
+} from "./types";
 
 /**
  * The server-to-server call to the assistant service.
@@ -159,6 +163,7 @@ function mapCitations(
 export async function askAssistantService(
   question: string,
   config: AssistantServiceConfig,
+  history: readonly AssistantHistoryTurn[] = [],
 ): Promise<AssistantResult> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -172,7 +177,17 @@ export async function askAssistantService(
         // instance's budget, and it never reaches the browser.
         "X-Assistant-Secret": config.secret,
       },
-      body: JSON.stringify({ question }),
+      // Rebuilt field by field rather than forwarded. Whatever shape the caller
+      // held, what leaves this process is a question, a list of questions and a
+      // list of labels — so a field the browser invented cannot ride along to
+      // the service on the strength of having passed a type check.
+      body: JSON.stringify({
+        question,
+        history: history.map((turn) => ({
+          question: turn.question,
+          sources: [...turn.sources],
+        })),
+      }),
       signal: controller.signal,
       cache: "no-store",
     });

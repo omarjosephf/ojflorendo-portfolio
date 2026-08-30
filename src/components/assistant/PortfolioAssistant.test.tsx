@@ -42,10 +42,18 @@ async function openAssistant() {
 }
 
 async function askSomething(text = "What projects has OJ built?") {
-  fireEvent.change(screen.getByLabelText(/ask about oj's public portfolio/i), {
-    target: { value: text },
-  });
+  // The label changes once a conversation has started — "Ask a follow-up"
+  // rather than the opening prompt — so this matches either.
+  fireEvent.change(
+    screen.getByLabelText(/ask about oj's public portfolio|ask a follow-up/i),
+    { target: { value: text } },
+  );
   fireEvent.click(screen.getByRole("button", { name: /ask oj assistant/i }));
+}
+
+/** The parsed body of the nth request the panel made. */
+function sentBody(call = 0) {
+  return JSON.parse(fetchMock.mock.calls[call]![1].body);
 }
 
 const GROUNDED: AssistantResult = {
@@ -273,7 +281,7 @@ describe("PortfolioAssistant — honesty of the interface", () => {
     expect(document.body.textContent).not.toMatch(/\bpreview\b/i);
   });
 
-  it("keeps no history: a new question replaces the previous result", async () => {
+  it("keeps the conversation on screen instead of replacing it", async () => {
     respondWith(GROUNDED);
     render(<PortfolioAssistant />);
     await openAssistant();
@@ -288,8 +296,90 @@ describe("PortfolioAssistant — honesty of the interface", () => {
     });
     await askSomething("What skills does OJ have?");
 
-    expect(await screen.findByText("A different answer entirely.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("A different answer entirely."),
+    ).toBeInTheDocument();
+    // ADR-0007: the earlier exchange stays. This assertion is the inverse of
+    // the one it replaced, which asserted D7's single-result behaviour.
+    expect(screen.getByText(GROUNDED.answer)).toBeInTheDocument();
+    expect(screen.getByText("What projects has OJ built?")).toBeInTheDocument();
+  });
+
+  it("sends earlier turns with a follow-up, and none with the first question", async () => {
+    respondWith(GROUNDED);
+    render(<PortfolioAssistant />);
+    await openAssistant();
+
+    await askSomething();
+    await screen.findByText(GROUNDED.answer);
+
+    respondWith({ state: "answered", answer: "Second.", citations: [] });
+    await askSomething("How long did that take?");
+    await screen.findByText("Second.");
+
+    expect(sentBody(0).history).toEqual([]);
+    expect(sentBody(1).history).toEqual([
+      { question: "What projects has OJ built?", sources: ["About OJ"] },
+    ]);
+  });
+
+  it("never sends a previous answer back to the service", async () => {
+    respondWith(GROUNDED);
+    render(<PortfolioAssistant />);
+    await openAssistant();
+
+    await askSomething();
+    await screen.findByText(GROUNDED.answer);
+
+    respondWith({ state: "answered", answer: "Second.", citations: [] });
+    await askSomething("How long did that take?");
+    await screen.findByText("Second.");
+
+    // ADR-0007 E2. Source labels travel; generated prose does not, because
+    // replaying it would push corpus passages back across the boundary on
+    // every turn.
+    const follow = JSON.stringify(sentBody(1));
+    expect(follow).not.toContain(GROUNDED.answer);
+    expect(follow).not.toContain(GROUNDED.citations[0]!.quote);
+    expect(follow).toContain("About OJ");
+  });
+
+  it("starting a new conversation drops the transcript and the context", async () => {
+    respondWith(GROUNDED);
+    render(<PortfolioAssistant />);
+    await openAssistant();
+
+    await askSomething();
+    await screen.findByText(GROUNDED.answer);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /start a new conversation/i }),
+    );
+
     expect(screen.queryByText(GROUNDED.answer)).not.toBeInTheDocument();
+
+    respondWith({ state: "answered", answer: "Fresh.", citations: [] });
+    await askSomething("A brand new question?");
+    await screen.findByText("Fresh.");
+
+    expect(sentBody(1).history).toEqual([]);
+  });
+
+  it("does not carry an unavailable turn as context", async () => {
+    respondWith({ state: "unavailable" });
+    render(<PortfolioAssistant />);
+    await openAssistant();
+
+    await askSomething();
+    await screen.findByText(/can't answer right now/i);
+
+    respondWith({ state: "answered", answer: "Second.", citations: [] });
+    await askSomething("How long did that take?");
+    await screen.findByText("Second.");
+
+    // A failed turn says nothing about what the visitor is asking about, so it
+    // is not worth the context it would cost.
+    expect(sentBody(1).history).toEqual([]);
   });
 
   it("writes nothing to browser storage on any path", async () => {

@@ -211,10 +211,28 @@ against the real answers and the real corpus that motivated it.
 The assistant has no access to, and cannot be made to use:
 
 - tools, function calling, code execution, browsing, email, forms, calendars or payments;
-- conversation memory, sessions, cookies, local storage, or a database;
+- sessions, cookies, local storage, or a database;
+- conversation memory **that outlives the tab it happened in** — see the
+  correction below;
 - user accounts or any authenticated context;
 - environment variables, secrets, server files, repository APIs, private documents, private CVs, chats, or unpublished work;
 - any corpus other than the one whose checksum it was started with.
+
+### Correction — conversation, added 30 August 2026 (ADR-0007)
+
+This list previously read "conversation memory, sessions, cookies, local
+storage, or a database". The first item is no longer accurate and is corrected
+rather than quietly left standing.
+
+The assistant now supports follow-up questions. What that does and does not mean:
+
+| | |
+| --- | --- |
+| **Where the conversation lives** | React state in the visitor's tab. Closing the panel, reloading, or pressing *Start a new conversation* destroys it |
+| **What is stored** | Nothing. No session, no cookie, no `localStorage`, no database, no server-side state. The privacy notice is unchanged because nothing about retention changed |
+| **What travels with a follow-up** | Up to four earlier **questions** and the **source labels** that answered them |
+| **What never travels** | The earlier **answer text**. The request type has no field for it, in the browser, at the route, and in the service — three places, so it is a contract rather than a convention |
+| **Who enforces the cap** | The route and the service independently. The browser is not a trust boundary |
 
 ## Residual risks — accepted, with reasons
 
@@ -233,8 +251,21 @@ The assistant has no access to, and cannot be made to use:
    appear. The provider cap is the ceiling.
 6. **The route throttle is per-instance and best-effort.** Correct at current
    scale; it is not an edge or distributed limiter and is not described as one.
-7. **Cold start adds first-request latency.** Accepted under D9; must be
-   measured before public launch.
+7. **Cold start adds first-request latency.** ~~Accepted under D9; must be
+   measured before public launch.~~ **Measured 30 August 2026 and found worse
+   than "latency":** a stopped machine took 154 seconds to answer `/health`,
+   against a 20-second route timeout, so the first visitor after idle received
+   `unavailable` rather than a slow answer. One machine now stays warm
+   (ADR-0007 E6). The underlying cause — a neural embedding model loaded at
+   boot to search 64 chunks — is unfixed and tracked post-launch.
+8. **Conversation makes cumulative extraction easier to conduct.** The
+   anti-extraction guard counts reproduced passages **per request**, and that
+   bound is unchanged. What changes is that a sequence of requests is now one
+   continuous act rather than several unrelated ones. Bounded by the four-turn
+   cap, by the unchanged per-request cap, and by prior answer text never being
+   replayed. Accepted on the same grounds as risk 2 in ADR-0006: the corpus is
+   public material that exists to be read. **Requires explicit owner approval
+   before release** (ADR-0007 E5).
 
 Residual risk is accepted for an optional, tool-free, stateless assistant that
 answers only from reviewed public content, shows its sources, refuses what it

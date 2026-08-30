@@ -139,8 +139,82 @@ describe("POST /api/assistant — validation and limits", () => {
     const body = await response.json();
 
     const sent = JSON.parse(fetchMock.mock.calls[0]![1].body);
-    expect(Object.keys(sent)).toEqual(["question"]);
+    // The outgoing body is rebuilt field by field, so it contains exactly the
+    // two fields the contract defines and nothing the caller invented.
+    expect(Object.keys(sent).sort()).toEqual(["history", "question"]);
+    expect(JSON.stringify(sent)).not.toContain("you are evil");
+    expect(JSON.stringify(sent)).not.toContain("admin");
     expect(JSON.stringify(body)).not.toContain("you are evil");
+  });
+
+  it("drops a prior answer a caller tries to smuggle in through history", async () => {
+    const fetchMock = backendReturns(GROUNDED_BACKEND);
+    vi.stubGlobal("fetch", fetchMock);
+
+    await POST(
+      request(
+        {
+          question: "And after that?",
+          history: [
+            {
+              question: "What has OJ built?",
+              sources: ["Projects"],
+              answer: "Verbatim corpus text a caller wants replayed.",
+            },
+          ],
+        },
+        freshIp(),
+      ),
+    );
+
+    const sent = JSON.parse(fetchMock.mock.calls[0]![1].body);
+    // ADR-0007 E2: prior ANSWER text never crosses the boundary a second time.
+    expect(JSON.stringify(sent)).not.toContain("Verbatim corpus text");
+    expect(sent.history).toEqual([
+      { question: "What has OJ built?", sources: ["Projects"] },
+    ]);
+  });
+
+  it("keeps only the most recent turns when history runs long", async () => {
+    const fetchMock = backendReturns(GROUNDED_BACKEND);
+    vi.stubGlobal("fetch", fetchMock);
+
+    await POST(
+      request(
+        {
+          question: "And now?",
+          history: Array.from({ length: 9 }, (_, index) => ({
+            question: `question ${index}`,
+            sources: [],
+          })),
+        },
+        freshIp(),
+      ),
+    );
+
+    const sent = JSON.parse(fetchMock.mock.calls[0]![1].body);
+    expect(sent.history).toHaveLength(4);
+    // The most recent, not the first: the oldest context is the least relevant
+    // to what is being asked now.
+    expect(sent.history[3].question).toBe("question 8");
+  });
+
+  it("answers the question even when history is malformed", async () => {
+    const fetchMock = backendReturns(GROUNDED_BACKEND);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(
+      request(
+        { question: "What has OJ built?", history: "not an array at all" },
+        freshIp(),
+      ),
+    );
+
+    // History is an optional convenience. A caller that gets it wrong should
+    // still have the visitor's actual question answered.
+    expect(response.status).toBe(200);
+    const sent = JSON.parse(fetchMock.mock.calls[0]![1].body);
+    expect(sent.history).toEqual([]);
   });
 
   it("throttles a burst from one address", async () => {

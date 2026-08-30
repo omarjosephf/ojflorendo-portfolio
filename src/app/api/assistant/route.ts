@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { askAssistantService, readServiceConfig } from "@/lib/assistant/service";
-import { ASSISTANT_INPUT_LIMIT } from "@/lib/assistant/types";
+import {
+  ASSISTANT_HISTORY_LIMIT,
+  ASSISTANT_INPUT_LIMIT,
+  type AssistantHistoryTurn,
+} from "@/lib/assistant/types";
 import { createRateLimiter } from "@/lib/rate-limit";
 
 /**
@@ -36,10 +40,65 @@ const limiter = createRateLimiter({ limit: 8, windowMs: 60_000 });
 
 /**
  * Conservative cap on the raw body. The largest valid request is a 280-character
- * question plus JSON overhead — well under 2 KiB — so 8 KiB is ample headroom
- * and still refuses anything designed to be expensive to parse.
+ * question plus up to four earlier turns, each a 280-character question and a
+ * few short source labels — roughly 3 KiB with JSON overhead — so 8 KiB is still
+ * ample headroom and still refuses anything designed to be expensive to parse.
  */
 const MAX_BODY_BYTES = 8 * 1024;
+
+/**
+ * Longest source label accepted from the caller.
+ *
+ * Labels originate here — they were sent to the browser by this route — but they
+ * come back through the visitor's machine, so they return as untrusted input
+ * like anything else. Bounded so a label cannot be rewritten into a payload.
+ */
+const MAX_SOURCE_LABEL_CHARS = 80;
+
+/** Source labels kept per earlier turn. Matches the service's own cap. */
+const MAX_SOURCE_LABELS = 8;
+
+/**
+ * Read the conversation history from an untrusted body.
+ *
+ * Malformed turns are **dropped rather than rejected**. History is an optional
+ * convenience: a caller that gets it wrong should still have the visitor's
+ * actual question answered, and the worst case of dropping it is a follow-up
+ * answered as though it were a first question — which is exactly how the
+ * assistant behaved before this feature existed.
+ *
+ * The caps here are duplicated in the service on purpose. The browser is not a
+ * trust boundary, and neither is this route to the service behind it.
+ */
+function readHistory(value: unknown): AssistantHistoryTurn[] {
+  if (!Array.isArray(value)) return [];
+
+  const turns: AssistantHistoryTurn[] = [];
+  // The most recent turns, not the first: an over-long history means the oldest
+  // context is the least relevant to the question being asked now.
+  for (const entry of value.slice(-ASSISTANT_HISTORY_LIMIT)) {
+    if (typeof entry !== "object" || entry === null) continue;
+    const turn = entry as Record<string, unknown>;
+
+    if (typeof turn.question !== "string") continue;
+    const question = turn.question.trim().slice(0, ASSISTANT_INPUT_LIMIT);
+    if (!question) continue;
+
+    // Anything that is not a string label is discarded rather than coerced.
+    const sources = Array.isArray(turn.sources)
+      ? turn.sources
+          .filter((source): source is string => typeof source === "string")
+          .map((source) => source.trim().slice(0, MAX_SOURCE_LABEL_CHARS))
+          .filter(Boolean)
+          .slice(0, MAX_SOURCE_LABELS)
+      : [];
+
+    turns.push({ question, sources });
+  }
+
+  return turns;
+}
+
 
 function clientIp(req: NextRequest): string {
   const forwarded = req.headers.get("x-forwarded-for");
@@ -131,7 +190,9 @@ export async function POST(req: NextRequest) {
     return json({ state: "unavailable" }, 422);
   }
 
-  const result = await askAssistantService(trimmed, config);
+  const history = readHistory((body as Record<string, unknown>)?.history);
+
+  const result = await askAssistantService(trimmed, config, history);
 
   // Privacy-safe observability only: outcome, status category, latency. The
   // question itself is never logged, here or in the backend — a log is a place
