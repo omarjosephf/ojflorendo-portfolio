@@ -78,9 +78,9 @@ function paint(
  * 90+. That decision is unchanged. This draws a much smaller field of the same
  * water in plain Canvas 2D instead, at a measured budget (see `wave-field.ts`).
  *
- * Device pixel ratio is pinned to 1: this is a soft, out-of-focus background
- * where the extra fidelity of a 3x buffer costs nine times the fill for no
- * visible gain.
+ * The backing store is capped at 2x rather than the 3x most phones report:
+ * enough that the soft sprites are not visibly upscaled, at a quarter of the
+ * fill a full 3x buffer would cost.
  */
 export function MobileWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -101,8 +101,14 @@ export function MobileWave() {
 
     const width = window.innerWidth;
     const height = Math.round(window.innerHeight * MOBILE_WAVE.bandHeight);
-    canvas.width = width;
-    canvas.height = height;
+
+    // Draw in CSS pixels but back the canvas at up to 2x, so the field stays
+    // legible on the 3x screens most phones now have. Everything below this
+    // line works in CSS pixels and is unaware of the scale.
+    const dpr = Math.min(window.devicePixelRatio || 1, MOBILE_WAVE.maxDpr);
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.scale(dpr, dpr);
 
     const points = buildField(width, height);
     const sprites = buildSprites(MOBILE_WAVE.spriteSize);

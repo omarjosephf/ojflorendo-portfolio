@@ -29,12 +29,22 @@ import { BAND_HIGH, BAND_LOW } from "@/components/three/wave-geometry";
  * The WebGL wave uses 5712 points; this cannot, and does not try to.
  */
 export const MOBILE_WAVE = {
-  points: 600,
+  points: 800,
   fps: 20,
   /** Fraction of viewport height the canvas occupies, measured from the bottom. */
   bandHeight: BAND_HIGH,
-  spriteSize: 12,
+  spriteSize: 20,
   alphaBuckets: 4,
+  /**
+   * Cap on the backing-store scale.
+   *
+   * The first release pinned this to 1 to save fill, which was a mistake worth
+   * recording: a phone at `devicePixelRatio: 3` then upscaled every sprite
+   * threefold, blurring already-soft 0.27-alpha dots into near-nothing. All the
+   * verification screenshots were taken at DPR 1 and so never showed it. 2 keeps
+   * the field legible at a quarter of the fill cost of a full 3x buffer.
+   */
+  maxDpr: 2,
 } as const;
 
 export type WavePoint = {
@@ -110,7 +120,7 @@ export function buildField(
         x,
         y,
         amplitude: perspective * 30,
-        size: 2.5 + perspective * 7,
+        size: 3.5 + perspective * 10,
         sprite: spriteIndexFor(gx, t, alpha),
         gx: gx * 6,
         gz: t * 8,

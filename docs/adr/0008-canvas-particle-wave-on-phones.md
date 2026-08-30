@@ -117,6 +117,41 @@ was initially wide enough that most near-row points fell off the canvas, leaving
 the near field sparse. Both were found by looking at a screenshot, not by
 reasoning, and both now fail the suite if reintroduced.
 
+## Amendment — 30 August 2026: legible on a real phone
+
+The version above shipped and the owner reported faint scattered dots rather
+than a wave. Emulation confirmed it: the field rendered, animated and sat in the
+right place, but was too thin and too soft to read as water on a phone.
+
+Two causes, both mine:
+
+- **The backing store was pinned to `devicePixelRatio: 1`** to save fill. Phones
+  report 3, so every sprite was upscaled threefold, blurring 0.27-alpha dots
+  into nothing. Every verification screenshot had been taken at DPR 1, so none
+  of them showed this.
+- **600 points is too sparse at phone size.** The desktop field reads as a
+  surface because 5712 points merge; 600 read as scattered specks.
+
+Now 800 points, sprites enlarged (`3.5 + perspective * 10`, drawn from a 20px
+texture), and the backing store capped at 2x — legible without the fourfold fill
+of a full 3x buffer. Peak alpha is unchanged at 0.27: brightness was not the
+problem and the astigmatism constraint still holds.
+
+Measured after the change, mobile best-of-5: **93, 93, 93, 92, 93**, unchanged.
+`scriptEvaluation` 617-703 ms and paint 171-180 ms, against 572-640 and 155-175
+before — a small rise for four times the fill, because the added cost is GPU
+compositing rather than main-thread work. Frame cadence under CPU throttling
+held a median 16.5 ms gap at 4x and 16.9 ms at 6x, with 0-1 long tasks.
+
+### Testing note: WebKit and localhost
+
+WebKit honours `Strict-Transport-Security` on localhost and upgrades
+`http://localhost` to HTTPS, which fails. Chromium exempts localhost. A WebKit
+run against a local production build therefore loads no JavaScript and finds no
+canvas — an artifact of the test setup, not a defect. Verify WebKit against a
+deployed HTTPS preview instead. This is a further argument for the mobile
+WebKit e2e project already on the backlog.
+
 ## Alternatives considered
 
 - **Tap-to-load the real WebGL wave.** Full fidelity and no Lighthouse impact,
