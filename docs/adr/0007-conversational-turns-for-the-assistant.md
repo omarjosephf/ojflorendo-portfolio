@@ -190,6 +190,62 @@ requires its own evaluation evidence, and because the owner declined to trim
 memory further on the evidence available — correctly, given the two production
 OOMs.
 
+### E8 — One whole passage is extraction when the passage is substantial
+
+**Owner decision, 30 August 2026.** The depth rule counted passages only, so
+reproducing one passage in full was always permitted — including the longest in
+the corpus, where "the whole passage" is a meaningful share of a document rather
+than the length of a good answer.
+
+The rule that preceded it was retired for rejecting correct answers, notably the
+critical question *"Tell me about Cited."* The cause was length, not principle:
+a short section largely **is** the answer to a question about it.
+
+So the rule is now length-aware rather than count-only. Reproducing one passage
+near-completely is extraction when that passage reaches
+`SUBSTANTIAL_PASSAGE_WORDS`; below it, the count rule applies as before.
+
+Measured against this corpus rather than chosen:
+
+| | |
+| --- | --- |
+| Chunk lengths | median 94 words, p75 128, p90 163, longest 183 |
+| Passages behind the rejected answers | **42, 52 and 83 words** |
+| Threshold adopted | **140 words** |
+
+Both cases therefore sit clear of the boundary: every answer that forced the
+retirement stays permitted, and reproducing one of the longest passages whole no
+longer does. Re-measure when the corpus changes shape — a number derived from a
+distribution stops being right when the distribution moves.
+
+### E9 — A conversation-level breadth bound, computed from the request
+
+**Owner decision, 30 August 2026**, and the control that answers E5 rather than
+merely accepting it.
+
+The per-request rules bound one request. This bounds the sequence, using only
+what the request already carries: the follow-up reports the source labels of
+earlier turns, so the union of documents touched so far is computable without
+the service remembering anything. ADR-0007 E1 is untouched — no session, no
+storage, nothing retained after the response is written.
+
+It fires only when **both** hold:
+
+* the conversation has touched more than `CONVERSATION_SOURCE_BREADTH_MAX`
+  distinct documents; **and**
+* this answer reproduces at least one passage near-completely.
+
+Requiring both is what keeps an ordinary visitor out of it. Asking about six
+parts of someone's portfolio is the feature working; asking about six parts and
+receiving each one verbatim is not. Breadth alone never triggers it.
+
+**Honest limitation, asserted in a test rather than described in prose:** the
+caller supplies the history, so an extractor can omit it and start fresh. Doing
+so returns them to the per-request bound they already faced. The control
+therefore raises the cost of extraction and weakens nothing — best-effort
+against a determined attacker, real against an ordinary one, which is the same
+framing the route-level rate limiter already uses.
+
 ## Alternatives considered
 
 **Server-side sessions (rejected).** The conventional design. It would require

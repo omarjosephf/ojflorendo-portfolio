@@ -264,8 +264,12 @@ The assistant now supports follow-up questions. What that does and does not mean
    continuous act rather than several unrelated ones. Bounded by the four-turn
    cap, by the unchanged per-request cap, and by prior answer text never being
    replayed. Accepted on the same grounds as risk 2 in ADR-0006: the corpus is
-   public material that exists to be read. **Requires explicit owner approval
-   before release** (ADR-0007 E5).
+   public material that exists to be read. **Owner approved 30 August 2026**,
+   together with a control rather than acceptance alone: a conversation-level
+   breadth bound (ADR-0007 E9) refuses to keep reproducing passages once a
+   conversation has touched more than five distinct documents, computed from
+   the request so the service still stores nothing. Evadable by omitting the
+   history, which returns the caller to the per-request bound.
 
 Residual risk is accepted for an optional, tool-free, stateless assistant that
 answers only from reviewed public content, shows its sources, refuses what it

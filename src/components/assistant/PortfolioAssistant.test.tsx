@@ -273,12 +273,35 @@ describe("PortfolioAssistant — honesty of the interface", () => {
     ).toBeInTheDocument();
   });
 
-  it("carries no maturity badge", async () => {
+  it("carries an honest maturity label", async () => {
     render(<PortfolioAssistant />);
     await openAssistant();
 
-    expect(document.body.textContent).not.toMatch(/\bbeta\b/i);
-    expect(document.body.textContent).not.toMatch(/\bpreview\b/i);
+    // Inverted from "carries no maturity badge" (ADR-0006, release work).
+    // §49.6 requires a label while the feature is genuinely experimental, and
+    // ADR-0006's graduation criteria include a production soak — which cannot
+    // happen before production. Shipping unlabelled would claim a maturity the
+    // evidence does not support.
+    //
+    // This test is expected to be inverted AGAIN at graduation. That is the
+    // point: the label is a stage, and understating maturity is not the safe
+    // error it looks like — it teaches visitors the label carries no
+    // information.
+    expect(screen.getByText(/^beta$/i)).toBeInTheDocument();
+  });
+
+  it("keeps the maturity label distinct from the capability disclosure", async () => {
+    render(<PortfolioAssistant />);
+    await openAssistant();
+
+    // Two different obligations that look similar on screen. The disclosure
+    // survives graduation; the label does not. If they ever merge into one
+    // string, removing the label at graduation would silently remove the
+    // disclosure with it.
+    expect(
+      screen.getByText(/answers from oj's approved portfolio content/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/^beta$/i)).toBeInTheDocument();
   });
 
   it("keeps the conversation on screen instead of replacing it", async () => {

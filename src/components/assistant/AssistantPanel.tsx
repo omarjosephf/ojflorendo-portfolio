@@ -228,9 +228,27 @@ export function AssistantPanel({
             className="h-10 w-10 shrink-0 rounded-xl border border-accent/30 bg-accent/10 object-cover"
           />
           <div>
-            <h2 id={titleId} className="font-heading text-base font-semibold text-ink">
-              OJ Assistant
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2
+                id={titleId}
+                className="font-heading text-base font-semibold text-ink"
+              >
+                OJ Assistant
+              </h2>
+              {/* The maturity label required by §49.6 while the feature is
+                  genuinely experimental. Distinct from the capability
+                  disclosure below it: this one describes how finished the
+                  feature is and is REMOVED at graduation, while the disclosure
+                  describes what the feature is and never is.
+
+                  It ships labelled because ADR-0006's graduation criteria
+                  include a production soak, which cannot happen before
+                  production. Publishing unlabelled on day one would be claiming
+                  a maturity the evidence does not yet support. */}
+              <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-accent">
+                Beta
+              </span>
+            </div>
             {/* The permanent capability disclosure. Not a maturity label: it
                 states what the assistant does, what bounds it, and that it is
                 not OJ — obligations that hold for as long as the feature
