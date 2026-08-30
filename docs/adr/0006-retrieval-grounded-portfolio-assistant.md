@@ -398,11 +398,29 @@ graduated product and premature for this one. Adding a label, and inverting that
 test, is required before production publication and is tracked as release work
 rather than as a defect in this decision.
 
-**Graduation status, 29 August 2026:** §49.1 amended and ratified — **met**;
-`npm run test:ci` green on the candidate — **met**; evaluation thresholds across
-three consecutive runs — **1 of 3**, with zero unverifiable citations so far.
-The remainder are manual QA, citation-to-URL mapping, accessibility, cold-start
-latency, the verified spend cap and the production soak.
+**Graduation status, 30 August 2026 — published, still labelled Beta.**
+
+| Criterion | State |
+| --- | --- |
+| §49.1 amended and ratified | met |
+| `npm run test:ci` green on the candidate | met |
+| Evaluation thresholds across three consecutive runs | **2 of 3** — both runs on `b8a478c` passed all nine, zero unverifiable citations across 227 accepted |
+| Cold-start latency measured | met — and it failed, which is why ADR-0007 E6 exists |
+| Verified spend cap | met |
+| Accessibility | met — Lighthouse 100 on five consecutive mobile runs |
+| Manual QA | met — owner reviewed the preview, 30 August |
+| Citation-to-URL mapping | met — 11/11 live release checks |
+| **Production soak** | **in progress from 30 August 2026** |
+
+Two criteria remain: a third consecutive passing evaluation, and the soak. The
+third run is deliberately NOT being taken today. Three runs against one commit
+in one afternoon measures the same thing three times; the criterion is there to
+show stability across changes, and taking it now would satisfy the wording while
+defeating the purpose.
+
+**Until both are met the maturity label stays.** Removing it earlier would be
+claiming a maturity the evidence does not support, which §49.6 treats as exactly
+as untruthful as the opposite error.
 
 ---
 
