@@ -10,8 +10,10 @@ export const COMPACT_QUERY = "(max-width: 767px)";
  * Whether a decorative WebGL scene should mount at all.
  *
  * Phone-sized viewports skip WebGL entirely and keep the CSS presentations that
- * already exist as the documented no-WebGL state: the `body::before` glow behind
- * the wave, and `DigitalCoreFallback` behind the hero core. Nothing else is lost.
+ * already exist as the documented no-WebGL state: the ambient `body::before` /
+ * `body::after` glow behind the wave, and `DigitalCoreFallback` behind the hero
+ * core. Those layers drift on phones (ADR-0003 amendment), so the background is
+ * still in motion there; only the WebGL scenes are lost.
  *
  * Both scenes share one ~234 KiB three.js chunk that costs roughly 1.1s of script
  * evaluation on a throttled mobile CPU. That dominated Total Blocking Time and

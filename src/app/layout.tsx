@@ -88,7 +88,8 @@ export default async function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         {/* Decorative site-wide background, fixed behind all content. Loads
-            only where WebGL exists; otherwise the body::before glow stands in. */}
+            only where WebGL exists; otherwise the ambient body::before /
+            body::after glow layers stand in. */}
         <ParticleWaveLazy />
         <SkipLink />
         <Nav />

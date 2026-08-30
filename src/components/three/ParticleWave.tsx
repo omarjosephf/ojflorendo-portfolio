@@ -366,8 +366,8 @@ const CANVAS_STYLE = { pointerEvents: "none" } as const;
 
 /**
  * Ambient "particle wave" behind the whole site. Decorative only: `aria-hidden`,
- * never interactive, and every page reads identically without it (the static
- * `body::before` glow is the no-JS / no-WebGL state).
+ * never interactive, and every page reads identically without it (the ambient
+ * `body::before` / `body::after` glow is the no-JS / no-WebGL state).
  *
  * This is a *fixed* viewport layer, not a scrolling one, and that is a
  * performance decision as much as a visual one: a fixed canvas does not move

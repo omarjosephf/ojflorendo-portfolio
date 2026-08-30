@@ -13,8 +13,9 @@ const ParticleWave = dynamic(
  * Mounts the site-wide particle wave only where WebGL is actually available.
  *
  * There is no JS-rendered fallback on purpose: the wave is a decorative
- * enhancement over the static `body::before` glow, so with no JS, no WebGL, or
- * on a phone, every page keeps that background and loses nothing else.
+ * enhancement over the ambient `body::before` / `body::after` glow, so with no
+ * JS, no WebGL, or on a phone, every page keeps that background and loses
+ * nothing else. On phones those layers drift (ADR-0003 amendment).
  */
 export function ParticleWaveLazy() {
   const enabled = useSceneEnabled();

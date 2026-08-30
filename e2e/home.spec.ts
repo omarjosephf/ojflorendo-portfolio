@@ -42,6 +42,22 @@ test.describe("Homepage", () => {
     expect(await hasNoHorizontalOverflow(page)).toBe(true);
   });
 
+  test("phone-sized viewports mount no WebGL canvas (ADR-0003)", async ({
+    page,
+  }) => {
+    // The whole mobile Lighthouse budget rests on `useSceneEnabled()` refusing
+    // to mount either scene below 768px, and nothing else asserts it. The
+    // desktop half is not decoration: without it a broken gate that mounted
+    // nothing anywhere would still pass.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await expect(page.locator("canvas")).toHaveCount(0);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+    await expect(page.locator("canvas")).not.toHaveCount(0);
+  });
+
   test("the decorative background never intercepts pointer input", async ({
     page,
   }) => {
