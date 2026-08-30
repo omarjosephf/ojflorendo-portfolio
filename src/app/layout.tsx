@@ -11,6 +11,7 @@ import { Footer } from "@/components/layout/Footer";
 import { PortfolioAssistant } from "@/components/assistant/PortfolioAssistant";
 import { StructuredData } from "@/components/ui/StructuredData";
 import { ParticleWaveLazy } from "@/components/three/ParticleWaveLazy";
+import { MobileWaveLazy } from "@/components/canvas/MobileWaveLazy";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -91,6 +92,7 @@ export default async function RootLayout({
             only where WebGL exists; otherwise the ambient body::before /
             body::after glow layers stand in. */}
         <ParticleWaveLazy />
+        <MobileWaveLazy />
         <SkipLink />
         <Nav />
         <main id="main" className="flex-1">
