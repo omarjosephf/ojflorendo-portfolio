@@ -1,0 +1,259 @@
+--- docs/ENGINEERING_HANDBOOK.md	2026-08-01 02:01:26.629356900 +0100
++++ docs/proposals/ENGINEERING_HANDBOOK-v1.2.0-DRAFT.md	2026-08-28 13:37:07.707893800 +0100
+@@ -1,11 +1,11 @@
+ # Project Zero Engineering Handbook
+ 
+-**Version:** 1.1.0  
+-**Status:** Ratified and governing — the single authoritative version  
++**Version:** 1.2.0  
++**Status:** DRAFT amendment — proposed, NOT ratified, NOT governing  
+ **Owner:** OJ Florendo  
+ **Project:** OJ Florendo Rayatchi Portfolio & Platform  
+ **Canonical repository path:** `docs/ENGINEERING_HANDBOOK.md`  
+-**Prepared:** 28 July 2026  
++**Prepared:** 28 August 2026  
+ **Applies to:** the Project Zero codebase, infrastructure, documentation, releases, and all human or AI-assisted engineering work
+ 
+ ---
+@@ -14,9 +14,15 @@
+ 
+ This handbook defines how Project Zero is planned, designed, implemented, tested, secured, reviewed, released, operated, and evolved.
+ 
+-Version 1.0.0 was owner-ratified as the governing policy for Project Zero. This 1.1.0 release candidate preserves the same authority, risk, security, privacy, accessibility, testing, release, and production-control model while adding approved product-expansion, identity, AI-authorship, and proportional-delivery standards.
++Version 1.1.0 is the current owner-ratified governing policy for Project Zero. **This 1.2.0 document is a draft amendment. It is not ratified, it is not governing, and nothing in it authorises any action.** Until it is ratified, v1.1.0 governs in full.
+ 
+-This release candidate supersedes v1.0.0 only after:
++This amendment is deliberately narrow. It changes the **maturity and lifecycle policy for the portfolio AI assistant** and nothing else. It preserves without alteration the authority model, risk classification, security, privacy, accessibility, performance, cost-control, evaluation, testing, release, rollback, production-control, and truthful-representation requirements of v1.1.0.
++
++**What it changes, and why.** v1.1.0 §49.1 authorises the assistant *"only as a narrow, optional beta"*. Read strictly — and it must be read strictly, since §3 places a stated preference below the handbook — "beta" is a **condition of the authorisation**, not a UI string. That wording made a permanent status out of what should have been a stage, and §46 forecloses the obvious workaround by stating that exceptions must be narrow and time-limited and that *"permanent policy changes require a new handbook version."* This is that version.
++
++Track C was also written as **"Instructor-required AI assistant beta"**. That named a one-off external prompt as the product's permanent governance identity. The requirement was real and is discharged; the product outlived it, and the handbook should describe what the thing is rather than why it was first started.
++
++This draft supersedes v1.1.0 only after:
+ 
+ 1. OJ Florendo explicitly ratifies this exact version;
+ 2. it is committed at `docs/ENGINEERING_HANDBOOK.md`;
+@@ -24,7 +30,7 @@
+ 4. the ratification/adoption ADR records its effective date and checksum; and
+ 5. conflicting project documentation is reconciled.
+ 
+-Until those steps are complete, v1.0.0 remains governing and this document is authoritative only as the approved amendment candidate.
++Until every one of those steps is complete, **v1.1.0 remains governing**, the assistant may not be published without the maturity label v1.1.0 requires, and this document is authoritative only as a proposed amendment awaiting review.
+ 
+ ### Versioning
+ 
+@@ -349,7 +355,7 @@
+ 2. the contact form and email transport boundary;
+ 3. the Digital Core as progressive enhancement; and
+ 4. temporary dependency overrides, while any remain;
+-5. the portfolio AI assistant before public beta;
++5. the portfolio AI assistant, before its first public release and again before any change of maturity status;
+ 6. newsletter subscription and delivery before collecting subscribers; and
+ 7. authentication, CMS, or administrative access before any admin capability is implemented.
+ 
+@@ -1448,11 +1454,31 @@
+ - Add accurate credential categories and verification links.
+ - Keep the real profile photograph pending; use the approved 2D avatar only for the AI guide and selected brand assets.
+ 
+-### Track C — Instructor-required AI assistant beta
++### Track C — Portfolio AI assistant as a client-ready, reusable product
+ 
+-- Build a narrow portfolio assistant grounded only in approved content.
+-- Require an ADR, threat model, provider/cost decision, rate limits, prompt-injection controls, explicit beta label, honest limitations, fallback contact route, accessibility, performance review, and operational monitoring.
+-- The main website must remain useful when the assistant is unavailable.
++The assistant is a retrieval-grounded question-answering product over an
++owner-approved corpus. It began as coursework; it is governed here as a product,
++because that is what it became. The external requirement that prompted it is
++discharged and is deliberately not part of its permanent identity.
++
++- Build a narrow assistant grounded **only** in owner-approved content, which
++  answers from retrieved documents, shows the source behind every claim, and
++  refuses what its corpus does not support.
++- Require an ADR, a threat model, a provider and cost decision, rate and spend
++  limits, prompt-injection controls, honest limitations, a human fallback route,
++  accessibility verification, a performance review, and privacy-safe operational
++  monitoring. **None of these requirements is relaxed by this amendment.**
++- Require a committed evaluation set scoring answer quality, refusal behaviour,
++  and citation integrity, with thresholds agreed before the run and results
++  reported with their sample size. A quality claim that cannot be reproduced by
++  running one command is not a quality claim.
++- The main website must remain fully useful when the assistant is unavailable.
++- Treat the assistant as a **reusable product rather than a one-off**: corpus,
++  system prompt, and deployment target are per-deployment configuration, so a
++  second instance over different documents is a deployment rather than a fork.
++- Maturity labelling follows §49.6. The assistant may reach **stable public
++  release** once the graduation criteria recorded in its ADR are met and the
++  owner approves; it is not permanently confined to a beta stage.
+ 
+ ### Track D — Content and discoverability
+ 
+@@ -1493,7 +1519,9 @@
+ 
+ ### 49.1 Portfolio AI assistant
+ 
+-A public assistant is allowed only as a narrow, optional beta after R2 approval and an accepted ADR. It must:
++A public assistant is allowed as a **narrow, optional feature** after R2 approval and an accepted ADR. It may be released as a **stable public feature** — with no experimental maturity label — once the graduation criteria recorded in its ADR are met, the required gate is green, and the owner explicitly approves the release. Until those criteria are met it is experimental and must be labelled under §49.6.
++
++Removing the maturity label is a statement that the feature has stopped being experimental. It is **never** a statement that any requirement below has been relaxed, and it does not reduce what the assistant owes a visitor. Every obligation in this list applies for the whole life of the feature, at every maturity stage. It must:
+ 
+ - answer from owner-approved portfolio content;
+ - distinguish verified facts, limitations, and unknowns;
+@@ -1502,8 +1530,10 @@
+ - use rate and cost limits and have an explicit failure/fallback state;
+ - collect no personal data by default and retain no conversations without separate approval;
+ - remain accessible by keyboard and usable without animation;
+-- link visitors to relevant portfolio pages and direct serious enquiries to OJ; and
+-- never present itself as OJ or imply that every response was personally written by him.
++- link visitors to relevant portfolio pages and direct serious enquiries to OJ;
++- never present itself as OJ or imply that every response was personally written by him;
++- carry a **permanent, truthful capability disclosure** stating what it answers from, that its answers are sourced, and that it is not OJ. This disclosure is not a maturity label: it describes what the feature *is* rather than how finished it is, and it therefore survives graduation and may never be removed; and
++- degrade **visibly**. When it cannot answer — outage, exhausted allowance, or a question outside its corpus — it must say so and offer the human route. Silently substituting a different or lower-quality answering path is prohibited at every maturity stage, because a fallback the visitor cannot detect is a misrepresentation.
+ 
+ ### 49.2 Blog
+ 
+@@ -1524,9 +1554,50 @@
+ - Credential cards and reviewed PDFs may be published with exact titles, issuers, dates, categories, and verification links.
+ - Social icons must remain hidden until the corresponding professional account is live, owner-approved, and useful.
+ 
+-### 49.6 Feature maturity labels
++### 49.6 Feature maturity labels and graduation
+ 
+-Experimental work must be labelled honestly as **Beta**, **Preview**, **Experimental**, **In development**, or **Coming soon**. A label does not waive security, privacy, accessibility, or truthful-representation requirements.
++**While work is experimental** it must be labelled honestly as **Beta**,
++**Preview**, **Experimental**, **In development**, or **Coming soon**. A label
++does not waive security, privacy, accessibility, or truthful-representation
++requirements, and it never excuses a defect: "it's in beta" is a description of
++maturity, not a permit.
++
++A maturity label is a **stage, not a permanent property**. It is required for as
++long as the feature is genuinely experimental and is removed when it genuinely
++is not. Both halves of that sentence are obligations: labelling finished work as
++experimental is as untruthful as labelling experimental work as finished, and
++understating maturity is not the "safe" error it appears to be — it teaches
++visitors that the label carries no information.
++
++#### Graduation
++
++A feature may drop its maturity label only when **all** of the following hold:
++
++1. **Graduation criteria were recorded in the feature's ADR before launch**, not
++   written afterwards to fit the result. Criteria composed after the evidence
++   are a rationalisation, and this clause exists to make that distinction
++   enforceable rather than rhetorical.
++2. Those criteria are **met and evidenced**, with the evidence reproducible by
++   someone who does not trust the claim.
++3. The required quality gate is green on the unchanged release candidate.
++4. Security, privacy, accessibility, performance, and cost obligations are
++   verified as still met — graduation reviews them, it does not exempt them.
++5. Any permanent capability disclosure the feature carries is **retained**. Only
++   the maturity claim is removed.
++6. **The owner explicitly approves the change of status.** Graduation is a
++   product decision and is never implied by a passing gate, by a deployment, or
++   by the passage of time.
++
++Graduation criteria should be specific and falsifiable. For a feature whose
++quality is measurable, they should name the measurement, the threshold, and the
++number of consecutive runs required.
++
++#### Regression
++
++Maturity is not a ratchet. If a graduated feature develops a defect that would
++have blocked graduation, either fix it or **restore the label** — and say which.
++A feature that has quietly stopped meeting the criteria it graduated on, while
++still presenting as stable, is the failure this section exists to prevent.
+ ---
+ 
+ # Part XI — Definition of Done and Adoption
+@@ -1567,10 +1638,35 @@
+ - rollback remains available; and
+ - release notes and handoff are recorded.
+ 
+-## 52. v1.1.0 adoption checklist
++## 52. v1.2.0 adoption checklist
+ 
+ Before this handbook version becomes the repository source of truth:
+ 
++1. Owner reviews the complete v1.1.0-to-v1.2.0 diff and ratifies **this exact
++   version**.
++2. Save it at `docs/ENGINEERING_HANDBOOK.md` on the canonical repository branch,
++   replacing v1.1.0.
++3. Record the policy change, effective date, and committed checksum in the
++   handbook adoption ADR (`docs/adr/0000-handbook-adoption.md`).
++4. Confirm the assistant's ADR records graduation criteria that were written
++   **before** its launch, as §49.6 requires.
++5. Reconcile documents that reference the assistant as a beta — its ADR, threat
++   model, test plan, `SECURITY.md`, and `README.md` — so none contradicts the
++   amended policy.
++6. Confirm the shipped assistant carries its permanent capability disclosure,
++   independently of any maturity label.
++7. Run the required gate on the assembled candidate and record exact results.
++8. Only then may non-beta public copy ship, and only through the approved Git
++   and deployment workflow with explicit R3 approval.
++
++**Until step 1 is complete, v1.1.0 governs and the assistant may not be
++published without the maturity label v1.1.0 requires.** Implementation status
++does not create authorisation.
++
++## 52.1 v1.1.0 adoption checklist (completed, retained for the record)
++
++Before v1.1.0 became the repository source of truth:
++
+ 1. Owner ratifies the exact v1.1.0 document version.
+ 2. Save it at `docs/ENGINEERING_HANDBOOK.md` on the canonical repository release branch.
+ 3. Record the v1.0.0-to-v1.1.0 policy change, effective date, and committed checksum in the handbook adoption ADR.
+@@ -1778,6 +1874,55 @@
+ 
+ # Changelog
+ 
++## 1.2.0 — DRAFT, proposed 28 August 2026, NOT RATIFIED
++
++A focused amendment to the maturity and lifecycle policy for the portfolio AI
++assistant. **Nothing else changes.**
++
++**Changed**
++
++- **§49.1** — the assistant is authorised as a *narrow, optional feature* rather
++  than *"only as a narrow, optional beta"*. Stable public release is permitted
++  once ADR-recorded graduation criteria are met, the gate is green, and the
++  owner approves. The previous wording made "beta" a permanent condition of the
++  authorisation, which §46 meant no exception record could legitimately lift.
++- **§49.1** — two obligations added, both permanent and neither waivable by
++  graduation: a **truthful capability disclosure** that survives the removal of
++  any maturity label, and a prohibition on **silent degradation**.
++- **§49.6** — retitled *Feature maturity labels and graduation*. Labels are
++  required **while work is experimental** rather than indefinitely, with a
++  six-condition graduation mechanism requiring criteria recorded **before**
++  launch, reproducible evidence, a green gate, re-verified security, privacy,
++  accessibility, performance and cost obligations, retention of the capability
++  disclosure, and explicit owner approval. Adds a **regression** clause: a
++  graduated feature that stops meeting its criteria is fixed or relabelled.
++- **§48 Track C** — retitled from *"Instructor-required AI assistant beta"* to
++  *"Portfolio AI assistant as a client-ready, reusable product"*. A one-off
++  external requirement is no longer part of the product's permanent governance
++  identity. Adds an explicit evaluation-set requirement and a reusability
++  expectation. **No existing Track C requirement is removed or weakened.**
++- **§10** — the assistant's ADR trigger is "before its first public release and
++  again before any change of maturity status" rather than "before public beta".
++- **§52** — adds a v1.2.0 adoption checklist; the completed v1.1.0 checklist is
++  retained as §52.1.
++
++**Explicitly preserved, unchanged**
++
++Authority and conflict resolution (§3), R0–R3 risk classification (§11), stop
++conditions (§13), Git and branch policy (§14), coding standards, accessibility
++(§19), performance (§20), the security model (§21), secrets (§22), CSP and
++headers (§23), dependency and supply-chain security (§25), privacy (§27),
++testing and the required gate (§29–§32), release readiness, deployment and
++rollback (§33–§35), observability (§36), incidents (§37), AI-assisted
++engineering (§40–§45), the exception policy (§46), scalability review (§47), and
++every truthful-representation requirement in §6.2 and §49.
++
++**Not changed by this amendment**
++
++The assistant's security, privacy, accessibility, cost-control, evaluation,
++rollback, and honesty obligations. Graduation changes what the feature may be
++*called*, not what it must *do*.
++
+ ## 1.1.0 — ratified 1 August 2026
+ 
+ - Promoted the 28 July 2026 release candidate to the ratified, governing version.

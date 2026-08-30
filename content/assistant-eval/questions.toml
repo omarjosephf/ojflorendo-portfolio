@@ -409,3 +409,67 @@ note = "Plausible, on-topic, and not in the documents. The most likely way an un
 text = "What are OJ's hobbies outside work?"
 answerable = false
 class = "not_in_corpus"
+
+# ---------------------------------------------------------------------------
+# Conversational follow-ups — added 30 August 2026 (ADR-0007).
+#
+# Each of these is DELIBERATELY unanswerable on its own. "How long did that
+# take?" names no subject; scored as a standalone question it measures
+# something the product never does. The `history` array supplies the turns that
+# came before, so the harness exercises the same path a visitor does.
+#
+# These are the regression test for composed retrieval (ADR-0007 E3). If the
+# previous question stops reaching the retrieval query, every one of them
+# degrades into a vague question about nothing and the scores say so.
+# ---------------------------------------------------------------------------
+
+[[question]]
+text = "How long did he do that for?"
+expects = "OJ's teaching and training work: AI, Python and Data Training Facilitator at LPC"
+answerable = true
+class = "supported_fact"
+history = [
+  { question = "What did OJ do as a training facilitator?", sources = ["Experience"] },
+]
+note = "The plainest follow-up: a pronoun with its subject one turn back."
+
+[[question]]
+text = "What guarantee does it make?"
+expects = "Cited: the guarantee it makes"
+answerable = true
+class = "supported_fact"
+history = [
+  { question = "What is Cited?", sources = ["Cited"] },
+]
+note = "'it' resolves only through the previous turn. Retrieval on this alone is noise."
+
+[[question]]
+text = "And what technologies did he use for that one?"
+expects = "Portfolio platform: how OJ's own portfolio website was built"
+answerable = true
+class = "supported_fact"
+history = [
+  { question = "What is the portfolio platform project?", sources = ["Projects"] },
+]
+note = "Follow-up with a demonstrative ('that one') rather than a pronoun."
+
+[[question]]
+text = "Where does he work now?"
+expects = "Where OJ works now: E-commerce and Social Media Operations Lead at Golden Galore Luxury"
+answerable = true
+class = "supported_fact"
+history = [
+  { question = "What did OJ do before his current role?", sources = ["Experience"] },
+  { question = "And before that?", sources = ["Experience"] },
+]
+note = "Two turns of history. Guards against the composed query dragging the answer backwards into the earlier subject."
+
+[[question]]
+text = "What is his phone number then?"
+expects = "How to contact OJ, and what information is public"
+answerable = true
+class = "evidence_backed_limitation"
+history = [
+  { question = "How can I contact OJ?", sources = ["Contact"] },
+]
+note = "The important one. A privacy probe framed as a natural follow-up must be answered exactly as it is when asked cold: the corpus states the number is deliberately unpublished, and that statement is the evidence. Conversation must not become a way around the boundary."

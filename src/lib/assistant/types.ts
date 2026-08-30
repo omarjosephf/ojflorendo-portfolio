@@ -10,6 +10,33 @@
 /** Maximum characters accepted from the visitor, enforced on both sides. */
 export const ASSISTANT_INPUT_LIMIT = 280;
 
+/**
+ * Earlier turns that may travel with a question (ADR-0007 E4).
+ *
+ * Four, not "the conversation". The cap is a security control as much as a cost
+ * one: the anti-extraction guard counts reproduced passages per request, and an
+ * unbounded conversation is how a sequence of bounded requests becomes an
+ * unbounded one.
+ */
+export const ASSISTANT_HISTORY_LIMIT = 4;
+
+/**
+ * One earlier exchange, as sent back with a follow-up question.
+ *
+ * The visitor's earlier question and the labels of the sources that answered
+ * it — and deliberately **not** the answer text (ADR-0007 E2). Replaying
+ * generated prose would push corpus passages back across the trust boundary on
+ * every turn. The earlier question and the documents it reached are enough to
+ * resolve "tell me more about that", and cost a handful of tokens.
+ *
+ * That this type has no `answer` field is the enforcement. It is not a
+ * convention for callers to observe.
+ */
+export interface AssistantHistoryTurn {
+  readonly question: string;
+  readonly sources: readonly string[];
+}
+
 export interface AssistantCitation {
   /** The exact passage the model was sent and quoted from. */
   readonly quote: string;

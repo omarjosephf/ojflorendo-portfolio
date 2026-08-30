@@ -147,7 +147,8 @@ describe("screenQuestion — the evaluation set reaches the service intact", () 
   it("reads the same question set the harness runs", () => {
     // Guards the parser itself: a silently empty list would make the assertion
     // below pass while testing nothing.
-    expect(questions.length).toBe(49);
+    // 49 single-turn plus the 5 conversational follow-ups added with ADR-0007.
+    expect(questions.length).toBe(54);
   });
 
   it.each(questions)("does not intercept %s", (question) => {

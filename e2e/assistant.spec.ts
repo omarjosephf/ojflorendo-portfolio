@@ -227,7 +227,9 @@ test.describe("OJ Assistant", () => {
     await expect(source).toBeFocused();
   });
 
-  test("carries the capability disclosure and no maturity badge", async ({ page }) => {
+  test("carries the capability disclosure and an honest maturity label", async ({
+    page,
+  }) => {
     await stubAssistant(page, GROUNDED);
     await page.goto("/");
     const dialog = await openAssistant(page);
@@ -235,10 +237,13 @@ test.describe("OJ Assistant", () => {
     await expect(
       dialog.getByText(/answers from oj's approved portfolio content, with sources/i),
     ).toBeVisible();
-    // The old copy became false when answering moved to a model. Both it and
-    // the maturity badge are asserted absent.
+    // The old copy became false when answering moved to a model, and stays
+    // asserted absent.
     await expect(dialog.getByText(/stays in this browser/i)).toBeHidden();
-    await expect(dialog.getByText(/curated beta/i)).toBeHidden();
+    // Inverted from asserting the badge ABSENT. §49.6 requires the label while
+    // the feature is experimental, and ADR-0006's graduation criteria include a
+    // production soak that cannot happen before production.
+    await expect(dialog.getByText(/^beta$/i)).toBeVisible();
   });
 
   test("does not leak the backend URL or secret into the client bundle", async ({
