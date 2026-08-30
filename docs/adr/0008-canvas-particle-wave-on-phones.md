@@ -1,6 +1,6 @@
 # ADR-0008: A Canvas-2D particle wave on phones
 
-- Status: Accepted
+- Status: Withdrawn 31 August 2026 — see the closing note
 - Date: 2026-08-30
 - Owner: OJ Florendo
 - Risk class: R2 (user-visible presentation change on mobile, touching the
@@ -132,3 +132,43 @@ reasoning, and both now fail the suite if reintroduced.
 Remove `<MobileWaveLazy />` from `src/app/layout.tsx`. Phones return to the
 drifting ambient glow with no other change. Deleting
 `src/components/canvas/` removes the feature entirely.
+
+---
+
+## Withdrawn — 31 August 2026
+
+The owner reviewed the shipped result on his phone and rejected it. Two defects,
+both mine, and the second is not fixable by tuning:
+
+**1. The field was a wedge, not a plane.** `HALF_WIDTH = 0.62` with `NEAR = 1`
+and `FAR = 6` describes a *finite* plane, which shrinks in both axes and so
+tapers to a point instead of filling the screen:
+
+| Row | Field width on a 390px screen |
+| --- | --- |
+| Nearest | 484 px (covers) |
+| Mid | 138 px — 35% |
+| Farthest | 80 px — 20% |
+
+It rendered as a fan of dotted arcs with black corners. The WebGL wave avoids
+this by being about six times wider than the screen at the near edge (half-width
+36.9 world units against the 24 needed at the far edge) — affordable at 5712
+points, not at 800. Narrowing the plane to fix a sparse near field is what
+created the wedge.
+
+None of the verification caught it. Every check asserted cost, motion or the
+presence of a canvas; none asserted that the field *covered the screen*. The
+one look I took at a rendered frame was cropped to a region where the wedge was
+still wide.
+
+**2. A quality ceiling that tuning cannot lift.** Even with coverage corrected,
+800 Canvas-2D sprites cannot resemble 5712 GPU-rendered points. Rows read as
+dotted arcs with moiré.
+
+`<MobileWaveLazy />` is unmounted so production returns to the ambient glow. The
+component remains in the tree until its replacement lands, at which point
+`src/components/canvas/` is deleted.
+
+**Superseded by ADR-0009**, which renders the same shader the desktop wave uses
+through a bespoke WebGL renderer with no three.js — ADR-0003's measured
+objection was three.js's 234 KiB and ~1123 ms of parsing, not WebGL itself.

@@ -46,11 +46,12 @@ test.describe("Homepage", () => {
     // The whole mobile Lighthouse budget rests on `useSceneEnabled()` refusing
     // to mount either WebGL scene below 768px, and nothing else asserts it.
     //
-    // This deliberately does NOT assert the absence of a canvas: phones now
-    // carry the Canvas-2D wave (ADR-0008), so a canvas is expected there. What
-    // must never come back is the ~234 KiB three.js chunk, which is what the
-    // budget is actually about. The desktop half is not decoration -- without
-    // it, a gate that loaded nothing anywhere would still pass.
+    // This deliberately does NOT assert the absence of a canvas. Phones have
+    // carried one (ADR-0008, withdrawn) and will again (ADR-0009), so the count
+    // is not the invariant. What must never come back is the ~234 KiB three.js
+    // chunk, which is what the budget is actually about. The desktop half is
+    // not decoration -- without it, a gate that loaded nothing anywhere would
+    // still pass.
     const bigChunks = (p: typeof page) =>
       p.evaluate(
         () =>
@@ -71,54 +72,6 @@ test.describe("Homepage", () => {
     await page.waitForLoadState("load");
     await expect(page.locator("canvas")).not.toHaveCount(0);
     expect(await bigChunks(page)).toBeGreaterThan(0);
-  });
-
-  test("the phone particle wave renders and animates (ADR-0008)", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
-    await page.waitForLoadState("load");
-    await expect(page.locator("canvas")).toHaveCount(1);
-    await page.waitForTimeout(1200);
-
-    const first = (await page.screenshot()).toString("base64");
-    await page.waitForTimeout(1200);
-    const second = (await page.screenshot()).toString("base64");
-
-    // Same reasoning as the ambient-glow guard above: assert the effect, not
-    // just that a canvas element exists. A wave nobody can see is the failure
-    // mode this project has already shipped once.
-    const maxChange = await page.evaluate(async ([a, b]) => {
-      const load = (data: string) =>
-        new Promise<HTMLImageElement>((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.src = `data:image/png;base64,${data}`;
-        });
-      const pixels = (img: HTMLImageElement) => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0);
-        return ctx.getImageData(0, 0, canvas.width, canvas.height);
-      };
-      const [ia, ib] = await Promise.all([load(a), load(b)]);
-      const [pa, pb] = [pixels(ia), pixels(ib)];
-      let max = 0;
-      for (let i = 0; i < pa.data.length; i += 4) {
-        for (let k = 0; k < 3; k++) {
-          const d = Math.abs(pa.data[i + k] - pb.data[i + k]);
-          if (d > max) max = d;
-        }
-      }
-      return max;
-    }, [first, second]);
-
-    // Measured around 54 levels. Twenty is clear of the ambient glow's drift
-    // (8) without demanding the exact figure.
-    expect(maxChange).toBeGreaterThan(20);
   });
 
   test("the phone ambient background visibly moves (ADR-0003 follow-up)", async ({
