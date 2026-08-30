@@ -95,3 +95,25 @@ export function horizontalScale(config: WaveConfig, aspect: number): number {
   const required = Math.tan(fovRadians / 2) * aspect * fadeFarOf(config);
   return Math.max(1, required / halfWidthOf(config));
 }
+
+/** A flat grid of points on the XZ plane, centred on the origin. */
+export function buildGrid(
+  columns: number,
+  rows: number,
+  spacing: number,
+): Float32Array {
+  const positions = new Float32Array(columns * rows * 3);
+  const halfWidth = ((columns - 1) * spacing) / 2;
+  const halfDepth = ((rows - 1) * spacing) / 2;
+
+  let i = 0;
+  for (let row = 0; row < rows; row++) {
+    for (let column = 0; column < columns; column++) {
+      positions[i++] = column * spacing - halfWidth;
+      positions[i++] = 0;
+      positions[i++] = row * spacing - halfDepth;
+    }
+  }
+
+  return positions;
+}

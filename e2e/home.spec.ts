@@ -74,6 +74,77 @@ test.describe("Homepage", () => {
     expect(await bigChunks(page)).toBeGreaterThan(0);
   });
 
+  test("the phone wave covers the screen width (ADR-0009)", async ({ page }) => {
+    // ADR-0008 was withdrawn because the field was a finite plane that tapered
+    // to a point, covering barely a third of the screen at mid-depth and
+    // rendering as a fan. Nothing caught it: every check asserted cost, motion
+    // or the presence of a canvas, never that the water covered the screen.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await page.waitForLoadState("load");
+    await expect(page.locator("canvas")).toHaveCount(1);
+    await page.waitForTimeout(2000);
+
+    const withWave = (await page.screenshot()).toString("base64");
+    // CSP forbids an injected <style>; a CSSOM rule is not blocked.
+    await page.evaluate(() => {
+      const sheet = document.styleSheets[0];
+      sheet.insertRule(
+        ".site-wave{display:none !important}",
+        sheet.cssRules.length,
+      );
+    });
+    await page.waitForTimeout(300);
+    const without = (await page.screenshot()).toString("base64");
+
+    const span = await page.evaluate(async ([a, b]) => {
+      const load = (data: string) =>
+        new Promise<HTMLImageElement>((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = `data:image/png;base64,${data}`;
+        });
+      const pixels = (img: HTMLImageElement) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        return ctx.getImageData(0, 0, canvas.width, canvas.height);
+      };
+      const [ia, ib] = await Promise.all([load(a), load(b)]);
+      const [pa, pb] = [pixels(ia), pixels(ib)];
+      const w = pa.width;
+      // A band rather than a single row: the near field is sparse by design, so
+      // one row of pixels can fall between points and read as empty.
+      const columns = new Uint8Array(w);
+      const top = Math.round(pa.height * 0.45);
+      const bottom = Math.round(pa.height * 0.7);
+      for (let y = top; y < bottom; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4;
+          let d = 0;
+          for (let k = 0; k < 3; k++) {
+            d = Math.max(d, Math.abs(pa.data[i + k] - pb.data[i + k]));
+          }
+          if (d >= 2) columns[x] = 1;
+        }
+      }
+      let min = w;
+      let max = -1;
+      for (let x = 0; x < w; x++) {
+        if (columns[x]) {
+          if (x < min) min = x;
+          if (x > max) max = x;
+        }
+      }
+      return max < 0 ? 0 : Math.round((100 * (max - min)) / w);
+    }, [withWave, without]);
+
+    // Measured at 100%. The withdrawn version scored about 35% here.
+    expect(span).toBeGreaterThanOrEqual(90);
+  });
+
   test("the phone ambient background visibly moves (ADR-0003 follow-up)", async ({
     page,
   }) => {
