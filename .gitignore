@@ -60,6 +60,18 @@ next-env.d.ts
 # still applies to every other PDF.
 !/content/assistant/OJ_Florendo_Rayatchi_Public_CV.pdf
 
+# Certificate documents, published by the owner's decision of 31 August 2026.
+# Exact paths only — the blanket *.pdf rule above deliberately stays in force for
+# everything else, including the private CVs and invoices that sit beside these
+# files in the owner's source folder. Publication record, review status and
+# SHA-256 per file: docs/certificates/README.md.
+!/public/documents/certificates/pcep-python-institute-2025.pdf
+!/public/documents/certificates/business-intelligence-lpc-2025.pdf
+!/public/documents/certificates/ux-ui-designer-bootcamp-school-of-ux-design-2023.pdf
+!/public/documents/certificates/analyze-data-with-excel-codecademy-2025.pdf
+!/public/documents/certificates/prompt-engineering-dubai-future-foundation-2025.pdf
+!/public/documents/certificates/art-of-storytelling-iese-2025.pdf
+
 # Public repository guidance is tracked at the root. Ignore only private/local
 # AI-tooling instructions and state; never copy their contents into tracked files.
 /CLAUDE.local.md

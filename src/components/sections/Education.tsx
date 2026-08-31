@@ -11,14 +11,26 @@ const categories: CredentialCategory[] = [
 ];
 
 /**
- * The intro previously said credential links "appear only after their source
- * evidence has been reviewed". Once some credentials carried links, that wording
- * implied the remaining ones were still unreviewed. They are not — those issuers
- * simply publish no public verification page, which is ordinary and worth
- * stating plainly rather than leaving as an apparent gap.
+ * The intro has been rewritten twice for the same underlying reason: it must not
+ * imply that a credential without an issuer verification page is somehow less
+ * evidenced. It previously said links "appear only after their source evidence
+ * has been reviewed", then that not every provider offers a verification page.
+ * Both readings left three credentials looking unsupported.
+ *
+ * Since 31 August 2026 every credential publishes its certificate document, so
+ * the intro can state the plain arrangement: the document is the evidence, and an
+ * issuer page is an extra where one exists.
  */
 const INTRO =
-  "My credentials support my experience across Python, data, UX/UI, business intelligence, communication, and prompt engineering. Where an issuer publishes a public verification page, I link to it directly. Not every training provider offers one.";
+  "My credentials support my experience across Python, data, UX/UI, business intelligence, communication, and prompt engineering. Every credential below links to the certificate itself, and where the issuer also publishes a public verification page, I link to that as well.";
+
+/**
+ * Published under the owner's explicit decision of 31 August 2026. The wording is
+ * his own and was chosen from three drafts; do not expand it with the family
+ * detail he deliberately left out.
+ */
+const NAME_DISCLOSURE =
+  "Some certificates show my legal name, Omar Joseph Florendo — the name on my birth certificate, and the name each issuer recorded. I go by OJ, and I present professionally as OJ Florendo Rayatchi, using both family surnames. Issuer records are preserved exactly as issued rather than rewritten.";
 
 export function Education() {
   return (
@@ -55,10 +67,7 @@ export function Education() {
             <Award className="h-5 w-5 text-accent" aria-hidden="true" />
             Credentials
           </h3>
-          <p className="mb-5 text-sm leading-relaxed text-muted">
-            Some credentials may display my legal name or a previously used
-            professional name. Issuer records are preserved rather than rewritten.
-          </p>
+          <p className="mb-5 text-sm leading-relaxed text-muted">{NAME_DISCLOSURE}</p>
 
           <div className="space-y-6">
             {categories.map((category) => {
@@ -74,49 +83,69 @@ export function Education() {
                     {category}
                   </h4>
                   <ul className="space-y-3">
-                    {items.map((credential) => (
-                      <li
-                        key={credential.title}
-                        className="glass hover-card rounded-xl px-4 py-3.5"
-                      >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-ink">
-                              {credential.title}
-                            </p>
-                            <p className="text-sm text-muted">{credential.issuer}</p>
-                          </div>
-                          <span className="shrink-0 text-xs text-muted">
-                            {credential.date}
-                          </span>
-                        </div>
+                    {items.map((credential) => {
+                      /*
+                       * Four of the six certificates are scans with no text
+                       * layer, so the document itself tells assistive technology
+                       * nothing. The link's accessible name has to carry the
+                       * credential, issuer, date and format instead.
+                       */
+                      const context = `${credential.title}, ${credential.issuer}, ${credential.date}`;
 
-                        {credential.verificationUrl || credential.certificatePath ? (
-                          <div className="mt-3 flex flex-wrap gap-3">
-                            {credential.verificationUrl ? (
-                              <a
-                                href={credential.verificationUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
-                              >
-                                Verify credential
-                                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                              </a>
-                            ) : null}
-                            {credential.certificatePath ? (
-                              <a
-                                href={credential.certificatePath}
-                                className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
-                              >
-                                <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                                View certificate
-                              </a>
-                            ) : null}
+                      return (
+                        <li
+                          key={credential.title}
+                          className="glass hover-card rounded-xl px-4 py-3.5"
+                        >
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                              <p className="text-sm font-medium text-ink">
+                                {credential.title}
+                              </p>
+                              <p className="text-sm text-muted">{credential.issuer}</p>
+                            </div>
+                            <span className="shrink-0 text-xs text-muted">
+                              {credential.date}
+                            </span>
                           </div>
-                        ) : null}
-                      </li>
-                    ))}
+
+                          {credential.certificatePath || credential.verificationUrl ? (
+                            <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2.5">
+                              {credential.certificatePath ? (
+                                <a
+                                  href={credential.certificatePath}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-2 px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:border-accent/60"
+                                >
+                                  <FileText
+                                    className="h-3.5 w-3.5 text-accent"
+                                    aria-hidden="true"
+                                  />
+                                  View certificate
+                                  <span className="sr-only">{` for ${context} (PDF)`}</span>
+                                </a>
+                              ) : null}
+                              {credential.verificationUrl ? (
+                                <a
+                                  href={credential.verificationUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+                                >
+                                  Verify with issuer
+                                  <span className="sr-only">{` for ${context}`}</span>
+                                  <ExternalLink
+                                    className="h-3.5 w-3.5"
+                                    aria-hidden="true"
+                                  />
+                                </a>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </section>
               );

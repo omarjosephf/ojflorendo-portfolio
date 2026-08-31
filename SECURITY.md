@@ -202,6 +202,11 @@ This boundary and its limitations are recorded in
 - The private CV is never published. The reviewed, phone-free public CV is
   available at `public/documents/OJ_Florendo_Rayatchi_Public_CV.pdf`; its editable
   public-safe source is maintained under `docs/cv/`.
+- Certificate documents under `public/documents/certificates/` are published by an
+  explicit owner decision of 31 August 2026 and **do display the owner's legal
+  name**. That is intended, not a leak. The publication record, review workflow and
+  file hashes are in `docs/certificates/README.md`. They contain no phone number,
+  street address, date of birth or identification number.
 - Contact data is collected only to reply to the enquiry and is not persisted by
   the application.
 - No cookies, behavioural analytics, fingerprinting, or ad tracking are used in
