@@ -18,7 +18,7 @@ export const assistantCorpusFiles: readonly AssistantCorpusFile[] = [
   { path: "OJ_Florendo_Rayatchi_Public_CV.pdf", digest: "1fccbd560745b886290350795c4e4bd4c6df68683f0ede3c043e7894a9f6c85b" },
   { path: "about-oj.md", digest: "a36e9600cbedc63b9e4157d0166f81c3cd53086eece6695655eedc1a26209aff" },
   { path: "contact-and-this-assistant.md", digest: "7a7fa45b357f386651dd4cfae2cad7ee9822dc679cf917ff4f29e164dc423edd" },
-  { path: "education-and-credentials.md", digest: "b6f917b85bdc894375af1a884fa4360847e3ec11c41d0e4390f12c6340c3ac9d" },
+  { path: "education-and-credentials.md", digest: "5798f62edd572fc4089b9c6fdb814e92cdab3d637dcd325efd6495905768d97f" },
   { path: "experience.md", digest: "8cc229f3e3b2e80a43669da9db9047138ca6386ce80cd9125bde7d7c4f2ff27e" },
   { path: "how-oj-works.md", digest: "884486a3bf7fd12bee50ee97281b22530533ab77417b7ac30f72c5c934eec715" },
   { path: "project-cited.md", digest: "1255b3b34dc392d8403a8f4ea46055607d4abdc1dcd5a8d0cac3ef619084b744" },
@@ -35,4 +35,4 @@ export const assistantCorpusFiles: readonly AssistantCorpusFile[] = [
  * process rather than answering confidently from the wrong content.
  */
 export const assistantCorpusChecksum =
-  "047e333141b2a4c680dd624363cd7d17b1eb5e76336bfb54e93ddf4d09718def";
+  "86e8ddb479d8ca018942fa6736c2872fc6227659552c987a3d936d6a1c2bc42b";

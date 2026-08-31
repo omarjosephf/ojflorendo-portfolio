@@ -58,9 +58,20 @@ are not professional certifications, and presenting them as though they were
 would be a misrepresentation, so the website keeps them apart. Each credential
 shows its exact title, issuer, and date as the issuer recorded them.
 
-Where an issuer provides a verification page, the website links to that page
-rather than hosting a certificate PDF. An issuer's own page cannot be forged, and
-linking to it keeps documents bearing OJ's full legal name off this domain. Some
-certificates display a legal name or a previously used professional name; this is
-disclosed on the website rather than hidden, and the issuer's record is never
-rewritten.
+Every credential on the website links to its certificate document, published as
+a PDF on this domain. OJ decided in August 2026 to publish all six certificates
+so that every qualification he claims can be checked directly. Before that, the
+website linked only to issuer verification pages, which left three credentials
+with no evidence at all because their issuers publish no such page. Most training
+providers issue a PDF and nothing more, which is ordinary.
+
+Where an issuer does also publish a verification page, the website links to it in
+addition to the document, because an issuer-hosted page cannot be forged. Three
+credentials have one: the PCEP certification on Credly, the Codecademy course,
+and The Art of Storytelling on Coursera.
+
+Some certificates show OJ's legal name, Omar Joseph Florendo. That is the name on
+his birth certificate and the name each issuer recorded. He goes by OJ and
+presents professionally as OJ Florendo Rayatchi, using both family surnames. The
+website states this openly next to the credentials rather than hiding it, and an
+issuer's record is never rewritten.
