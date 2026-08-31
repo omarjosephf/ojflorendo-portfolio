@@ -131,8 +131,8 @@ export const projects: ProjectItem[] = [
       "pytest",
       "AI-assisted engineering",
     ],
-    // No bespoke card image yet; the grid falls back to the abstract placeholder.
-    image: null,
+    // Pre-sized at 2x the rendered 552x160 card area, like the portfolio card.
+    image: "/images/projects/cited.webp",
     liveUrl: "https://cited-demo.fly.dev",
     githubUrl: "https://github.com/omarjosephf/cited",
     featured: true,
