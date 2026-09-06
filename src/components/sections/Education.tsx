@@ -36,7 +36,7 @@ export function Education() {
   return (
     <Section
       id="education"
-      eyebrow="Education & credentials"
+      eyebrow="09 / Education & credentials"
       title="Verified learning and professional development"
       intro={INTRO}
     >

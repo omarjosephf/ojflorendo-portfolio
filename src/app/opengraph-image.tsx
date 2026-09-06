@@ -17,8 +17,8 @@ export default function OpengraphImage() {
           justifyContent: "space-between",
           padding: "72px",
           background:
-            "radial-gradient(1200px 500px at 85% -10%, #0e2230, #0b0f14 60%)",
-          color: "#e8edf2",
+            "#f5f2e9",
+          color: "#292a26",
           fontFamily: "sans-serif",
         }}
       >
@@ -30,17 +30,17 @@ export default function OpengraphImage() {
               justifyContent: "center",
               width: "56px",
               height: "56px",
-              borderRadius: "14px",
-              border: "1px solid #223042",
-              background: "#111821",
-              color: "#2dd4bf",
+              borderRadius: "28px",
+              border: "1px solid #d4d1c5",
+              background: "#292a26",
+              color: "#f5f2e9",
               fontSize: "22px",
               fontWeight: 700,
             }}
           >
             OJ
           </div>
-          <div style={{ display: "flex", fontSize: "22px", color: "#98a6b5" }}>
+          <div style={{ display: "flex", fontSize: "22px", color: "#65665c" }}>
             Software · AI · Creative Development
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function OpengraphImage() {
               display: "flex",
               marginTop: "20px",
               fontSize: "34px",
-              color: "#98a6b5",
+              color: "#65665c",
               maxWidth: "920px",
             }}
           >
@@ -69,10 +69,10 @@ export default function OpengraphImage() {
               width: "180px",
               height: "8px",
               borderRadius: "9999px",
-              background: "linear-gradient(90deg, #2dd4bf, #38bdf8)",
+              background: "#294fc9",
             }}
           />
-          <div style={{ display: "flex", fontSize: "24px", color: "#98a6b5" }}>
+          <div style={{ display: "flex", fontSize: "24px", color: "#65665c" }}>
             Windsor, Berkshire · UK
           </div>
         </div>

@@ -20,8 +20,9 @@ states this in its identity area, and the 3D portrait carries the alternative
 text "3D illustrated avatar of OJ Florendo".
 
 They are **not** a substitute for a real profile photograph. `site.profileImage`
-remains unset on purpose: the hero profile slot is reserved for a genuine
-photograph, and these assets must not silently fill it.
+points to the separate, genuine `oj-profile.webp` photograph used in the
+navigation and contact circles. CSS clips the unchanged image to those circles.
+The assistant illustrations must not replace that photograph.
 
 ## Provenance
 

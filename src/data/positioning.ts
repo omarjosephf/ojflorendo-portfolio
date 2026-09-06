@@ -4,7 +4,7 @@ export const positioning = {
     eyebrow: "SOFTWARE · AI · CREATIVE DEVELOPMENT",
     supportingCopy:
       "I combine web development, Python, data, UX, training, and digital operations to turn real problems into useful, trustworthy solutions.",
-    primaryCta: "Discuss your project",
+    primaryCta: "Discuss a project",
     secondaryCta: "Explore my work",
     availability:
       "Available for selected remote projects, part-time opportunities, internships, and collaborations.",

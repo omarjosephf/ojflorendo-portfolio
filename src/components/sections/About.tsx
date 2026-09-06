@@ -1,4 +1,5 @@
 import { BadgeCheck, GraduationCap, MapPin, Presentation } from "lucide-react";
+import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
 import { Section } from "@/components/ui/Section";
 import { Reveal } from "@/components/ui/Reveal";
@@ -14,7 +15,7 @@ export function About() {
   return (
     <Section
       id="about"
-      eyebrow="About"
+      eyebrow="04 / About"
       title="Building with purpose, learning through execution."
     >
       <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
@@ -38,6 +39,9 @@ export function About() {
               </li>
             ))}
           </ul>
+          <ul className="about-roles" aria-label="Professional roles">{site.descriptor.split("·").map((role) => <li key={role}>{role.trim()}</li>)}</ul>
+          <p className="about-availability">{positioning.hero.availability}</p>
+          {site.cvPath ? <a className="text-link mt-3" href={site.cvPath} target="_blank" rel="noopener noreferrer">Download public CV <span aria-hidden="true">↗</span></a> : null}
         </Reveal>
       </div>
     </Section>

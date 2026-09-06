@@ -20,7 +20,7 @@ function Block({
   children: ReactNode;
 }) {
   return (
-    <section className="border-t border-line/60 pt-8">
+    <section className="case-block border-t border-line/60 pt-8">
       <h2 className="font-heading text-xl font-semibold text-ink sm:text-2xl">
         {heading}
       </h2>
@@ -51,7 +51,7 @@ export function CaseStudyView({ project }: { project: ProjectItem }) {
   if (!cs) return null;
 
   return (
-    <article className="py-28 sm:py-32">
+    <article className="case-study py-28 sm:py-32">
       <Container>
         {/* Header */}
         <Link
@@ -83,6 +83,12 @@ export function CaseStudyView({ project }: { project: ProjectItem }) {
             </li>
           ))}
         </ul>
+
+        {project.image ? <div className="case-study-image"><img src={project.image} alt={`${project.title} interface`} width={1104} height={320} decoding="async" /></div> : null}
+
+        {project.slug === "personal-portfolio-website" ? (
+          <p className="mt-5 text-sm text-muted">This case study documents the original portfolio platform and its engineering decisions.</p>
+        ) : null}
 
         {/* Body */}
         <div className="mt-14 space-y-10">
@@ -157,7 +163,7 @@ export function CaseStudyView({ project }: { project: ProjectItem }) {
         </div>
 
         {/* Return link */}
-        <div className="mt-14 border-t border-line/60 pt-8">
+        <div className="case-actions mt-14 border-t border-line/60 pt-8">
           <Link
             href="/#projects"
             className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-accent/60"
