@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Barlow_Condensed, Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
@@ -10,8 +10,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { PortfolioAssistant } from "@/components/assistant/PortfolioAssistant";
 import { StructuredData } from "@/components/ui/StructuredData";
-import { ParticleWaveLazy } from "@/components/three/ParticleWaveLazy";
-import { MobileWaveGLLazy } from "@/components/webgl/MobileWaveGLLazy";
+import { InteractionFeedback } from "@/components/ui/InteractionFeedback";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,6 +21,13 @@ const inter = Inter({
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+const display = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -73,8 +79,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0f14",
-  colorScheme: "dark",
+  themeColor: "#f5f2e9",
+  colorScheme: "light",
 };
 
 export default async function RootLayout({
@@ -85,22 +91,19 @@ export default async function RootLayout({
   return (
     <html
       lang="en-GB"
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full`}
+      className={`${inter.variable} ${spaceGrotesk.variable} ${display.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
-        {/* Decorative site-wide background, fixed behind all content. Loads
-            only where WebGL exists; otherwise the ambient body::before /
-            body::after glow layers stand in. Phones run the same shader
-            through a bespoke WebGL renderer rather than three.js (ADR-0009). */}
-        <ParticleWaveLazy />
-        <MobileWaveGLLazy />
         <SkipLink />
         <Nav />
         <main id="main" className="flex-1">
           {children}
         </main>
         <Footer />
-        <PortfolioAssistant />
+        <InteractionFeedback />
+        <div className="assistant-theme">
+          <PortfolioAssistant />
+        </div>
         <StructuredData nonce={nonce} />
       </body>
     </html>

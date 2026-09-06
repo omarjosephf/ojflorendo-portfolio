@@ -8,9 +8,9 @@
 
 A premium, accessible and security-conscious personal website — the foundation of
 a long-term platform documenting **OJ Florendo’s** journey across software
-engineering, AI, data, learning and entrepreneurship. It’s a fast, dark,
-editorial single-page site with a procedural 3D hero, an interactive experience
-timeline, an accessible contact form and dedicated project case-study routes.
+engineering, AI, data, learning and entrepreneurship. The design uses warm editorial typography, real project imagery, finite motion, the existing experience timeline, an accessible contact form and dedicated project case-study routes.
+
+The owner approved the design and its publication on 7 September 2026. Its scope and validation are recorded in [the design notes](docs/portfolio-redesign-preview.md) and [release notes](docs/releases/2026-09-07-portfolio-redesign.md).
 
 ## Purpose
 
@@ -24,9 +24,9 @@ and security treated as first-class requirements.
 
 ## Live demo
 
-> 🔗 **Live site:** https://ojfr.me &nbsp;·&nbsp; _deployment in progress_
+> 🔗 **Live site:** https://ojfr.me
 
-## Screenshots
+## Screenshots of the earlier design
 
 | Desktop | Mobile |
 | --- | --- |
@@ -40,9 +40,9 @@ and security treated as first-class requirements.
 
 - **Single-page portfolio** — Hero, About, Now, Skills, Experience, Projects,
   Education and Contact, all driven by typed content data.
-- **Procedural “Digital Core” 3D hero** — a dynamically-loaded WebGL scene with
+- **Earlier production design (unmounted in this preview): Digital Core 3D hero** — a dynamically-loaded WebGL scene with
   an attractive CSS fallback; paused when off-screen or the tab is hidden.
-- **Procedural particle-wave background** — a shader-driven point field fixed
+- **Earlier production design (unmounted in this preview): particle-wave background** — a shader-driven point field fixed
   behind every page, sitting in the lower half like a shoreline and reacting
   gently to the pointer, over a static CSS gradient that serves as its no-JS /
   no-WebGL state (see `docs/adr/0002-hero-particle-wave.md`).
@@ -145,6 +145,8 @@ readable.
 See [`SECURITY.md`](SECURITY.md) for the full posture and disclosure policy.
 
 ## Performance considerations
+
+The preview uses finite CSS motion with no decorative canvas. The following 3D measurements describe the earlier production design. See the preview notes for the current verification plan.
 
 - Both 3D scenes are **dynamically imported**, frame-rate capped, and **paused
   when off-screen or the tab is hidden**, with a device-appropriate pixel-ratio

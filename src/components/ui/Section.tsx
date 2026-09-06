@@ -27,26 +27,26 @@ export function Section({
     <section
       id={id}
       aria-labelledby={headingId}
-      className={`scroll-mt-24 py-20 sm:py-28 ${className}`}
+      className={`portfolio-section ${className}`}
     >
       <Container>
-        <Reveal className="max-w-2xl">
-          <p className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-accent">
+        <Reveal className="section-header">
+          <p className="section-eyebrow">
             {eyebrow}
           </p>
           <h2
             id={headingId}
-            className="font-heading text-3xl font-semibold tracking-tight text-ink sm:text-4xl"
+            className="section-title"
           >
             {title}
           </h2>
           {intro ? (
-            <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
+            <p className="section-intro">
               {intro}
             </p>
           ) : null}
         </Reveal>
-        <div className="mt-10 sm:mt-14">{children}</div>
+        <div className="section-body">{children}</div>
       </Container>
     </section>
   );

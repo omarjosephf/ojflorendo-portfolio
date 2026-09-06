@@ -7,7 +7,7 @@ export function Mission() {
   return (
     <Section
       id="mission"
-      eyebrow="Mission"
+      eyebrow="05 / Mission"
       title="Purposeful products for real needs"
       intro={positioning.mission.short}
     >

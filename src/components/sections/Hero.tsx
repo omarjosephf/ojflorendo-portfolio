@@ -1,100 +1,52 @@
-import { ArrowUpRight, Mail } from "lucide-react";
+import Link from "next/link";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { site } from "@/data/site";
 import { positioning } from "@/data/positioning";
+import { projects } from "@/data/projects";
 import { Container } from "@/components/ui/Container";
-import { Avatar } from "@/components/ui/Avatar";
-import { SocialIcon } from "@/components/ui/SocialIcon";
-import { DigitalCoreLazy } from "@/components/three/DigitalCoreLazy";
-
-const roles = site.descriptor.split("·").map((role) => role.trim());
 
 export function Hero() {
   return (
-    <section
-      id="top"
-      aria-labelledby="hero-heading"
-      className="relative overflow-hidden pt-28 pb-16 sm:pt-32 lg:pt-36 lg:pb-24"
-    >
+    <section id="top" aria-labelledby="hero-heading" className="portfolio-hero">
       <Container>
-        <div className="grid items-center gap-10 sm:gap-12 md:grid-cols-2 md:gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-              {positioning.hero.eyebrow}
-            </p>
-
-            <div className="mt-5 flex items-center gap-4">
-              <Avatar />
-              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-                <span>{site.location.replace(", United Kingdom", "")}</span>
-                <span aria-hidden="true" className="text-line">•</span>
-                <span className="text-accent">Open to selected opportunities</span>
-              </p>
-            </div>
-
-            <h1
-              id="hero-heading"
-              className="mt-6 font-heading text-4xl font-bold leading-[1.08] tracking-tight text-ink sm:text-5xl lg:text-6xl"
-            >
-              {site.name}
+        <div className="hero-meta">
+          <p>{positioning.hero.eyebrow}</p>
+          <p>{site.location.replace(", United Kingdom", "")} <span aria-hidden="true">↗</span></p>
+        </div>
+        <div className="hero-grid">
+          <div className="hero-copy">
+            <h1 id="hero-heading" className="hero-name">
+              <span>OJ Florendo</span>{" "}<span>Rayatchi</span>
             </h1>
-
-            <p className="mt-5 max-w-xl text-xl font-semibold leading-relaxed text-ink sm:text-2xl">
-              {site.headline}
-            </p>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-              {positioning.hero.supportingCopy}
-            </p>
-
-            <ul className="mt-6 flex flex-wrap gap-2" aria-label="Professional roles">
-              {roles.map((role) => (
-                <li key={role} className="chip">
-                  {role}
-                </li>
-              ))}
-            </ul>
-
-            <p className="mt-6 max-w-xl text-sm leading-relaxed text-muted">
-              {positioning.hero.availability}
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <a
-                href="#contact"
-                className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-night transition-transform hover:-translate-y-0.5"
-              >
-                <Mail className="h-4 w-4" aria-hidden="true" />
-                {positioning.hero.primaryCta}
+            <p className="hero-headline">{site.headline}</p>
+            <p className="hero-support">{positioning.hero.supportingCopy}</p>
+            <div className="hero-actions">
+              <a href="#contact" className="button-primary">
+                {positioning.hero.primaryCta}<ArrowUpRight size={19} aria-hidden="true" />
               </a>
-              <a
-                href="#projects"
-                className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-accent/60"
-              >
-                {positioning.hero.secondaryCta}
-                <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+              <a href="#projects" className="text-link">
+                {positioning.hero.secondaryCta}<ArrowDown size={18} aria-hidden="true" />
               </a>
             </div>
-
-            <div className="mt-8 flex items-center gap-3">
-              {site.socials.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target={social.external ? "_blank" : undefined}
-                  rel={social.external ? "noopener noreferrer" : undefined}
-                  aria-label={social.ariaLabel}
-                  className="rounded-md border border-line bg-surface p-2.5 text-muted transition-colors hover:border-accent/50 hover:text-ink"
-                >
-                  <SocialIcon name={social.icon} />
-                </a>
+          </div>
+          <div className="hero-work">
+            <div className="hero-note" aria-hidden="true">Ideas into<br />working things. <span>↘</span></div>
+            <div className="hero-project-stack">
+              {projects.filter((project) => project.image && project.caseStudy).slice(0, 2).map((project, index) => (
+                <Link className={`hero-preview hero-preview-${index + 1}`} key={project.slug} href={`/projects/${project.slug}`} aria-label={`Preview ${project.title}`}>
+                  <div className="preview-bar"><span className="preview-dots" aria-hidden="true">● ● ●</span><span>{index === 0 ? "Portfolio & platform" : "Cited · Document assistant"}</span><ArrowUpRight size={16} aria-hidden="true" /></div>
+                  <img src={project.image!} alt="" width={1104} height={320} decoding="async" fetchPriority={index === 0 ? "high" : "auto"} />
+                  <span className="preview-caption">{index === 0 ? "Software, design & a personal platform" : "An AI project grounded in real sources"}</span>
+                </Link>
               ))}
             </div>
+            <p className="hero-work-caption"><span aria-hidden="true">↳</span> A few things I’ve brought to life</p>
           </div>
-
-          <div className="relative">
-            <div className="glass rounded-[var(--radius-xl2)] p-6 sm:p-10">
-              <DigitalCoreLazy />
-            </div>
-          </div>
+        </div>
+        <div className="hero-bottom">
+          <p><span className="availability-dot" aria-hidden="true" /> Open to selected projects & collaborations</p>
+          <p>Thoughtful technology. Practical outcomes.</p>
+          <a href="#projects" aria-label="Scroll to selected work"><ArrowDown size={22} aria-hidden="true" /></a>
         </div>
       </Container>
     </section>

@@ -7,7 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X, FileText } from "lucide-react";
 import { site } from "@/data/site";
 import { Container } from "@/components/ui/Container";
-import { Monogram } from "@/components/ui/Monogram";
+import { PortraitMark } from "@/components/ui/PortraitMark";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 
 /** Section ids observed for active-link highlighting. */
@@ -175,7 +175,7 @@ export function Nav() {
       }
     };
     const onResize = () => {
-      if (window.innerWidth >= 768) close();
+      if (window.innerWidth >= 1024) close();
     };
     window.addEventListener("keydown", onKey);
     window.addEventListener("resize", onResize);
@@ -201,17 +201,17 @@ export function Nav() {
         >
           <Link
             href="/#top"
-            className="flex items-center gap-2.5 rounded-lg"
+            className="portrait-trigger flex min-h-11 min-w-11 items-center gap-2.5 rounded-lg"
             aria-label={`${site.name} — home`}
           >
-            <Monogram />
+            <PortraitMark />
             <span className="hidden font-heading text-sm font-semibold text-ink sm:block">
-              {site.name}
+              OJ Florendo
             </span>
           </Link>
 
           {/* Desktop navigation */}
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="hidden items-center gap-1 lg:flex">
             {site.nav.map((item) => {
               const isActive = activeSection === item.targetId;
               return (
@@ -234,7 +234,7 @@ export function Nav() {
 
           {/* Right-hand actions */}
           <div className="flex items-center gap-1">
-            <div className="hidden items-center gap-1 sm:flex">
+            <div className="hidden items-center gap-1 2xl:flex">
               {site.socials
                 .filter((s) => s.external)
                 .map((s) => (
@@ -256,7 +256,7 @@ export function Nav() {
                 href={site.cvPath}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-1 hidden items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent/60 sm:inline-flex"
+                className="ml-1 hidden items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent/60 xl:inline-flex"
               >
                 <FileText className="h-4 w-4" aria-hidden="true" />
                 View CV
@@ -271,7 +271,7 @@ export function Nav() {
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? "Close menu" : "Open menu"}
-              className="ml-1 inline-flex items-center justify-center rounded-md p-2.5 text-ink md:hidden"
+              className="ml-1 inline-flex items-center justify-center rounded-md p-2.5 text-ink lg:hidden"
             >
               {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -288,7 +288,7 @@ export function Nav() {
             animate={{ opacity: 1, height: "auto" }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="overflow-hidden border-t border-line/60 nav-blur md:hidden"
+            className="overflow-hidden border-t border-line/60 nav-blur lg:hidden"
           >
             <Container>
               <ul className="flex flex-col gap-1 py-4">
