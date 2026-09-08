@@ -170,11 +170,14 @@ or persistent application data. Experimental hash-based CSP is not used.
 ## Notable coding decisions
 
 - **`dangerouslySetInnerHTML` has one documented use.**
-  `src/components/ui/StructuredData.tsx` emits static, self-authored JSON-LD using
-  the official Next.js pattern. The payload has no user input, escapes `<` before
-  embedding, uses the non-executable `application/ld+json` type, and carries the
-  request nonce. No other use of `dangerouslySetInnerHTML`, `eval`, or
-  `new Function` is permitted without R2 review.
+  It is in `src/components/ui/JsonLd.tsx`, which emits static, self-authored
+  JSON-LD using the official Next.js pattern.
+  `src/components/ui/StructuredData.tsx` contains no such call itself; it builds
+  the site's Person and WebSite payload and renders it through `JsonLd`. The
+  payload has no user input, escapes `<` before embedding, uses the
+  non-executable `application/ld+json` type, and carries the request nonce. No
+  other use of `dangerouslySetInnerHTML`, `eval`, or `new Function` is permitted
+  without R2 review.
 
 ## Secrets and environment variables
 
