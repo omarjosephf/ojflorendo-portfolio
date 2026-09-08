@@ -1,6 +1,6 @@
 # Project Zero Engineering Handbook
 
-**Version:** 1.2.0  
+**Version:** 1.2.1  
 **Status:** Ratified and governing — the single authoritative version  
 **Owner:** OJ Florendo  
 **Project:** OJ Florendo Rayatchi Portfolio & Platform  
@@ -15,7 +15,9 @@
 
 This handbook defines how Project Zero is planned, designed, implemented, tested, secured, reviewed, released, operated, and evolved.
 
-**OJ Florendo ratified this exact version on 29 August 2026. It supersedes v1.1.0 and is the governing policy for Project Zero.** v1.1.0 remains in Git history and is no longer governing.
+**OJ Florendo ratified v1.2.0 on 29 August 2026, and this patch release v1.2.1 on 8 September 2026. v1.2.1 is the governing policy for Project Zero.** v1.1.0 and v1.2.0 remain in Git history and are no longer governing.
+
+v1.2.1 is a patch: it clarifies one sentence of §6.4 and changes no policy. The description of the v1.2.0 amendment below is retained unchanged, because v1.2.1 does not touch it.
 
 The ratification, with this file's effective checksum, is recorded in ADR-0000.
 
@@ -189,7 +191,7 @@ OJ Florendo is the project owner, product decision-maker, repository authority, 
 - Public authorship should use wording such as **“Designed and built by OJ Florendo Rayatchi.”**
 - AI assistance should be disclosed once in an appropriate case study, README section, or engineering note rather than repeatedly promoted as the product’s creator.
 - A truthful disclosure may identify Claude Code, ChatGPT, or other approved tools as support for research, planning, implementation, debugging, and review, while stating that OJ directed decisions, approved changes, verified output, and remains responsible for the result.
-- AI tools must not be added as Git co-authors by default. A `Co-authored-by` trailer requires explicit owner instruction for that commit.
+- AI tools must not be added as Git co-authors by default. A `Co-authored-by` trailer requires explicit owner instruction. That instruction may be **standing** — given once for a defined body of work, such as a named phase or an agent session — rather than repeated for every commit, provided it is recorded alongside the work it authorises and its scope is stated. What this rule requires is that a human decided, not that a human decided repeatedly; a standing instruction that names its scope satisfies it, and silence never does.
 - Existing historical AI co-author metadata does not transfer repository ownership or authority and should not be rewritten solely for cosmetic reasons.
 - “Built by AI,” “Claude built this,” or equivalent wording is prohibited when it obscures human direction and accountability.
 
@@ -1876,6 +1878,34 @@ Privacy-reviewed: Yes / No / Not applicable
 ---
 
 # Changelog
+
+## 1.2.1 — ratified 8 September 2026
+
+A one-sentence clarification to §6.4. **No policy changes.**
+
+**Clarified**
+
+- **§6.4** — a `Co-authored-by` trailer still requires explicit owner
+  instruction, and the default is still no trailer. What changes is that the
+  instruction may be **standing** — given once for a defined body of work, such
+  as a named phase or an agent session — rather than repeated for every commit,
+  provided it is recorded alongside the work and its scope is stated.
+
+**Why this is a patch and not a minor version**
+
+The rule's requirement is unchanged: a human must decide, and silence is not a
+decision. v1.2.0 already permitted the trailer on "explicit owner instruction";
+the only words removed are "for that commit", which read as a per-commit
+formality rather than a control. Requiring the same decision forty times does not
+make it forty decisions, and a standing instruction that names its scope is
+auditable in a way a scatter of per-commit ones is not.
+
+Under §46 this is "clarification or correction with no material policy change",
+which the versioning section defines as a patch. Nothing in the authority model,
+risk classification, disclosure obligations or the rest of §6.4 is touched — in
+particular, the prohibitions on presenting AI output as independently created,
+on "Built by AI" wording, and on rewriting historical co-author metadata all
+stand unchanged.
 
 ## 1.2.0 — ratified 29 August 2026
 
