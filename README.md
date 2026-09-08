@@ -76,6 +76,7 @@ and security treated as first-class requirements.
 | Motion | Framer Motion (restrained, reduced-motion aware) |
 | 3D | Three.js · React Three Fiber · Drei |
 | Icons | lucide-react |
+| Testing | Vitest (unit and component) · Playwright (end-to-end) · axe-core |
 | Tooling | ESLint · npm |
 
 ## Architecture overview
@@ -204,6 +205,22 @@ env files). All values below are placeholders.
 | `RESEND_API_KEY` | optional | Enables real contact-email delivery (server-only). Without it, the form uses a safe mock transport. |
 | `CONTACT_TO_EMAIL` | optional | Inbox that receives contact enquiries (server-only). |
 | `CONTACT_FROM_EMAIL` | optional | Verified sender address for enquiries (server-only). |
+| `TURNSTILE_SECRET_KEY` | optional | Server-only half of the Cloudflare bot check on the contact form. |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | optional | Browser half of the same bot check. Public by design, and inlined at build time, so changing it needs a redeploy. |
+| `ASSISTANT_SERVICE_URL` | optional | Origin of the retrieval service OJ Assistant asks (server-only; HTTPS in production). |
+| `ASSISTANT_SERVICE_SECRET` | optional | Shared secret authenticating this site to that service (server-only). |
+
+Both pairs are all-or-nothing, and leaving a pair unset is the supported way to
+switch that feature off rather than a broken state. With no Turnstile keys the
+contact form behaves exactly as it does without a bot check and nothing calls
+Cloudflare. With no assistant keys the panel shows its honest "unavailable"
+state, no request is made, and the rest of the site is unaffected — which is also
+the fastest rollback for the assistant, needing no deploy and no code change.
+Setting only one of a pair is a misconfiguration: the assistant route fails
+closed and logs which value is missing rather than calling the service
+unauthenticated.
+
+`.env.example` carries the full setup notes, including Cloudflare's test keys.
 
 ## npm scripts
 
@@ -213,7 +230,12 @@ env files). All values below are placeholders.
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build |
 | `npm run lint` | Run ESLint |
-| `npm run typecheck` | Type-check with `tsc --noEmit` |
+| `npm run typecheck` | Type-check the app and the tests |
+| `npm run test:unit` | Unit and component tests (Vitest) |
+| `npm run test:e2e` | End-to-end tests (Playwright) |
+| `npm run test:ci` | The full gate CI runs, in CI's order |
+| `npm run assistant:build-corpus` | Rebuild the assistant corpus from `content/` |
+| `npm run assistant:check-corpus` | Assert the committed corpus matches `content/` |
 
 ## Project structure
 
@@ -221,6 +243,8 @@ env files). All values below are placeholders.
 src/
 ├── app/
 │   ├── api/contact/route.ts      # contact form POST handler
+│   ├── api/assistant/route.ts    # assistant POST handler (calls the retrieval
+│   │                             #   service server-to-server)
 │   ├── projects/[slug]/page.tsx  # project case-study route
 │   ├── layout.tsx  page.tsx  globals.css
 │   ├── robots.ts  sitemap.ts  manifest.ts
@@ -234,7 +258,12 @@ src/
 │   │                             #   frame limiter/hooks, CSS fallback
 │   └── ui/                       # small reusable pieces
 ├── data/                         # typed content (site, skills, experience, …)
-├── lib/                          # contact schema, email transport, helpers
+│                                 #   plus the generated assistant corpus
+├── lib/
+│   ├── assistant/                # wire types, response guard, corpus checksum,
+│   │                             #   and the server-to-server service client
+│   ├── contact/  email/  turnstile/
+│   └── …                         # rate limit, site URL, structured data, WebGL
 ├── types/                        # shared TypeScript types
 └── proxy.ts                      # per-request nonce Content Security Policy
 ```
