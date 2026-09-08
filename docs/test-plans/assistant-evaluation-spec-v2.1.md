@@ -1,5 +1,9 @@
 # OJ Assistant — evaluation specification v2.1
 
+> Historical specification. [v3.0](assistant-evaluation-spec-v3.md) supersedes
+> this prospectively. Earlier run records retain their original definitions;
+> citation presence alone is not a v3 factual-quality pass.
+
 - **Status:** **FROZEN** 29 August 2026, before any further paid evaluation.
 - **Amended** 29 August 2026 with §6 only. The taxonomy, metrics, classes and
   thresholds are **unchanged**; §6 records what the harness measures relative to

@@ -27,10 +27,14 @@ The genuine photograph replaces the circular navigation and contact initials.
 The original 256px asset is reused unchanged and clipped into circles with CSS.
 The hero statement retains its original layout. The contact portrait links to
 the enquiry form; the navigation portrait retains its home link. The footer mark
-is unchanged. The existing assistant has its original
-palette and font scoped around it so the portfolio theme does not inadvertently
-redesign it. Assistant renaming, receptionist features, booking integrations
-and the separate assistant service are outside this work.
+is unchanged. The initial redesign preserved the assistant's original palette
+and font. Following the owner's separate approval on 7 September 2026, E.V now
+shares the portfolio's ivory surfaces, charcoal text, cobalt accents, Barlow
+Condensed headings, Inter body text and restrained borders. Its approved minimal
+welcome and interaction behaviour are preserved. The assistant wrapper remains
+an interaction boundary so portfolio click effects do not fire inside the chat.
+Receptionist features, booking integrations and the separate assistant service
+remain outside this presentation change.
 
 The added heading font is Barlow Condensed by The Barlow Project Authors,
 served through the existing Next.js font pipeline. Its source and SIL Open Font

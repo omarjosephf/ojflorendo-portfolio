@@ -74,10 +74,14 @@ next-env.d.ts
 
 # Public repository guidance is tracked at the root. Ignore only private/local
 # AI-tooling instructions and state; never copy their contents into tracked files.
+# Every assistant that works on this repository gets an entry here: the rule is
+# about the class of file, not about one vendor, and an unlisted tool's config
+# directory is one `git add -A` away from being published.
 /CLAUDE.local.md
 /AGENTS.local.md
 /.claude/
 /.agents/
+/.codex/
 
 # test / automation artefacts (if ever added inside the repo)
 /test-results/
