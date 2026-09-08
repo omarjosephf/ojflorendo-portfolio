@@ -14,14 +14,14 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Mission />
-      <About />
+      <Projects />
+      <Services />
       <HowIWork />
+      <About />
+      <Mission />
       <Now />
       <Skills />
-      <Services />
       <Experience />
-      <Projects />
       <Education />
       <Contact />
     </>

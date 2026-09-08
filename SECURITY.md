@@ -47,10 +47,37 @@ environment variable disables it.
 **Visitor questions leave the browser.** This is a deliberate change from the
 earlier browser-only assistant, and the interface says so rather than implying
 otherwise. A question is sent to this site's server and from there,
-server-to-server, to the retrieval service and its model provider. It is **not**
-stored, **not** written to any log in either repository, **not** used for
-training, and **no** conversation history is kept. The visitor's IP address is
-not forwarded.
+server-to-server, to the retrieval service and its model provider. The visitor's
+IP address is not forwarded.
+
+The two sides of that journey give different guarantees, so they are stated
+separately. On the sides this project controls, the question is **not** stored,
+**not** written to any log in either repository, and **no** conversation history
+is kept. On the provider side, the guarantee is about **training, not
+deletion**: the paid provider tiers this assistant uses do **not** train on the
+content sent to them, but they do retain it briefly for their own abuse and
+policy monitoring before deleting it — up to about thirty days where the
+provider publishes a figure. This project cannot waive that window, so it is
+stated here rather than implied away. No provider is named, because the same
+two terms hold across every provider this assistant is configured to use; a
+tier that trains on submitted content, or allows human review of it, is
+disqualified for this assistant regardless of cost.
+
+Nothing is *kept*, but something more than the current question is *sent*, and
+that is worth stating rather than leaving to inference. A follow-up question
+travels together with up to four of the visitor's own earlier questions
+(`ASSISTANT_HISTORY_LIMIT`), so that the assistant can resolve "it" or "that one"
+against what was already asked. Only the questions themselves and the short
+source labels shown beneath each answer travel; the answer text does not, and the
+type that carries them has no field for it. That history lives only in the memory
+of the open page — never in a cookie, in browser storage, or on disk — and it is
+gone when the tab is reloaded or closed.
+
+This section describes the assistant **as deployed today**, which keeps nothing
+after the answer is returned — not on the owner's side and not in the visitor's
+browser. Should either change — a transcript store, an analytics view, a
+tab-restore record, or any other feature that keeps what a visitor typed — this
+section must be rewritten in the same change that ships it, never afterwards.
 
 One category of input never leaves the browser at all: apparent personal,
 financial or credential data the visitor typed about themselves is detected
@@ -153,11 +180,14 @@ or persistent application data. Experimental hash-based CSP is not used.
 ## Notable coding decisions
 
 - **`dangerouslySetInnerHTML` has one documented use.**
-  `src/components/ui/StructuredData.tsx` emits static, self-authored JSON-LD using
-  the official Next.js pattern. The payload has no user input, escapes `<` before
-  embedding, uses the non-executable `application/ld+json` type, and carries the
-  request nonce. No other use of `dangerouslySetInnerHTML`, `eval`, or
-  `new Function` is permitted without R2 review.
+  It is in `src/components/ui/JsonLd.tsx`, which emits static, self-authored
+  JSON-LD using the official Next.js pattern.
+  `src/components/ui/StructuredData.tsx` contains no such call itself; it builds
+  the site's Person and WebSite payload and renders it through `JsonLd`. The
+  payload has no user input, escapes `<` before embedding, uses the
+  non-executable `application/ld+json` type, and carries the request nonce. No
+  other use of `dangerouslySetInnerHTML`, `eval`, or `new Function` is permitted
+  without R2 review.
 
 ## Secrets and environment variables
 

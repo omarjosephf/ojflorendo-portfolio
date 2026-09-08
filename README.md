@@ -8,9 +8,9 @@
 
 A premium, accessible and security-conscious personal website — the foundation of
 a long-term platform documenting **OJ Florendo’s** journey across software
-engineering, AI, data, learning and entrepreneurship. It’s a fast, dark,
-editorial single-page site with a procedural 3D hero, an interactive experience
-timeline, an accessible contact form and dedicated project case-study routes.
+engineering, AI, data, learning and entrepreneurship. The design uses warm editorial typography, real project imagery, finite motion, the existing experience timeline, an accessible contact form and dedicated project case-study routes.
+
+The owner approved the design and its publication on 7 September 2026. Its scope and validation are recorded in [the design notes](docs/portfolio-redesign-preview.md) and [release notes](docs/releases/2026-09-07-portfolio-redesign.md).
 
 ## Purpose
 
@@ -24,9 +24,9 @@ and security treated as first-class requirements.
 
 ## Live demo
 
-> 🔗 **Live site:** https://ojfr.me &nbsp;·&nbsp; _deployment in progress_
+> 🔗 **Live site:** https://ojfr.me
 
-## Screenshots
+## Screenshots of the earlier design
 
 | Desktop | Mobile |
 | --- | --- |
@@ -40,9 +40,9 @@ and security treated as first-class requirements.
 
 - **Single-page portfolio** — Hero, About, Now, Skills, Experience, Projects,
   Education and Contact, all driven by typed content data.
-- **Procedural “Digital Core” 3D hero** — a dynamically-loaded WebGL scene with
+- **Earlier production design (unmounted in this preview): Digital Core 3D hero** — a dynamically-loaded WebGL scene with
   an attractive CSS fallback; paused when off-screen or the tab is hidden.
-- **Procedural particle-wave background** — a shader-driven point field fixed
+- **Earlier production design (unmounted in this preview): particle-wave background** — a shader-driven point field fixed
   behind every page, sitting in the lower half like a shoreline and reacting
   gently to the pointer, over a static CSS gradient that serves as its no-JS /
   no-WebGL state (see `docs/adr/0002-hero-particle-wave.md`).
@@ -50,11 +50,17 @@ and security treated as first-class requirements.
   highlights the most relevant role, with a static reduced-motion presentation.
 - **Accessible contact form** — full server-side validation, plus direct email,
   LinkedIn and GitHub actions.
-- **Curated OJ Assistant beta** — deterministic, reviewed portfolio answers
-  processed entirely in the browser with no model API, transcript storage,
-  inference charge, or private-data source. It carries an artistic digital
-  avatar of OJ; the panel, matcher, knowledge manifest and larger portrait load
-  only when a visitor opens it.
+- **OJ Assistant beta** — answers questions about OJ from a reviewed corpus of
+  owner-approved documents, and shows the sources it used. Questions leave the
+  browser: the panel posts to this site's own `/api/assistant` route, which calls
+  a retrieval service server-to-server, and that service asks a hosted language
+  model (currently Claude Haiku 4.5) to answer from the retrieved passages.
+  A browser-side privacy stop keeps a visitor's own personal, financial or
+  credential data from being sent at all. This site stores no transcript,
+  creates no cookie or account, and does not forward the visitor's IP address;
+  the model provider does not train on what it receives, but does retain it
+  briefly for abuse monitoring, which `SECURITY.md` sets out in full. The panel
+  and the larger portrait load only when a visitor opens it.
 - **Project case studies** — dedicated, data-driven routes with structured data.
 - **Responsive** — from small phones to large monitors, with no horizontal
   overflow.
@@ -70,6 +76,7 @@ and security treated as first-class requirements.
 | Motion | Framer Motion (restrained, reduced-motion aware) |
 | 3D | Three.js · React Three Fiber · Drei |
 | Icons | lucide-react |
+| Testing | Vitest (unit and component) · Playwright (end-to-end) · axe-core |
 | Tooling | ESLint · npm |
 
 ## Architecture overview
@@ -78,9 +85,12 @@ and security treated as first-class requirements.
   interactivity is required (3D hero, navigation, timeline, contact form).
 - **Content is data, not markup** — all copy lives in typed modules under
   `src/data`, kept separate from presentation.
-- **OJ Assistant is a local curated client island** — it selects reviewed answers
-  from a typed public manifest and makes no model, server, provider, storage, or
-  analytics request.
+- **OJ Assistant is a client island behind a same-origin route** — the browser
+  only ever talks to this origin; the backend URL and shared secret stay
+  server-side. A question travels with at most four earlier question/source
+  turns, never with previously generated answer prose. Every response is
+  revalidated here before it renders, and citation links are resolved from an
+  exact corpus allowlist rather than from anything the model returned.
 - **Security at the edge of the app** — a per-request nonce Content Security
   Policy is generated in `src/proxy.ts` (Next.js 16’s replacement for
   middleware); other security headers are set in `next.config.ts`.
@@ -92,10 +102,13 @@ flowchart TD
   V["Visitor browser"] -->|HTTPS| P["Proxy: per-request nonce + CSP"]
   P --> A["Next.js App Router"]
   A --> RSC["Server Components<br/>(sections from typed data)"]
-  A --> CC["Client islands<br/>(3D hero, nav, timeline, form, curated assistant)"]
+  A --> CC["Client islands<br/>(3D hero, nav, timeline, form, assistant)"]
   RSC --> D[("Typed content<br/>src/data")]
   A --> CS["Case-study routes<br/>/projects/[slug]"]
   CC -->|"POST JSON"| API["/api/contact route"]
+  CC -->|"question + bounded source history"| AA["/api/assistant route"]
+  AA -->|"server-to-server, shared secret"| RS["Retrieval service"]
+  RS --> MP["Language model provider"]
   API --> VAL["Validation + honeypot + rate limit"]
   VAL --> T{"Email transport"}
   T -->|"no secrets"| MOCK["Mock (validated, not sent)"]
@@ -146,6 +159,8 @@ See [`SECURITY.md`](SECURITY.md) for the full posture and disclosure policy.
 
 ## Performance considerations
 
+The preview uses finite CSS motion with no decorative canvas. The following 3D measurements describe the earlier production design. See the preview notes for the current verification plan.
+
 - Both 3D scenes are **dynamically imported**, frame-rate capped, and **paused
   when off-screen or the tab is hidden**, with a device-appropriate pixel-ratio
   cap. All wave motion runs in a vertex shader, so per-frame CPU cost does not
@@ -190,6 +205,22 @@ env files). All values below are placeholders.
 | `RESEND_API_KEY` | optional | Enables real contact-email delivery (server-only). Without it, the form uses a safe mock transport. |
 | `CONTACT_TO_EMAIL` | optional | Inbox that receives contact enquiries (server-only). |
 | `CONTACT_FROM_EMAIL` | optional | Verified sender address for enquiries (server-only). |
+| `TURNSTILE_SECRET_KEY` | optional | Server-only half of the Cloudflare bot check on the contact form. |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | optional | Browser half of the same bot check. Public by design, and inlined at build time, so changing it needs a redeploy. |
+| `ASSISTANT_SERVICE_URL` | optional | Origin of the retrieval service OJ Assistant asks (server-only; HTTPS in production). |
+| `ASSISTANT_SERVICE_SECRET` | optional | Shared secret authenticating this site to that service (server-only). |
+
+Both pairs are all-or-nothing, and leaving a pair unset is the supported way to
+switch that feature off rather than a broken state. With no Turnstile keys the
+contact form behaves exactly as it does without a bot check and nothing calls
+Cloudflare. With no assistant keys the panel shows its honest "unavailable"
+state, no request is made, and the rest of the site is unaffected — which is also
+the fastest rollback for the assistant, needing no deploy and no code change.
+Setting only one of a pair is a misconfiguration: the assistant route fails
+closed and logs which value is missing rather than calling the service
+unauthenticated.
+
+`.env.example` carries the full setup notes, including Cloudflare's test keys.
 
 ## npm scripts
 
@@ -199,7 +230,13 @@ env files). All values below are placeholders.
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build |
 | `npm run lint` | Run ESLint |
-| `npm run typecheck` | Type-check with `tsc --noEmit` |
+| `npm run typecheck` | Type-check the app and the tests |
+| `npm run test:unit` | Unit and component tests (Vitest) |
+| `npm run test:e2e` | End-to-end tests (Playwright) |
+| `npm run test:ci` | The full gate CI runs, in CI's order |
+| `npm run assistant:build-corpus` | Rebuild the assistant corpus from `content/` |
+| `npm run assistant:check-corpus` | Assert the committed corpus matches `content/` |
+| `npm run docs:check-anchors` | Assert every rule anchor cited from code resolves |
 
 ## Project structure
 
@@ -207,12 +244,14 @@ env files). All values below are placeholders.
 src/
 ├── app/
 │   ├── api/contact/route.ts      # contact form POST handler
+│   ├── api/assistant/route.ts    # assistant POST handler (calls the retrieval
+│   │                             #   service server-to-server)
 │   ├── projects/[slug]/page.tsx  # project case-study route
 │   ├── layout.tsx  page.tsx  globals.css
 │   ├── robots.ts  sitemap.ts  manifest.ts
 │   ├── opengraph-image.tsx  icon.svg  not-found.tsx
 ├── components/
-│   ├── assistant/                # curated local portfolio guide
+│   ├── assistant/                # assistant panel and conversation UI
 │   ├── layout/                   # nav, footer, skip link
 │   ├── sections/                 # hero, about, now, skills, experience, …
 │   ├── case-study/               # reusable case-study template
@@ -220,7 +259,12 @@ src/
 │   │                             #   frame limiter/hooks, CSS fallback
 │   └── ui/                       # small reusable pieces
 ├── data/                         # typed content (site, skills, experience, …)
-├── lib/                          # contact schema, email transport, helpers
+│                                 #   plus the generated assistant corpus
+├── lib/
+│   ├── assistant/                # wire types, response guard, corpus checksum,
+│   │                             #   and the server-to-server service client
+│   ├── contact/  email/  turnstile/
+│   └── …                         # rate limit, site URL, structured data, WebGL
 ├── types/                        # shared TypeScript types
 └── proxy.ts                      # per-request nonce Content Security Policy
 ```

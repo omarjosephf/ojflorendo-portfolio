@@ -1,8 +1,9 @@
 /**
- * Renders a JSON-LD structured-data block (CLAUDE.md §13).
+ * Renders a JSON-LD structured-data block.
  *
- * NOTE (documented exception to CLAUDE.md §15 — see SECURITY.md, gap G12): this
- * and <StructuredData/> are the only uses of `dangerouslySetInnerHTML`. It is the
+ * NOTE (documented exception to docs/ENGINEERING_HANDBOOK.md §15.1, dangerous
+ * APIs — see SECURITY.md, "Notable coding decisions"): the `<script>` below is
+ * the only use of `dangerouslySetInnerHTML` in the codebase. It is the
  * official Next.js JSON-LD pattern and is safe here because the payload is 100%
  * static, self-authored data (no user input), `<` is escaped to `<`, the
  * element is a non-executable `application/ld+json` data block, and it carries

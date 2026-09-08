@@ -47,10 +47,11 @@ export const site: SiteConfig = {
     },
   ],
   nav: [
+    { label: "Projects", targetId: "projects" },
+    { label: "Services", targetId: "services" },
     { label: "About", targetId: "about" },
     { label: "Skills", targetId: "skills" },
     { label: "Experience", targetId: "experience" },
-    { label: "Projects", targetId: "projects" },
     { label: "Education", targetId: "education" },
     { label: "Contact", targetId: "contact" },
   ],

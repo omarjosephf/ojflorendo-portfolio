@@ -1,4 +1,4 @@
-/** Keyboard skip link — first focusable element, jumps to main content (CLAUDE.md §11). */
+/** Keyboard skip link — first focusable element, jumps to main content (docs/ENGINEERING_HANDBOOK.md §19, accessibility standard). */
 export function SkipLink() {
   return (
     <a

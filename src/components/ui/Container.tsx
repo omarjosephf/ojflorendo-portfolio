@@ -10,7 +10,7 @@ export function Container({
 }) {
   return (
     <div
-      className={`mx-auto w-full max-w-6xl px-5 sm:px-8 2xl:max-w-[82rem] ${className}`}
+      className={`portfolio-container mx-auto w-full max-w-[88rem] px-6 sm:px-10 lg:px-16 ${className}`}
     >
       {children}
     </div>

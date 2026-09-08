@@ -37,7 +37,8 @@ const eslintConfig = defineConfig([
        * set of warnings that must each be individually ignored, which trains
        * everyone to skim past lint output — the real cost.
        *
-       * Explicit dimensions on every `<img>` remain mandatory (CLAUDE.md §12):
+       * Explicit dimensions on every `<img>` remain mandatory
+       * (docs/ENGINEERING_HANDBOOK.md §18, external links and assets):
        * that is what prevents layout shift, and it is enforced by review and by
        * the e2e checks, not by this rule.
        */

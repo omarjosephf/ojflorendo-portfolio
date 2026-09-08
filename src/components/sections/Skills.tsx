@@ -6,7 +6,7 @@ export function Skills() {
   return (
     <Section
       id="skills"
-      eyebrow="Capabilities"
+      eyebrow="07 / Capabilities"
       title="Capabilities shaped by software, AI, design, and operations."
       intro="My experience combines technical development with training, UX, data, content, and digital operations. This helps me consider both how a product is built and how it will be understood, used, and maintained."
     >

@@ -15,7 +15,7 @@ export function Now() {
   return (
     <Section
       id="now"
-      eyebrow="Now"
+      eyebrow="06 / Now"
       title="What I'm working on now"
       intro="A snapshot of my current focus."
     >
