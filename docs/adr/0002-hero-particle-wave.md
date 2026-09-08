@@ -112,7 +112,8 @@ Each was diagnosed against a measured baseline rather than assumed:
   context cost ever becomes a problem.
 - **Keeping the wave hero-only.** Rejected by the owner, who asked for a
   consistent background across the whole page.
-- **Dropping the Digital Core.** Offered and declined; CLAUDE.md §10 mandates it.
+- **Dropping the Digital Core.** Offered and declined; the approved architecture
+  baseline in docs/ENGINEERING_HANDBOOK.md §7 mandates it.
 
 ## Security and privacy impact
 

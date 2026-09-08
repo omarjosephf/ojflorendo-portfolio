@@ -45,7 +45,7 @@ function BulletList({ items }: { items: string[] }) {
   );
 }
 
-/** Reusable, data-driven case-study template (CLAUDE.md §9 / Phase 6). */
+/** Reusable, data-driven case-study template (docs/ENGINEERING_HANDBOOK.md §16, components and data modelling). */
 export function CaseStudyView({ project }: { project: ProjectItem }) {
   const cs = project.caseStudy;
   if (!cs) return null;
