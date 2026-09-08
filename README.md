@@ -236,6 +236,7 @@ unauthenticated.
 | `npm run test:ci` | The full gate CI runs, in CI's order |
 | `npm run assistant:build-corpus` | Rebuild the assistant corpus from `content/` |
 | `npm run assistant:check-corpus` | Assert the committed corpus matches `content/` |
+| `npm run docs:check-anchors` | Assert every rule anchor cited from code resolves |
 
 ## Project structure
 
