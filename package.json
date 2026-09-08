@@ -38,7 +38,8 @@
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:ci": "node scripts/verify-dependency-audit.mjs && npm run lint && npm run typecheck:app && npm run typecheck:tests && npm run assistant:check-corpus && npm run test:unit && npm run build && npm run test:e2e",
+    "test:ci": "node scripts/verify-dependency-audit.mjs && npm run docs:check-anchors && npm run lint && npm run typecheck:app && npm run typecheck:tests && npm run assistant:check-corpus && npm run test:unit && npm run build && npm run test:e2e",
+    "docs:check-anchors": "node scripts/check-doc-anchors.mjs",
     "assistant:build-corpus": "node scripts/build-assistant-corpus.mjs",
     "assistant:check-corpus": "node scripts/build-assistant-corpus.mjs --check",
     "assistant:export": "node scripts/export-assistant-corpus.mjs"

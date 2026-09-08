@@ -1,7 +1,7 @@
 import { site } from "@/data/site";
 
 /**
- * Profile photo area (CLAUDE.md §9). Shows the profile photo when
+ * Profile photo area (docs/ENGINEERING_HANDBOOK.md §18, assets). Shows the profile photo when
  * `site.profileImage` is set, otherwise a clean monogram placeholder so the
  * layout looks complete.
  *

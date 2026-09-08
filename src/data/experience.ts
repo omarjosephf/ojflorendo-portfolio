@@ -1,6 +1,6 @@
 import type { ExperienceItem } from "@/types";
 
-/** Verified work experience (CLAUDE.md §4). Newest first. */
+/** Verified work experience (docs/ENGINEERING_HANDBOOK.md §6.2, content rules). Newest first. */
 export const experience: ExperienceItem[] = [
   {
     role: "E-commerce & Social Media Operations Lead",

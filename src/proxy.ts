@@ -10,7 +10,7 @@ import type { NextRequest } from "next/server";
  * Next.js automatically attaches this nonce to its framework/bootstrap scripts
  * and any injected styles when it sees the CSP header on the incoming request.
  *
- * Consequence (documented in SECURITY.md, gap G2): using a nonce forces
+ * Consequence (documented in SECURITY.md, "Dynamic-rendering trade-off"): using a nonce forces
  * dynamic rendering. The site is "static-first" in substance (no DB / auth /
  * user input) but is server-rendered per request rather than a static export.
  */

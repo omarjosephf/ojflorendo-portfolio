@@ -43,6 +43,11 @@ jobs:
       - name: Dependency audit
         run: node scripts/verify-dependency-audit.mjs
 
+      # Resolve every rule anchor cited from code against the headings that
+      # actually exist. Sub-second and deterministic, so it fails before lint.
+      - name: Documentation anchors
+        run: npm run docs:check-anchors
+
       - name: Lint
         run: npm run lint
 

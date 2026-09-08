@@ -1,5 +1,7 @@
 /**
- * Pure-CSS "Digital Core" (CLAUDE.md §10). Decorative and self-contained:
+ * Pure-CSS "Digital Core" (docs/ENGINEERING_HANDBOOK.md §19.1, motion and 3D;
+ * the CSS fallback itself is required by docs/ENGINEERING_HANDBOOK.md §17).
+ * Decorative and self-contained:
  * renders with no WebGL, no JavaScript and no inline styles, and is dampened
  * automatically under prefers-reduced-motion. Used on its own until the 3D
  * scene loads, and as the permanent fallback when WebGL is unavailable.

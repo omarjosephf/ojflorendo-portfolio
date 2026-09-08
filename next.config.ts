@@ -6,7 +6,8 @@ const isProd = process.env.NODE_ENV === "production";
  * Static security headers applied to every response.
  *
  * The Content-Security-Policy is intentionally NOT set here — it is generated
- * per-request with a fresh nonce in `src/proxy.ts` (see CLAUDE.md §14 and the
+ * per-request with a fresh nonce in `src/proxy.ts` (see
+ * docs/ENGINEERING_HANDBOOK.md §23, Content Security Policy and response headers, and the
  * Next.js CSP guide). These headers are the static, request-independent part of
  * our defence-in-depth header set.
  */

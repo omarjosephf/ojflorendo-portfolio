@@ -123,7 +123,8 @@ function CoreScene({ animate, mobile }: { animate: boolean; mobile: boolean }) {
 }
 
 /**
- * Procedural "Digital Core" (CLAUDE.md §10). Client-only, dynamically imported.
+ * Procedural "Digital Core" (docs/ENGINEERING_HANDBOOK.md §19.1, motion and 3D).
+ * Client-only, dynamically imported.
  * Performance controls: capped DPR (≈1 mobile / ≤1.5 desktop), no post-processing
  * or shadows, unlit basic materials, and the render loop is paused when the canvas
  * is off-screen or the tab is hidden. Static (single frame) under reduced motion.
