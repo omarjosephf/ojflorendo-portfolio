@@ -56,8 +56,10 @@ and security treated as first-class requirements.
   a retrieval service server-to-server, and that service asks a hosted language
   model (currently Claude Haiku 4.5) to answer from the retrieved passages.
   A browser-side privacy stop keeps a visitor's own personal, financial or
-  credential data from being sent at all. No transcript is stored, no cookie or
-  account is created, and the visitor's IP address is not forwarded. The panel
+  credential data from being sent at all. This site stores no transcript,
+  creates no cookie or account, and does not forward the visitor's IP address;
+  the model provider does not train on what it receives, but does retain it
+  briefly for abuse monitoring, which `SECURITY.md` sets out in full. The panel
   and the larger portrait load only when a visitor opens it.
 - **Project case studies** — dedicated, data-driven routes with structured data.
 - **Responsive** — from small phones to large monitors, with no horizontal

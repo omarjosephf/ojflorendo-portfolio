@@ -47,10 +47,27 @@ environment variable disables it.
 **Visitor questions leave the browser.** This is a deliberate change from the
 earlier browser-only assistant, and the interface says so rather than implying
 otherwise. A question is sent to this site's server and from there,
-server-to-server, to the retrieval service and its model provider. It is **not**
-stored, **not** written to any log in either repository, **not** used for
-training, and **no** conversation history is kept. The visitor's IP address is
-not forwarded.
+server-to-server, to the retrieval service and its model provider. The visitor's
+IP address is not forwarded.
+
+The two sides of that journey give different guarantees, so they are stated
+separately. On the sides this project controls, the question is **not** stored,
+**not** written to any log in either repository, and **no** conversation history
+is kept. On the provider side, the guarantee is about **training, not
+deletion**: the paid provider tiers this assistant uses do **not** train on the
+content sent to them, but they do retain it briefly for their own abuse and
+policy monitoring before deleting it — up to about thirty days where the
+provider publishes a figure. This project cannot waive that window, so it is
+stated here rather than implied away. No provider is named, because the same
+two terms hold across every provider this assistant is configured to use; a
+tier that trains on submitted content, or allows human review of it, is
+disqualified for this assistant regardless of cost.
+
+This section describes the assistant **as deployed today**, which keeps nothing
+after the answer is returned — not on the owner's side and not in the visitor's
+browser. Should either change — a transcript store, an analytics view, a
+tab-restore record, or any other feature that keeps what a visitor typed — this
+section must be rewritten in the same change that ships it, never afterwards.
 
 One category of input never leaves the browser at all: apparent personal,
 financial or credential data the visitor typed about themselves is detected
