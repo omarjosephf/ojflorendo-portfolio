@@ -171,6 +171,58 @@ date and checksum, and conflicting documentation is reconciled in ADR-0006 D12.
 
 **v1.1.0 remains in Git history** and is no longer citable as governing.
 
+### Ratification, 8 September 2026 — v1.2.1 supersedes v1.2.0
+
+OJ Florendo explicitly ratified **Engineering Handbook v1.2.1** on 8 September
+2026. It is now the governing policy and is committed at
+`docs/ENGINEERING_HANDBOOK.md`.
+
+- **Effective date:** 8 September 2026
+- **Effective checksum (SHA-256 of the committed file, LF line endings):**
+  `9bdf6a7c8319ba616091c68c158bb882f9ae1cdc2d3b665bb9281df127d8f366`
+
+**What it changes.** One sentence of §6.4. A `Co-authored-by` trailer still
+requires explicit owner instruction and the default is still no trailer; the
+instruction may now be **standing** for a defined body of work rather than
+repeated per commit, provided its scope is recorded. Under §46 this is a
+clarification with no material policy change, which the versioning section
+defines as a patch. No other section is touched.
+
+### Correction, 8 September 2026 — the recorded checksums were CRLF renderings
+
+The v1.2.0 checksum recorded above,
+`370cdb24f867c66514544f38aae0c816114c70c8062e04bc3195af3a94e73dfb`, **does not
+match the committed file.** The committed bytes hash to
+`fa3e88c6a36a86b0689c0b20f2db8069316c87576a57555c27e0ea1191086128`.
+
+The handbook was not altered after ratification — it has exactly one commit,
+`1319554`. The recorded value is the hash of the same content rendered with
+**CRLF** line endings, as it appears in a Windows working copy. The repository
+stores LF: `.gitattributes` sets `* text=auto eol=lf` and `*.md text eol=lf`.
+
+This mattered. The checksum exists so that, in this ADR's own words, "no
+unratified bytes are ever treated as authoritative". A value that only verifies
+on Windows fails that job in both directions: it reports tampering on Linux and
+in CI where none occurred, and it would fail to detect a real substitution by
+anyone verifying on a platform where it happens to match. A verification control
+whose result depends on the checker's operating system is not a verification
+control.
+
+**Convention, from this correction onward:** the effective checksum is the
+SHA-256 of the **committed** bytes — LF line endings, as `git show
+<ref>:docs/ENGINEERING_HANDBOOK.md | sha256sum` produces. That is what
+"recomputed from the committed file" above always meant, and it is now stated
+explicitly so the ambiguity cannot recur.
+
+For the record, the corrected historical value:
+
+| Version | Recorded (CRLF, wrong) | Committed bytes (LF, authoritative) |
+| --- | --- | --- |
+| 1.2.0 | `370cdb24…e73dfb` | `fa3e88c6…086128` |
+
+v1.2.0 is superseded and neither value is now authoritative; the row exists so
+the discrepancy is explained rather than left to be rediscovered.
+
 ## Rollback or migration
 
 Before publication, remove the candidate files. After publication, revert the
