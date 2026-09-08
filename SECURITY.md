@@ -63,6 +63,16 @@ two terms hold across every provider this assistant is configured to use; a
 tier that trains on submitted content, or allows human review of it, is
 disqualified for this assistant regardless of cost.
 
+Nothing is *kept*, but something more than the current question is *sent*, and
+that is worth stating rather than leaving to inference. A follow-up question
+travels together with up to four of the visitor's own earlier questions
+(`ASSISTANT_HISTORY_LIMIT`), so that the assistant can resolve "it" or "that one"
+against what was already asked. Only the questions themselves and the short
+source labels shown beneath each answer travel; the answer text does not, and the
+type that carries them has no field for it. That history lives only in the memory
+of the open page — never in a cookie, in browser storage, or on disk — and it is
+gone when the tab is reloaded or closed.
+
 This section describes the assistant **as deployed today**, which keeps nothing
 after the answer is returned — not on the owner's side and not in the visitor's
 browser. Should either change — a transcript store, an analytics view, a
