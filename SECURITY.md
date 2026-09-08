@@ -254,7 +254,6 @@ versions in response to published advisories:
 | --- | --- | --- |
 | `sharp` | `^0.35.3` | GHSA-f88m-g3jw-g9cj (bundled libvips) |
 | `postcss` | `^8.5.10` | GHSA-qx2v-qp2m-jg93 |
-| `nanoid`, nested under `postcss` | `^3.3.18` | Not recorded when the override was added; to be identified or the override removed at the next review |
 
 The overrides are temporary. They must be reviewed when Next.js changes, removed
 when the installed dependency tree is natively patched, and regression-tested

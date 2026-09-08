@@ -20,10 +20,7 @@
   },
   "overrides": {
     "sharp": "^0.35.3",
-    "postcss": {
-      ".": "^8.5.10",
-      "nanoid": "^3.3.18"
-    }
+    "postcss": "^8.5.10"
   },
   "scripts": {
     "dev": "next dev",
