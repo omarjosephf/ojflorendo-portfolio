@@ -1,10 +1,14 @@
 # ADR-0006: Retrieval-grounded portfolio assistant
 
-- **Status:** Proposed — awaiting owner acceptance
+- **Status:** Accepted — original decision released 2026-08-30; the P1
+  amendment below is approved locally only
 - **Date:** 2026-08-28
+- **Local amendment:** Owner-approved 7 Sep 2026 for P1 implementation; this
+  records no publication or deployment approval
 - **Owner:** OJ Florendo
 - **Risk class:** R2 (implementation) with R3 dependencies (deploy, secrets, paid service)
-- **Governing policy:** Project Zero Engineering Handbook **v1.1.0**
+- **Governing policy:** Project Zero Engineering Handbook **v1.2.0** (v1.1.0
+  governed the original decision)
 - **Supersedes:** ADR-0004 (Curated no-inference portfolio assistant)
 
 > ADR-0004 anticipated this decision precisely: *"A future generative provider
@@ -145,7 +149,8 @@ compared: it made the browser a second policy authority, and the two diverged.
 
 ### D5 — The system prompt is per-deployment configuration, authored here
 
-`cited`'s generic document-assistant prompt is replaced by an OJ Assistant
+`cited`'s generic document-assistant prompt was replaced by a deployment-specific
+portfolio-assistant
 prompt covering role, tone, scope, guardrails including human handoff, output
 format, and few-shot examples. It is authored at
 `content/assistant-system-prompt.md` in this repository and shipped with the
@@ -172,12 +177,19 @@ One case resolves in the browser without a network call: personal or credential
 data the visitor typed about *themselves*. Everything else, including every probe,
 reaches the service (D14).
 
-### D7 — Stateless. No memory, no session, no transcript
+### D7 — Historical decision: stateless, with no memory, session or transcript
 
-No conversation history, no session identifier, no cookie, no storage entry, no
-transcript. §49.1 requires retaining no conversations; §36 prohibits raw request
-bodies in logs. `cited` already declines to log questions
-(`src/assistant/api.py`) and that behaviour is preserved verbatim.
+The original decision was: no conversation history, no session identifier, no
+cookie, no storage entry and no transcript. §49.1 requires separate approval to
+retain conversations; §36 prohibits raw request bodies in logs. `cited` already
+declined to log questions (`src/assistant/api.py`) and that server-side behaviour
+was preserved.
+
+**Superseded.** ADR-0007 first replaced the no-conversation part on 30 August
+2026. Its owner-approved local P1 amendment of 7 Sep 2026 now also replaces
+the absolute no-browser-storage claim with bounded `sessionStorage`. The service
+and portfolio route still have no transcript store, no visitor session and no
+question-text logs. See ADR-0007 E1 and E10 for the current contract.
 
 ### D8 — Privacy-safe aggregate metrics only
 
@@ -516,9 +528,17 @@ panel copy must say so — the existing *"Your text stays in this browser, is no
 sent or saved"* becomes false the moment this ships and is replaced in the same
 change.
 
-**What is still true:** no personal data is collected by default, no
-conversation is retained, no question text is logged in either repository, no
-cookie or storage entry is created, and no visitor IP is forwarded.
+**What remains true after the owner-approved local P1 amendment of 7 Sep 2026:**
+blocked personal input is neither stored nor sent, and pending requests are not
+stored; the portfolio route and assistant service create no transcript, log no question
+text, and receive no browser storage record; no cookie, account, database or
+cross-device history is introduced; and no visitor IP is forwarded to the
+assistant service or model provider. The browser does retain a bounded
+`sessionStorage` record of completed exchanges under
+`oj.smart-assistant.session.v1`, as specified by ADR-0007 E10. This decision
+makes no broader claim that the model provider retains nothing or never uses
+submitted data; any provider-retention or training assurance must be supported
+by the current provider terms and account configuration.
 
 **Prompt injection** changes from *impossible* (no model existed) to *contained*.
 The containment is structural, not merely textual: **the assistant has no
@@ -589,8 +609,11 @@ to any site". It is not required here, and it is a natural follow-on.
 fails closed, the panel enters *Unavailable*, and the site is unharmed. This is
 a configuration change, not a code change.
 
-**Full rollback.** Revert the pull request. Today's behaviour is restored
-exactly; the matcher and manifest are in Git history.
+**Full rollback.** Revert the feature change; the matcher and manifest remain in
+Git history. The P1 rollback also removes the assistant's owned
+`oj.smart-assistant.session.v1` key on an eligible client visit, without touching
+other browser storage. Reverting code cannot remotely erase a record from a
+browser that does not run the cleanup.
 
 **Service rollback.** The new Fly app can be stopped or destroyed independently.
 `cited-demo` is untouched by all of the above.
@@ -609,3 +632,29 @@ becomes user-visible — neither is close at 20-60 chunks.
 - `docs/test-plans/retrieval-grounded-portfolio-assistant.md`
 - `docs/runbooks/assistant-corpus.md`
 - `cited`: `docs/adr/0002-refusal-is-a-judgement-not-a-threshold.md`, `docs/adr/0003-refusal-marker.md`
+
+
+## Local runtime amendment, 7 September 2026
+
+ADR-0013 and the runtime v2 runbook supersede the earlier local response/timeout
+implementation: fixed application-owned unsupported copy, exact source IDs,
+bounded bodies, 9-second proxy and 10-second browser budgets. The matching
+Cited candidate uses bounded workers and conservative paid-attempt accounting.
+These local changes do not certify semantic correctness or remove Beta.
+
+## Local presentation amendment, 7 September 2026
+
+The owner requested a simpler opening view using an instructor's chatbot as a
+visual reference. E.V now opens with a short, unboxed welcome and a compact
+composer. The header identifies it as OJ's portfolio AI assistant. About and
+privacy are available through an accessible header disclosure, which retains
+the permanent statement that answers come from OJ's published portfolio, carry
+sources, and are not OJ. The full privacy and tab-retention explanation remains
+there; storage failures remain visible when they occur.
+
+The input keeps its accessible label while its visual label is hidden. Clear
+chat is a labelled header control once a conversation exists. This changes
+presentation only: the Beta label, citation checks, request limits, cancellation,
+bounded tab continuity and provider boundaries remain in force. No instructor
+artwork, source code, branding or product claims are incorporated. This amendment
+authorizes local refinement and verification, not publication or graduation.

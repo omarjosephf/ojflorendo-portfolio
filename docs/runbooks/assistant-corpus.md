@@ -3,6 +3,9 @@
 - **Decision record:** [ADR-0006](../adr/0006-retrieval-grounded-portfolio-assistant.md)
 - **Applies to:** the corpus at `content/assistant/`, its system prompt, and the
   `oj-assistant` deployment of the `cited` service
+- **Release checks:** [Release evidence](assistant-release-evidence.md) records
+  the proposed v3 review and manifest workflow. Historical scores alone do not
+  establish claim-level support for a new release.
 
 ## What this corpus is
 
@@ -32,11 +35,10 @@ content/
    replace reading what you wrote.
 2. **Every claim must be verifiable** from owner-approved information. No
    invented projects, clients, metrics, testimonials, or availability.
-3. **Write self-describing sections.** A section body must state its own subject
-   rather than relying on its heading — headings are carried as citation
-   metadata and are *not* embedded, so they contribute nothing to retrieval. This
-   is not style advice: it was worth 32 percentage points of retrieval hit rate
-   (45% → 77%) when the corpus was rewritten this way.
+3. **Write self-describing sections.** A section body should state its subject.
+   Cited now embeds the heading together with the body and retains it as citation
+   metadata. Re-score retrieval when either changes; the earlier body-only
+   embedding behavior is historical.
 4. **Aim for 80–180 words per section.** Short abstract sections behave as
    attractors — they are semantically close to every question and outrank the
    specific content that actually answers it.
@@ -58,7 +60,7 @@ npm run assistant:build-corpus
 # 3. Re-score retrieval. Free: no API key, no spend.
 cd ../oj-doc-assistant
 PYTHONPATH=src python -m assistant.cli \
-  --corpus deploy/oj-assistant/content eval \
+  --corpus ../ojflorendo-portfolio-public/content/assistant eval --suite portfolio \
   --questions ../ojflorendo-portfolio-public/content/assistant-eval/questions.toml \
   --top-k 4
 
@@ -67,6 +69,7 @@ PYTHONPATH=src python -m assistant.cli \
 
 # 4. Run the gate. It includes assistant:check-corpus, which fails if the
 #    documents and the committed record disagree.
+cd ../ojflorendo-portfolio-public
 npm run test:ci
 ```
 
@@ -93,10 +96,12 @@ Then, from the `cited` repository — an R3 action requiring explicit owner
 approval:
 
 ```bash
-fly deploy --config fly.oj-assistant.toml --remote-only --ha=false
+fly deploy --config fly.oj-assistant.toml --remote-only --ha=false \
+  --build-arg BACKEND_COMMIT="$(git rev-parse HEAD)"
 ```
 
-`--config` and `--ha=false` are both mandatory. Without `--config` this
+The full backend commit build argument records image provenance. Verify the
+checkout is clean before building. `--config` and `--ha=false` are both mandatory. Without `--config` this
 redeploys the public demo app; without `--ha=false` Fly creates a second machine
 with a second in-memory budget counter, silently doubling the daily allowance.
 
@@ -145,8 +150,8 @@ afterwards rather than assuming behaviour held.
 - [ ] Evaluation set run with answering enabled and thresholds met.
 - [ ] Cold-start latency measured against the real deployment.
 - [ ] `/health` checksum matches the release notes.
-- [ ] Handbook §49.1 amendment ratified — see ADR-0006 D12. **Public release is
-      blocked until then.**
+- [x] Handbook §49.1 amendment ratified on 29 August 2026 — see ADR-0000 and
+      ADR-0006 D12. The remaining release gates and owner approval still apply.
 
 ## Rolling back
 
@@ -157,3 +162,14 @@ unavailable state, and the rest of the site is untouched.
 To roll the corpus back rather than the feature, re-export from an earlier commit
 of `content/assistant/` and redeploy. The service's startup check makes a
 mismatched or partial rollback fail rather than half-apply.
+
+
+## Runtime v2 candidate compatibility
+
+See [runtime contract](assistant-runtime-v2.md). Prompt factual examples now live
+in evaluation; prompt, policy-v3, corpus, questions and runtime/configuration
+hashes must be reviewed together. The local candidate uses E.V and bounded
+browser retention. Exporting content alone does not update backend policy or
+prove that precomputed vectors match. Preserve a fresh candidate export and
+its checksum, and rebuild matching vectors only in the approved build workflow.
+Rollback must restore a compatible API/prompt/policy/corpus/config/vector tuple.

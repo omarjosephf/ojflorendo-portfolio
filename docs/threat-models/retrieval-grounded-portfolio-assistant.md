@@ -1,9 +1,13 @@
 # Retrieval-grounded portfolio assistant — threat model
 
-- **Status:** Proposed — awaiting owner acceptance
+- **Status:** Accepted — original model released 2026-08-30; the P1 amendment
+  below is approved locally only
 - **Date:** 2026-08-28
+- **Local amendment:** Owner-approved 7 Sep 2026 for P1 implementation; this
+  records no publication or deployment approval
 - **Risk class:** R2
-- **Governing policy:** Project Zero Engineering Handbook v1.1.0
+- **Governing policy:** Project Zero Engineering Handbook v1.2.0 (v1.1.0
+  governed the original model)
 - **Decision record:** [ADR-0006](../adr/0006-retrieval-grounded-portfolio-assistant.md)
 - **Supersedes:** `curated-portfolio-assistant.md`
 
@@ -28,7 +32,8 @@ model's conclusions do not transfer.
 
 - Truthful public identity and content integrity (§6.2)
 - The private-information boundary — private CV, phone number, address, secrets, unpublished work
-- Visitor privacy: question text, and the absence of any retained transcript
+- Visitor privacy: question text, the bounded tab-local record, and the absence
+  of any server or owner transcript
 - The owner's money: an unauthenticated endpoint that causes paid calls
 - Site integrity and availability, independent of the assistant
 - Accessibility of the assistant interface
@@ -49,26 +54,33 @@ visitor's question text. Returns prose and citations.
 
 ## Data flow
 
-1. Visitor opens the panel and types a question (bounded client-side).
-2. The **client privacy stop** runs locally. Input carrying the *visitor's own*
+1. On first client use, the panel attempts to load and strictly validate the
+   bounded `oj.smart-assistant.session.v1` record from `sessionStorage`. It
+   restores completed exchanges for display only and never resends them.
+2. Visitor opens the panel and types a question (bounded client-side).
+3. The **client privacy stop** runs locally. Input carrying the *visitor's own*
    personal, financial or credential data resolves in the browser with a fixed
    response and **no network call is made**, so it never reaches a provider.
    It screens nothing else: questions about OJ, about the privacy boundary and
    probes of either belong to the service, which is the single authority for
    product policy (ADR-0006 D14).
-3. Otherwise the browser `POST`s `{ question }` to `/api/assistant` (same
-   origin; covered by the existing `connect-src 'self'`).
-4. The route handler: enforces a raw-body byte cap before parsing, validates the
+4. Otherwise the browser `POST`s `{ question, history }` to `/api/assistant`
+   (same origin; covered by the existing `connect-src 'self'`). `history` is at
+   most four prior questions and source identifiers or labels, never prior
+   answer prose.
+5. The route handler: enforces a raw-body byte cap before parsing, validates the
    schema, bounds the length, applies a best-effort per-instance throttle, and
    fails closed if configuration is absent.
-5. The route handler calls the service server-to-server with the shared secret
+6. The route handler calls the service server-to-server with the shared secret
    and an abort timeout. **The visitor's IP is not forwarded.**
-6. The service retrieves top-k passages, reserves budget, calls the provider,
+7. The service retrieves top-k passages, reserves budget, calls the provider,
    verifies every returned quote against the passage actually sent, and responds.
-7. The route handler validates the response shape, maps each citation source to
+8. The route handler validates the response shape, maps each citation source to
    an **allowlisted public URL** (or to no link at all), and returns a narrow
    typed result.
-8. The panel renders one of three states. Nothing is stored anywhere.
+9. The panel validates the result again, renders it, and saves only bounded
+   completed non-sensitive exchanges. Pending work and blocked personal input
+   are never saved. Closing or clearing suppresses late results.
 
 ## Threats and controls
 
@@ -108,11 +120,14 @@ visitor's question text. Returns prose and citations.
 
 | Threat | Example | Controls |
 | --- | --- | --- |
-| **Question text retained** | Logs, analytics, or a transcript store | No storage of any kind. `cited` deliberately does not log the question; the route logs only §36-permitted fields (category, status, latency, sanitised error class); no raw request body is logged anywhere |
-| **Visitor believes nothing leaves the browser** | The old copy said exactly that | That copy is **removed in the same change**. The panel now states plainly that questions are sent to a model provider to be answered, that they are not stored, and that personal information should not be entered |
+| **Question text retained beyond the approved boundary** | Logs, analytics, a server transcript, or unbounded browser history | The route and service have no transcript store and do not log question text; observability remains bounded categories and numbers. The browser stores only the latest 20 completed exchanges under `oj.smart-assistant.session.v1`, bounded to 32 KiB with oldest whole exchanges trimmed. Questions are capped at 280 characters. Pending requests, blocked personal input, secrets, headers and service configuration are excluded |
+| **Visitor receives an absolute no-storage promise** | Historical copy says the question is not stored | Public copy discloses that questions go to OJ's server and an AI provider and that this tab retains bounded completed messages. This architecture makes no unsupported claim that the provider retains nothing or never trains on submitted data; any provider assurance must follow current terms and account configuration |
 | **Visitor enters personal data anyway** | An email address or phone number in the question | The client privacy stop detects likely personal data and resolves **locally**, so it is never transmitted; visible warning before submission; input clears. This is the **only** thing that guard now decides, and it is the one guarantee no server-side control can provide — by the time a server can apply one, the data has already been sent |
 | **IP correlation across services** | The provider or service builds a visitor profile | The call is server-to-server; the visitor's IP is not forwarded. The hosting platform sees it, as it already does for every page request |
 | **Metrics become surveillance** | Per-question analytics creep in | Scope is fixed by ADR-0006 D8 and owner correction C7: aggregate counters only, no question text, no per-question analytics, and the operator view requires the shared secret — there is no unauthenticated public metrics endpoint |
+| **Same-origin script reads the chat record** | A compromised or newly added first-party script reads `sessionStorage` | Accepted browser trust boundary: any same-origin script can read the record. Keep the CSP and third-party-script review effective, store no secret or blocked personal input, and preserve React text rendering plus citation-link allowlisting |
+| **Tab lifecycle is mistaken for guaranteed deletion** | Browser session restore revives a closed tab, or a duplicated/opener-created tab starts with a copy | Copy states that browser restore may revive the record and that a new tab may initially copy then diverge. No unique-tab or physical-erasure guarantee is made |
+| **Storage fails or clear cannot remove the record** | `getItem`, `setItem`, or `removeItem` throws | Continue the chat in memory. Clear cancels pending work, clears memory, and attempts to remove only the owned key. Copy must admit that previously saved messages may remain until browser storage is cleared when removal cannot be confirmed |
 
 ### Application integrity and accessibility
 
@@ -136,7 +151,7 @@ application code (`src/assistant/policy.py` in the service repository).
 
 | Threat | Control | Layer |
 | --- | --- | --- |
-| Assistant presents as Claude/Anthropic rather than as OJ Assistant | Two deterministic responses — product identity, and a truthful architecture answer naming Claude Haiku 4.5 as a component — plus a post-generation first-person self-ID guard | **Code**, pre- and post-model |
+| Assistant presents as Claude/Anthropic rather than as E.V | Two deterministic responses — product identity, and a truthful architecture answer naming Claude Haiku 4.5 as a component — plus a post-generation first-person self-ID guard | **Code**, pre- and post-model |
 | Corpus reproduced in bulk on request | Pre-model request guard; **two** independent output-side rules — multi-passage breadth, and single-passage depth to close one-source-at-a-time extraction — both with corpus-measured thresholds | **Code**, pre- and post-model |
 | Unpublished work / private roadmap discussed, confirmed or inferred | Deterministic response; **and the material is absent from the corpus** | **Code**, plus corpus property |
 | Tone, concision, citation style | Instruction | Prompt |
@@ -211,20 +226,23 @@ against the real answers and the real corpus that motivated it.
 The assistant has no access to, and cannot be made to use:
 
 - tools, function calling, code execution, browsing, email, forms, calendars or payments;
-- sessions, cookies, local storage, or a database;
-- conversation memory **that outlives the tab it happened in** — see the
-  correction below;
+- cookies, `localStorage`, visitor accounts, a server-side session, transcript
+  database or cross-device history;
+- browser storage beyond the bounded `sessionStorage` record described in the
+  corrections below;
 - user accounts or any authenticated context;
 - environment variables, secrets, server files, repository APIs, private documents, private CVs, chats, or unpublished work;
 - any corpus other than the one whose checksum it was started with.
 
-### Correction — conversation, added 30 August 2026 (ADR-0007)
+### Historical correction — conversation, added 30 August 2026 (ADR-0007)
 
 This list previously read "conversation memory, sessions, cookies, local
 storage, or a database". The first item is no longer accurate and is corrected
 rather than quietly left standing.
 
-The assistant now supports follow-up questions. What that does and does not mean:
+The assistant added follow-up questions. This table records the 30 August
+decision and is superseded for browser retention by the 7 September correction
+below:
 
 | | |
 | --- | --- |
@@ -234,11 +252,39 @@ The assistant now supports follow-up questions. What that does and does not mean
 | **What never travels** | The earlier **answer text**. The request type has no field for it, in the browser, at the route, and in the service — three places, so it is a contract rather than a convention |
 | **Who enforces the cap** | The route and the service independently. The browser is not a trust boundary |
 
+### Current correction — bounded tab continuity, locally approved 7 Sep 2026
+
+This P1 amendment is owner-approved for local implementation and does not record
+publication or deployment approval.
+
+| | |
+| --- | --- |
+| **Product name** | **E.V** |
+| **Where the conversation lives** | React memory plus one version-1 `sessionStorage` record under `oj.smart-assistant.session.v1` |
+| **What is stored** | Positive created/updated timestamps and up to 20 recent completed exchanges, capped at 32 KiB. Questions are capped at 280 characters, answers at 4,000, citations at 8, quotes at 1,000 and labels at 80 |
+| **What is excluded** | Pending requests, blocked personal or credential input, secrets, request headers, service configuration and pending markers |
+| **How bounds apply** | Strict parsing at restore and API-result boundaries; unknown roots/versions are rejected, invalid exchanges discarded, and oldest whole exchanges trimmed deterministically. Stored citation links are never trusted and are re-resolved through the corpus allowlist |
+| **What travels with a follow-up** | Up to four earlier questions and bounded source identifiers or labels, unchanged from ADR-0007 E2/E4 |
+| **What never travels** | Earlier answer prose, including answers restored for display |
+| **Lifecycle limits** | No auto-resend. Browser restore may revive a record; duplicated or opener-created tabs may begin with a copy and then diverge. Any same-origin script can read it |
+| **Clear and failure** | Clear removes only the owned key and current memory. Storage failures leave the assistant usable in memory; if removal fails, saved messages may remain until browser storage is cleared |
+| **Server boundary** | No server or owner transcript collection, no question-text logs, no cookie, no account and no cross-device history. No 30-day owner notice is added because no owner review workflow is introduced |
+
+P1 deliberately leaves the corpus privacy document and system prompt
+byte-identical, so they still contain the legacy OJ Assistant name and absolute
+no-storage claim. P1 preview responses are synthetic and do not establish
+release readiness. Before combined readiness, P2 must update prompt, policy,
+corpus and evaluation as one compatible versioned tuple; releasing only part of
+that identity/privacy correction would create contradictory answers.
+
 ## Residual risks — accepted, with reasons
 
 1. **Visitor questions reach a third-party provider.** Unavoidable given the
    capability. Mitigated by disclosure, by not transmitting detected personal
-   data, and by retaining nothing.
+   data, and by keeping application-side server logs and transcript storage out
+   of the design. The bounded browser record is disclosed. Provider retention
+   and training are not characterised beyond verified current terms and account
+   configuration.
 2. **Generative output is nondeterministic.** An answer can be unhelpful without
    being wrong. Mitigated by grounding, citations, refusal, and an evaluation
    set that is run rather than cited from memory.
@@ -271,7 +317,24 @@ The assistant now supports follow-up questions. What that does and does not mean
    the request so the service still stores nothing. Evadable by omitting the
    history, which returns the caller to the per-request bound.
 
-Residual risk is accepted for an optional, tool-free, stateless assistant that
+Residual risk is accepted for an optional, tool-free, server-stateless assistant that
 answers only from reviewed public content, shows its sources, refuses what it
-cannot support, retains nothing, and can be disabled by unsetting one
-environment variable.
+cannot support, keeps only the bounded disclosed tab record, and can be disabled
+by unsetting one environment variable.
+
+
+## Runtime v2 candidate controls and remaining risk
+
+ADR-0013 adds per-block citation validation, whole-answer suppression on invalid
+or uncovered blocks, application-owned policy responses, exact source-ID links,
+pre-parse body limits, ordered deadlines, bounded worker admission and logging
+without provider exception payloads. A cancelled request keeps its actual job
+slot and any possibly billable allowance. Provider and backend redirects must
+not forward credentials to another host.
+
+A single cited block can still mix supported and invented claims. This is an
+explicit unresolved semantic risk; quote containment is not entailment and
+human review of captured evaluation answers cannot cover unseen live answers.
+A stalled native operation can occupy a worker until process shutdown. Limits
+remain per process, and unchanged production has not acquired these controls
+merely because this local candidate passed synthetic tests.

@@ -4,6 +4,8 @@
   production the same day. E5 and E9 were approved as separate decisions
   before release, as this record required.
 - **Date:** 2026-08-30
+- **Local amendment:** Owner-approved 7 Sep 2026 for P1 implementation; this
+  records no publication or deployment approval
 - **Owner:** OJ Florendo
 - **Risk class:** R2 (implementation), with the extraction consequence in E5
   requiring separate owner approval before release
@@ -15,8 +17,9 @@
 
 > ADR-0006 D7 is categorical: *"No conversation history, no session identifier,
 > no cookie, no storage entry, no transcript."* This record does not reinterpret
-> that sentence — it replaces it, and says why the replacement is narrower than
-> it sounds.
+> that sentence — it replaces it, and says why. E1's later absolute
+> no-browser-storage wording is itself superseded by E10 under the
+> owner-approved local P1 amendment of 7 Sep 2026.
 
 ## Context
 
@@ -32,7 +35,7 @@ did he build with Python?"* and then *"how long did that take?"* is asking one
 question in two parts. Today the second part is answered as though the first was
 never asked, which reads as the assistant not listening.
 
-### What D7 was protecting
+### What D7 was protecting (historical rationale)
 
 D7 was not arbitrary. It bought four things:
 
@@ -46,31 +49,38 @@ D7 was not arbitrary. It bought four things:
    passages **per request**, which is only a meaningful bound if requests are
    independent.
 
-The decision below keeps (1), (2) and (3) intact. It narrows (4), which is why
-E5 needs separate approval rather than riding along with this ADR.
+The 30 August decision kept (1), (2) and (3) intact and narrowed (4), which is
+why E5 needed separate approval rather than riding along with the original ADR.
+E10 now changes browser retention under separate owner approval while keeping
+the route and service stateless.
 
 ### What §49.1 actually permits
 
 §49.1 prohibits **retaining** conversations without separate approval. It does
-not prohibit a conversation existing. The distinction is the whole design: a
-transcript that lives in one browser tab and is destroyed when that tab closes
-is not retained by anyone, and the service that answers from it stores nothing.
+not prohibit a conversation existing. On 7 Sep 2026 the owner separately
+approved bounded tab-local retention for P1. That approval does not authorise a
+server transcript, owner review, analytics, a visitor account, or cross-device
+history, and it does not record publication approval.
 
 ## Decision
 
 ### E1 — The conversation lives in the browser; the service stays stateless
 
-The transcript is React state in the visitor's tab. There is **no session
-identifier, no cookie, no `localStorage`, no database, and no server-side
-session**. Closing the panel or reloading the page destroys it, and nothing
-anywhere else has a copy.
+The working transcript lives in React state in the visitor's tab. E10 permits a
+bounded copy of completed exchanges in that tab's `sessionStorage`; the
+absolute no-storage and destroy-on-panel-close-or-reload statements in the
+original E1 are superseded. There is still **no visitor session identifier, no
+cookie, no `localStorage`, no account, no database, and no server-side
+session**.
 
 The service continues to store nothing and log nothing beyond the aggregate
 counters already permitted by D8. `DailyCallBudget` is unaffected: it still
 counts calls in one process lifetime and knows nothing about who asked what.
 
-**This preserves the privacy notice verbatim.** No wording change is required,
-because no new retention is introduced.
+The privacy copy must therefore disclose both boundaries: questions are sent to
+the portfolio server and model provider, while completed exchanges are retained
+in bounded browser tab storage. No claim about provider retention or training
+may be broader than current provider terms and account configuration support.
 
 ### E2 — History carries prior questions and source labels, never prior answers
 
@@ -89,6 +99,10 @@ boundary a second time on every turn, widening precisely the extraction surface
 that E5 already has to account for. The earlier question plus the documents it
 reached is sufficient to resolve a follow-up, costs a handful of tokens, and
 moves that risk almost not at all.
+
+E10 does not change this model-history contract. Restored answers are display
+content only. A request still carries at most the four most recent eligible
+earlier questions and their bounded source labels, never restored answer prose.
 
 ### E3 — Retrieval query is composed, not condensed by a second model call
 
@@ -228,8 +242,9 @@ merely accepting it.
 The per-request rules bound one request. This bounds the sequence, using only
 what the request already carries: the follow-up reports the source labels of
 earlier turns, so the union of documents touched so far is computable without
-the service remembering anything. ADR-0007 E1 is untouched — no session, no
-storage, nothing retained after the response is written.
+the service remembering anything. E10 adds browser storage only: no storage
+record is sent to the route or service, and the service retains nothing after
+the response is written.
 
 It fires only when **both** hold:
 
@@ -248,13 +263,70 @@ therefore raises the cost of extraction and weakens nothing — best-effort
 against a determined attacker, real against an ordinary one, which is the same
 framing the route-level rate limiter already uses.
 
+### E10 — Bounded completed exchanges persist in this browser tab
+
+**Owner-approved local amendment, 7 Sep 2026.** This amendment changes
+the local implementation contract and does not record publication or deployment
+approval.
+
+The interface name for this local candidate is **E.V**.
+
+The client may store one versioned record under the namespaced
+`sessionStorage` key `oj.smart-assistant.session.v1`. The root contains version
+`1`, positive integer `createdAt` and `updatedAt` timestamps written in Unix
+epoch milliseconds, and completed exchanges. The record keeps at most 20 recent
+completed exchanges and at most 32 KiB serialized as UTF-8. When either bound is
+crossed, the oldest whole exchanges are removed deterministically until the
+record fits.
+
+Every restored or newly received value crosses the same strict parser. A
+question is at most 280 characters; answer prose 4,000; citations 8; each quote
+1,000; and each label 80. An answered result requires a citation. Citation links
+are re-resolved from the checked-in corpus allowlist; an unexpected link becomes
+plain text rather than a trusted `href`. An unknown version or invalid root is
+rejected as a whole; invalid exchanges are discarded. The client never stores
+pending requests, blocked personal or credential input, secrets, request
+headers, service configuration or pending markers.
+
+Restoration is display-only and never resends work. A pending exchange is absent
+from the record, so refresh cannot auto-resend it. Restored answers never enter
+model history: the existing E2/E4 request remains limited to four earlier
+questions plus bounded source identifiers or labels.
+
+This is tab-scoped browser retention, not guaranteed physical erasure on tab
+closure. Browser session restoration can revive a tab and its record. An
+opener-created or duplicated tab may begin with a copied record; after that the
+tabs change independently. Any same-origin script can read the record, so
+same-origin script integrity remains part of the privacy boundary.
+
+**Clear chat** cancels and suppresses any pending result, clears the in-memory
+conversation and removes only `oj.smart-assistant.session.v1`; it must not clear
+unrelated browser storage. If storage read, write or removal throws or is
+unavailable, the assistant remains usable in memory. The public copy must be
+equally candid: refresh can clear the in-memory conversation, but a previously
+saved record may remain until the visitor clears browser storage when removal
+cannot be confirmed.
+
+This adds no owner transcript collection, server transcript, analytics, cookie,
+account, database or cross-device history. Consequently it adds no 30-day owner
+notice; such notice would belong to a separately approved collection or review
+workflow that does not exist here.
+
+**Compatibility and release boundary.** P1 leaves
+`content/assistant/contact-and-this-assistant.md` and
+`content/assistant-system-prompt.md` byte-identical. They therefore still carry
+the legacy OJ Assistant name and absolute no-storage language. P1 preview uses
+synthetic responses and is not release-ready alone. P2 must correct the prompt,
+policy, corpus and evaluation as one compatible versioned tuple before combined
+readiness; a partial identity/privacy update across that boundary is prohibited.
+
 ## Alternatives considered
 
 **Server-side sessions (rejected).** The conventional design. It would require
-a session store, make the privacy notice false, complicate the process-local
-budget counter, and add the database that the whole architecture exists to
-avoid. It buys nothing a client-held transcript does not, for a single-visitor
-conversation that never needs to outlive a tab.
+a session store, materially expand the privacy notice and retention duties,
+complicate the process-local budget counter, and add the database that the whole
+architecture exists to avoid. Bounded client-held continuity meets P1 without
+that trust boundary.
 
 **Full transcript replay (rejected).** Simpler to write, and it sends
 model-generated passage text back across the boundary on every turn. E2 exists
@@ -268,14 +340,21 @@ way a visitor expects an assistant to behave.
 
 ## Security and privacy impact
 
-- **Unchanged:** nothing stored, nothing logged, no cookie, no session, no
-  personal data collected by default. The privacy notice stays true as written.
+- **Changed by E10:** completed exchanges are stored in bounded
+  `sessionStorage` for tab continuity. Same-origin scripts can read them, browser
+  restore may revive them, and opener-created or duplicated tabs may initially
+  copy them before diverging.
+- **Still absent:** server or owner transcript collection, question-text logs,
+  cookies, accounts, databases, analytics and cross-device history. No blocked
+  personal input or pending request is saved.
 - **Unchanged:** the shared secret, the rate limits, the daily allowance, the
   per-request passage cap, the citation re-verification.
 - **Changed:** earlier questions from the same visitor now travel with a
   request, and reach the provider. They were already reaching the provider one
   at a time; the difference is that up to four now arrive together.
 - **Changed:** cumulative extraction is easier to conduct (E5).
+- **Provider boundary:** this ADR records transmission to the provider but makes
+  no unsupported zero-retention or no-training promise about the provider.
 
 ## Accessibility impact
 
@@ -293,6 +372,13 @@ independently and in either order:
 - Revert the portfolio branch — the service continues to accept requests without
   history and answers them as first turns.
 - Revert the service — the portfolio sends a field the service ignores.
+
+Rolling back E10 removes its UI/storage behaviour and removes only
+`oj.smart-assistant.session.v1` when an eligible client next runs the cleanup.
+It does not clear other storage and cannot claim remote erasure from browsers
+that do not visit or execute the rollback. If removal fails, in-memory use
+continues and previously saved messages may remain until browser storage is
+cleared.
 
 No environment variable, secret, corpus, or machine configuration changes with
 this ADR except the E6 amendments, which are already deployed and are
