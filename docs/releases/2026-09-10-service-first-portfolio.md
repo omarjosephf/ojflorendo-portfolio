@@ -1,10 +1,15 @@
 # Service-first portfolio — 10 September 2026
 
-**Status: release candidate. Not approved for publication.** Owner approval of
-the copy and design is recorded; approval to publish is a separate R3 decision
-and has not been given. B1 is cleared. One release blocker remains open — the
-corpus release, B2 below — and it is an R3 action that must go out with the
-site rather than after it.
+**Status: released, 10 September 2026.** Both blockers are cleared and the site
+and the corpus are live. One known limitation is open and recorded below.
+
+| | |
+| --- | --- |
+| Merge commit | `ea1100a`, merged 18:27:56Z by OJ Florendo |
+| Production | `https://ojfr.me/` — verified serving this release |
+| Corpus deployed | `10ccbbc9…`, confirmed by `/health` over 69 chunks |
+| Assistant image | `oj-assistant:deployment-01M26B1WRRA55TSYDZBWYATYDS`, machine version 12, `lhr` |
+| Deploy completed | 19:01:45Z, health check passing |
 
 Release uses the existing GitHub pull-request, CI and Vercel production workflow.
 The release pull request records the exact commit, deployment and post-deploy
@@ -97,9 +102,15 @@ was updated from 67 to 69 by reading that output rather than by guessing. The
 checksum binding, source-set equality, index uniqueness, token bounds and
 per-chunk content hashes are unchanged.
 
-**B2 — E.V's deployed knowledge is behind the published copy. Open.**
-The deployed service reports corpus `047e333141b2` over 64 chunks; this release
-carries `10ccbbc9…` over 69. The service recomputes the checksum at startup and
+**B2 — Cleared.** The deployed service reported corpus `047e333141b2` over 64
+chunks; this release carries `10ccbbc9…` over 69, and `/health` now confirms it.
+
+The deploy also replaced the system prompt. The artifact serving before this
+release dated from 29 August and its prompt began *"You are OJ Assistant"* — so
+the panel was branded E.V while the backend answered as the previous persona.
+Both the corpus and the persona are now current.
+
+The original text of this blocker is retained below for the record. The service recomputes the checksum at startup and
 refuses to run on a mismatch, so publishing the site alone leaves E.V either
 failing to start or answering from superseded content that contradicts the new
 positioning. **The site and the corpus must go out together.**
@@ -109,6 +120,65 @@ Releasing the corpus is a separate R3 action; see
 repository with `npm run assistant:export`, deploy from the `cited` repository
 with the `fly.oj-assistant.toml` config, and confirm `/health` reports the
 checksum above before treating the release as complete.
+
+## Post-deploy verification
+
+Run against production after the merge and the corpus deploy.
+
+| Check | Result |
+| --- | --- |
+| `/`, `/about`, both case studies | 200 |
+| `/manage` | **404** — private owner tool, as designed |
+| Unknown route | 404 |
+| `robots.txt`, `sitemap.xml`, `manifest.webmanifest`, `opengraph-image` | 200; sitemap lists `/about` |
+| HTTP → HTTPS, `www` → apex | 308 to `https://ojfr.me/` |
+| Security headers | CSP, HSTS, nosniff, Referrer-Policy, Permissions-Policy, X-Frame-Options, X-Permitted-Cross-Domain-Policies present; no `X-Powered-By` |
+| CSP nonce | unique per request |
+| Metadata | service-led title, approved description and OG alt, one `h1` |
+| Structured data | `Person`, `WebSite`, `PostalAddress` — locality and region only, no street address |
+| E.V | `/health` reports `10ccbbc912bc` over 69 chunks |
+
+## Retrieval quality — open, and measured
+
+**The evaluation set could not run.** `offer-no-client-list` was marked
+`critical` while `answerable = false`, which the harness rejects for the whole
+set, so no score could be produced for any of the seventy questions. The gate
+did not catch it because the evaluation harness lives in the `cited` repository
+and is not one of the twelve gate steps. This release's evidence section cites
+70 questions; that set was unrunnable until the flag was removed.
+
+With it runnable, retrieval has regressed against the pre-release baseline:
+
+| | Pre-release `4020a00` | This release |
+| --- | --- | --- |
+| Hit rate | 100% | 88% |
+| Top-1 | 79% | 68% |
+| Critical core | **100% — PASS** (13) | **75% — FAIL** (16) |
+
+Four critical questions miss, including *"Can OJ build me a website?"*, which
+does not retrieve the website service section at all — it ranks 7th, 0.031
+behind the portfolio case study. *"What kind of work does OJ take on now?"*
+ranks the service section 27th, because "now" pulls the current-employment
+sections.
+
+Diagnosed, in the order the runbook requires — corpus gap, then retrieval, then
+prompt. It is **not** a corpus gap: the sections exist. It is a corpus-design
+problem. The offer is stated in three documents, so the compact summaries in
+`about-oj.md` outrank the specific service sections, and the 248-word "AI
+document assistants" section exceeds the 80–180 word guidance and splits into
+two weaker chunks.
+
+Two principled fixes were tested on scratch copies and **both failed to move the
+metric**: removing the duplicated offer sentence from `about-oj.md`, and
+splitting the over-long section in two. Rankings shifted; the critical core
+stayed at 75%. Closing this needs deliberate corpus authoring rather than
+mechanical restructuring, and it is deferred to the owner rather than resolved
+by tuning content against the measure.
+
+**What this does and does not mean.** These are citation-precision failures, not
+truthfulness failures: the retrieved sections still support a truthful answer,
+they are simply not the section the evaluation set names. No question was
+deleted and no `expects` was changed — the runbook rules both out.
 
 ## Known limitations
 
