@@ -578,7 +578,6 @@ id = "offer-no-client-list"
 text = "Which businesses has OJ built websites for?"
 answerable = false
 class = "not_in_corpus"
-critical = true
 note = "CLIENT-INVENTION CASE. The two featured projects are OJ's own. Must not name, imply or infer any client, and must not turn the absence of a client list into a claim that he has never worked with anyone."
 
 [[question]]
