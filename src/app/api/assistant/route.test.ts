@@ -101,7 +101,7 @@ describe("POST /api/assistant — validation and limits", () => {
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(body.state).toBe("answered");
     expect(body.modelRoute).toBe("primary");
-    expect(body.citations[0].href).toBe("/#about");
+    expect(body.citations[0].href).toBe("/about#about");
   });
 
   it("rejects a body over the byte cap before parsing it", async () => {
@@ -576,7 +576,7 @@ describe("POST /api/assistant — citation mapping", () => {
     const body = await (await POST(request({ question: "q" }, freshIp()))).json();
 
     expect(body.citations[0].label).toBe("About OJ");
-    expect(body.citations[0].href).toBe("/#about");
+    expect(body.citations[0].href).toBe("/about#about");
   });
 
   it("requires an exact corpus-relative source identifier", async () => {

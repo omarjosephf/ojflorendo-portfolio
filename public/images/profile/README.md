@@ -1,5 +1,28 @@
 # Profile and E.V avatar assets
 
+## OJ hero portrait, 10 September 2026
+
+The owner selected this photorealistic digital portrait, generated with Codex's
+built-in image-generation tool using owner-supplied reference photographs.
+It is an AI-generated representation, not an original camera photograph.
+The approved face and image texture are preserved. At the owner's explicit
+request, local non-generative segmentation adds an alpha channel to the original
+master. All original RGB pixels are unchanged; no face or clothing is regenerated.
+CSS fades the lower body into the page background. The hero has descriptive alternative
+text and no visible image-production caption, as requested by the owner.
+
+| File | Dimensions | Bytes | Use |
+| --- | --- | --- | --- |
+| `oj-hero-600.webp` | 600×750 | 80,186 | Small-screen hero |
+| `oj-hero-1000.webp` | 1000×1250 | 164,124 | Large-screen hero |
+
+Sharp only resizes and encodes the transparent master at WebP quality 95,
+preserving its alpha channel. These derivatives omit metadata. The original
+generated image, transparent master, reference photographs and prompt remain
+outside the public repository. The older `oj-profile.webp` photograph has been
+retired from the public assets and its navigation and contact circles removed.
+`site.profileImage` is now null. E.V's separate illustrated identity is unchanged.
+
 ## E.V identity, 9 September 2026
 
 E.V uses an original female digital illustration created with Codex's built-in
@@ -19,9 +42,7 @@ PNG and full prompt are retained outside the public delivery tree. The header's
 alternative text is "Illustrated avatar of E.V"; the launcher's empty alternative
 text avoids repeating the adjacent Ask E.V label.
 
-The genuine `oj-profile.webp` profile photograph used elsewhere on the portfolio
-is unchanged. The following section records the earlier OJ artwork's provenance
-and describes its former use.
+The following section records the earlier OJ artwork's provenance and former use.
 
 ## Historical OJ assistant artwork
 
@@ -40,14 +61,9 @@ dependency was added to produce them.
 
 ## What these are, and are not
 
-These are **artistic digital representations**, not photographs. The assistant
-states this in its identity area, and the 3D portrait carries the alternative
-text "3D illustrated avatar of OJ Florendo".
-
-They are **not** a substitute for a real profile photograph. `site.profileImage`
-points to the separate, genuine `oj-profile.webp` photograph used in the
-navigation and contact circles. CSS clips the unchanged image to those circles.
-The assistant illustrations must not replace that photograph.
+These historical assets are **artistic digital representations**, not
+photographs. Their former assistant identity area described them accordingly.
+They are no longer rendered by the assistant or used for the owner's profile.
 
 ## Provenance
 
@@ -69,8 +85,8 @@ authority's domain, not to the owner.
 metadata, which was verified: the derivatives contain no EXIF, ICC, XMP or IPTC
 data and no C2PA markers. This is a deliberate trade — a ~25 KB provenance box
 on a 4.5 KB image is disproportionate for web delivery — and the AI-generated
-nature is instead disclosed in the user interface, where visitors actually see
-it. The originals retain their credentials outside the repository.
+nature was disclosed in their former user interface. Their provenance remains
+recorded here, and the originals retain their credentials outside the repository.
 
 No copyright registration, facial accuracy or third-party licensing is claimed
 beyond what is recorded here.

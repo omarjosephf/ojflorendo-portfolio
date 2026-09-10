@@ -14,13 +14,15 @@ The owner approved the design and its publication on 7 September 2026. Its scope
 
 ## Purpose
 
-This site introduces **OJ Florendo** — a final-year BSc Computing and IT
-(Software) student — to employers, recruiters, freelance clients and
-collaborators, and serves as a growing home for projects and case studies over
-time. Visitors can understand who OJ is, review skills, experience and
-qualifications, explore project case studies, open LinkedIn and GitHub, and get
-in touch safely. It is built as a real product, with accessibility, performance
-and security treated as first-class requirements.
+This site presents **OJ Florendo** — a software developer and final-year BSc
+Computing and IT (Software) student — to small service businesses looking for a
+website, to collaborators, and to anyone reviewing his work. It leads with a
+clear service offer and keeps verified experience, skills and qualifications as
+supporting background, and serves as a growing home for projects and case
+studies over time. Visitors can understand what OJ offers, explore project case
+studies, review that background, open LinkedIn and GitHub, and get in touch
+safely. It is built as a real product, with accessibility, performance and
+security treated as first-class requirements.
 
 ## Live demo
 
@@ -38,8 +40,10 @@ and security treated as first-class requirements.
 
 ## Features
 
-- **Single-page portfolio** — Hero, About, Now, Skills, Experience, Projects,
-  Education and Contact, all driven by typed content data.
+- **Service-led landing page** — Hero, Services, Selected work, How I work and
+  Contact, all driven by typed content data.
+- **Separate `/about` route** — About, Now, Skills, Experience and Education,
+  so background sits one click from the offer rather than beneath it.
 - **Earlier production design (unmounted in this preview): Digital Core 3D hero** — a dynamically-loaded WebGL scene with
   an attractive CSS fallback; paused when off-screen or the tab is hidden.
 - **Earlier production design (unmounted in this preview): particle-wave background** — a shader-driven point field fixed
@@ -247,7 +251,8 @@ src/
 │   ├── api/contact/route.ts      # contact form POST handler
 │   ├── api/assistant/route.ts    # assistant POST handler (calls the retrieval
 │   │                             #   service server-to-server)
-│   ├── (portfolio)/            # public layout, homepage and projects/[slug]
+│   ├── (portfolio)/            # public layout, homepage, /about and
+│   │                             #   projects/[slug]
 │   ├── manage/page.tsx        # development-only owner preview
 │   ├── layout.tsx  globals.css
 │   ├── robots.ts  sitemap.ts  manifest.ts

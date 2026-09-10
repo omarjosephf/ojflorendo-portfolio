@@ -7,13 +7,13 @@ async function fillValidExcept(
 ) {
   // Scope to the form so labels can't collide with the footer's email link.
   const form = page.locator("form");
-  await form.getByLabel(/full name/i).fill("Jane Recruiter");
-  await form.getByLabel(/email/i).fill(overrides.email ?? "jane@example.com");
-  await form.getByLabel(/enquiry type/i).selectOption("job");
-  await form.getByLabel(/subject/i).fill("Frontend role");
+  await form.getByLabel(/your name/i).fill("Jane Baker");
+  await form.getByLabel(/email address/i).fill(overrides.email ?? "jane@example.com");
+  await form.getByLabel(/enquiry type/i).selectOption("freelance");
+  await form.getByLabel(/subject/i).fill("New website for my studio");
   await form
-    .getByLabel(/message/i)
-    .fill("We have an opening that fits your profile nicely.");
+    .getByLabel(/tell me about the project/i)
+    .fill("We run a small physiotherapy studio and our site does not explain what we offer.");
   await form.getByLabel(/happy for OJ Florendo/i).check();
 }
 

@@ -8,11 +8,19 @@ import { Menu, X, FileText } from "lucide-react";
 import { ThemeSelect } from "@/components/theme/ThemeSelect";
 import { site } from "@/data/site";
 import { Container } from "@/components/ui/Container";
-import { PortraitMark } from "@/components/ui/PortraitMark";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 
-/** Section ids observed for active-link highlighting. */
-const sectionIds = site.nav.map((item) => item.targetId);
+/**
+ * Section ids observed for active-link highlighting.
+ *
+ * Only items that are landing-page sections. An item with its own route (About)
+ * is excluded: there is no element to observe, and its active state comes from
+ * the pathname instead.
+ */
+const sectionIds = site.nav.filter((item) => !item.href).map((item) => item.targetId);
+
+/** Where a nav item points: its own route, or a section on the landing page. */
+const navHref = (item: (typeof site.nav)[number]) => item.href ?? `/#${item.targetId}`;
 
 export function Nav() {
   // Active state is a pure function of the current route + the section in view.
@@ -202,11 +210,10 @@ export function Nav() {
         >
           <Link
             href="/#top"
-            className="portrait-trigger flex min-h-11 min-w-11 items-center gap-2.5 rounded-lg"
+            className="flex min-h-11 items-center rounded-lg"
             aria-label={`${site.name} — home`}
           >
-            <PortraitMark />
-            <span className="hidden font-heading text-sm font-semibold text-ink sm:block">
+            <span className="font-heading text-lg font-semibold text-ink">
               OJ Florendo
             </span>
           </Link>
@@ -214,12 +221,20 @@ export function Nav() {
           {/* Desktop navigation */}
           <ul className="hidden items-center gap-1 lg:flex">
             {site.nav.map((item) => {
-              const isActive = activeSection === item.targetId;
+              // A route item is active on its own route; a section item is active
+              // only while that section is in view on the landing page.
+              const isActive = item.href
+                ? pathname === item.href
+                : activeSection === item.targetId;
               return (
                 <li key={item.targetId}>
                   <Link
-                    href={`/#${item.targetId}`}
-                    aria-current={isActive ? "true" : undefined}
+                    href={navHref(item)}
+                    // "page" is the correct value for a link to the route you
+                    // are on; sections keep the existing "true" contract.
+                    aria-current={
+                      isActive ? (item.href ? "page" : "true") : undefined
+                    }
                     className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                       isActive
                         ? "text-accent"
@@ -298,7 +313,7 @@ export function Nav() {
                   <li key={item.targetId}>
                     <Link
                       ref={i === 0 ? firstLinkRef : undefined}
-                      href={`/#${item.targetId}`}
+                      href={navHref(item)}
                       onClick={close}
                       className="block rounded-md px-3 py-3 text-base font-medium text-ink hover:bg-surface-2"
                     >

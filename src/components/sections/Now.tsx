@@ -15,9 +15,9 @@ export function Now() {
   return (
     <Section
       id="now"
-      eyebrow="06 / Now"
-      title="What I'm working on now"
-      intro="A snapshot of my current focus."
+      eyebrow="02 / Now"
+      title="What I'm building towards."
+      intro="My current focus, updated September 2026."
     >
       <div className="grid gap-5 sm:grid-cols-2">
         {now.items.map((item, i) => {

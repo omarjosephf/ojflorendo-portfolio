@@ -5,35 +5,41 @@
 OJ is based in Windsor, in Berkshire, in the United Kingdom. Windsor is where he
 lives and where he works from.
 
-He works remotely with clients and organisations elsewhere in the UK and
-internationally, so his location does not limit where he can take on work. His
-location is the only geographic detail published about him: his home address and
-personal phone number are private and are deliberately not published anywhere.
+He works remotely, so his location does not limit where he can take on work in
+the UK or internationally. His location is the only geographic detail published
+about him: his home address and personal phone number are private and are
+deliberately not published anywhere.
 
 ## Who OJ Florendo Rayatchi is
 
-OJ Florendo Rayatchi is a software developer, AI-focused builder, and creative
-developer. He is professionally known as OJ Florendo. He is a final-year BSc
-(Honours) Computing and IT (Software) student with The Open University, expected
-to finish in 2026.
+OJ Florendo Rayatchi is a software developer based in Windsor, Berkshire,
+United Kingdom, professionally known as OJ Florendo. His work includes websites,
+AI document-assistant projects, and training in AI, Python and data. He is a
+final-year BSc (Honours) Computing and IT (Software) student with The Open
+University, expected to finish in 2026.
 
-His work spans web development, Python, data, UX/UI, professional training,
+His broader background also covers Python, data, UX/UI, professional training,
 digital marketing, e-commerce, and social-media operations. His public
 professional profiles are LinkedIn at linkedin.com/in/ojflorendo and GitHub at
 github.com/omarjosephf.
 
-## What OJ builds and what his mission is
+## What OJ builds and what his current focus is
 
-OJ builds practical digital products with software and AI. He combines web
-development, Python, data, UX, training, and digital operations to turn real
-problems into useful, trustworthy solutions.
+OJ builds practical digital products with software and AI. His leading offer is a
+focused website or landing page for a small service business, with AI document
+assistants over an approved set of documents as a second line of work. He has
+built and deployed document assistants twice, so that is a capability he offers
+rather than an idea he is exploring.
 
-His mission is to build practical and trustworthy digital products at the
-intersection of software, AI, data, and design. He focuses on real needs rather
-than creating technology for its own sake, combining thoughtful product
-decisions, responsible AI-assisted engineering, and clear communication to help
-people and businesses work better. He creates purposeful digital products that
-solve real problems, make work easier, and give people clear, useful experiences.
+He focuses on real needs rather than creating technology for its own sake,
+combining thoughtful product decisions, responsible AI-assisted engineering, and
+clear communication. He aims to build products that help people understand
+information, complete a task, or run part of their work more easily.
+
+OJ is also developing his personal brand and exploring how AI can help him
+explain and market his own products. That is a direction of work rather than
+evidence of an established growth-marketing service, and it does not mean he
+sells marketing outcomes.
 
 ## What projects OJ has built and published
 
@@ -49,9 +55,11 @@ documents do not cover. It is live at cited-demo.fly.dev.
 experience, qualifications and services, and hosts the assistant answering this
 question.
 
-Those two are the complete list of work OJ has built and published. Each has its
-own document here with the full technical detail, including what each is built
-with and what was measured.
+Those two are the projects currently featured on this portfolio. They are
+personal projects. Their presence does not establish a client list, revenue, or
+client results, and the featured list should not be treated as an exhaustive
+history of everything OJ has ever built. Each has its own document here with the
+full technical detail, including what each is built with and what was measured.
 
 ## What motivates OJ and how he came into technology
 
@@ -72,23 +80,29 @@ stated limitations rather than claims alone.
 
 ## Whether OJ is available for work, and what kind
 
-OJ is available for work. He is open to selected remote projects, part-time
-opportunities, internships, graduate and junior roles, freelance engagements, and
-collaborations. He is a final-year student, so availability depends on scope and
-timing, and a specific opportunity is best discussed directly through the contact
-section of this website.
+OJ welcomes selected website-project enquiries and discussion of AI
+document-assistant work. He also remains open to collaborations, and his
+background in AI,
+Python and data training and in digital content and e-commerce operations can be
+discussed for a specific requirement.
 
-He is interested in software development, AI-focused product work, data work, and
-training delivery. He is willing to begin an unfamiliar engagement with a
-discovery phase, a prototype, or one clearly defined module rather than
-committing to a large scope up front.
+Scope, timing, price and suitability must be confirmed directly with OJ through
+the contact section of this website. E.V cannot promise that he has capacity,
+accept a project, quote a price, or give a start date. There are no published
+prices, fixed turnaround times, or service-level commitments.
+
+He is willing to begin an unfamiliar engagement with a discovery phase, a
+prototype, or one clearly defined module rather than committing to a large scope
+up front.
 
 ## What this portfolio platform is for
 
-This website documents OJ's growth, demonstrates his capabilities through real
-work, and connects him with employers, clients, and collaborators who value
-thoughtful technology. It is the first stage of a longer-term personal platform
-rather than a finished portfolio, and further projects, writing, and content are
-planned. Everything published on it is intended to be verifiable: projects are
-real, credentials show their issuer and date, and limitations are stated rather
-than omitted.
+This website's current focus is attracting prospective clients, showing OJ's own
+products, and sharing the work behind them. It is not primarily a job-search
+website. His education and employment history remain part of his background, and
+the change of emphasis does not mean he has changed or completed a qualification.
+
+It is the first stage of a longer-term personal platform rather than a finished
+portfolio, and further projects, writing, and content are planned. Everything
+published on it is intended to be verifiable: projects are real, credentials show
+their issuer and date, and limitations are stated rather than omitted.

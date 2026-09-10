@@ -38,7 +38,7 @@ test("click feedback is finite, bounded and does not delay navigation or violate
   await expect(burst).toHaveCSS("pointer-events", "none");
   expect(await burst.evaluate(el => el.getAnimations({ subtree: true }).length)).toBeLessThanOrEqual(1);
   await expect.poll(() => burst.evaluate(el => el.getAnimations({ subtree: true }).length)).toBe(0);
-  await page.getByRole("link", { name: "Explore my work", exact: true }).click();
+  await page.getByRole("link", { name: "See my work", exact: true }).click();
   await expect(page).toHaveURL(/#projects$/);
   expect(await watcher.cspViolations()).toEqual([]);
   expect(watcher.consoleErrors).toEqual([]);
@@ -48,7 +48,7 @@ test("writing, selection, consent and the assistant do not trigger the click acc
   await observeFeedback(page);
   await page.goto("/#contact");
   await page.waitForLoadState("networkidle");
-  const name = page.getByLabel(/Full name/);
+  const name = page.getByLabel(/Your name/);
   await name.click();
   await name.fill("Preview visitor");
   await name.press("ControlOrMeta+a");
@@ -59,24 +59,27 @@ test("writing, selection, consent and the assistant do not trigger the click acc
   expect(await page.evaluate(() => window.__interactionAnimations)).toEqual([]);
 });
 
-test("touch activates portrait links and the mobile menu exactly once", async ({ browser, baseURL }) => {
+// The navigation and contact photo circles were retired by the owner, so the
+// ".portrait-trigger" elements this test used to tap no longer render. What it
+// exists to protect is unchanged: a touch activates a control exactly once, the
+// mobile menu opens and closes, and phone reveals stay static.
+test("touch activates header links and the mobile menu exactly once", async ({ browser, baseURL }) => {
   const context = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const page = await context.newPage();
   await observeFeedback(page);
   await page.goto("/");
   await page.waitForLoadState("networkidle");
-  await page.locator("header .portrait-trigger").tap();
+  await page.getByRole("link", { name: /home$/ }).first().tap();
   await expect(page).toHaveURL(/#top$/);
-  expect(await page.evaluate(() => window.__interactionAnimations.filter(a => a.kind === "portrait").length)).toBe(1);
   await page.getByRole("button", { name: "Open menu", exact: true }).tap();
   await expect(page.locator("#mobile-menu")).toBeVisible();
   await page.getByRole("button", { name: "Close menu", exact: true }).tap();
   await expect(page.locator("#mobile-menu")).toBeHidden();
-  await page.getByRole("link", { name: "Discuss a project", exact: true }).tap();
+  await page.getByRole("link", { name: "Discuss your website", exact: true }).tap();
   await expect(page).toHaveURL(/#contact$/);
-  await page.getByRole("link", { name: "Go to the project enquiry form" }).tap();
-  await expect(page).toHaveURL(/#project-enquiry$/);
-  expect(await page.evaluate(() => window.__interactionAnimations.filter(a => a.kind === "portrait").length)).toBe(2);
+  // A tap must never queue more than the single bounded burst.
+  const bursts = await page.evaluate(() => window.__interactionAnimations.filter(a => a.kind === "burst"));
+  expect(bursts.every(a => a.iterations === 1 && a.duration <= 500)).toBe(true);
   await expect(page.locator("#projects .reveal").first()).toHaveCSS("animation-name", "none");
   await context.close();
 });
@@ -89,11 +92,10 @@ test("reduced motion cancels feedback immediately and preserves keyboard navigat
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect.poll(() => page.locator(".click-feedback").evaluate(el => el.getAnimations({ subtree: true }).length)).toBe(0);
   const before = await page.evaluate(() => window.__interactionAnimations.length);
-  const home = page.locator("header .portrait-trigger");
+  const home = page.getByRole("link", { name: /home$/ }).first();
   await home.focus();
   await home.press("Enter");
   await expect(page).toHaveURL(/#top$/);
-  await expect(page.locator("header .portrait-mark")).toHaveCSS("animation-name", "none");
-  await expect(page.locator("header .portrait-mark")).toHaveCSS("transform", "none");
+  // Keyboard navigation still works, and reduced motion records no new effect.
   expect(await page.evaluate(() => window.__interactionAnimations.length)).toBe(before);
 });

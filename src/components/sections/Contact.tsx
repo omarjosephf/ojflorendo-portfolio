@@ -1,4 +1,3 @@
-import { PortraitMark } from "@/components/ui/PortraitMark";
 import { headers } from "next/headers";
 import { ArrowUpRight, Mail } from "lucide-react";
 import { positioning } from "@/data/positioning";
@@ -17,10 +16,14 @@ export async function Contact() {
   return (
     <Section
       id="contact"
-      eyebrow="10 / Contact"
+      eyebrow="04 / Let's talk"
       title={positioning.contact.heading}
       intro={positioning.contact.supportingCopy}
     >
+      <Reveal className="contact-lead">
+        <p>{positioning.contact.reassurance}</p>
+        <p>{positioning.contact.secondary}</p>
+      </Reveal>
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start">
         <Reveal>
           <div id="project-enquiry" tabIndex={-1}>
@@ -30,15 +33,12 @@ export async function Contact() {
 
         <Reveal delay={1}>
           <div className="contact-aside glass flex flex-col gap-6 rounded-2xl p-6 sm:p-8">
-            <a href="#project-enquiry" className="portrait-trigger contact-portrait" aria-label="Go to the project enquiry form">
-              <PortraitMark className="contact-mark" />
-            </a>
             <div>
               <p className="font-heading text-lg font-semibold text-ink">
-                Other ways to connect
+                Prefer email?
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted">
-                {positioning.contact.secondary}
+                {positioning.contact.asideCopy}
               </p>
             </div>
 

@@ -11,18 +11,44 @@ const highlights = [
   { icon: MapPin, label: "Windsor, Berkshire · Remote-friendly" },
 ];
 
+/**
+ * Jump links to the rest of this route. Every target is a section further down
+ * /about, plus the reviewed public CV — the CV link is rendered only when one
+ * is configured.
+ */
+const backgroundLinks = [
+  { label: "Experience", href: "#experience" },
+  { label: "Skills", href: "#skills" },
+  { label: "Education & credentials", href: "#education" },
+];
+
 export function About() {
   return (
     <Section
       id="about"
-      eyebrow="04 / About"
-      title="Building with purpose, learning through execution."
+      eyebrow="01 / About"
+      title="I'm OJ. I build the work you see here."
+      as="h1"
     >
       <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <Reveal className="max-w-[65ch] space-y-5 text-base leading-relaxed text-muted sm:text-lg">
           {site.about.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
+          <ul className="about-background" aria-label="Supporting background">
+            {backgroundLinks.map((link) => (
+              <li key={link.href}>
+                <a className="text-link" href={link.href}>{link.label}</a>
+              </li>
+            ))}
+            {site.cvPath ? (
+              <li>
+                <a className="text-link" href={site.cvPath} target="_blank" rel="noopener noreferrer">
+                  Public CV <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ) : null}
+          </ul>
         </Reveal>
 
         <Reveal delay={1}>
@@ -41,7 +67,6 @@ export function About() {
           </ul>
           <ul className="about-roles" aria-label="Professional roles">{site.descriptor.split("·").map((role) => <li key={role}>{role.trim()}</li>)}</ul>
           <p className="about-availability">{positioning.hero.availability}</p>
-          {site.cvPath ? <a className="text-link mt-3" href={site.cvPath} target="_blank" rel="noopener noreferrer">Download public CV <span aria-hidden="true">↗</span></a> : null}
         </Reveal>
       </div>
     </Section>

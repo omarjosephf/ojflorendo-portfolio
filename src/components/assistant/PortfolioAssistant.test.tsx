@@ -20,7 +20,7 @@ const GROUNDED: AssistantResult = {
     {
       quote: "OJ has two published projects",
       label: "About OJ",
-      href: "/#about",
+      href: "/about#about",
     },
   ],
   modelRoute: "primary",
@@ -134,7 +134,7 @@ describe("E.V experience", () => {
     expect(screen.getByText(`“${GROUNDED.citations[0]!.quote}”`)).toBeVisible();
     expect(screen.getByRole("link", { name: "About OJ" })).toHaveAttribute(
       "href",
-      "/#about",
+      "/about#about",
     );
   });
 

@@ -6,23 +6,22 @@ import type { SiteConfig } from "@/types";
  */
 export const site: SiteConfig = {
   name: "OJ Florendo Rayatchi",
-  headline: "I build practical digital products with software and AI.",
-  descriptor: "Software Developer · AI-Focused Builder · Creative Developer",
+  // Rendered on the social preview card; the on-page hero owns its own copy.
+  headline: "Websites and AI document assistants for small service businesses.",
+  descriptor: "Web developer · AI product builder",
   location: "Windsor, Berkshire, United Kingdom",
   email: "ojflorendo.connect@gmail.com",
   about: [
-    "I am a software developer, AI-focused builder, and creative developer with experience across web development, Python, data, UX/UI, professional training, digital marketing, e-commerce, and social-media operations.",
-    "My path into technology was not straightforward. Over time, I discovered that I am most motivated when I am turning ideas into working products, solving practical problems, and learning through the process of building. Artificial intelligence has become an important part of that direction—not as a substitute for judgement, but as a tool for researching, prototyping, debugging, and working more effectively.",
-    "I care about the people who will use what I create, not only the code behind it. I aim to communicate honestly, take responsibility for the final result, and build solutions that are clear, useful, accessible, and dependable.",
+    "I'm OJ Florendo Rayatchi, a software developer based in Windsor, Berkshire. My work includes websites, document-assistant projects and practical training in AI, Python and data.",
+    "My path into technology wasn't straightforward. I found I'm most motivated turning ideas into working products and solving practical problems — and that's still how I work. My background in digital content and e-commerce shapes the questions I ask about a website: what needs explaining, what the visitor needs to do, and how it will be maintained.",
+    "I'm developing my own products alongside selected project work. This site is where I share what I build and what I learn from it.",
   ],
   // This path points only to the separately reviewed, phone-free public CV.
   // The editable DOCX source is stored under docs/cv/ for controlled updates.
   cvPath: "/documents/OJ_Florendo_Rayatchi_Public_CV.pdf",
-  // A real photograph of OJ, pre-cropped to a square and sized at build time
-  // (256px covers the 64px avatar at up to 4x device pixel ratio). The assistant
-  // avatars under the same directory are illustrations reserved for OJ
-  // Assistant and must never stand in for the human profile image.
-  profileImage: "/images/profile/oj-profile.webp",
+  // The earlier circular profile photograph was retired by the owner.
+  // The separately reviewed digital hero portrait is used only in the hero.
+  profileImage: null,
   socials: [
     {
       label: "LinkedIn",
@@ -46,13 +45,13 @@ export const site: SiteConfig = {
       external: false,
     },
   ],
+  // Mirrors the landing page, with one exception: About is its own route, so
+  // the background sections do not compete with the offer. Skills, experience,
+  // education and the public CV all live there, one click away.
   nav: [
-    { label: "Projects", targetId: "projects" },
     { label: "Services", targetId: "services" },
-    { label: "About", targetId: "about" },
-    { label: "Skills", targetId: "skills" },
-    { label: "Experience", targetId: "experience" },
-    { label: "Education", targetId: "education" },
+    { label: "Work", targetId: "projects" },
+    { label: "About", targetId: "about", href: "/about" },
     { label: "Contact", targetId: "contact" },
   ],
 };

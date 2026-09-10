@@ -14,8 +14,10 @@ describe("getProjectBySlug", () => {
   it("contains one transparent, owner-accountable AI disclosure", () => {
     const project = getProjectBySlug("personal-portfolio-website");
     expect(project?.caseStudy?.role).toContain("Claude Code and ChatGPT");
-    expect(project?.caseStudy?.role).toContain(
-      "I directed the product decisions",
+    // Tense-tolerant: the disclosure moved to the present when the case study
+    // was rewritten. What must not move is who directed the decisions.
+    expect(project?.caseStudy?.role).toMatch(
+      /I direct(ed)? the product decisions/,
     );
     expect(project?.technologies).not.toContain("Claude Code");
   });
@@ -41,7 +43,14 @@ describe("getProjectBySlug", () => {
 
   it("discloses AI assistance without listing the tool as a skill", () => {
     for (const project of projects) {
-      expect(project.caseStudy?.role).toMatch(/AI-assisted engineering/i);
+      // Two halves of the same obligation: say that AI assisted, and say who
+      // remains answerable for the result.
+      expect(project.caseStudy?.role).toMatch(
+        /AI-assisted engineering|AI tools|AI assistance/i,
+      );
+      expect(project.caseStudy?.role).toMatch(
+        /remains? (accountable|responsible)|I direct(ed)?/i,
+      );
       expect(project.technologies).not.toContain("Claude Code");
     }
   });

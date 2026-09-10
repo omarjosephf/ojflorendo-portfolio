@@ -2,19 +2,27 @@
 
 ## Cited: what it is
 
-Cited is a document assistant that answers questions from a set of documents and
-shows the exact passage each answer came from. When the documents do not contain
-the answer, it says so instead of producing a plausible one.
+Cited is OJ's document-assistant demo. It retrieves relevant passages, generates
+an answer, and checks quoted text against the passages supplied to the model. It
+is designed to say so when the documents do not contain the answer, rather than
+producing a plausible one, and its evaluation set tests that behaviour as well as
+ordinary answering.
 
 It is live at https://cited-demo.fly.dev and the source is at
 https://github.com/omarjosephf/cited. Status: live.
 
-## Cited: the guarantee it makes
+## Cited: what it checks, and what that check does and does not prove
 
 Every quoted citation is verified locally against the passage the model was
-actually sent. Questions the documents cannot answer are refused rather than
-guessed at. Answer quality, refusal behaviour, and citation integrity are scored
-by a committed evaluation set rather than asserted.
+actually sent; a quote that does not appear in that passage is discarded and
+counted. Cited is designed to decline questions its documents do not cover, and
+that intended behaviour is measured by a committed evaluation set rather than
+asserted.
+
+Three things are worth keeping apart. Checking that a quotation appears in a
+passage is not the same as establishing that the passage supports every claim in
+the answer, and neither is the same as evidence about documents the system has
+never seen.
 
 ## Cited: why it exists
 
@@ -65,6 +73,12 @@ runs.
 The scope of that claim is stated rather than glossed: it is fifteen questions
 against a ten-chunk corpus. That is enough to catch regressions, and it has
 already found three real bugs. It is not enough to show the system generalises.
+
+This evaluation context belongs to Cited. It is not evidence about E.V, and it is
+not a performance claim for any client's documents. A business pilot would need
+suitable documents, a broader test set, human review, and operational
+requirements agreed in advance. Cited is a demo, not proof of production
+capability for arbitrary business use.
 
 ## Cited: three things that went wrong
 

@@ -21,7 +21,7 @@ const display = Barlow_Condensed({
   display: "swap",
 });
 
-const title = "OJ Florendo Rayatchi | Software Developer & AI-Focused Builder";
+const title = "OJ Florendo Rayatchi | Websites for Service Businesses";
 const description = positioning.seoDescription;
 
 export const metadata: Metadata = {
@@ -37,15 +37,17 @@ export const metadata: Metadata = {
   keywords: [
     "OJ Florendo Rayatchi",
     "OJ Florendo",
-    "software developer",
-    "AI-focused builder",
-    "creative developer",
+    "web developer",
+    "websites for small businesses",
+    "service business website",
+    "AI product builder",
+    "AI document assistant",
     "portfolio",
     "Python",
     "AI training",
-    "data analysis",
     "Next.js",
     "Windsor",
+    "Berkshire",
   ],
   alternates: { canonical: "/" },
   openGraph: {

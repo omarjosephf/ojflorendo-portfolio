@@ -38,10 +38,10 @@ const { ContactForm } = await import("./ContactForm");
 const SITE_KEY = "0xTEST_SITE_KEY";
 
 function fillValidForm() {
-  fireEvent.change(screen.getByLabelText(/full name/i), {
+  fireEvent.change(screen.getByLabelText(/your name/i), {
     target: { value: "Jane Recruiter" },
   });
-  fireEvent.change(screen.getByLabelText(/^email/i), {
+  fireEvent.change(screen.getByLabelText(/email address/i), {
     target: { value: "jane@example.com" },
   });
   fireEvent.change(screen.getByLabelText(/enquiry type/i), {
@@ -50,7 +50,7 @@ function fillValidForm() {
   fireEvent.change(screen.getByLabelText(/subject/i), {
     target: { value: "Frontend role" },
   });
-  fireEvent.change(screen.getByLabelText(/message/i), {
+  fireEvent.change(screen.getByLabelText(/tell me about the project/i), {
     target: { value: "We have an opening that fits your profile nicely." },
   });
   fireEvent.click(screen.getByLabelText(/happy for OJ Florendo/i));

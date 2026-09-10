@@ -17,17 +17,19 @@ test("project frame responds to keyboard focus and opens its case study", async 
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Personal Portfolio");
 });
 
-test("contact portrait responds to keyboard focus and leads to the enquiry form", async ({ page }) => {
-  await page.goto("/#contact");
-  const portrait = page.getByRole("link", { name: "Go to the project enquiry form" });
-  await portrait.focus();
-  await expect(portrait).toBeFocused();
-  await expect(page.locator(".contact-mark")).toHaveCSS("animation-name", "portrait-wiggle");
-  await portrait.press("Enter");
-  await expect(page).toHaveURL(/#project-enquiry$/);
-  await expect(page.locator("#project-enquiry")).toBeFocused();
-  await page.keyboard.press("Tab");
-  const name = page.getByLabel(/Full name/);
+// The owner retired the contact portrait circle, so the link this test used to
+// drive no longer exists. The contract it protected does: a keyboard visitor
+// must be able to reach the enquiry form from the hero and start typing.
+test("the enquiry form is reachable and usable from the keyboard", async ({ page }) => {
+  await page.goto("/");
+  const cta = page.getByRole("link", { name: "Discuss your website", exact: true });
+  await cta.focus();
+  await expect(cta).toBeFocused();
+  await cta.press("Enter");
+  await expect(page).toHaveURL(/#contact$/);
+  await expect(page.locator("#contact")).toBeInViewport({ ratio: 0.01 });
+  const name = page.getByLabel(/Your name/);
+  await name.focus();
   await expect(name).toBeFocused();
   await name.fill("Preview visitor");
   await expect(name).toHaveValue("Preview visitor");
@@ -37,10 +39,17 @@ test("all portfolio content and project links work without JavaScript", async ({
   const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
   const page = await context.newPage();
   await page.goto("/");
-  for (const id of ["projects", "services", "approach", "about", "mission", "now", "skills", "experience", "education", "contact"]) {
+  for (const id of ["services", "projects", "approach", "contact"]) {
     await expect(page.locator(`#${id}-heading`)).toBeVisible();
   }
-  await page.getByRole("link", { name: "Explore my work", exact: true }).click();
+  // The background sections moved to their own route. Sweeping it here keeps
+  // the "nothing was lost in the split" guarantee, without JavaScript.
+  await page.goto("/about");
+  for (const id of ["about", "now", "skills", "experience", "education"]) {
+    await expect(page.locator(`#${id}-heading`)).toBeVisible();
+  }
+  await page.goto("/");
+  await page.getByRole("link", { name: "See my work", exact: true }).click();
   await expect(page).toHaveURL(/#projects$/);
   await expect(page.locator("#projects")).toBeInViewport();
   await context.close();
@@ -52,8 +61,17 @@ test("small phones, tablets and 200 percent reflow retain content without overfl
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
     expect(await hasNoHorizontalOverflow(page), `overflow at ${viewport.width}px`).toBe(true);
-    await expect(page.getByRole("link", { name: "Discuss a project", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Explore my work", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Discuss your website", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "See my work", exact: true })).toBeVisible();
+
+    // /about is a public route in its own right and carries the long-form
+    // content (timeline, credential tables), so it needs the same sweep.
+    await page.goto("/about");
+    await page.evaluate(() => document.fonts.ready);
+    expect(
+      await hasNoHorizontalOverflow(page),
+      `overflow on /about at ${viewport.width}px`,
+    ).toBe(true);
   }
 });
 
@@ -87,11 +105,15 @@ test("review screenshots show complete desktop and mobile layouts", async ({ pag
     await settle();
     await page.screenshot({ path: testInfo.outputPath(`${name}-home.png`) });
     await page.screenshot({ path: testInfo.outputPath(`${name}-full.png`), fullPage: true });
-    for (const section of ["projects", "services", "approach", "contact"]) {
+    for (const section of ["services", "projects", "approach", "contact"]) {
       await page.goto(`/#${section}`);
       await settle();
       await page.screenshot({ path: testInfo.outputPath(`${name}-${section}.png`) });
     }
+    await page.goto("/about");
+    await settle();
+    await page.screenshot({ path: testInfo.outputPath(`${name}-about.png`) });
+    await page.screenshot({ path: testInfo.outputPath(`${name}-about-full.png`), fullPage: true });
     await page.goto("/projects/cited");
     await settle();
     await page.screenshot({ path: testInfo.outputPath(`${name}-case-study.png`) });

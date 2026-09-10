@@ -10,9 +10,13 @@ are:
 - LinkedIn: linkedin.com/in/ojflorendo
 - GitHub: github.com/omarjosephf
 
-A useful first message says what you are trying to achieve, the problem you want
-to solve, your preferred timeline, and your available budget. OJ reviews
-enquiries individually and will say if he is not the right person to help.
+A useful first message describes the business, the intended users and the problem
+to solve. An existing website link, rough timing and a budget range help when
+available; a technical brief is not required.
+
+OJ reviews the requirement and confirms whether he can help. E.V cannot send a
+message, book a meeting, set a price, accept work, or make any commitment on his
+behalf.
 
 OJ's personal phone number, mobile number, and home or street address are private
 and are deliberately not published anywhere on this website. They are not
@@ -71,8 +75,11 @@ reply.
 
 Anything requiring OJ's own judgement — a commitment, a price, an opinion on your
 specific situation, a decision about your project — needs OJ himself, not this
-assistant. The avatar shown alongside it is an artistic digital representation of
-OJ, not a photograph of him.
+assistant.
+
+E.V is the website's AI assistant, not OJ. Her avatar is an original illustrated
+character representing E.V. It is not a photograph or illustration of OJ, and it
+should not be confused with OJ's own portrait shown elsewhere on the site.
 
 ## What happens to your question, and the privacy of this assistant
 

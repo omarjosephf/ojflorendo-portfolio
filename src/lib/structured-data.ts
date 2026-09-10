@@ -18,7 +18,10 @@ export function buildStructuredData() {
         alternateName: positioning.professionalName,
         url: SITE_URL,
         jobTitle: site.descriptor,
-        description: positioning.seoDescription,
+        // Third person: this describes OJ to a machine reader, not to a visitor.
+        // No Offer, Review, rating, price or service-area data is published here;
+        // none of it would be verifiable.
+        description: positioning.personDescription,
         email: `mailto:${site.email}`,
         address: {
           "@type": "PostalAddress",

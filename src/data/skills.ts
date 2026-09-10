@@ -2,9 +2,9 @@ import type { SkillGroup } from "@/types";
 
 export const skillGroups: SkillGroup[] = [
   {
-    title: "Software and web development",
+    title: "Web development",
     summary:
-      "Responsive, accessible interfaces and practical applications built with a maintainable technical foundation.",
+      "Responsive interfaces, page structure, accessibility-conscious implementation, technical search foundations, testing and documentation.",
     skills: [
       "Next.js",
       "React",
@@ -19,9 +19,9 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
   {
-    title: "AI-assisted product development",
+    title: "AI product exploration",
     summary:
-      "Focused AI exploration with defined purposes, human review, and honest limitations.",
+      "Document-assistant prototypes, prompt and knowledge workflows, human review and evaluation of a defined use case.",
     skills: [
       "Narrow AI assistant prototypes",
       "Prompt and knowledge-workflow design",
@@ -33,9 +33,9 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
   {
-    title: "UX, data, and communication",
+    title: "Data and communication",
     summary:
-      "Technical work supported by user-focused structure, data skills, and clear explanation.",
+      "Python, Excel, Power BI, training materials and explaining technical ideas clearly.",
     skills: [
       "Wireframes and interface prototypes",
       "User-focused content structure",
@@ -48,9 +48,9 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
   {
-    title: "Digital and commercial operations",
+    title: "Digital operations",
     summary:
-      "Practical digital support informed by e-commerce, content, marketing, and day-to-day operations.",
+      "E-commerce content, product presentation, social-media planning and workflow organisation.",
     skills: [
       "E-commerce operations support",
       "Social-media content planning",

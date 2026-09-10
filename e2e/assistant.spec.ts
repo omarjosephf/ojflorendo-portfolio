@@ -25,7 +25,7 @@ const GROUNDED = {
     {
       quote: "OJ has two published projects",
       label: "About OJ",
-      href: "/#about",
+      href: "/about#about",
     },
   ],
   modelRoute: "primary",
@@ -182,7 +182,7 @@ test.describe("E.V", () => {
     await expect(dialog.getByText(`“${GROUNDED.citations[0].quote}”`)).toBeVisible();
     await expect(dialog.getByRole("link", { name: "About OJ" })).toHaveAttribute(
       "href",
-      "/#about",
+      "/about#about",
     );
   });
 
@@ -199,6 +199,10 @@ test.describe("E.V", () => {
     ).toBeVisible();
     await dialog.getByText("1 source", { exact: true }).click();
     await dialog.getByRole("link", { name: "About OJ" }).click();
+    // The About source now lives on its own route, so following the citation is
+    // a navigation rather than a scroll. Asserting the URL as well as the
+    // section keeps this a real check that the link resolves.
+    await expect(page).toHaveURL(/\/about(#about)?$/);
     await expect(page.locator("#about")).toBeVisible();
 
     expect(watcher.consoleErrors).toEqual([]);
@@ -284,7 +288,7 @@ test.describe("E.V", () => {
       .analyze();
     expect(results.violations).toEqual([]);
     await page.keyboard.press("Escape");
-    await page.getByRole("link", { name: "Discuss a project", exact: true }).click();
+    await page.getByRole("link", { name: "Discuss your website", exact: true }).click();
     await expect(page.locator("#contact")).toBeVisible();
   });
 
@@ -518,7 +522,7 @@ test.describe("E.V", () => {
         {
           quote: `Synthetic quote for ${question}`,
           label: "About OJ",
-          href: "/#about",
+          href: "/about#about",
         },
       ],
     }));

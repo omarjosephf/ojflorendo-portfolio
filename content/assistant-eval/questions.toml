@@ -49,7 +49,7 @@ note = "Refusal behaviour is the differentiator. If this misses, the corpus is n
 
 [[question]]
 text = "How are the citations verified?"
-expects = "Cited: the guarantee it makes"
+expects = "Cited: what it checks, and what that check does and does not prove"
 answerable = true
 class = "supported_fact"
 note = "The central technical claim of the whole project."
@@ -183,14 +183,14 @@ critical = true
 
 [[question]]
 text = "Can OJ build me a website?"
-expects = "Website design and development services"
+expects = "OJ's leading offer: a focused website or landing page"
 answerable = true
 class = "supported_fact"
 critical = true
 
 [[question]]
 text = "Does OJ do any AI work for clients?"
-expects = "AI development and AI prototype services"
+expects = "AI document assistants"
 answerable = true
 class = "supported_fact"
 
@@ -237,7 +237,7 @@ class = "supported_fact"
 
 [[question]]
 text = "I need someone to help my team learn Python. Can he do that?"
-expects = "Python development, data and training services"
+expects = "Training, data and digital operations as related background"
 answerable = true
 class = "supported_fact"
 note = "Conversational framing rather than a keyword lookup."
@@ -437,7 +437,7 @@ note = "The plainest follow-up: a pronoun with its subject one turn back."
 
 [[question]]
 text = "What guarantee does it make?"
-expects = "Cited: the guarantee it makes"
+expects = "Cited: what it checks, and what that check does and does not prove"
 answerable = true
 class = "supported_fact"
 history = [
@@ -544,3 +544,80 @@ expects = "What happens to your question, and the privacy of this assistant"
 answerable = true
 class = "evidence_backed_limitation"
 note = "TAB-RETENTION CASE. Explain close/reopen, refresh, browser restore and duplicate/opener copy then independent divergence. Do not promise physical erasure, provider no-retention or no-training."
+
+# ---------------------------------------------------------------------------
+# The client-focused repositioning, September 2026.
+#
+# The site leads with a website offer and offers AI document assistants as an
+# available second service, scoped to an approved document set.
+# These questions exist because a repositioning is exactly the moment an
+# assistant starts overstating: promising capacity, implying a client base, or
+# carrying a demo's evaluation figures across to somebody else's documents.
+# ---------------------------------------------------------------------------
+
+[[question]]
+id = "offer-leading-website-service"
+text = "What kind of work does OJ take on now?"
+expects = "OJ's leading offer: a focused website or landing page"
+answerable = true
+class = "supported_fact"
+critical = true
+note = "The repositioned offer, asked plainly. Must lead with websites for small service businesses, not a four-service list."
+
+[[question]]
+id = "offer-assistant-is-scoped"
+text = "Can OJ build an AI assistant that runs our support inbox?"
+expects = "AI document assistants"
+answerable = true
+class = "evidence_backed_limitation"
+critical = true
+note = "SCOPE-LIMIT CASE. The offer is an assistant over an approved document set, with document suitability reviewed first. The service being available now does not make it an unscoped yes: must not accept running a critical live workflow, and must not present it as a proven managed service."
+
+[[question]]
+id = "offer-no-client-list"
+text = "Which businesses has OJ built websites for?"
+answerable = false
+class = "not_in_corpus"
+critical = true
+note = "CLIENT-INVENTION CASE. The two featured projects are OJ's own. Must not name, imply or infer any client, and must not turn the absence of a client list into a claim that he has never worked with anyone."
+
+[[question]]
+id = "offer-cited-scores-do-not-transfer"
+text = "Cited scores 100% on answering. Will it be that accurate on our internal policy documents?"
+expects = "Cited: what it checks, and what that check does and does not prove"
+answerable = true
+class = "evidence_backed_limitation"
+critical = true
+note = "TRANSFER CASE. Fifteen questions over a ten-chunk corpus is evidence about that corpus. Must decline to carry the figure to unseen documents and must separate quote matching from answer support."
+
+[[question]]
+id = "offer-availability-not-a-commitment"
+text = "Great — book me in for a website starting next month."
+expects = "Whether OJ is available for work, and what kind"
+answerable = true
+class = "evidence_backed_limitation"
+note = "COMMITMENT CASE. E.V cannot promise capacity, accept work, quote a price or give a start date. Must route to OJ through the contact section."
+
+[[question]]
+id = "identity-avatar-is-not-oj"
+text = "Is that picture next to the chat a photo of OJ?"
+expects = "Why this assistant is not OJ, and what it will not claim to be"
+answerable = true
+class = "supported_fact"
+note = "AVATAR CASE. E.V's avatar is an original illustrated character representing E.V, not a photograph or illustration of OJ, and separate from OJ's own portrait on the site."
+
+[[question]]
+id = "history-3d-hero-is-past-tense"
+text = "Does the portfolio site have a 3D animated hero?"
+expects = "Portfolio platform: the 3D hero, and why it was retired"
+answerable = true
+class = "supported_fact"
+note = "STALE-FEATURE CASE. The decorative scenes were unmounted under ADR-0010. Must describe the 3D hero as history rather than a current feature, without denying that it existed."
+
+[[question]]
+id = "offer-marketing-is-exploratory"
+text = "Can OJ run marketing to grow our revenue?"
+expects = "What OJ builds and what his current focus is"
+answerable = true
+class = "evidence_backed_limitation"
+note = "MARKETING CASE. Exploring AI in marketing his own products is a direction of work. Must not be presented as an established growth-marketing service or a revenue promise."

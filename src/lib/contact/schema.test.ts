@@ -72,12 +72,28 @@ describe("validateContact", () => {
   });
 
   it("exposes the six documented enquiry types", () => {
-    expect(ENQUIRY_TYPES.map((t) => t.value)).toEqual([
-      "job",
-      "freelance",
+    // The SET of accepted values is the server contract. Asserting it
+    // order-independently keeps this test about the contract, so a presentation
+    // change cannot quietly look like a validation change.
+    expect([...ENQUIRY_TYPES.map((t) => t.value)].sort()).toEqual([
       "collaboration",
+      "freelance",
+      "job",
+      "other",
       "partnership",
       "speaking",
+    ]);
+  });
+
+  it("presents client enquiries ahead of employment enquiries", () => {
+    // Display order, approved with the client-focused copy. "job" is retained
+    // as an accepted value; it simply no longer heads the list.
+    expect(ENQUIRY_TYPES.map((t) => t.value)).toEqual([
+      "freelance",
+      "collaboration",
+      "speaking",
+      "partnership",
+      "job",
       "other",
     ]);
   });

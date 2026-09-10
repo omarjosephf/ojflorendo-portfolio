@@ -9,17 +9,19 @@ test.describe("Homepage", () => {
     const watcher = await watchPage(page);
     await page.goto("/");
 
+    // The h1 states the offer; the name is carried by the hero meta line, the
+    // nav wordmark, About and the footer.
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "OJ Florendo Rayatchi",
+      "Make your services clear.Make the next step easy.",
     );
     await expect(page).toHaveTitle(
-      /OJ Florendo Rayatchi \| Software Developer & AI-Focused Builder/,
+      /OJ Florendo Rayatchi \| Websites for Service Businesses/,
     );
     await expect(
-      page.getByRole("link", { name: "Discuss a project" }),
+      page.getByRole("link", { name: "Discuss your website" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Explore my work" }),
+      page.getByRole("link", { name: "See my work" }),
     ).toBeVisible();
 
     expect(watcher.consoleErrors).toEqual([]);
@@ -53,9 +55,12 @@ test.describe("Homepage", () => {
     }
   });
 
-  test("hero preview visibly settles, then stops animating", async ({ page }) => {
+  // The rotating project-preview stack was replaced by the owner-approved
+  // portrait, which is deliberately static. The finite-entrance contract now
+  // belongs to the hero heading, which is what still animates.
+  test("hero heading visibly settles, then stops animating", async ({ page }) => {
     await page.goto("/");
-    const preview = page.locator(".hero-preview-1");
+    const line = page.locator(".hero-offer > span").first();
     await page.evaluate(async () => {
       await document.fonts.ready;
       for (const animation of document.getAnimations()) {
@@ -63,15 +68,15 @@ test.describe("Homepage", () => {
         animation.currentTime = 0;
       }
     });
-    const start = await preview.evaluate((el) => getComputedStyle(el).transform);
+    const start = await line.evaluate((el) => getComputedStyle(el).transform);
     // Text must retain its reviewed contrast even at the entrance's first frame.
-    expect(await page.locator(".hero-name > span").evaluateAll((elements) =>
+    expect(await page.locator(".hero-offer > span").evaluateAll((elements) =>
       elements.every((el) => getComputedStyle(el).opacity === "1")
     )).toBe(true);
     await page.evaluate(() => {
       for (const animation of document.getAnimations()) animation.finish();
     });
-    const end = await preview.evaluate((el) => getComputedStyle(el).transform);
+    const end = await line.evaluate((el) => getComputedStyle(el).transform);
     expect(end).not.toBe(start);
     expect(await page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === "running").length)).toBe(0);
   });
@@ -79,10 +84,10 @@ test.describe("Homepage", () => {
   test("reduced motion is complete and static", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    await expect(page.locator(".hero-preview-1")).toBeVisible();
-    await expect(page.locator("#about-heading")).toBeVisible();
+    await expect(page.locator(".hero-portrait-blend img")).toBeVisible();
+    await expect(page.locator("#services-heading")).toBeVisible();
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
-    expect(await page.locator(".hero-preview-1").evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+    expect(await page.locator(".hero-offer > span").first().evaluate((el) => getComputedStyle(el).transform)).toBe("none");
   });
   test("the project enquiry action is immediately available", async ({
     page,
@@ -91,7 +96,7 @@ test.describe("Homepage", () => {
     // The particle-wave canvas is fixed over the whole viewport on every page.
     // Playwright's actionability check fails if another element would receive
     // the click, so this asserts the canvas stays pointer-events: none.
-    await page.getByRole("link", { name: "Discuss a project" }).click();
+    await page.getByRole("link", { name: "Discuss your website" }).click();
     await expect(page).toHaveURL(/#contact$/);
   });
 
@@ -138,5 +143,13 @@ test.describe("Homepage", () => {
     await page.goto("/");
     const mobile = await new AxeBuilder({ page }).analyze();
     expect(mobile.violations).toEqual([]);
+
+    // /about is a landing route in its own right, so it carries the same bar.
+    for (const size of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(size);
+      await page.goto("/about");
+      const about = await new AxeBuilder({ page }).analyze();
+      expect(about.violations, `axe on /about at ${size.width}px`).toEqual([]);
+    }
   });
 });

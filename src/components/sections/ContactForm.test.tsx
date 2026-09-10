@@ -22,7 +22,7 @@ describe("ContactForm (client validation)", () => {
 
     expect(await screen.findByText(/please enter your name/i)).toBeInTheDocument();
     expect(screen.getByText(/enter your email address/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/full name/i)).toHaveAttribute(
+    expect(screen.getByLabelText(/your name/i)).toHaveAttribute(
       "aria-invalid",
       "true",
     );
@@ -31,10 +31,10 @@ describe("ContactForm (client validation)", () => {
 
   it("rejects an invalid email before submitting", async () => {
     render(<ContactForm />);
-    fireEvent.change(screen.getByLabelText(/full name/i), {
+    fireEvent.change(screen.getByLabelText(/your name/i), {
       target: { value: "Jane Recruiter" },
     });
-    fireEvent.change(screen.getByLabelText(/email/i), {
+    fireEvent.change(screen.getByLabelText(/email address/i), {
       target: { value: "not-an-email" },
     });
     fireEvent.change(screen.getByLabelText(/enquiry type/i), {
@@ -43,7 +43,7 @@ describe("ContactForm (client validation)", () => {
     fireEvent.change(screen.getByLabelText(/subject/i), {
       target: { value: "Hello there" },
     });
-    fireEvent.change(screen.getByLabelText(/message/i), {
+    fireEvent.change(screen.getByLabelText(/tell me about the project/i), {
       target: { value: "A message long enough to pass validation." },
     });
     fireEvent.click(screen.getByLabelText(/happy for OJ Florendo/i));

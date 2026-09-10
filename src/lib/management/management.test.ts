@@ -65,7 +65,7 @@ describe("canonical snapshot", () => {
     expect(corpus.corpusSha256).toBe(assistantCorpusChecksum);
     const paths = assistantCorpusFiles.map((s) => s.path).sort();
     expect([...new Set(corpus.chunks.map((c) => c.source))].sort()).toEqual(paths);
-    expect(corpus.chunks).toHaveLength(67);
+    expect(corpus.chunks).toHaveLength(69);
     expect(new Set(corpus.chunks.map((c) => c.index)).size).toBe(corpus.chunks.length);
     for (const c of corpus.chunks) {
       expect(c.tokens).toBeGreaterThan(0); expect(c.tokens).toBeLessThanOrEqual(corpus.tokenLimit);

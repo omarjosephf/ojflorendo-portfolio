@@ -147,8 +147,9 @@ describe("screenQuestion — the evaluation set reaches the service intact", () 
   it("reads the same question set the harness runs", () => {
     // Guards the parser itself: a silently empty list would make the assertion
     // below pass while testing nothing.
-    // Original 54 cases plus eight runtime-v2 prompt counterexamples.
-    expect(questions.length).toBe(62);
+    // Original 54 cases, plus eight runtime-v2 prompt counterexamples, plus
+    // eight covering the September 2026 client-focused repositioning.
+    expect(questions.length).toBe(70);
   });
 
   it.each(questions)("does not intercept %s", (question) => {

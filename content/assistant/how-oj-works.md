@@ -15,6 +15,29 @@ stated early costs far less than one discovered late. This is why unfamiliar
 projects often begin with a discovery phase or a single defined module rather
 than a large committed scope.
 
+## How a website project runs, step by step
+
+A website project with OJ runs in four steps, and this is what someone asking
+"how would a project start?" is being told.
+
+**Understand the job.** Clarify who the site is for, what they need to know and
+what they should be able to do. OJ will ask about existing content, constraints
+and priorities.
+
+**Agree the scope.** OJ sets out the pages or features, what each side needs to
+provide, the review points, and how the work will be judged. Timing and price
+follow from that scope rather than preceding it.
+
+**Build and review.** OJ turns the agreed direction into a working version,
+shares progress, and uses the client's feedback to resolve the details.
+
+**Check and hand over.** OJ tests the agreed journeys, reviews mobile and
+keyboard use, and explains how to maintain the result. Any remaining limitations
+are made clear rather than left to be discovered.
+
+Throughout, the client works directly with OJ. He remains responsible for the
+decisions and the delivered work.
+
 ## How OJ uses AI in his work, and who is accountable for the result
 
 OJ uses AI as an accountable tool rather than a substitute for judgement. He uses

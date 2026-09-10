@@ -184,7 +184,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
   return (
     <form onSubmit={onSubmit} noValidate className="glass rounded-2xl p-6 sm:p-8">
       <p className="font-heading text-lg font-semibold text-ink">
-        Send a project enquiry
+        Discuss a project
       </p>
       <p className="mt-1 text-sm text-muted">
         Fields marked <span className="text-accent">*</span> are required.
@@ -202,7 +202,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
       <div className="mt-6 grid gap-5 sm:grid-cols-2">
         <Field
           id={fid("name")}
-          label="Full name"
+          label="Your name"
           required
           error={errors.name}
         >
@@ -222,7 +222,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
           />
         </Field>
 
-        <Field id={fid("email")} label="Email" required error={errors.email}>
+        <Field id={fid("email")} label="Email address" required error={errors.email}>
           <input
             id={fid("email")}
             name="email"
@@ -241,7 +241,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
 
         <Field
           id={fid("company")}
-          label="Company / organisation"
+          label="Business or organisation"
           hint="Optional"
           error={errors.company}
         >
@@ -320,11 +320,20 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
       <div className="mt-5">
         <Field
           id={fid("message")}
-          label="Message"
+          label="Tell me about the project"
           required
           error={errors.message}
           hint={`${values.message.length}/${LIMITS.message}`}
         >
+          {/*
+            Guidance a visitor can act on, associated with the field rather than
+            floating near it, so assistive technology announces it with the
+            textarea alongside the character counter.
+          */}
+          <p id={`${fid("message")}-guide`} className="mb-1.5 text-xs leading-relaxed text-muted">
+            What do you offer, who is it for and what would you like to improve?
+            Include your website link, timing and budget if useful.
+          </p>
           <textarea
             id={fid("message")}
             name="message"
@@ -333,7 +342,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
             required
             aria-required="true"
             aria-invalid={!!errors.message}
-            aria-describedby={`${fid("message")}-hint${errors.message ? ` ${fid("message")}-error` : ""}`}
+            aria-describedby={`${fid("message")}-guide ${fid("message")}-hint${errors.message ? ` ${fid("message")}-error` : ""}`}
             value={values.message}
             onChange={(e) => update("message", e.target.value)}
             className={`${inputCls} resize-y`}

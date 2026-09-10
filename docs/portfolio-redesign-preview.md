@@ -4,6 +4,18 @@
 - Date: 7 September 2026
 - Risk: R1 presentation and interaction change; no new trust boundary.
 
+> **Partly superseded, 10 September 2026.** This record describes the design
+> accepted and published on 7 September 2026 and is retained as history. A later,
+> owner-approved and still **unpublished** service-first iteration changes some of
+> what is described below: the landing page now leads with Services and ends at
+> Contact, the background sections (About, Now, Skills, Experience, Education)
+> have moved to a separate `/about` route, the standalone Mission section is folded
+> into About and How I work, the primary action reads **Discuss your website**, and
+> the navigation and contact portrait circles and the original profile photograph
+> have been retired in favour of a single hero portrait. Everything else here still
+> applies. See [ADR-0010](adr/0010-warm-portfolio-and-finite-motion.md) for the
+> published decision.
+
 The approved direction is a warm, typography-led personal portfolio for client
 work and solo entrepreneurship across software, websites, applications, AI
 agents and business systems. Existing substantive content, project claims,
