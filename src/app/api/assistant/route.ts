@@ -4,6 +4,7 @@ import { askAssistantService, readServiceConfig } from "@/lib/assistant/service"
 import {
   ASSISTANT_HISTORY_LIMIT,
   ASSISTANT_INPUT_LIMIT,
+  ASSISTANT_PROXY_TIMEOUT_MS,
   type AssistantHistoryTurn,
 } from "@/lib/assistant/types";
 import { createRateLimiter } from "@/lib/rate-limit";
@@ -121,6 +122,7 @@ function json(body: unknown, status: number) {
 async function readBoundedBody(
   req: NextRequest,
   maxBytes: number,
+  signal: AbortSignal,
 ): Promise<{ tooLarge: true } | { tooLarge: false; text: string }> {
   const stream = req.body;
   if (!stream) return { tooLarge: false, text: "" };
@@ -128,80 +130,142 @@ async function readBoundedBody(
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (!value) continue;
-
-    total += value.byteLength;
-    if (total > maxBytes) {
-      await reader.cancel();
-      return { tooLarge: true };
+  const cancelOnAbort = () => {
+    try {
+      void reader.cancel().catch(() => undefined);
+    } catch {
+      // Cancellation remains best effort at an already-failed boundary.
     }
-    chunks.push(value);
-  }
-  reader.releaseLock();
+  };
+  signal.addEventListener("abort", cancelOnAbort, { once: true });
 
-  const merged = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    merged.set(chunk, offset);
-    offset += chunk.byteLength;
+  try {
+    for (;;) {
+      if (signal.aborted) throw new Error("aborted");
+      const { done, value } = await reader.read();
+      if (signal.aborted) throw new Error("aborted");
+      if (done) break;
+      if (!value || value.byteLength === 0) continue;
+
+      total += value.byteLength;
+      if (total > maxBytes) {
+        // A hostile stream may never settle its cancellation hook. Fire and
+        // forget so rejecting an oversized request cannot outlive the deadline.
+        cancelOnAbort();
+        return { tooLarge: true };
+      }
+      chunks.push(value);
+    }
+
+    const merged = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      merged.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    return {
+      tooLarge: false,
+      text: new TextDecoder("utf-8", { fatal: true }).decode(merged),
+    };
+  } finally {
+    signal.removeEventListener("abort", cancelOnAbort);
+    try {
+      reader.releaseLock();
+    } catch {
+      // A canceled stream may already have released its reader.
+    }
   }
-  return { tooLarge: false, text: new TextDecoder().decode(merged) };
 }
 
 export async function POST(req: NextRequest) {
-  const started = Date.now();
+  const started = performance.now();
+  const controller = new AbortController();
+  const abortFromClient = () => controller.abort();
+  if (req.signal.aborted) controller.abort();
+  else req.signal.addEventListener("abort", abortFromClient, { once: true });
+  const timeout = setTimeout(
+    () => controller.abort(),
+    ASSISTANT_PROXY_TIMEOUT_MS,
+  );
 
-  // Checked first, so an unconfigured deployment costs nothing and cannot be
-  // probed for whether a backend exists.
-  const config = readServiceConfig();
-  if (!config) {
-    return json({ state: "unavailable" }, 200);
-  }
-
-  if (!limiter.check(clientIp(req))) {
-    return json({ state: "unavailable" }, 429);
-  }
-
-  const bounded = await readBoundedBody(req, MAX_BODY_BYTES);
-  if (bounded.tooLarge) {
-    return json({ state: "unavailable" }, 413);
-  }
-
-  let body: unknown;
   try {
-    body = JSON.parse(bounded.text);
+    // Checked first, so an unconfigured deployment costs nothing and cannot be
+    // probed for whether a backend exists.
+    const config = readServiceConfig();
+    if (!config) {
+      return json({ state: "unavailable" }, 200);
+    }
+
+    if (!limiter.check(clientIp(req))) {
+      return json({ state: "unavailable" }, 429);
+    }
+
+    const bounded = await readBoundedBody(
+      req,
+      MAX_BODY_BYTES,
+      controller.signal,
+    );
+    if (bounded.tooLarge) {
+      return json({ state: "unavailable" }, 413);
+    }
+
+    let body: unknown;
+    try {
+      body = JSON.parse(bounded.text);
+    } catch {
+      return json({ state: "unavailable" }, 400);
+    }
+
+    const question = (body as Record<string, unknown>)?.question;
+    if (typeof question !== "string") {
+      return json({ state: "unavailable" }, 422);
+    }
+
+    // Bounded server-side rather than trusting the client's own limit. Unexpected
+    // fields on the body are ignored rather than echoed.
+    const trimmed = question.trim().slice(0, ASSISTANT_INPUT_LIMIT);
+    if (!trimmed) {
+      return json({ state: "unavailable" }, 422);
+    }
+
+    const history = readHistory((body as Record<string, unknown>)?.history);
+    const remainingMs = Math.floor(
+      ASSISTANT_PROXY_TIMEOUT_MS - (performance.now() - started),
+    );
+    if (remainingMs <= 0 || controller.signal.aborted) {
+      return json({ state: "unavailable" }, 408);
+    }
+
+    const result = await askAssistantService(trimmed, config, history, {
+      signal: controller.signal,
+      deadlineMs: remainingMs,
+    });
+    if (controller.signal.aborted) {
+      return json({ state: "unavailable" }, 408);
+    }
+
+    // Privacy-safe observability only: outcome, status category, latency. The
+    // question itself is never logged, here or in the backend — a log is a place
+    // data goes to be retained and read by people it was not sent to.
+    console.info("[assistant] answered", {
+      category: "assistant_result",
+      state: result.state,
+      latencyMs: Math.min(
+        ASSISTANT_PROXY_TIMEOUT_MS,
+        Math.max(0, Math.round(performance.now() - started)),
+      ),
+    });
+
+    return json(result, 200);
   } catch {
-    return json({ state: "unavailable" }, 400);
+    console.warn("[assistant] request boundary failed", {
+      category: controller.signal.aborted
+        ? "assistant_request_aborted"
+        : "assistant_invalid_request",
+    });
+    return json({ state: "unavailable" }, controller.signal.aborted ? 408 : 400);
+  } finally {
+    clearTimeout(timeout);
+    req.signal.removeEventListener("abort", abortFromClient);
   }
-
-  const question = (body as Record<string, unknown>)?.question;
-  if (typeof question !== "string") {
-    return json({ state: "unavailable" }, 422);
-  }
-
-  // Bounded server-side rather than trusting the client's own limit. Unexpected
-  // fields on the body are ignored rather than echoed.
-  const trimmed = question.trim().slice(0, ASSISTANT_INPUT_LIMIT);
-  if (!trimmed) {
-    return json({ state: "unavailable" }, 422);
-  }
-
-  const history = readHistory((body as Record<string, unknown>)?.history);
-
-  const result = await askAssistantService(trimmed, config, history);
-
-  // Privacy-safe observability only: outcome, status category, latency. The
-  // question itself is never logged, here or in the backend — a log is a place
-  // data goes to be retained and read by people it was not sent to.
-  console.info("[assistant] answered", {
-    category: "assistant_result",
-    state: result.state,
-    latencyMs: Date.now() - started,
-  });
-
-  return json(result, 200);
 }

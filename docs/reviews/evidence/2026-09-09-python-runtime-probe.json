@@ -1,0 +1,168 @@
+{
+  "date": "2026-09-09",
+  "scope": "Fixed-query retrieval runtime experiment, no LLM generation",
+  "risk": "R2",
+  "package14Complete": false,
+  "localChecksPassed": 252,
+  "cloudChecksPassed": 46,
+  "cloudRequests": 60,
+  "frozenQuestionRankMatches": {
+    "ev": 24,
+    "cited": 14
+  },
+  "corpora": {
+    "ev": {
+      "corpusSha256": "048b3f242d294c5a30d78acb02efb33a1587f0c84fa81fc4513b5a6e2f1bde3f",
+      "chunkDigest": "8ff3f7b100d3a49fdba95348608ffff76ff2f87dafaf5f6b94c38b5d717b09b8",
+      "chunks": 67
+    },
+    "cited": {
+      "corpusSha256": "9c3915e8c5f17cb2b6994405b590c0fb937c531b864b7d90802e09bc2c3208f6",
+      "chunkDigest": "6b68c8c3927f598ac64353de3fae71871cbdc1ea22451b0b68d2a780e0805c58",
+      "chunks": 10
+    }
+  },
+  "manifestSha256": "718a00498d766cde076906e14d2a6e9d1f94024936dbcfcefb7e91d2d2de9680",
+  "sourceFileCount": 57,
+  "uploadedFilesMatchBoundSource": true,
+  "model": "BAAI/bge-small-en-v1.5",
+  "revision": "52398278842ec682c6f32300af41344b1c0b0bb2",
+  "versions": {
+    "fastapi": "0.141.1",
+    "fastembed": "0.8.0",
+    "onnxruntime": "1.28.0",
+    "numpy": "2.5.1",
+    "tokenizers": "0.23.1"
+  },
+  "python": "3.12.13",
+  "region": "iad1",
+  "build": {
+    "builderReportedPreOptimizationMB": 277.81,
+    "inspectReportedArtifactMB": 97.95,
+    "finalUncompressedBytes": null,
+    "buildCommandSeconds": [
+      9,
+      11,
+      8
+    ],
+    "provisionedBuildCores": 2,
+    "provisionedBuildMemoryMiB": 8192,
+    "note": "Builder and inspect are different size measurements; final uncompressed output not separately exposed."
+  },
+  "sequentialWarm": {
+    "ev": {
+      "httpTotalMs": {
+        "n": 24,
+        "p50": 200.22449999999998,
+        "p95NearestRank": 239.044,
+        "max": 328.33299999999997
+      },
+      "queryMs": {
+        "n": 24,
+        "p50": 30.694981999999982,
+        "p95NearestRank": 39.922063999995316,
+        "max": 43.074978000007036
+      },
+      "handlerMs": {
+        "n": 24,
+        "p50": 31.695762500000058,
+        "p95NearestRank": 39.95366099999842,
+        "max": 43.11652500000207
+      },
+      "processCpuMs": {
+        "n": 24,
+        "p50": 30.378333999999896,
+        "p95NearestRank": 34.13491299999993,
+        "max": 39.88101199999994
+      }
+    },
+    "cited": {
+      "httpTotalMs": {
+        "n": 13,
+        "p50": 209.86599999999999,
+        "p95NearestRank": 259.926,
+        "max": 259.926
+      },
+      "queryMs": {
+        "n": 13,
+        "p50": 20.873478999988038,
+        "p95NearestRank": 42.58676300000275,
+        "max": 42.58676300000275
+      },
+      "handlerMs": {
+        "n": 13,
+        "p50": 21.225157999992916,
+        "p95NearestRank": 42.62560300000473,
+        "max": 42.62560300000473
+      },
+      "processCpuMs": {
+        "n": 13,
+        "p50": 25.086152000000084,
+        "p95NearestRank": 34.94384900000025,
+        "max": 34.94384900000025
+      }
+    }
+  },
+  "coldObservations": [
+    {
+      "dataset": "cited",
+      "context": "Final protected preview",
+      "manifestSha256": "718a00498d766cde076906e14d2a6e9d1f94024936dbcfcefb7e91d2d2de9680",
+      "httpTotalMs": 3311.061,
+      "initializationMs": 2850.471153000001,
+      "handlerMs": 2889.565324000003
+    },
+    {
+      "dataset": "ev",
+      "context": "Final protected preview",
+      "manifestSha256": "718a00498d766cde076906e14d2a6e9d1f94024936dbcfcefb7e91d2d2de9680",
+      "httpTotalMs": 3251.9770000000003,
+      "initializationMs": 2881.251467,
+      "handlerMs": 2914.4220910000004
+    },
+    {
+      "dataset": "cited",
+      "context": "Final protected preview",
+      "manifestSha256": "718a00498d766cde076906e14d2a6e9d1f94024936dbcfcefb7e91d2d2de9680",
+      "httpTotalMs": 2383.416,
+      "initializationMs": 2055.906799999999,
+      "handlerMs": 2087.1575149999994
+    }
+  ],
+  "peakRssKiB": 299432,
+  "concurrentClientsPerBurst": 8,
+  "bursts": [
+    {
+      "200": 6,
+      "503": 2
+    },
+    {
+      "200": 5,
+      "503": 3
+    }
+  ],
+  "previewInstancesObserved": 3,
+  "paidCalls": 0,
+  "additionalSpentUsd": 0,
+  "additionalBatchCapUsd": 3,
+  "subscriptionsPurchased": 0,
+  "protection": {
+    "firstAttemptPassed": false,
+    "unexpectedResearchProductionAliases": 2,
+    "initialAliasAnonymousStatus": 200,
+    "aliasesRemoved": true,
+    "removedAliasFinalStatus": 404,
+    "previewAnonymousStatus": 302,
+    "previewAliases": 0,
+    "credentialsInUpload": false,
+    "note": "CLI first-deployment auto-promotion overrode requested preview; later preview and final denial checks passed."
+  },
+  "limitations": [
+    "No full answering runtime or paid provider qualification",
+    "No durable distributed admission qualification",
+    "No answer-quality or refusal-accuracy claim",
+    "Cold sample too small for percentile guarantees",
+    "Hobby commercial production eligibility not established",
+    "No full release gate or owner approval"
+  ]
+}

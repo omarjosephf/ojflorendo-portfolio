@@ -1,26 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
-import { Barlow_Condensed, Inter, Space_Grotesk } from "next/font/google";
+import { Barlow_Condensed, Inter } from "next/font/google";
 import "./globals.css";
+import { cookies } from "next/headers";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { THEME_COOKIE, themeColors, themePreference } from "@/lib/theme/preference";
 import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
 import { SITE_URL } from "@/lib/site-url";
-import { SkipLink } from "@/components/layout/SkipLink";
-import { Nav } from "@/components/layout/Nav";
-import { Footer } from "@/components/layout/Footer";
-import { PortfolioAssistant } from "@/components/assistant/PortfolioAssistant";
-import { StructuredData } from "@/components/ui/StructuredData";
-import { InteractionFeedback } from "@/components/ui/InteractionFeedback";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
   display: "swap",
 });
 
@@ -78,33 +68,29 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#f5f2e9",
-  colorScheme: "light",
-};
+export async function generateViewport(): Promise<Viewport> {
+  const preference = themePreference((await cookies()).get(THEME_COOKIE)?.value);
+  return {
+    colorScheme: preference === "system" ? "light dark" : preference,
+    themeColor: (["light", "dark"] as const).map((scheme) => ({
+      media: `(prefers-color-scheme: ${scheme})`,
+      color: themeColors[preference === "system" ? scheme : preference],
+    })),
+  };
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
-
+  const preference = themePreference((await cookies()).get(THEME_COOKIE)?.value);
   return (
     <html
       lang="en-GB"
-      className={`${inter.variable} ${spaceGrotesk.variable} ${display.variable} h-full`}
+      data-theme={preference}
+      className={`${inter.variable} ${display.variable} h-full`}
     >
       <body className="flex min-h-full flex-col">
-        <SkipLink />
-        <Nav />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-        <InteractionFeedback />
-        <div className="assistant-theme">
-          <PortfolioAssistant />
-        </div>
-        <StructuredData nonce={nonce} />
+        <ThemeProvider initialPreference={preference}>{children}</ThemeProvider>
       </body>
     </html>
   );

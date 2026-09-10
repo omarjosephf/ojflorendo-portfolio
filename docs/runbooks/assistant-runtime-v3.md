@@ -1,16 +1,17 @@
 # E.V runtime contract v3
 
-Status: local implementation, unverified. Extends the resource, privacy and
+Status: local candidate; current source and release checks are recorded separately. Extends the resource, privacy and
 lifecycle boundaries in [runtime v2](assistant-runtime-v2.md); supersedes its
 single-provider and wire-v2 requirements for this candidate.
 
 ## Provider routing
 
-Primary is `gpt-5.6-luna` through OpenAI Responses, with `store: false`, no
-tools and reasoning effort fixed to `none` for this candidate. Backup is
-`gemini-3.5-flash-lite` through Google GenerateContent with its default
-thinking configuration. These settings are engineering choices, not measured
-latency or quality findings.
+Primary is `gemini-3.5-flash-lite` through Google GenerateContent with its
+minimal default thinking configuration. Backup is `gpt-5.6-luna` through OpenAI
+Responses, with `store: false`, no tools and reasoning effort fixed to `none`.
+Adapter model identity is separate from routing role, which the router assigns.
+The selected order follows the owner's delegated model decision. Neither a
+small comparison nor mocked tests establish production quality or latency.
 
 One retrieval snapshot and the same current question and last four bounded
 questions/source-label sets are used for both. Previous generated prose and
@@ -33,17 +34,20 @@ Unclassified 429, quota/billing problems, missing/invalid credentials,
 configuration/TLS errors, other HTTP errors, local admission/budget exhaustion,
 cancellation and overall deadline expiry do not qualify. Neither do safety
 refusal, malformed or oversized responses, truncation, failed citations or
-failed policy. A missing primary key must not silently enable Gemini-only use.
+failed policy. A missing primary key must not silently enable backup-only use.
 Runtime remains inactive until explicit configuration enables the complete pair.
 
-Each dispatch reserves one unit of the same daily attempt budget. Unknown
-primary usage remains unknown even when backup succeeds. Metrics separate
-primary and backup attempts by configured role/model and expose known subtotals
-with unknown counts. Gemini output usage is treated as complete only when its
-candidate and thinking-token counts are explicitly available; otherwise the
-usage pair remains unknown. The budget is per process and resets on restart; it is not
-an account-wide dollar cap. One executor slot stays occupied until both serial
-work and cleanup have actually returned.
+Each dispatch commits a fixed reservation to the same persistent daily/monthly
+ledger. See [durable spending and admission](durable-budget.md) for exact caps,
+single-Machine topology, failure behavior and activation requirements. Neither
+provider completion nor unknown usage refunds a reservation. A separate shared
+lock keeps one actual worker admitted across processes until all work returns.
+
+Metrics retain each configured role/model and distinguish known subtotals from
+unknown counts. Gemini total-minus-prompt usage can establish complete output
+usage including thinking; missing or inconsistent totals remain unknown. An
+unknown primary stays unknown even if backup succeeds. Neither per-provider
+estimated usage nor cancellation establishes an invoice or remote termination.
 
 ## Portfolio transport
 
@@ -70,53 +74,23 @@ older records keep absent metadata and are never retrospectively attributed
 to the new primary. Generated answer text is still excluded from provider
 history. The intro and accepted palette/fonts/layout are unchanged.
 
-## Delivery status and remaining qualification
+## Delivery status and qualification
 
-The owner explicitly stopped further testing and model comparisons. No new
-tests, builds, lint/typechecks, benchmarks, captures or provider probes accompany
-this implementation. Existing tests and captures describe earlier candidates
-and have not been rewritten as evidence for v3. Source inspection does not
-establish runtime correctness. Provider-adapter behavior, timing, accessibility
-of the new label and answer quality remain unverified.
+The 8 September continuation supersedes the earlier local-test pause and provider
+order. Offline qualification of the current files is in progress; earlier dated
+results qualify only their exact source. Local tests and retrieval are authorized.
+Live inference must fit the existing private, carried-forward spending allowance;
+no task, process or ledger may silently grant a fresh allowance.
 
-The corpus and fixed model/privacy copy change with this candidate. Regenerating
-the corpus fingerprint is source generation only, not qualification. A later
-authorized release workflow must produce compatible exported corpus/vectors and
-bind the actual dirty-file fingerprints or revisions, effective prompt/policy,
-provider configuration and dependencies. Old vectors and old evaluation results
-cannot qualify changed corpus bytes.
-
-When verification is authorized again, the pending scope includes both provider
-adapters, classification, two-attempt budget/unknown usage, deadline/cancellation,
-policy/citation suppression, wire-v3 parsing, restored fallback disclosure,
-and the existing integrated quality/release gates. No paid account, provider
-credential, billing, production service or deployment was changed in this task.
+Generate matching corpus/vectors and bind prompt, policy, questions, runtime,
+evaluation code, dependency and model hashes. Paid captures require both service
+accounting and a non-renewing qualification ledger, preserve each attempt and
+interrupted run, and need complete human claim review. Incomplete/stale evidence
+fails the manifest. Verify Linux image provenance, mounted-volume restart behavior,
+provider accounts, billed-token bounds and actual deployment identity before
+activation. No credential, purchase or deployment is performed by these sources.
 
 Rollback is paired across Cited and the portfolio, including prompt, policy,
-corpus, vectors and provider configuration. Version mismatch remains unavailable.
-Retain the owner's release approval and the outstanding evidence separately.
-
-## Verification authorization update — 7 September 2026
-
-The owner subsequently authorized local tests, builds and type checks, and the
-specific npm dependency security audit. That supersedes the earlier local-test
-pause recorded above. All live AI calls and model comparisons remain paused.
-Passing offline checks can qualify their covered contracts; they do not supply
-new live-answer evidence or establish provider account and spending controls.
-
-## Offline verification result — 7 September 2026
-
-The resumed local verification passed portfolio lint, application/test typing,
-production build, corpus checks, 419 unit tests and 73 browser tests. Production
-and full npm advisory audits reported zero vulnerabilities. The paired backend
-passed 660 tests excluding the separately verified CLI/manifest suite (41 tests),
-Ruff lint/format and strict mypy over source/tests. Seven backend checks requiring
-recorded paid-run/corpus artifacts were skipped and remain unverified.
-
-Fresh offline retrieval hit all 43 answerable portfolio cases in the top four
-(including all 13 critical cases) and all 10 answerable demo cases. These findings
-cover retrieval only. Mocked provider tests do not measure live model quality,
-latency, account suitability or costs. Current routed live captures and human
-reviews, Linux image validation and source/image provenance remain outstanding.
-All live AI calls and model comparisons remain paused; no activation or release
-was performed as part of this verification.
+corpus, vectors and provider configuration. A version mismatch stays unavailable.
+Retain release approval and outstanding evidence separately. Keep Beta until the
+actual graduation criteria and required owner review pass.

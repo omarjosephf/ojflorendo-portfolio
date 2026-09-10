@@ -87,3 +87,10 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# Private synthetic management preview state
+/.ev-preview/
+
+# Machine-local Supabase project links and CLI cache
+/supabase/.temp/
+/supabase/.branches/

@@ -19,7 +19,7 @@
     "node": ">=20.9.0"
   },
   "overrides": {
-    "sharp": "^0.35.3",
+    "sharp": "^0.35.4",
     "postcss": "^8.5.10"
   },
   "scripts": {
@@ -28,22 +28,27 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "npm run typecheck:app && npm run typecheck:tests",
-    "typecheck:app": "tsc --noEmit",
+    "typecheck:app": "next typegen && tsc --noEmit",
     "typecheck:tests": "tsc -p tsconfig.tests.json",
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:ci": "node scripts/verify-dependency-audit.mjs && npm run docs:check-anchors && npm run lint && npm run typecheck:app && npm run typecheck:tests && npm run assistant:check-corpus && npm run test:unit && npm run build && npm run test:e2e",
+    "test:ci": "node scripts/verify-dependency-audit.mjs && npm run docs:check-anchors && npm run lint && npm run typecheck:app && npm run typecheck:tests && npm run assistant:check-corpus && npm run test:management:sql && npm run test:management:restore && npm run test:unit && npm run build && npm run test:e2e && npm run test:management:preview",
     "docs:check-anchors": "node scripts/check-doc-anchors.mjs",
     "assistant:build-corpus": "node scripts/build-assistant-corpus.mjs",
     "assistant:check-corpus": "node scripts/build-assistant-corpus.mjs --check",
-    "assistant:export": "node scripts/export-assistant-corpus.mjs"
+    "assistant:export": "node scripts/export-assistant-corpus.mjs",
+    "preview:management": "node scripts/preview-management.mjs",
+    "test:management:sql": "node scripts/test-management-sql.mjs && node scripts/test-shared-budget-sql.mjs && node scripts/test-answer-events-sql.mjs && node scripts/test-live-gap-sql.mjs",
+    "test:management:preview": "playwright test --config=playwright.management.config.ts",
+    "test:management:restore": "node scripts/test-management-backup.mjs && node scripts/test-management-backup-job.mjs && node scripts/test-management-restore.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.6.1",
+    "@supabase/supabase-js": "2.116.0",
     "framer-motion": "^13.1.1",
     "lucide-react": "^1.37.0",
     "next": "16.3.3",
@@ -52,7 +57,9 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "3.1129.0",
     "@axe-core/playwright": "^4.13.0",
+    "@electric-sql/pglite": "0.5.8",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.1",
@@ -65,6 +72,7 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.3",
     "jsdom": "^30.0.1",
+    "pg": "8.23.0",
     "tailwindcss": "^4",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"

@@ -1,5 +1,9 @@
 # ADR-0014: Luna primary and Gemini availability fallback
 
+Provider order and process-local accounting are superseded for the current
+candidate by [ADR-0015](0015-durable-budget-and-provider-order.md).
+Historical verification and approval statements below retain their dated scope.
+
 - Status: Owner-approved model arrangement; local implementation unverified
 - Date: 2026-09-07
 - Owner: OJ Florendo

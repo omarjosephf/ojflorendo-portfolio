@@ -28,7 +28,7 @@ than claimed.
 
 ## Cited: how it is built
 
-The technology Cited is built with is Python and FastAPI, the Anthropic API
+The original Cited demo described here was built with Python and FastAPI, the Anthropic API
 with Claude Haiku 4.5, fastembed and ONNX Runtime for local embeddings, NumPy
 for vector search, pytest, Docker and Fly.io. The technical design behind that
 stack:
@@ -52,6 +52,9 @@ fastembed / ONNX Runtime, NumPy, Docker, Fly.io, pytest, GitHub Actions, and
 AI-assisted engineering with human review.
 
 ## Cited: what was measured
+
+These measurements concern the original Haiku-based demo. They do not establish
+quality or latency for E.V's newer Luna and Gemini configuration.
 
 The results of evaluating Cited, measured by its committed evaluation set rather
 than asserted, are as follows. On the committed question set: 100% retrieval hit rate and 80% top-1, 100%
@@ -101,10 +104,16 @@ Spend is bounded by request rate, a daily answer budget, and a cap on question
 length. The documentation is explicit that only a provider-level spend cap truly
 bounds the loss, because the in-process budget resets on restart.
 
-## Cited: relationship to OJ Assistant
+## Cited: relationship to E.V
 
-OJ Assistant on this website runs on the same engine, pointed at a different
+E.V on this website runs on the same engine, pointed at a different
 corpus: OJ's own approved portfolio content instead of the demo's
 prompt-engineering material. The two are separate deployments with separate
 budgets. That second deployment is itself the evidence for the claim that Cited
 is a reusable product rather than a one-off.
+
+E.V's approved model configuration uses Gemini 3.5 Flash-Lite as primary and GPT-5.6
+Luna as backup. This local migration uses model-generated citation
+references with local verification; it does not inherit the original demo's
+native-citation implementation or its measured results. The migration has not
+been qualified for release.

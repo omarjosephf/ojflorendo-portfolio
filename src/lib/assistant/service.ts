@@ -1,72 +1,57 @@
-import { resolveCorpusSource } from "@/data/assistant-corpus";
-import type {
-  AssistantCitation,
-  AssistantHistoryTurn,
-  AssistantResult,
+import { parseAnswerEvent, eventMatchesResult, type AnswerEvent } from "./answer-event";
+import assistantPolicy from "../../../content/assistant-policy.json";
+import { assistantCorpusSources } from "@/data/assistant-corpus";
+import {
+  ASSISTANT_HISTORY_LIMIT,
+  ASSISTANT_INPUT_LIMIT,
+  ASSISTANT_POLICY_IDS,
+  ASSISTANT_PROXY_TIMEOUT_MS,
+  ASSISTANT_SERVICE_RESPONSE_BYTE_LIMIT,
+  isAssistantModelRoute,
+  type AssistantCitation,
+  type AssistantHistoryTurn,
+  type AssistantModelRoute,
+  type AssistantPolicyId,
+  type AssistantResult,
 } from "./types";
 
-/**
- * The server-to-server call to the assistant service.
- *
- * Server-only. Nothing here may be imported by a client component: it reads the
- * backend URL and the shared secret, and both must stay out of the browser
- * bundle. Keeping the call on this side is also what avoids a CSP change — the
- * browser only ever talks to this origin.
- *
- * Everything the backend returns is treated as untrusted. It is a service OJ
- * runs, but it is also the output of a language model, and the difference
- * between "our service" and "safe to render" is the whole point of validating
- * here rather than assuming.
- */
-
-/**
- * How long to wait before giving up.
- *
- * The backend scales to zero, so a cold request pays machine boot plus ~1.8s of
- * measured startup on top of the model call. 20s is generous enough not to
- * abort a legitimate cold start and short enough that a hung request becomes an
- * honest "unavailable" rather than a spinner the visitor stares at.
- */
-const REQUEST_TIMEOUT_MS = 20_000;
+const ANSWER_LIMIT = 4_000;
+const CITATION_LIMIT = 8;
+const CITATION_QUOTE_LIMIT = 1_000;
+const SOURCE_ID_LIMIT = 200;
+const EVIDENCE_ID_PATTERN = /^[a-f0-9]{64}$/;
+const SOURCE_LABEL_LIMIT = 80;
+const SOURCE_LABELS_PER_TURN_LIMIT = 8;
 
 export interface AssistantServiceConfig {
   readonly url: string;
   readonly secret: string;
 }
 
-/**
- * Read and validate configuration.
- *
- * Returns `null` when the assistant is not configured, which is a supported
- * state rather than an error: it is how the feature is switched off, and how
- * every local checkout behaves by default. The route then reports `unavailable`
- * without attempting a call.
- *
- * Fails closed on a *partial* configuration. A URL with no secret would call the
- * service unauthenticated, which either fails or — worse, if the service were
- * ever misconfigured to allow it — succeeds while spending OJ's budget for
- * anyone who found the endpoint.
- */
+export interface AssistantServiceRequestOptions {
+  readonly signal?: AbortSignal;
+  /** Server-only sink; diagnostics never become part of AssistantResult. */
+  readonly onEvent?: (event: AnswerEvent) => void;
+  /** Remaining proxy budget, never permission to exceed the nine-second cap. */
+  readonly deadlineMs?: number;
+}
+
+function logConfigurationError(): void {
+  console.error("[assistant] service configuration rejected", {
+    category: "assistant_misconfigured",
+  });
+}
+
+/** Read a complete, transport-safe backend configuration or fail closed. */
 export function readServiceConfig(
-  env: NodeJS.ProcessEnv = process.env,
+  env: Readonly<Record<string, string | undefined>> = process.env,
 ): AssistantServiceConfig | null {
   const url = env.ASSISTANT_SERVICE_URL?.trim();
   const secret = env.ASSISTANT_SERVICE_SECRET?.trim();
 
   if (!url && !secret) return null;
-
   if (!url || !secret) {
-    // Loud, because the assistant is silently switched off until it is fixed,
-    // and the cause is a single missing variable. No value is logged.
-    console.error(
-      "[assistant] MISCONFIGURED — the assistant is disabled. Set both " +
-        "ASSISTANT_SERVICE_URL and ASSISTANT_SERVICE_SECRET, or neither.",
-      {
-        category: "assistant_misconfigured",
-        hasUrl: Boolean(url),
-        hasSecret: Boolean(secret),
-      },
-    );
+    logConfigurationError();
     return null;
   }
 
@@ -74,172 +59,371 @@ export function readServiceConfig(
   try {
     parsed = new URL(url);
   } catch {
-    console.error("[assistant] ASSISTANT_SERVICE_URL is not a valid URL", {
-      category: "assistant_misconfigured",
-    });
+    logConfigurationError();
     return null;
   }
 
-  // HTTPS only in production. The request carries a shared secret; sending it
-  // in clear text would hand it to anything on the path. `localhost` is allowed
-  // over HTTP so the integration can be exercised locally without a certificate.
-  const isLocal =
+  const isExactLocalHost =
     parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
-  if (parsed.protocol !== "https:" && !isLocal) {
-    console.error("[assistant] ASSISTANT_SERVICE_URL must use HTTPS", {
-      category: "assistant_misconfigured",
-    });
+  const isAllowedProtocol =
+    parsed.protocol === "https:" ||
+    (parsed.protocol === "http:" && isExactLocalHost);
+
+  if (
+    !isAllowedProtocol ||
+    parsed.username !== "" ||
+    parsed.password !== "" ||
+    parsed.search !== "" ||
+    parsed.hash !== ""
+  ) {
+    logConfigurationError();
     return null;
   }
 
   return { url: parsed.origin, secret };
 }
 
-/** Shape the backend promises. Validated rather than trusted. */
-interface BackendResponse {
-  answer: string;
-  citations: { quote: string; source: string }[];
-  grounded: boolean;
-  refused: boolean;
+interface BackendCitation {
+  readonly source_id: string;
+  readonly evidence_id: string;
+  readonly quote: string;
 }
 
-function isBackendResponse(value: unknown): value is BackendResponse {
-  if (typeof value !== "object" || value === null) return false;
-  const body = value as Record<string, unknown>;
+type BackendResponse =
+  | {
+      readonly version: 3;
+      readonly state: "answered";
+      readonly answer: string;
+      readonly citations: readonly BackendCitation[];
+      readonly model_route: AssistantModelRoute;
+    }
+  | {
+      readonly version: 3;
+      readonly state: "not-covered";
+      readonly policy: string;
+      readonly model_route: AssistantModelRoute | null;
+    }
+  | { readonly version: 3; readonly state: "unavailable" };
 
-  if (typeof body.answer !== "string") return false;
-  if (typeof body.grounded !== "boolean") return false;
-  if (typeof body.refused !== "boolean") return false;
-  if (!Array.isArray(body.citations)) return false;
-
-  return body.citations.every((citation) => {
-    if (typeof citation !== "object" || citation === null) return false;
-    const entry = citation as Record<string, unknown>;
-    return typeof entry.quote === "string" && typeof entry.source === "string";
-  });
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/**
- * Map backend citations onto the corpus allowlist.
- *
- * The source string is **never** used to build a URL. It is looked up, and a
- * source with no entry keeps its text but loses its link. A citation the
- * allowlist does not recognise is a bug worth seeing rather than a link worth
- * following.
- *
- * Duplicates collapse in first-use order: a model that cites the same document
- * three times should produce one source, not three.
- */
-function mapCitations(
-  citations: readonly { quote: string; source: string }[],
-): AssistantCitation[] {
-  const seen = new Set<string>();
-  const mapped: AssistantCitation[] = [];
+function hasOnlyKeys(
+  value: Record<string, unknown>,
+  allowed: readonly string[],
+): boolean {
+  const allowedKeys = new Set(allowed);
+  return Object.keys(value).every((key) => allowedKeys.has(key));
+}
 
-  for (const { quote, source } of citations) {
-    const resolved = resolveCorpusSource(source);
-    const key = resolved?.path ?? source;
-    if (seen.has(key)) continue;
-    seen.add(key);
+function isPolicyId(value: string): value is AssistantPolicyId {
+  return (ASSISTANT_POLICY_IDS as readonly string[]).includes(value);
+}
 
-    mapped.push({
-      quote,
-      // Falls back to the raw source text only as a label, never as a link.
-      label: resolved?.label ?? source,
-      href: resolved?.publicUrl ?? null,
-    });
+function policyText(policy: AssistantPolicyId): string {
+  const configured = (assistantPolicy.responses as Record<string, unknown>)[policy];
+  if (
+    assistantPolicy.version === "portfolio-policy-v3" &&
+    typeof configured === "string" &&
+    configured.trim().length > 0 &&
+    configured.length <= ANSWER_LIMIT
+  ) {
+    return configured.trim();
   }
 
+  // This exact application-owned text remains safe if the checked-in policy
+  // artifact is accidentally malformed.
+  return "I can't answer that from the information I have. You can contact OJ directly.";
+}
+
+function unsupported(modelRoute: AssistantModelRoute): AssistantResult {
+  return { state: "not-covered", answer: policyText("unsupported"), modelRoute };
+}
+
+function invalidAnsweredResponse(modelRoute: AssistantModelRoute): BackendResponse {
+  return { version: 3, state: "answered", answer: "", citations: [], model_route: modelRoute };
+}
+
+function readBackendResponse(value: unknown): BackendResponse | null {
+  if (!isRecord(value) || value.version !== 3) return null;
+
+  if (value.state === "unavailable") {
+    if (!hasOnlyKeys(value, ["version", "state"])) return null;
+    return { version: 3, state: "unavailable" };
+  }
+
+  if (value.state === "not-covered") {
+    if (!hasOnlyKeys(value, ["version", "state", "policy", "model_route"])) {
+      return null;
+    }
+    if (value.model_route !== null && !isAssistantModelRoute(value.model_route)) return null;
+    if (typeof value.policy !== "string" || value.policy.length > 64) return null;
+    return { version: 3, state: "not-covered", policy: value.policy, model_route: value.model_route };
+  }
+
+  if (value.state !== "answered") return null;
+  if (!hasOnlyKeys(value, ["version", "state", "answer", "citations", "model_route"])) {
+    return null;
+  }
+  if (!isAssistantModelRoute(value.model_route)) return null;
+  const modelRoute = value.model_route;
+  if (
+    typeof value.answer !== "string" ||
+    value.answer.length > ANSWER_LIMIT ||
+    value.answer.trim().length === 0 ||
+    !Array.isArray(value.citations) ||
+    value.citations.length < 1 ||
+    value.citations.length > CITATION_LIMIT
+  ) {
+    return invalidAnsweredResponse(modelRoute);
+  }
+
+  const citations: BackendCitation[] = [];
+  for (const valueCitation of value.citations) {
+    if (!isRecord(valueCitation)) return invalidAnsweredResponse(modelRoute);
+    if (!hasOnlyKeys(valueCitation, ["source_id", "evidence_id", "quote"])) {
+      return invalidAnsweredResponse(modelRoute);
+    }
+    const { source_id: sourceId, evidence_id: evidenceId, quote } = valueCitation;
+    if (
+      typeof sourceId !== "string" ||
+      sourceId.length < 1 ||
+      sourceId.length > SOURCE_ID_LIMIT ||
+      typeof evidenceId !== "string" ||
+      !EVIDENCE_ID_PATTERN.test(evidenceId) ||
+      typeof quote !== "string" ||
+      quote.length > CITATION_QUOTE_LIMIT ||
+      quote.trim().length === 0
+    ) {
+      return invalidAnsweredResponse(modelRoute);
+    }
+    citations.push({ source_id: sourceId, evidence_id: evidenceId, quote });
+  }
+
+  return {
+    version: 3,
+    state: "answered",
+    answer: value.answer.trim(),
+    citations,
+    model_route: modelRoute,
+  };
+}
+
+const corpusByPath = new Map(
+  assistantCorpusSources.map((source) => [source.path, source]),
+);
+
+function mapCitations(
+  citations: readonly BackendCitation[],
+): AssistantCitation[] | null {
+  const mapped: AssistantCitation[] = [];
+  for (const citation of citations) {
+    // Exact corpus-relative path match. Backend text never becomes a label or
+    // URL and decorated/partial paths are deliberately rejected.
+    const source = corpusByPath.get(citation.source_id);
+    if (!source) return null;
+    mapped.push({
+      quote: citation.quote.trim(),
+      label: source.label,
+      href: source.publicUrl,
+      sourceId: citation.source_id,
+      evidenceId: citation.evidence_id,
+    });
+  }
   return mapped;
 }
 
-/**
- * Ask the assistant service one question.
- *
- * Never throws: every failure resolves to `unavailable`. A route handler that
- * has to reason about exception types on the paid path is a route handler that
- * eventually renders a stack trace to somebody.
- */
+function cancelBody(response: Response): void {
+  // Never await an untrusted stream's cancellation hook. Cancellation is best
+  // effort and cannot be allowed to extend the request deadline.
+  try {
+    void response.body?.cancel().catch(() => undefined);
+  } catch {
+    // A nonstandard stream may throw before returning a cancellation promise.
+  }
+}
+
+function cancelReader(reader: ReadableStreamDefaultReader<Uint8Array>): void {
+  try {
+    void reader.cancel().catch(() => undefined);
+  } catch {
+    // Cancellation remains best effort at an already-failed boundary.
+  }
+}
+
+/** Read response bytes incrementally so chunked bodies cannot evade the cap. */
+async function readBoundedJson(
+  response: Response,
+  signal: AbortSignal,
+): Promise<unknown | null> {
+  if (!response.body) return null;
+
+  const declaredLength = response.headers.get("content-length");
+  if (
+    declaredLength !== null &&
+    /^\d+$/.test(declaredLength) &&
+    Number(declaredLength) > ASSISTANT_SERVICE_RESPONSE_BYTE_LIMIT
+  ) {
+    cancelBody(response);
+    return null;
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  const cancelOnAbort = () => {
+    cancelReader(reader);
+  };
+  signal.addEventListener("abort", cancelOnAbort, { once: true });
+
+  try {
+    while (true) {
+      if (signal.aborted) throw new Error("aborted");
+      const { done, value } = await reader.read();
+      if (signal.aborted) throw new Error("aborted");
+      if (done) break;
+      if (!value || value.byteLength === 0) continue;
+      total += value.byteLength;
+      if (total > ASSISTANT_SERVICE_RESPONSE_BYTE_LIMIT) {
+        cancelReader(reader);
+        return null;
+      }
+      chunks.push(value);
+    }
+
+    const bytes = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    return JSON.parse(text) as unknown;
+  } catch {
+    if (signal.aborted) throw new Error("aborted");
+    return null;
+  } finally {
+    signal.removeEventListener("abort", cancelOnAbort);
+    try {
+      reader.releaseLock();
+    } catch {
+      // A canceled stream may already have released its reader.
+    }
+  }
+}
+
+function boundedDeadline(value: number | undefined): number {
+  if (value === undefined) return ASSISTANT_PROXY_TIMEOUT_MS;
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  return Math.min(ASSISTANT_PROXY_TIMEOUT_MS, Math.max(1, Math.floor(value)));
+}
+
+/** Ask the backend under a bounded, abortable, strictly validated wire-v3 contract. */
 export async function askAssistantService(
   question: string,
   config: AssistantServiceConfig,
   history: readonly AssistantHistoryTurn[] = [],
+  options: AssistantServiceRequestOptions = {},
 ): Promise<AssistantResult> {
+  const deadlineMs = boundedDeadline(options.deadlineMs);
+  if (deadlineMs === 0 || options.signal?.aborted) {
+    return { state: "unavailable" };
+  }
+
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let timedOut = false;
+  const forwardAbort = () => controller.abort();
+  options.signal?.addEventListener("abort", forwardAbort, { once: true });
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, deadlineMs);
 
   try {
     const response = await fetch(`${config.url}/ask`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // The backend requires this. It is why only this site can spend the
-        // instance's budget, and it never reaches the browser.
         "X-Assistant-Secret": config.secret,
+        "X-Assistant-Deadline-Ms": String(deadlineMs),
+        ...(options.onEvent ? { "X-Assistant-Event": "1" } : {}),
       },
-      // Rebuilt field by field rather than forwarded. Whatever shape the caller
-      // held, what leaves this process is a question, a list of questions and a
-      // list of labels — so a field the browser invented cannot ride along to
-      // the service on the strength of having passed a type check.
       body: JSON.stringify({
-        question,
-        history: history.map((turn) => ({
-          question: turn.question,
-          sources: [...turn.sources],
+        question: question.trim().slice(0, ASSISTANT_INPUT_LIMIT),
+        history: history.slice(-ASSISTANT_HISTORY_LIMIT).map((turn) => ({
+          question: turn.question.trim().slice(0, ASSISTANT_INPUT_LIMIT),
+          sources: turn.sources
+            .slice(0, SOURCE_LABELS_PER_TURN_LIMIT)
+            .map((source) => source.trim().slice(0, SOURCE_LABEL_LIMIT)),
         })),
       }),
       signal: controller.signal,
       cache: "no-store",
+      redirect: "error",
     });
 
     if (!response.ok) {
-      // 503 is the daily allowance; 401/403 a secret problem; 5xx an outage.
-      // The visitor is told the same thing for all of them — the difference is
-      // operator information and is recorded in the log category only.
-      console.warn("[assistant] backend returned an error status", {
+      cancelBody(response);
+      console.warn("[assistant] backend status rejected", {
         category: "assistant_backend_error",
         status: response.status,
       });
       return { state: "unavailable" };
     }
 
-    const body: unknown = await response.json();
-    if (!isBackendResponse(body)) {
-      console.error("[assistant] backend response failed validation", {
+    const raw = await readBoundedJson(response, controller.signal);
+    if (controller.signal.aborted) return { state: "unavailable" };
+    const body = readBackendResponse(raw);
+    if (!body) {
+      console.error("[assistant] backend response rejected", {
         category: "assistant_invalid_response",
       });
       return { state: "unavailable" };
     }
 
-    // `grounded` means: an answer, with evidence behind it. Both halves are
-    // required. A refusal that cites the passage showing the corpus scope is
-    // still a refusal, and unsupported prose is still unsupported — neither may
-    // be presented as a sourced answer.
-    if (body.refused || !body.grounded) {
-      return { state: "not-covered", answer: body.answer };
+    const observed = (result: AssistantResult): AssistantResult => {
+      const header = response.headers.get("X-Assistant-Event");
+      if (options.onEvent && header && header.length <= 8000 && /^[A-Za-z0-9_-]+$/.test(header)) {
+        try {
+          const event = parseAnswerEvent(JSON.parse(Buffer.from(header, "base64url").toString("utf8")));
+          if (event && eventMatchesResult(event, result) && [...event.retrieved, ...event.cited].every(s => corpusByPath.has(s)) &&
+            (body.state !== "not-covered" || (isPolicyId(body.policy) && event.outcome === (body.policy === "unsupported" ? "not_covered" : "policy_boundary")))) options.onEvent(event);
+        } catch { /* Missing or invalid diagnostics do not invent an observation. */ }
+      }
+      return result;
+    };
+    if (body.state === "unavailable") return { state: "unavailable" };
+
+    if (body.state === "not-covered") {
+      const policy = isPolicyId(body.policy) ? body.policy : "unsupported";
+      return observed({
+        state: "not-covered",
+        answer: policyText(policy),
+        ...(body.model_route === null ? {} : { modelRoute: body.model_route }),
+      });
     }
 
     const citations = mapCitations(body.citations);
-    if (citations.length === 0) {
-      // Claimed grounded with nothing to show. Contradictory, so it is not
-      // rendered as an answer.
-      console.error("[assistant] backend claimed grounded with no citations", {
+    if (!body.answer || !citations || controller.signal.aborted) {
+      console.error("[assistant] unsafe answered response rejected", {
         category: "assistant_invalid_response",
       });
-      return { state: "not-covered", answer: body.answer };
+      return unsupported(body.model_route);
     }
 
-    return { state: "answered", answer: body.answer, citations };
-  } catch (error) {
-    // Timeout, DNS failure, connection refused, malformed JSON. The thrown
-    // value is deliberately never touched: it can carry the request URL and
-    // headers, and those must not reach a log.
-    const aborted = error instanceof Error && error.name === "AbortError";
+    return observed({ state: "answered", answer: body.answer, citations, modelRoute: body.model_route });
+  } catch {
     console.warn("[assistant] backend request failed", {
-      category: aborted ? "assistant_timeout" : "assistant_unreachable",
+      category: timedOut
+        ? "assistant_timeout"
+        : controller.signal.aborted
+          ? "assistant_request_aborted"
+          : "assistant_unreachable",
     });
     return { state: "unavailable" };
   } finally {
     clearTimeout(timeout);
+    options.signal?.removeEventListener("abort", forwardAbort);
   }
 }

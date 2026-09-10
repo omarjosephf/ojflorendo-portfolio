@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X, FileText } from "lucide-react";
+import { ThemeSelect } from "@/components/theme/ThemeSelect";
 import { site } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { PortraitMark } from "@/components/ui/PortraitMark";
@@ -234,6 +235,7 @@ export function Nav() {
 
           {/* Right-hand actions */}
           <div className="flex items-center gap-1">
+            <ThemeSelect label="Portfolio color theme" />
             <div className="hidden items-center gap-1 2xl:flex">
               {site.socials
                 .filter((s) => s.external)

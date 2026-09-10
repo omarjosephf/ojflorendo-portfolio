@@ -21,10 +21,10 @@ rephrasing will produce them. The public location information is that he is base
 in Windsor, Berkshire. For anything requiring a private channel, email him and he
 can respond directly.
 
-## What the OJ Assistant is and how it answers questions
+## What E.V is and how it answers questions
 
-OJ Assistant is the chat assistant on this portfolio website. It answers
-questions about OJ using a small set of documents that he wrote and approved.
+E.V is this website’s AI assistant. Its knowledge source is a small collection
+of OJ’s approved portfolio documents.
 
 It works by retrieval: it searches those approved documents for the passages most
 relevant to a question, answers using only those passages, and shows the source
@@ -33,9 +33,18 @@ connected to a real knowledge source — that set of documents — rather than
 answering from general knowledge or from a fixed list of pre-written replies.
 
 It runs on the same engine as OJ's Cited project, pointed at his portfolio
-content instead of Cited's demo documents. It uses a Claude model from Anthropic
-to generate the answer from the retrieved passages, and the citations are
-computed against the documents actually supplied and then verified locally.
+content instead of Cited's demo documents. Its approved model configuration is
+Gemini 3.5 Flash-Lite from Google as the primary model, with GPT-5.6 Luna from
+OpenAI as a backup when the primary service is unavailable. Both receive the
+same retrieved passages and bounded conversation context. A backup response is
+labelled "Backup model used." Refusals and failed policy or citation checks do
+not trigger the backup.
+
+The models generate answer text and citation references. E.V checks each quote
+against the passages actually supplied and resolves source links from its
+approved document list. A matching quote alone does not prove that every claim
+in an answer is supported. The models are implementation components; E.V is the
+product OJ built.
 
 ## What this assistant can and cannot do, and when it hands over to OJ
 
@@ -67,15 +76,28 @@ OJ, not a photograph of him.
 
 ## What happens to your question, and the privacy of this assistant
 
-When you ask a question here, it is sent to OJ's own server and from there to an
-AI model provider so that an answer can be generated from the approved documents.
-Your question is not stored, not written to any log, not used for training, and
-not kept as conversation history. Nothing you type is retained after the answer
-is returned, and the assistant has no memory of previous questions.
+When you ask a question here, it is sent through OJ's server to Google so that an
+answer can be generated from the approved documents. If the primary service is
+unavailable, the same question, retrieved passages and bounded context may also
+be sent to OpenAI for the backup response.
+Completed exchanges are kept in a bounded `sessionStorage` record for this
+browser tab, which lets them return after E.V is closed and reopened or the page
+is refreshed. A browser's session-restore feature can revive that tab record
+after the tab or browser is closed. An opener-created or duplicated tab may
+begin with a copy of the record; from then on, each tab changes independently.
+Pending requests are not saved or resent after a refresh.
+
+Clear chat removes E.V's record when browser storage is available. If browser
+storage is unavailable or removal fails, E.V continues in memory and a
+previously saved record may remain until you clear browser storage. OJ, the
+portfolio server, and the assistant service do not keep a transcript or log your
+question text. There is no cookie, `localStorage`, visitor account, database, or
+cross-device history. This description makes no promise about physical erasure
+or the model provider's retention or training practices.
 
 Because your question does leave your browser, please do not enter personal,
 confidential, financial, account, or credential information here. If you type
-something that looks like personal data or a credential, the assistant is
+something that looks like personal data or a credential, E.V is
 designed to stop it in your browser and warn you before it is sent anywhere. For
 anything private, use the contact section instead.
 

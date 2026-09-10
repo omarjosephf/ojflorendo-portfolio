@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "date": "2026-09-09",
+  "scope": "Synthetic shared transactional admission checkpoint; no real migration/activation",
+  "risk": "R2",
+  "completedPackages": 12,
+  "totalPackages": 16,
+  "sourceSha256": {
+    "frontend": {
+      "supabase/migrations/202609090006_ev_shared_budget.sql": "f38c0507a67967e4d5e3e7c513a3dd394c89d0da98ba7fad584c3d3ce765d590",
+      "scripts/test-shared-budget-sql.mjs": "1cd678c560badda589c1a8165210d444c13b42e1eeade85598056d6997100988",
+      "scripts/test-management-sql.mjs": "dc67fa432af18b9f4b1ee8cf2942b81fba063b34bae691d8fad637ab1d825f2d",
+      "package.json": "6a4d2a47769a8f1c119106a5032dc58d2e5ade623b05a82be43b509b2bd6bee3"
+    },
+    "backend": {
+      "src/assistant/shared_budget.py": "eff20ead9aeb3b4729066947df704f096c0ad29256501ffb8a9227097f49d4a7",
+      "tests/test_shared_budget.py": "f3c74de0788a96c3801150d911af79e8a6e44d6953d6e9a27b04edb440daf3b0"
+    }
+  },
+  "checks": {
+    "backendTestsPassed": 788,
+    "backendHistoricalSkips": 7,
+    "backendSourceMypyFiles": 30,
+    "backendFormatFiles": 61,
+    "localManagementSql": 42,
+    "localSharedSql": 48,
+    "stagingChecks": 11,
+    "stagingSuiteRpcRequests": 53,
+    "phaseBudgetRpcRequests": 60,
+    "anonymousRpcHttpStatus": 401,
+    "installedFunctionBodiesMatch": true,
+    "allSyntheticPoolsDisabled": true,
+    "syntheticPoolCount": 12,
+    "realAllowances": 0
+  },
+  "races": [
+    {
+      "case": "aggregate cap",
+      "processes": 4,
+      "reserved": 2,
+      "exhausted": 2
+    },
+    {
+      "case": "service daily cap",
+      "processes": 4,
+      "reserved": 1,
+      "exhausted": 3
+    },
+    {
+      "case": "one durable slot",
+      "processes": 8,
+      "acquiredThenExitedWithoutRelease": 1,
+      "busy": 7
+    }
+  ],
+  "money": {
+    "attemptReservationMicroUsd": 40000,
+    "additionalCapUsd": 3,
+    "additionalSpentUsd": 0,
+    "additionalReservedUsd": 0,
+    "paidCalls": 0,
+    "subscriptions": 0,
+    "priorPilotReservationsPreserved": true
+  },
+  "failures": [
+    "Local SQL JSON operator precedence rejected valid policy; fixed and explicit missing-field checks added.",
+    "Mock HTTP responses were already consumed; fixture corrected to stream bytes.",
+    "Ruff import/format findings corrected without suppression.",
+    "First full pytest: 780 passes, 8 Git ownership failures; command-scoped canonical trust then 788 pass/7 historical skips.",
+    "First staging acquisition committed but acknowledgment was untrusted; no reservation/dispatch. Lower-level cause not retained; stranded synthetic pool disabled, diagnostics retained, unchanged source passed complete suite.",
+    "Staging mutation initially rejected by automatic review; owner explicitly approved this migration and synthetic tests in current task before execution."
+  ],
+  "limits": [
+    "Not full app/host integration",
+    "No invoice reconciliation or real ledger provisioning",
+    "No serverless lifetime/recovery or provider quality completion",
+    "One successful network run is not a reliability guarantee",
+    "Database-local counters cannot detect a consistent stale restore",
+    "Provider-side computation may outlive an HTTP timeout",
+    "Final owner review and production confirmation remain required"
+  ]
+}

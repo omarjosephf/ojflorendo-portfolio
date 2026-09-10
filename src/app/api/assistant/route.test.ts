@@ -32,6 +32,20 @@ function request(body: unknown, headers: Record<string, string> = {}) {
   });
 }
 
+function streamingRequest(
+  body: ReadableStream<Uint8Array>,
+  headers: Record<string, string> = {},
+  signal?: AbortSignal,
+) {
+  return new NextRequest("https://ojfr.me/api/assistant", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body,
+    signal,
+    duplex: "half",
+  } as never);
+}
+
 /** A distinct IP per test, so one test's requests cannot exhaust another's. */
 let ipCounter = 0;
 function freshIp(): Record<string, string> {
@@ -40,18 +54,25 @@ function freshIp(): Record<string, string> {
 }
 
 function backendReturns(body: unknown, ok = true, status = 200) {
-  return vi.fn().mockResolvedValue({
-    ok,
-    status,
-    json: async () => body,
-  });
+  return vi.fn().mockResolvedValue(
+    new Response(JSON.stringify(body), {
+      status: ok ? status : status === 200 ? 500 : status,
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
 }
 
+const EVIDENCE_ID = "a".repeat(64);
 const GROUNDED_BACKEND = {
+  version: 3,
+  state: "answered",
   answer: "OJ has two published projects.",
-  citations: [{ quote: "two published projects", source: "about-oj.md" }],
-  grounded: true,
-  refused: false,
+  citations: [{
+    quote: "two published projects",
+    source_id: "about-oj.md",
+    evidence_id: EVIDENCE_ID,
+  }],
+  model_route: "primary",
 };
 
 beforeEach(() => {
@@ -63,6 +84,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
@@ -76,7 +98,9 @@ describe("POST /api/assistant — validation and limits", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
     expect(body.state).toBe("answered");
+    expect(body.modelRoute).toBe("primary");
     expect(body.citations[0].href).toBe("/#about");
   });
 
@@ -90,6 +114,77 @@ describe("POST /api/assistant — validation and limits", () => {
 
     expect(response.status).toBe(413);
     // The cap exists to stop expensive work, so no paid call may follow.
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized stream without awaiting its cancel hook", async () => {
+    let canceled = false;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(8 * 1024 + 1));
+      },
+      cancel() {
+        canceled = true;
+        return new Promise<void>(() => {});
+      },
+    });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const outcome = await Promise.race([
+      POST(streamingRequest(body, freshIp())),
+      new Promise<"still-pending">((resolve) =>
+        setTimeout(() => resolve("still-pending"), 50),
+      ),
+    ]);
+
+    expect(outcome).not.toBe("still-pending");
+    expect((outcome as Response).status).toBe(413);
+    expect(canceled).toBe(true);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("honors a request signal that was aborted before route entry", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const controller = new AbortController();
+    controller.abort();
+    const abortedRequest = new NextRequest("https://ojfr.me/api/assistant", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...freshIp() },
+      body: JSON.stringify({ question: "hello" }),
+      signal: controller.signal,
+    });
+    expect(abortedRequest.signal.aborted).toBe(true);
+
+    const response = await POST(abortedRequest);
+
+    expect(response.status).toBe(408);
+    expect((await response.json()).state).toBe("unavailable");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("cancels a stalled chunked body at the shared proxy deadline", async () => {
+    let canceled = false;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{"question":"partial'));
+      },
+      cancel() {
+        canceled = true;
+      },
+    });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    vi.useFakeTimers();
+
+    const pending = POST(streamingRequest(body, freshIp()));
+    await vi.advanceTimersByTimeAsync(9_000);
+    const response = await pending;
+
+    expect(response.status).toBe(408);
+    expect((await response.json()).state).toBe("unavailable");
+    expect(canceled).toBe(true);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -285,25 +380,27 @@ describe("POST /api/assistant — configuration fails closed", () => {
 });
 
 describe("POST /api/assistant — every upstream outcome maps to a state", () => {
-  it("maps a refusal to not-covered", async () => {
+  it("maps a policy identifier to application-owned not-covered text", async () => {
     vi.stubGlobal(
       "fetch",
       backendReturns({
-        answer: "The documents do not cover that.",
-        citations: [],
-        grounded: false,
-        refused: true,
+        version: 3,
+        state: "not-covered",
+        policy: "unsupported",
+        model_route: null,
       }),
     );
 
     const body = await (await POST(request({ question: "hobbies?" }, freshIp()))).json();
 
     expect(body.state).toBe("not-covered");
+    expect(body.answer).toBe(
+      "I can't answer that from the information I have. You can contact OJ directly.",
+    );
+    expect(body.modelRoute).toBeUndefined();
   });
 
-  it("maps ungrounded prose to not-covered rather than presenting it as sourced", async () => {
-    // The central rule: prose with nothing behind it is not an answer, whoever
-    // produced it.
+  it("rejects the legacy unversioned refusal/prose wire as unavailable", async () => {
     vi.stubGlobal(
       "fetch",
       backendReturns({
@@ -316,24 +413,47 @@ describe("POST /api/assistant — every upstream outcome maps to a state", () =>
 
     const body = await (await POST(request({ question: "anything" }, freshIp()))).json();
 
-    expect(body.state).toBe("not-covered");
+    expect(body.state).toBe("unavailable");
     expect(body.citations).toBeUndefined();
   });
 
-  it("refuses to render an answer claiming grounded with no usable citation", async () => {
+  it("rejects the old v2 answer wire even when its prose looks usable", async () => {
     vi.stubGlobal(
       "fetch",
       backendReturns({
+        version: 2,
+        state: "answered",
         answer: "Confident and unsupported.",
         citations: [],
-        grounded: true,
-        refused: false,
       }),
     );
 
     const body = await (await POST(request({ question: "anything" }, freshIp()))).json();
 
-    expect(body.state).toBe("not-covered");
+    expect(body.state).toBe("unavailable");
+    expect(body.answer).toBeUndefined();
+    expect(JSON.stringify(body)).not.toContain("Confident");
+  });
+
+  it.each([
+    {
+      label: "missing answered route",
+      body: {
+        version: 3,
+        state: "answered",
+        answer: GROUNDED_BACKEND.answer,
+        citations: GROUNDED_BACKEND.citations,
+      },
+    },
+    { label: "unknown answered route", body: { ...GROUNDED_BACKEND, model_route: "surprise" } },
+    { label: "missing policy route", body: { version: 3, state: "not-covered", policy: "unsupported" } },
+    { label: "unknown policy route", body: { version: 3, state: "not-covered", policy: "unsupported", model_route: "surprise" } },
+  ])("fails closed for $label", async ({ body: backendBody }) => {
+    vi.stubGlobal("fetch", backendReturns(backendBody));
+
+    const body = await (await POST(request({ question: "anything" }, freshIp()))).json();
+
+    expect(body).toEqual({ state: "unavailable" });
   });
 
   it.each([401, 403, 429, 500, 502, 503])(
@@ -400,11 +520,52 @@ describe("POST /api/assistant — every upstream outcome maps to a state", () =>
     vi.useFakeTimers();
 
     const pending = POST(request({ question: "hello" }, freshIp()));
-    await vi.advanceTimersByTimeAsync(21_000);
+    await vi.advanceTimersByTimeAsync(9_000);
     const body = await (await pending).json();
     vi.useRealTimers();
 
     expect(body.state).toBe("unavailable");
+  });
+
+  it("propagates only the remaining monotonic proxy budget", async () => {
+    const fetchMock = backendReturns({ version: 3, state: "unavailable" });
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(performance, "now")
+      .mockReturnValueOnce(100)
+      .mockReturnValueOnce(350)
+      .mockReturnValue(400);
+
+    await POST(request({ question: "hello" }, freshIp()));
+
+    expect(fetchMock.mock.calls[0]![1].headers["X-Assistant-Deadline-Ms"])
+      .toBe("8750");
+  });
+
+  it("forwards client disconnect abort and suppresses the backend result", async () => {
+    let release!: (response: Response) => void;
+    const fetchMock = vi.fn().mockImplementation(
+      (_url: string, init: RequestInit) => new Promise<Response>((resolve) => {
+        release = resolve;
+        (init.signal as AbortSignal).addEventListener("abort", () => {
+          resolve(new Response(JSON.stringify({ version: 3, state: "unavailable" })));
+        });
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const controller = new AbortController();
+    const pending = POST(new NextRequest("https://ojfr.me/api/assistant", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...freshIp() },
+      body: JSON.stringify({ question: "hello" }),
+      signal: controller.signal,
+    }));
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    controller.abort();
+    release(new Response(JSON.stringify(GROUNDED_BACKEND)));
+
+    const response = await pending;
+    expect(response.status).toBe(408);
+    expect((await response.json()).state).toBe("unavailable");
   });
 });
 
@@ -418,38 +579,44 @@ describe("POST /api/assistant — citation mapping", () => {
     expect(body.citations[0].href).toBe("/#about");
   });
 
-  it("parses a page-numbered PDF citation", async () => {
+  it("requires an exact corpus-relative source identifier", async () => {
     vi.stubGlobal(
       "fetch",
       backendReturns({
         ...GROUNDED_BACKEND,
         citations: [
-          { quote: "q", source: "OJ_Florendo_Rayatchi_Public_CV.pdf, p.1" },
+          {
+            quote: "q",
+            source_id: "OJ_Florendo_Rayatchi_Public_CV.pdf, p.1",
+            evidence_id: EVIDENCE_ID,
+          },
         ],
       }),
     );
 
     const body = await (await POST(request({ question: "q" }, freshIp()))).json();
 
-    expect(body.citations[0].href).toBe(
-      "/documents/OJ_Florendo_Rayatchi_Public_CV.pdf",
-    );
+    expect(body.state).toBe("not-covered");
+    expect(body.citations).toBeUndefined();
   });
 
-  it("gives an unknown source no link at all", async () => {
-    // The security property. A citation source is never used to build a URL, so
-    // the failure mode is a missing link rather than an attacker-chosen one.
+  it("rejects an unknown source without exposing it as a label or link", async () => {
     vi.stubGlobal(
       "fetch",
       backendReturns({
         ...GROUNDED_BACKEND,
-        citations: [{ quote: "q", source: "https://evil.example.com/x" }],
+        citations: [{
+          quote: "q",
+          source_id: "https://evil.example.com/x",
+          evidence_id: EVIDENCE_ID,
+        }],
       }),
     );
 
     const body = await (await POST(request({ question: "q" }, freshIp()))).json();
 
-    expect(body.citations[0].href).toBeNull();
+    expect(body.state).toBe("not-covered");
+    expect(JSON.stringify(body)).not.toContain("evil.example");
   });
 
   it("never emits an off-site href", async () => {
@@ -458,9 +625,11 @@ describe("POST /api/assistant — citation mapping", () => {
       backendReturns({
         ...GROUNDED_BACKEND,
         citations: [
-          { quote: "a", source: "javascript:alert(1)" },
-          { quote: "b", source: "../../etc/passwd" },
-          { quote: "c", source: "about-oj.md" },
+          {
+            quote: "c",
+            source_id: "about-oj.md",
+            evidence_id: EVIDENCE_ID,
+          },
         ],
       }),
     );
@@ -472,15 +641,15 @@ describe("POST /api/assistant — citation mapping", () => {
     }
   });
 
-  it("collapses repeated sources in first-use order", async () => {
+  it("preserves bounded evidence citations and their stable identifiers", async () => {
     vi.stubGlobal(
       "fetch",
       backendReturns({
         ...GROUNDED_BACKEND,
         citations: [
-          { quote: "one", source: "skills.md" },
-          { quote: "two", source: "about-oj.md" },
-          { quote: "three", source: "skills.md — Some heading" },
+          { quote: "one", source_id: "skills.md", evidence_id: "1".repeat(64) },
+          { quote: "two", source_id: "about-oj.md", evidence_id: "2".repeat(64) },
+          { quote: "three", source_id: "skills.md", evidence_id: "3".repeat(64) },
         ],
       }),
     );
@@ -490,6 +659,12 @@ describe("POST /api/assistant — citation mapping", () => {
     expect(body.citations.map((c: { label: string }) => c.label)).toEqual([
       "Skills and capabilities",
       "About OJ",
+      "Skills and capabilities",
+    ]);
+    expect(body.citations.map((c: { evidenceId: string }) => c.evidenceId)).toEqual([
+      "1".repeat(64),
+      "2".repeat(64),
+      "3".repeat(64),
     ]);
   });
 });

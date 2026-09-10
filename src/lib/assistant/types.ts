@@ -1,10 +1,9 @@
 /**
  * The contract between the assistant route and the panel.
  *
- * Three states, and deliberately no fourth. There is no "degraded answer" and no
- * silent fallback to another source, because a fallback the visitor cannot
- * detect is precisely the misrepresentation this feature is constrained to
- * avoid. If the assistant cannot answer from the approved corpus, it says so.
+ * Provider fallback preserves the approved evidence and answer states. The
+ * application identifies backup responses; changing models never permits an
+ * answer outside the approved corpus or relaxes citation and policy checks.
  */
 
 /** Maximum characters accepted from the visitor, enforced on both sides. */
@@ -19,6 +18,33 @@ export const ASSISTANT_INPUT_LIMIT = 280;
  * unbounded one.
  */
 export const ASSISTANT_HISTORY_LIMIT = 4;
+
+/** Absolute budgets for the two browser/server transport boundaries. */
+export const ASSISTANT_PROXY_TIMEOUT_MS = 9_000;
+export const ASSISTANT_UI_TIMEOUT_MS = 10_000;
+
+/** Maximum untrusted backend response size before JSON parsing. */
+export const ASSISTANT_SERVICE_RESPONSE_BYTE_LIMIT = 48 * 1024;
+
+export const ASSISTANT_POLICY_IDS = [
+  "unsupported",
+  "identity",
+  "architecture",
+  "bulk_extraction",
+  "unpublished_work",
+  "provider_self_identification",
+  "bulk_reproduction",
+  "privacy",
+] as const;
+
+export type AssistantPolicyId = (typeof ASSISTANT_POLICY_IDS)[number];
+
+/** Assigned by the service, never by generated answer content. */
+export type AssistantModelRoute = "primary" | "fallback";
+
+export function isAssistantModelRoute(value: unknown): value is AssistantModelRoute {
+  return value === "primary" || value === "fallback";
+}
 
 /**
  * One earlier exchange, as sent back with a follow-up question.
@@ -50,6 +76,10 @@ export interface AssistantCitation {
    * is the intended failure mode.
    */
   readonly href: string | null;
+  /** Stable corpus path from the backend transport, when available. */
+  readonly sourceId?: string;
+  /** Stable evidence identity from the backend transport, when available. */
+  readonly evidenceId?: string;
 }
 
 export type AssistantResult =
@@ -58,6 +88,8 @@ export type AssistantResult =
       readonly state: "answered";
       readonly answer: string;
       readonly citations: readonly AssistantCitation[];
+      /** Absent on older tab records; never infer a provider for those records. */
+      readonly modelRoute?: AssistantModelRoute;
     }
   /**
    * The corpus does not answer this. Distinct from `unavailable`: the assistant
@@ -66,6 +98,8 @@ export type AssistantResult =
   | {
       readonly state: "not-covered";
       readonly answer: string;
+      /** Absent when a policy or retrieval decision needed no model call. */
+      readonly modelRoute?: AssistantModelRoute;
     }
   /**
    * Outage, timeout, budget exhausted, or misconfiguration.

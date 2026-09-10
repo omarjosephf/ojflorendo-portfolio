@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 /**
- * The panel, its reviewed answer manifest and its matcher form their own chunk,
+ * The panel and its client-side validation form their own chunk,
  * fetched the first time a visitor opens the assistant.
  *
  * This component renders on every page, so anything it imports eagerly is paid
@@ -19,8 +19,9 @@ const AssistantPanel = dynamic(
   { ssr: false },
 );
 
-export function PortfolioAssistant() {
+export function PortfolioAssistant({storageEnabled=false,nonce}:{storageEnabled?:boolean;nonce?:string}) {
   const [open, setOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
   const titleId = useId();
   const descriptionId = useId();
   const toggleRef = useRef<HTMLButtonElement | null>(null);
@@ -43,8 +44,11 @@ export function PortfolioAssistant() {
 
   return (
     <div data-testid="oj-assistant" className="fixed bottom-4 right-4 z-[60]">
-      {open ? (
+      {hasOpened ? (
         <AssistantPanel
+          storageEnabled={storageEnabled}
+          nonce={nonce}
+          open={open}
           titleId={titleId}
           descriptionId={descriptionId}
           onClose={close}
@@ -54,34 +58,37 @@ export function PortfolioAssistant() {
       <button
         ref={toggleRef}
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setHasOpened(true);
+          setOpen(true);
+        }}
         aria-expanded={open}
         aria-haspopup="dialog"
-        aria-label="Open OJ Assistant"
-        className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent py-2 pl-2 pr-4 font-heading text-sm font-semibold text-night shadow-xl shadow-black/30 transition-transform hover:-translate-y-0.5"
+        aria-label="Open E.V"
+        className="inline-flex min-h-11 items-center gap-2 rounded-[3px] border border-accent bg-accent py-2 pl-2 pr-4 font-heading text-base font-semibold tracking-[0.01em] text-night shadow-[0_10px_24px_-18px_rgba(41,42,38,0.55)] transition-[transform,background-color] hover:-translate-y-0.5 hover:bg-accent-hover"
       >
         {/* A plain <img>, deliberately not next/image.
             next/image renders an inline `style` attribute, which this site's
             `style-src 'self' 'nonce-...'` policy blocks — it produced a real CSP
             violation on every page. Weakening the CSP to accommodate it is not
             acceptable, and the optimiser would add nothing here: the asset is
-            already a pre-sized 128px WebP (4.5 KB) shown at 28px, which stays
+            already a pre-sized 128px WebP (7.2 KB) shown at 28px, which stays
             crisp past 4x DPR.
 
             Decorative on purpose: the adjacent visible label already says
-            "Ask OJ Assistant", so meaningful alt text would make a screen
+            "Ask E.V", so meaningful alt text would make a screen
             reader announce the same thing twice. The identity image that does
             carry alt text lives in the panel. */}
         <img
-          src="/images/profile/oj-assistant-avatar-2d.webp"
+          src="/images/profile/ev-avatar-launcher.webp"
           alt=""
           width={28}
           height={28}
           loading="lazy"
           decoding="async"
-          className="h-7 w-7 rounded-full bg-night/20 object-cover"
+          className="h-7 w-7 rounded-full border border-night/40 bg-night/20 object-cover"
         />
-        Ask OJ Assistant
+        Ask E.V
       </button>
     </div>
   );

@@ -1,13 +1,38 @@
-# Assistant avatar assets
+# Profile and E.V avatar assets
 
-Owner-supplied artistic representations of OJ Florendo, used only by OJ Assistant.
+## E.V identity, 9 September 2026
 
-## Published files
+E.V uses an original female digital illustration created with Codex's built-in
+image-generation tool at the owner's request. The brief describes a confident,
+warm, calming and charming assistant. This is an illustrated AI character, not
+a photograph or a likeness of OJ or a named actor.
+
+| File | Dimensions | Bytes | Use |
+| --- | --- | --- | --- |
+| `ev-avatar-launcher.webp` | 128×128 | 7,184 | Decorative launcher image, rendered at 28px |
+| `ev-avatar-portrait.webp` | 192×192 | 12,722 | Header identity, rendered at 36px, loaded on first open |
+
+Both WebP files preserve alpha transparency and use the same generated portrait.
+The existing Sharp dependency only downsizes and encodes the generated master;
+it does not change the character. Web derivatives omit metadata. The original
+PNG and full prompt are retained outside the public delivery tree. The header's
+alternative text is "Illustrated avatar of E.V"; the launcher's empty alternative
+text avoids repeating the adjacent Ask E.V label.
+
+The genuine `oj-profile.webp` profile photograph used elsewhere on the portfolio
+is unchanged. The following section records the earlier OJ artwork's provenance
+and describes its former use.
+
+## Historical OJ assistant artwork
+
+Owner-supplied artistic representations of OJ Florendo, retained as historical assets and no longer used by E.V.
+
+### Earlier published files
 
 | File | Size | Bytes | Used by |
 | --- | --- | --- | --- |
-| `oj-assistant-avatar-2d.webp` | 128×128 | 4,546 | Assistant entry control, rendered at 28px |
-| `oj-assistant-avatar-3d.webp` | 192×192 | 7,580 | Assistant panel identity, rendered at 40px, loaded on open |
+| `oj-assistant-avatar-2d.webp` | 128×128 | 4,546 | Former assistant entry control |
+| `oj-assistant-avatar-3d.webp` | 192×192 | 7,580 | Former assistant panel identity |
 
 Both are WebP with an alpha channel, derived locally from the owner-supplied
 1024×1024 PNG originals using the already-declared `sharp` dependency. No

@@ -54,7 +54,7 @@ test("writing, selection, consent and the assistant do not trigger the click acc
   await name.press("ControlOrMeta+a");
   expect(await name.evaluate(el => (el as HTMLInputElement).selectionEnd! - (el as HTMLInputElement).selectionStart!)).toBe(15);
   await page.getByRole("checkbox").check();
-  await page.getByRole("button", { name: "Open OJ Assistant", exact: true }).click();
+  await page.getByRole("button", { name: "Open E.V", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(await page.evaluate(() => window.__interactionAnimations)).toEqual([]);
 });

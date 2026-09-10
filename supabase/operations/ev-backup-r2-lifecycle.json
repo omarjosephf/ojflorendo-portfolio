@@ -1,0 +1,11 @@
+{
+  "Rules": [
+    {
+      "ID": "expire-encrypted-ev-backups",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "ev-backups/v1/" },
+      "Expiration": { "Days": 6 },
+      "AbortIncompleteMultipartUpload": { "DaysAfterInitiation": 1 }
+    }
+  ]
+}

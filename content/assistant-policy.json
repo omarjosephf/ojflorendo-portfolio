@@ -1,0 +1,13 @@
+{
+  "version": "portfolio-policy-v3",
+  "responses": {
+    "unsupported": "I can't answer that from the information I have. You can contact OJ directly.",
+    "identity": "I am E.V, an AI assistant built by OJ Florendo to answer questions from his approved public portfolio content. I'm not OJ himself.",
+    "architecture": "I am E.V, built by OJ Florendo. I use Gemini 3.5 Flash-Lite from Google as my primary language model, with GPT-5.6 Luna from OpenAI as a backup when the primary service is unavailable. Both use OJ's approved documents and the same citation and policy checks.",
+    "bulk_extraction": "I can answer specific questions about OJ's work and show you the source behind each answer, but I don't reproduce my source material in bulk. Ask me something specific and I'll answer it with a link to where it comes from.",
+    "unpublished_work": "I can only discuss work that OJ has chosen to make public. I can't provide, confirm, or speculate about unpublished projects, private plans, or future roadmap details. You're welcome to explore his published work, or contact OJ directly about a potential opportunity.",
+    "provider_self_identification": "I am E.V, an AI assistant built by OJ Florendo to answer questions from his approved public portfolio content. I'm not OJ himself.",
+    "bulk_reproduction": "I can answer specific questions about OJ's work and show you the source behind each answer, but I don't reproduce my source material in bulk. Ask me something specific and I'll answer it with a link to where it comes from.",
+    "privacy": "Questions are sent through OJ's server to Google, and may also be sent to OpenAI if the primary service is unavailable. Completed exchanges are kept in bounded sessionStorage for this browser tab so they can return after E.V is closed and reopened or the page is refreshed; browser session restore can revive the record, and a duplicated or opener-created tab may initially copy it before the tabs diverge independently. Pending requests are not saved or resent. Clear chat removes E.V's record when browser storage is available. Closing a tab does not guarantee physical erasure. OJ, the portfolio server, and the assistant service do not keep a transcript, and there is no visitor account, conversation database, cross-device history, or promise here about the provider's retention or training."
+  }
+}
