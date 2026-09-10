@@ -32,7 +32,9 @@ export function proxy(request: NextRequest) {
   const csp = [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
-    `style-src 'self' 'nonce-${nonce}'${isDev ? " 'unsafe-inline'" : ""}`,
+    // Nonces suppress unsafe-inline; omit the style nonce only in development
+    // so Next dev tools can use their inline styles. Production remains nonce-only.
+    isDev ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`,
     `img-src 'self' blob: data:`,
     `font-src 'self'`,
     `connect-src 'self' ${turnstile}${isDev ? " ws: wss:" : ""}`,
@@ -49,10 +51,15 @@ export function proxy(request: NextRequest) {
   // header from the request) and echo the CSP on the response.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
+  const management = request.nextUrl.pathname === "/manage" || request.nextUrl.pathname.startsWith("/manage/");
   requestHeaders.set("Content-Security-Policy", csp);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
+  if (management) {
+    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
 
   return response;
 }

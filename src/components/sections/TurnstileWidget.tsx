@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 /**
  * Cloudflare Turnstile widget, rendered explicitly.
  *
- * Renders nothing unless `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is configured, so the
- * form behaves exactly as before until the owner sets it up.
+ * Callers render this only when their public site key is configured.
+ * Contact and managed Auth keep separate enforcement policies.
  *
  * CSP: `api.js` carries the per-request nonce, which Turnstile propagates to the
  * resources it loads. Combined with the existing `'strict-dynamic'` policy this
@@ -41,27 +41,35 @@ declare global {
   }
 }
 
-/** Load api.js once per document, carrying the CSP nonce. */
+let scriptLoading: Promise<void> | undefined;
+/** Load once, with a bounded failure even if the script request never finishes. */
 function ensureScript(nonce: string | undefined): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (window.turnstile) return resolve();
-
+  if (window.turnstile) return Promise.resolve();
+  if (scriptLoading) return scriptLoading;
+  scriptLoading = new Promise((resolve, reject) => {
     const existing = document.getElementById(SCRIPT_ID);
-    if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener("error", () => reject(), { once: true });
-      return;
+    const script = existing ?? document.createElement("script");
+    function done(ok: boolean) {
+      clearTimeout(timer);
+      script.removeEventListener("load", loaded);
+      script.removeEventListener("error", failed);
+      if (ok) resolve(); else reject(new Error("Verification could not load"));
     }
-
-    const script = document.createElement("script");
-    script.id = SCRIPT_ID;
-    script.src = SCRIPT_SRC;
-    script.async = true;
-    if (nonce) script.nonce = nonce;
-    script.addEventListener("load", () => resolve(), { once: true });
-    script.addEventListener("error", () => reject(), { once: true });
-    document.head.appendChild(script);
+    const loaded = () => done(Boolean(window.turnstile));
+    const failed = () => done(false);
+    const timer = setTimeout(failed, 10000);
+    script.addEventListener("load", loaded, { once: true });
+    script.addEventListener("error", failed, { once: true });
+    if (!existing) {
+      const element = script as HTMLScriptElement;
+      element.id = SCRIPT_ID;
+      element.src = SCRIPT_SRC;
+      element.async = true;
+      if (nonce) element.nonce = nonce;
+      document.head.appendChild(element);
+    }
   });
+  return scriptLoading;
 }
 
 export function TurnstileWidget({
@@ -70,8 +78,12 @@ export function TurnstileWidget({
   onToken,
   onUnavailable,
   resetSignal = 0,
+  theme = "dark",
+  failureMessage = "The verification check couldn’t load, so this form can’t be sent right now. Please reload the page, or use the email button instead.",
 }: {
   siteKey: string;
+  theme?: "auto" | "light" | "dark";
+  failureMessage?: string;
   nonce?: string;
   onToken: (token: string) => void;
   /** Called when the check cannot run at all (script blocked, or widget error). */
@@ -99,15 +111,16 @@ export function TurnstileWidget({
         if (cancelled || !window.turnstile) return;
         widgetIdRef.current = window.turnstile.render(container, {
           sitekey: siteKey,
-          callback: (token) => onToken(token),
+          callback: (token) => { if (!cancelled) { setFailed(false); onToken(token); } },
           // A stale token must not be submitted; clear it and let the widget retry.
-          "expired-callback": () => onToken(""),
+          "expired-callback": () => { if (!cancelled) onToken(""); },
           "error-callback": () => {
+            if (cancelled) return;
             onToken("");
             setFailed(true);
             onUnavailable?.();
           },
-          theme: "dark",
+          theme,
         });
       })
       .catch(() => {
@@ -125,7 +138,7 @@ export function TurnstileWidget({
     // `onToken` is a stable setter from the parent; re-rendering the widget on
     // every keystroke would reset the challenge.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [siteKey, nonce]);
+  }, [siteKey, nonce, theme]);
 
   useEffect(() => {
     // Skip the initial render — the widget issues its first token on its own.
@@ -147,9 +160,7 @@ export function TurnstileWidget({
         // a submission carrying no token is refused server-side. Point at the
         // two routes that actually work — reload, or the direct email button.
         <p role="alert" className="mt-2 text-sm text-red-300">
-          The verification check couldn&apos;t load, so this form can&apos;t be
-          sent right now. Please reload the page, or use the email button
-          instead.
+          {failureMessage}
         </p>
       ) : null}
     </div>

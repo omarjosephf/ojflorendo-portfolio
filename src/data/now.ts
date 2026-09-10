@@ -5,32 +5,32 @@ import type { NowData } from "@/types";
  * content, ready for a Version 2 migration. Keep it concise, current and honest.
  */
 export const now: NowData = {
-  updated: "July 2026",
+  updated: "September 2026",
   items: [
     {
-      iconKey: "study",
-      title: "Final year of my degree",
+      iconKey: "portfolio",
+      title: "A clearer client offer",
       description:
-        "Completing my BSc (Honours) Computing and IT (Software) at the Open University.",
+        "Focusing this platform on websites and carefully scoped product work, with a clearer way to discuss a project.",
     },
     {
       iconKey: "build",
-      title: "Portfolio projects",
+      title: "Products as evidence",
       description:
-        "Building software, AI and data projects to grow my portfolio of real work.",
-    },
-    {
-      iconKey: "portfolio",
-      title: "This website",
-      description:
-        "Designing and improving this personal portfolio and its project case studies.",
+        "Developing my own software and AI ideas, with case studies that explain decisions, checks and limitations.",
     },
     {
       iconKey: "learn",
-      title: "Always learning",
+      title: "Sharing the work",
       description:
-        "Continuing to develop my software engineering and AI skills.",
+        "Building a personal brand around the products I make and the useful lessons behind them.",
+    },
+    {
+      iconKey: "study",
+      title: "Learning through my own marketing",
+      description:
+        "Exploring how AI can help me explain and market my own products. I will distinguish experiments from results I can demonstrate.",
     },
   ],
-  personalNote: "Outside of work, I stay active with fitness and boxing.",
+  personalNote: "Outside work, I stay active with fitness and boxing.",
 };

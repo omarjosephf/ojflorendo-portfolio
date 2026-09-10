@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next";
+import { positioning } from "@/data/positioning";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "OJ Florendo Rayatchi — Portfolio & Professional Platform",
     short_name: "OJ Florendo",
-    description:
-      "Software developer, AI-focused builder, and creative developer creating practical websites, Python tools, AI prototypes, training, and digital solutions.",
+    // One approved description, shared with the page metadata and structured
+    // data so the three cannot drift apart.
+    description: positioning.seoDescription,
     start_url: "/",
     display: "standalone",
     background_color: "#f5f2e9",

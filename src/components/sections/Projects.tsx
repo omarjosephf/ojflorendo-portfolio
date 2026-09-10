@@ -35,13 +35,13 @@ function ProjectCard({ project, index }: { project: ProjectItem; index: number }
 
 export function Projects() {
   return (
-    <Section id="projects" eyebrow="01 / Projects" title="Selected work" intro="Projects built to solve real problems. This portfolio is the first—more software, automation, and AI work is in development.">
+    <Section id="projects" eyebrow="02 / Selected work" title="See what I have built." intro="These are my own projects. Each case study explains the problem, the decisions I made and the limits of the result.">
       <div className="projects-grid">
         {projects.map((project, index) => <Reveal key={project.slug}><ProjectCard project={project} index={index} /></Reveal>)}
       </div>
       <div className="projects-next">
         <Sparkles size={24} aria-hidden="true" />
-        <div><h3>More purposeful projects are in development</h3><p>Each will be published with an honest description of its status, decisions, limitations, and lessons learned.</p></div>
+        <div><h3>More products are in development</h3><p>I am developing further product ideas and will share work when there is something useful to inspect.</p></div>
         <a href="#now" className="text-link">What’s next <ArrowUpRight size={18} aria-hidden="true" /></a>
       </div>
     </Section>

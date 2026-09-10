@@ -2,19 +2,27 @@
 
 ## Cited: what it is
 
-Cited is a document assistant that answers questions from a set of documents and
-shows the exact passage each answer came from. When the documents do not contain
-the answer, it says so instead of producing a plausible one.
+Cited is OJ's document-assistant demo. It retrieves relevant passages, generates
+an answer, and checks quoted text against the passages supplied to the model. It
+is designed to say so when the documents do not contain the answer, rather than
+producing a plausible one, and its evaluation set tests that behaviour as well as
+ordinary answering.
 
 It is live at https://cited-demo.fly.dev and the source is at
 https://github.com/omarjosephf/cited. Status: live.
 
-## Cited: the guarantee it makes
+## Cited: what it checks, and what that check does and does not prove
 
 Every quoted citation is verified locally against the passage the model was
-actually sent. Questions the documents cannot answer are refused rather than
-guessed at. Answer quality, refusal behaviour, and citation integrity are scored
-by a committed evaluation set rather than asserted.
+actually sent; a quote that does not appear in that passage is discarded and
+counted. Cited is designed to decline questions its documents do not cover, and
+that intended behaviour is measured by a committed evaluation set rather than
+asserted.
+
+Three things are worth keeping apart. Checking that a quotation appears in a
+passage is not the same as establishing that the passage supports every claim in
+the answer, and neither is the same as evidence about documents the system has
+never seen.
 
 ## Cited: why it exists
 
@@ -28,7 +36,7 @@ than claimed.
 
 ## Cited: how it is built
 
-The technology Cited is built with is Python and FastAPI, the Anthropic API
+The original Cited demo described here was built with Python and FastAPI, the Anthropic API
 with Claude Haiku 4.5, fastembed and ONNX Runtime for local embeddings, NumPy
 for vector search, pytest, Docker and Fly.io. The technical design behind that
 stack:
@@ -53,6 +61,9 @@ AI-assisted engineering with human review.
 
 ## Cited: what was measured
 
+These measurements concern the original Haiku-based demo. They do not establish
+quality or latency for E.V's newer Luna and Gemini configuration.
+
 The results of evaluating Cited, measured by its committed evaluation set rather
 than asserted, are as follows. On the committed question set: 100% retrieval hit rate and 80% top-1, 100%
 answering accuracy, all unanswerable questions correctly refused, none wrongly
@@ -62,6 +73,12 @@ runs.
 The scope of that claim is stated rather than glossed: it is fifteen questions
 against a ten-chunk corpus. That is enough to catch regressions, and it has
 already found three real bugs. It is not enough to show the system generalises.
+
+This evaluation context belongs to Cited. It is not evidence about E.V, and it is
+not a performance claim for any client's documents. A business pilot would need
+suitable documents, a broader test set, human review, and operational
+requirements agreed in advance. Cited is a demo, not proof of production
+capability for arbitrary business use.
 
 ## Cited: three things that went wrong
 
@@ -101,10 +118,16 @@ Spend is bounded by request rate, a daily answer budget, and a cap on question
 length. The documentation is explicit that only a provider-level spend cap truly
 bounds the loss, because the in-process budget resets on restart.
 
-## Cited: relationship to OJ Assistant
+## Cited: relationship to E.V
 
-OJ Assistant on this website runs on the same engine, pointed at a different
+E.V on this website runs on the same engine, pointed at a different
 corpus: OJ's own approved portfolio content instead of the demo's
 prompt-engineering material. The two are separate deployments with separate
 budgets. That second deployment is itself the evidence for the claim that Cited
 is a reusable product rather than a one-off.
+
+E.V's approved model configuration uses Gemini 3.5 Flash-Lite as primary and GPT-5.6
+Luna as backup. This local migration uses model-generated citation
+references with local verification; it does not inherit the original demo's
+native-citation implementation or its measured results. The migration has not
+been qualified for release.

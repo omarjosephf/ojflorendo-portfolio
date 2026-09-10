@@ -6,8 +6,11 @@ import { projects } from "@/data/projects";
 describe("sitemap", () => {
   const entries = sitemap();
 
-  it("includes the homepage", () => {
+  it("includes every standalone page", () => {
+    // Both routes a visitor can land on directly. /about carries the background
+    // sections, so leaving it out would hide half the site from crawlers.
     expect(entries.some((e) => e.url === `${SITE_URL}/`)).toBe(true);
+    expect(entries.some((e) => e.url === `${SITE_URL}/about`)).toBe(true);
   });
 
   it("includes one absolute entry per project case study", () => {
@@ -16,7 +19,9 @@ describe("sitemap", () => {
       const url = `${SITE_URL}/projects/${project.slug}`;
       expect(entries.some((e) => e.url === url)).toBe(true);
     }
-    expect(entries.length).toBe(1 + withCaseStudy.length);
+    // Two standalone pages (/ and /about) plus one entry per case study, and
+    // nothing else: a stray entry is as much a defect as a missing one.
+    expect(entries.length).toBe(2 + withCaseStudy.length);
   });
 
   it("uses absolute URLs", () => {

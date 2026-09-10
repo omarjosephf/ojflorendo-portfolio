@@ -1,7 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const sections = ["about", "experience", "projects", "now", "contact"] as const;
+/** Sections that live on the landing page and are reachable by hash. */
+const sections = ["services", "projects", "approach", "contact"] as const;
+
+/** Sections that moved to their own route. */
+const aboutSections = ["about", "now", "skills", "experience", "education"] as const;
 
 test.describe("Navigation", () => {
   for (const id of sections) {
@@ -13,13 +17,39 @@ test.describe("Navigation", () => {
     });
   }
 
+  for (const id of aboutSections) {
+    test(`/about#${id} settles the section in view`, async ({ page }) => {
+      await page.goto(`/about#${id}`);
+      await expect(page.locator(`#${id}`)).toBeInViewport({ ratio: 0.01 });
+    });
+  }
+
   test("a primary nav link scrolls to its section", async ({ page }) => {
     await page.goto("/");
     await page
       .getByRole("navigation", { name: "Primary" })
-      .getByRole("link", { name: "Experience", exact: true })
+      .getByRole("link", { name: "Services", exact: true })
       .click();
-    await expect(page.locator("#experience")).toBeInViewport({ ratio: 0.01 });
+    await expect(page.locator("#services")).toBeInViewport({ ratio: 0.01 });
+  });
+
+  test("the About nav link navigates to its own route and marks itself current", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("link", { name: "About", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(page.locator("#about")).toBeVisible();
+    // A link to the page you are on is aria-current="page", not "true".
+    await expect(
+      primaryNav(page).getByRole("link", { name: "About", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+    // Exactly one h1 on the route, and it is the About heading.
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("h1")).toHaveAttribute("id", "about-heading");
   });
 
   test("the mobile menu opens and closes with Escape", async ({ page }) => {
@@ -158,7 +188,7 @@ test.describe("Case study round trip (v1.1)", () => {
     await page.goto("/");
     for (let i = 0; i < 3; i++) {
       await primaryNav(page)
-        .getByRole("link", { name: "Projects", exact: true })
+        .getByRole("link", { name: "Work", exact: true })
         .click();
       await expect(page, `cycle ${i}: at projects`).toHaveURL(/\/#projects$/);
       await page.getByRole("link", { name: PORTFOLIO_CASE_STUDY_LINK }).click();
@@ -174,14 +204,16 @@ test.describe("Case study round trip (v1.1)", () => {
   }) => {
     await page.goto("/");
 
+    // Two landing-page section links: About is its own route now, so it can no
+    // longer contribute a hash entry to this history round trip.
     await primaryNav(page)
-      .getByRole("link", { name: "About", exact: true })
+      .getByRole("link", { name: "Services", exact: true })
       .click();
-    await expect(page).toHaveURL(/\/#about$/);
+    await expect(page).toHaveURL(/\/#services$/);
     expectSingleHash(page);
 
     await primaryNav(page)
-      .getByRole("link", { name: "Projects", exact: true })
+      .getByRole("link", { name: "Work", exact: true })
       .click();
     await expect(page).toHaveURL(/\/#projects$/);
     expectSingleHash(page);
@@ -196,15 +228,15 @@ test.describe("Case study round trip (v1.1)", () => {
     await expect(page).toHaveURL(/\/#projects$/);
     expectSingleHash(page);
 
-    // Back -> /#about
+    // Back -> /#services
     await page.goBack();
-    await expect(page).toHaveURL(/\/#about$/);
+    await expect(page).toHaveURL(/\/#services$/);
     expectSingleHash(page);
 
     // The observer is responsive again after returning to the homepage: driving
     // a section into view activates its nav link.
-    await activateViaScroll(page, "experience");
-    await expect(activeLink(page, "experience")).toHaveAttribute(
+    await activateViaScroll(page, "services");
+    await expect(activeLink(page, "services")).toHaveAttribute(
       "aria-current",
       "true",
     );
@@ -231,7 +263,7 @@ test.describe("Case study round trip (v1.1)", () => {
     await page.getByRole("button", { name: /menu/i }).click();
     const menu = page.locator("#mobile-menu");
     await expect(menu).toBeVisible();
-    await menu.getByRole("link", { name: "Projects", exact: true }).click();
+    await menu.getByRole("link", { name: "Work", exact: true }).click();
     await expect(page).toHaveURL(/\/#projects$/);
     await expect(menu).toBeHidden(); // menu closes on navigation
     expectSingleHash(page);
@@ -272,8 +304,8 @@ test.describe("Case study round trip (v1.1)", () => {
 
     // Driving a section into view re-activates its link — proof the observer is
     // live after a full reload too.
-    await activateViaScroll(page, "experience");
-    await expect(activeLink(page, "experience")).toHaveAttribute(
+    await activateViaScroll(page, "contact");
+    await expect(activeLink(page, "contact")).toHaveAttribute(
       "aria-current",
       "true",
     );

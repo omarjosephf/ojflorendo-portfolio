@@ -111,13 +111,21 @@ the corpus holding no secret worth extracting are defence in depth on top of
 that, not the guarantee. The browser guard is deliberately not among them: it no
 longer screens probes, and a control that does not run must not be counted.
 
-Spend is bounded in layers, each described by what it actually guarantees: the
-route throttle is best-effort and per-instance (not distributed, not an edge
-limiter); the shared secret means only this site can spend the service's budget;
-the service enforces its own per-IP rate limit and a daily answer allowance. The
-daily allowance is **not** a monetary ceiling — it lives in process memory and
-resets on restart, which under a scale-to-zero deployment happens routinely. The
-provider-side account spend cap is the only hard financial limit.
+Spend has distinct boundaries. The route's local throttle is best-effort; the
+production edge rule additionally limits `/api/assistant` requests before the
+application. Neither proves a global monetary ceiling. The backend shared secret
+and per-IP limits restrict access but cannot replace shared accounting.
+
+The current ADR-0015 candidate adds persistent daily/monthly attempt and money
+reservations, one pinned Machine, a real persistent mount, and process-shared
+worker admission. Failed/uncertain calls keep reservations and accounting errors
+fail closed. These controls apply only after the matching backend/storage/config
+has been qualified and activated. The earlier Anthropic deployment still has
+restart-resetting counters; local code does not upgrade it. Provider caps are
+separate, account-scoped controls and must be verified for their actual enforcement,
+currency and other use. The fixed per-attempt reserve is not a guaranteed invoice
+bound until all billed input/output/thinking limits and rates are established.
+See [durable budget operations](docs/runbooks/durable-budget.md).
 
 The corpus is authored in this repository and reaches the service as a
 deterministic checksummed artifact. The service verifies the checksum at startup
@@ -239,8 +247,8 @@ This boundary and its limitations are recorded in
   street address, date of birth or identification number.
 - Contact data is collected only to reply to the enquiry and is not persisted by
   the application.
-- No cookies, behavioural analytics, fingerprinting, or ad tracking are used in
-  the current release.
+- The theme candidate adds only an explicit display-preference cookie, `oj-color-theme`: `system`, `light` or `dark`, one-year lifetime, path `/`, SameSite=Lax and Secure on HTTPS. No cookie is written until the visitor chooses a theme. It contains no identifier or chat content; server rendering applies it before paint.
+- No behavioural analytics, fingerprinting or ad tracking are used. Theme changes stay on this origin and may synchronize between its tabs.
 - Logs, screenshots, test artefacts, and support reports are subject to the same
   privacy rules as source code.
 

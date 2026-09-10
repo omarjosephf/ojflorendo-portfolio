@@ -19,6 +19,7 @@ const eslintConfig = defineConfig([
     // this because its workspace starts empty.
     "playwright-report/**",
     "test-results/**",
+    ".ev-preview/**",
   ]),
   {
     rules: {

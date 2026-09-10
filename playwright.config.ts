@@ -29,6 +29,6 @@ export default defineConfig({
     reuseExistingServer: process.env.PLAYWRIGHT_REUSE_SERVER === "true",
     timeout: 120_000,
     // Safe test environment: point metadata at the local server, no real secrets.
-    env: { NEXT_PUBLIC_SITE_URL: `http://localhost:${PORT}` },
+    env: { NEXT_PUBLIC_SITE_URL: `http://localhost:${PORT}`, EV_MANAGEMENT_MODE: "preview", ASSISTANT_SERVICE_URL: "", ASSISTANT_SERVICE_SECRET: "" },
   },
 });

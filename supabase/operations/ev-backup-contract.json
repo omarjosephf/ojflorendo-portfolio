@@ -1,0 +1,289 @@
+{
+  "version": 1,
+  "schemaSha256": "9d3f20e2d145db9d827e249f71e5e44dcdd75d2d3885e621828ba6614d178d1c",
+  "versions": [
+    "202609080001",
+    "202609090001",
+    "202609090002",
+    "202609090003",
+    "202609090004",
+    "202609090005",
+    "202609090006",
+    "202609090007",
+    "202609090008"
+  ],
+  "tables": {
+    "public.ev_knowledge_drafts": [
+      {
+        "name": "id",
+        "type": "uuid"
+      },
+      {
+        "name": "author_id",
+        "type": "uuid"
+      },
+      {
+        "name": "title",
+        "type": "text"
+      },
+      {
+        "name": "body",
+        "type": "text"
+      },
+      {
+        "name": "provenance",
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "type": "text"
+      },
+      {
+        "name": "revision",
+        "type": "integer"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone"
+      }
+    ],
+    "public.ev_conversations": [
+      {
+        "name": "id",
+        "type": "uuid"
+      },
+      {
+        "name": "user_id",
+        "type": "uuid"
+      },
+      {
+        "name": "app",
+        "type": "text"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "next_sequence",
+        "type": "integer"
+      }
+    ],
+    "public.ev_messages": [
+      {
+        "name": "id",
+        "type": "uuid"
+      },
+      {
+        "name": "conversation_id",
+        "type": "uuid"
+      },
+      {
+        "name": "request_id",
+        "type": "uuid"
+      },
+      {
+        "name": "sequence",
+        "type": "integer"
+      },
+      {
+        "name": "role",
+        "type": "text"
+      },
+      {
+        "name": "body",
+        "type": "text"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone"
+      }
+    ],
+    "public.ev_answer_events": [
+      {
+        "name": "message_id",
+        "type": "uuid"
+      },
+      {
+        "name": "outcome",
+        "type": "text"
+      },
+      {
+        "name": "route",
+        "type": "text"
+      },
+      {
+        "name": "model",
+        "type": "text"
+      },
+      {
+        "name": "retrieved",
+        "type": "text[]"
+      },
+      {
+        "name": "cited",
+        "type": "text[]"
+      },
+      {
+        "name": "latency_ms",
+        "type": "integer"
+      },
+      {
+        "name": "corpus_sha256",
+        "type": "text"
+      },
+      {
+        "name": "prompt_sha256",
+        "type": "text"
+      }
+    ],
+    "public.ev_feedback": [
+      {
+        "name": "message_id",
+        "type": "uuid"
+      },
+      {
+        "name": "user_id",
+        "type": "uuid"
+      },
+      {
+        "name": "helpful",
+        "type": "boolean"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone"
+      }
+    ],
+    "public.ev_message_results": [
+      {
+        "name": "message_id",
+        "type": "uuid"
+      },
+      {
+        "name": "payload",
+        "type": "jsonb"
+      }
+    ],
+    "ev_private.generation_requests": [
+      {
+        "name": "conversation_id",
+        "type": "uuid"
+      },
+      {
+        "name": "request_id",
+        "type": "uuid"
+      },
+      {
+        "name": "input_sha256",
+        "type": "text"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "result",
+        "type": "jsonb"
+      }
+    ],
+    "ev_private.editorial_receipts": [
+      {
+        "name": "request_id",
+        "type": "uuid"
+      },
+      {
+        "name": "actor_id",
+        "type": "uuid"
+      },
+      {
+        "name": "draft_id",
+        "type": "uuid"
+      },
+      {
+        "name": "input_sha256",
+        "type": "text"
+      },
+      {
+        "name": "revision",
+        "type": "integer"
+      },
+      {
+        "name": "status",
+        "type": "text"
+      },
+      {
+        "name": "saved_at",
+        "type": "timestamp with time zone"
+      }
+    ],
+    "public.ev_gap_reviews": [
+      {
+        "name": "id",
+        "type": "uuid"
+      },
+      {
+        "name": "question_key",
+        "type": "text"
+      },
+      {
+        "name": "diagnosis",
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "type": "text"
+      },
+      {
+        "name": "note",
+        "type": "text"
+      },
+      {
+        "name": "draft_id",
+        "type": "uuid"
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone"
+      },
+      {
+        "name": "message_id",
+        "type": "uuid"
+      },
+      {
+        "name": "revision",
+        "type": "integer"
+      },
+      {
+        "name": "last_request_id",
+        "type": "uuid"
+      },
+      {
+        "name": "last_input_sha256",
+        "type": "text"
+      }
+    ],
+    "ev_private.deleted_conversations": [
+      {
+        "name": "conversation_id",
+        "type": "uuid"
+      },
+      {
+        "name": "deleted_at",
+        "type": "timestamp with time zone"
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/data/site";
 
-export const alt = `${site.name} — Software Developer & AI-Focused Builder`;
+export const alt = `${site.name} — Websites and AI document assistants`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -41,13 +41,13 @@ export default function OpengraphImage() {
             OJ
           </div>
           <div style={{ display: "flex", fontSize: "22px", color: "#65665c" }}>
-            Software · AI · Creative Development
+            Web development · AI document assistants
           </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", fontSize: "62px", fontWeight: 700 }}>
-            {site.name}
+            Make your services clear.
           </div>
           <div
             style={{
@@ -58,7 +58,7 @@ export default function OpengraphImage() {
               maxWidth: "920px",
             }}
           >
-            {site.headline}
+            {`${site.headline} · ${site.name}`}
           </div>
         </div>
 

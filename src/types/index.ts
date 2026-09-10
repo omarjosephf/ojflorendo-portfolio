@@ -12,7 +12,17 @@ export interface SocialLink {
 
 export interface NavigationItem {
   label: string;
+  /**
+   * Section id on the landing page, used for active-link highlighting and to
+   * build the default "/#id" href.
+   */
   targetId: string;
+  /**
+   * Set when the item is its own route rather than a landing-page section.
+   * The nav links here instead of "/#targetId", and active state follows the
+   * pathname rather than the scroll observer.
+   */
+  href?: string;
 }
 
 export interface SkillGroup {

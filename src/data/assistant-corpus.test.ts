@@ -17,22 +17,29 @@ import {
 const CORPUS_DIR = join(process.cwd(), "content", "assistant");
 
 /**
- * Section anchors that exist on the home page. Kept here rather than scraped so
- * a section being renamed produces a failure with a name attached, instead of a
- * test that quietly stops checking anything.
+ * Section anchors that exist on the landing page. Kept here rather than scraped
+ * so a section being renamed produces a failure with a name attached, instead of
+ * a test that quietly stops checking anything.
  */
 const HOME_SECTIONS = new Set([
   "top",
-  "about",
-  "mission",
+  "services",
+  "projects",
   "approach",
+  "contact",
+]);
+
+/**
+ * Section anchors on /about. The background sections moved to their own route,
+ * so a citation link into one is only real if it names this route — pointing at
+ * "/#skills" would now land on the landing page and scroll nowhere.
+ */
+const ABOUT_SECTIONS = new Set([
+  "about",
   "now",
   "skills",
   "experience",
-  "projects",
-  "services",
   "education",
-  "contact",
 ]);
 
 const caseStudySlugs = new Set(
@@ -104,6 +111,16 @@ describe("assistant corpus — the public URL allowlist", () => {
         expect(HOME_SECTIONS, `${path} links to a missing section`).toContain(
           publicUrl.slice(2),
         );
+        continue;
+      }
+
+      if (publicUrl.startsWith("/about")) {
+        const anchor = publicUrl.slice("/about".length);
+        if (anchor === "") continue;
+        expect(
+          ABOUT_SECTIONS,
+          `${path} links to a missing /about section`,
+        ).toContain(anchor.replace(/^#/, ""));
         continue;
       }
 

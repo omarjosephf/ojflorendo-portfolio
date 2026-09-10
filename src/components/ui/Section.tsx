@@ -14,6 +14,7 @@ export function Section({
   intro,
   children,
   className = "",
+  as: Heading = "h2",
 }: {
   id: string;
   eyebrow: string;
@@ -21,6 +22,13 @@ export function Section({
   intro?: string;
   children: ReactNode;
   className?: string;
+  /**
+   * Heading level for this section title. Defaults to h2, which is correct
+   * wherever a page owns its own h1. A route whose first section IS the page
+   * subject passes "h1" so the document still has exactly one h1 and the
+   * heading order never skips a level.
+   */
+  as?: "h1" | "h2";
 }) {
   const headingId = `${id}-heading`;
   return (
@@ -34,12 +42,12 @@ export function Section({
           <p className="section-eyebrow">
             {eyebrow}
           </p>
-          <h2
+          <Heading
             id={headingId}
             className="section-title"
           >
             {title}
-          </h2>
+          </Heading>
           {intro ? (
             <p className="section-intro">
               {intro}

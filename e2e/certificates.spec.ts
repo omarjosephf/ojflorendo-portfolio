@@ -3,7 +3,7 @@ import { certifications } from "../src/data/education";
 
 test.describe("Published credential evidence", () => {
   test("every credential renders a certificate link", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about");
 
     const credentialLinks = page.getByRole("link", {
       name: /^View certificate for /,
@@ -24,7 +24,7 @@ test.describe("Published credential evidence", () => {
   test("issuer verification stays available alongside the documents", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/about");
 
     const verified = certifications.filter(
       (credential) => credential.verificationUrl,

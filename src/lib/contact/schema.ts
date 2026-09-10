@@ -6,12 +6,21 @@
  * dependency: the rules are simple and explicit.
  */
 
+/**
+ * The six accepted enquiry values. The SET is the server contract and is
+ * unchanged; the ORDER is presentation, and leads with the client enquiries the
+ * site now asks for. "Job opportunity" is retained — it is still a real way
+ * people reach OJ — but it no longer heads a list on a client-focused page.
+ *
+ * Renaming any label is a separate change: labels reach the email templates and
+ * the delivered notification, so they are not display-only.
+ */
 export const ENQUIRY_TYPES = [
-  { value: "job", label: "Job opportunity" },
   { value: "freelance", label: "Freelance project" },
   { value: "collaboration", label: "Collaboration" },
-  { value: "partnership", label: "Sponsorship / partnership" },
   { value: "speaking", label: "Speaking / training" },
+  { value: "partnership", label: "Sponsorship / partnership" },
+  { value: "job", label: "Job opportunity" },
   { value: "other", label: "Other" },
 ] as const;
 

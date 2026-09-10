@@ -1,0 +1,28 @@
+{
+  "frozenAt": "2026-09-09T01:19:05.278964+00:00",
+  "author": "Assistant, manually mapped to inspected source headings; human review pending",
+  "baseline": {
+    "model": "BAAI/bge-small-en-v1.5",
+    "targetWords": 180,
+    "overlapWords": 40
+  },
+  "comparators": [
+    {
+      "model": "BAAI/bge-small-en-v1.5",
+      "targetWords": 120,
+      "overlapWords": 24
+    },
+    {
+      "model": "BAAI/bge-base-en-v1.5",
+      "targetWords": 180,
+      "overlapWords": 40
+    }
+  ],
+  "noTuningAfterResults": true,
+  "promotionRule": "At least two additional E.V supported top-4 hits, no previously successful supported case lost on either corpus; discuss memory, tokens and timing before adoption. Holdout alone is not a quality/release approval.",
+  "unknownQuestions": "Report retrieved similarity only, never count it as successful refusal or use a new threshold.",
+  "files": {
+    "cited-questions.toml": "361be3fd3ff516526fcaab756495e557bd2ae41c199b6ca2c397205f3ba3743b",
+    "ev-questions.toml": "80680df039aefcec269c08d4815b60b8f337135fef81d5ce1fe3192c68bf450c"
+  }
+}

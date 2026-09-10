@@ -658,3 +658,18 @@ presentation only: the Beta label, citation checks, request limits, cancellation
 bounded tab continuity and provider boundaries remain in force. No instructor
 artwork, source code, branding or product claims are incorporated. This amendment
 authorizes local refinement and verification, not publication or graduation.
+
+## Local identity amendment, 9 September 2026
+
+The owner requested removal of the Beta badge and the embedded dialog's theme
+selector while preserving the existing chat layout. E.V follows the portfolio's
+System, Light or Dark preference (ADR-0017). Her header and launcher now use an
+original female illustrated avatar with a warm, confident expression, replacing
+the earlier illustrations of OJ. The portfolio's actual profile photograph is
+unchanged. Asset provenance is recorded with the avatar files.
+
+This supersedes the Beta presentation retained in the 7 September local
+amendments. The permanent AI capability and privacy disclosure remains available
+in About & privacy. Local badge removal is the owner's requested presentation
+change; release evidence, quality checks and final publication approval remain
+required under ADR-0011.

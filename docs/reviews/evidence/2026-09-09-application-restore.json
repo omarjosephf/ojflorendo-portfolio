@@ -1,0 +1,256 @@
+{
+  "version": 1,
+  "date": "2026-09-09",
+  "scope": "Local PGlite synthetic application-data serialization/restore; no managed restore, real Auth, provider calls or live target",
+  "risk": "R2",
+  "engine": "PGlite 0.5.8; fresh independent in-memory source/destination",
+  "checksPassed": 46,
+  "checks": [
+    {
+      "name": "application-only backup serializes through an actual file",
+      "passed": true
+    },
+    {
+      "name": "current ledger is captured after deletion, independently of backup",
+      "passed": true
+    },
+    {
+      "name": "runtime reads and definer RPCs are denied before loading",
+      "passed": true
+    },
+    {
+      "name": "isolated restore reconciles latest deletions and expiry before access",
+      "passed": true
+    },
+    {
+      "name": "deleted and expired chat descendants are physically absent",
+      "passed": true
+    },
+    {
+      "name": "all gap reviews are discarded because latest gap deletion evidence is unavailable",
+      "passed": true
+    },
+    {
+      "name": "ledger merge keeps the later deletion timestamp and all tombstones",
+      "passed": true
+    },
+    {
+      "name": "eligible chat content, payloads and exact approved draft bytes survive",
+      "passed": true
+    },
+    {
+      "name": "no sessions, owner assignments or budget allowances were restored",
+      "passed": true
+    },
+    {
+      "name": "a populated destination cannot be restored again",
+      "passed": true
+    },
+    {
+      "name": "grants, RLS, policies, functions and constraints pass before read access",
+      "passed": true
+    },
+    {
+      "name": "an old JWT-shaped claim has no active restored session",
+      "passed": true
+    },
+    {
+      "name": "fresh guest A sees only its surviving conversation",
+      "passed": true
+    },
+    {
+      "name": "fresh guest B remains isolated and sees its Cited conversation",
+      "passed": true
+    },
+    {
+      "name": "owner AAL1 and forged AAL2 cannot read guest chats or knowledge",
+      "passed": true
+    },
+    {
+      "name": "independently verified synthetic owner AAL2 reads eligible records",
+      "passed": true
+    },
+    {
+      "name": "recovery remains read-only including former column grants and definer writes",
+      "passed": true
+    },
+    {
+      "name": "anonymous and service-role access remains denied after recovery",
+      "passed": true
+    },
+    {
+      "name": "revoking a fresh session removes subsequent read access",
+      "passed": true
+    },
+    {
+      "name": "missing current ledger starts empty chats while approved knowledge survives",
+      "passed": true
+    },
+    {
+      "name": "unapproved knowledge and its receipts are omitted",
+      "passed": true
+    },
+    {
+      "name": "backup older than seven days fails closed",
+      "passed": true
+    },
+    {
+      "name": "future backup fails closed",
+      "passed": true
+    },
+    {
+      "name": "schema mismatch fails closed",
+      "passed": true
+    },
+    {
+      "name": "wrong source backup fails closed",
+      "passed": true
+    },
+    {
+      "name": "stale ledger predating backup fails closed",
+      "passed": true
+    },
+    {
+      "name": "wrong-source ledger fails closed",
+      "passed": true
+    },
+    {
+      "name": "future ledger fails closed",
+      "passed": true
+    },
+    {
+      "name": "ledger with future deletion fails closed",
+      "passed": true
+    },
+    {
+      "name": "extra auth-session table is rejected rather than imported",
+      "passed": true
+    },
+    {
+      "name": "unexpected credential-like field is rejected",
+      "passed": true
+    },
+    {
+      "name": "changed approved draft cannot be silently restored",
+      "passed": true
+    },
+    {
+      "name": "SQL constraint failure rolls back even earlier draft inserts",
+      "passed": true
+    },
+    {
+      "name": "missing independent principal fails without recreating identity",
+      "passed": true
+    },
+    {
+      "name": "preexisting application data refuses a merge restore",
+      "passed": true
+    },
+    {
+      "name": "RLS drift prevents restore",
+      "passed": true
+    },
+    {
+      "name": "extra direct grant prevents restore",
+      "passed": true
+    },
+    {
+      "name": "unexpected schema access is revoked again on failure",
+      "passed": true
+    },
+    {
+      "name": "preexisting sessions prevent recovery",
+      "passed": true
+    },
+    {
+      "name": "preexisting owner assignments prevent recovery",
+      "passed": true
+    },
+    {
+      "name": "policy tampering is detected before loading",
+      "passed": true
+    },
+    {
+      "name": "definer-function tampering is detected before loading",
+      "passed": true
+    },
+    {
+      "name": "changed artifact bytes do not match external digest pins",
+      "passed": true
+    },
+    {
+      "name": "security drift after loading still prevents access and retains quarantine",
+      "passed": true
+    },
+    {
+      "name": "source retains its own independent data and sessions",
+      "passed": true
+    },
+    {
+      "name": "legacy conversation reconciliation alone leaves expired gaps behind",
+      "passed": true
+    }
+  ],
+  "restore": {
+    "mode": "current-ledger",
+    "reconciledConversations": 2,
+    "discardedGapReviews": 3,
+    "restoredDrafts": 1,
+    "restoredConversations": 2,
+    "authSessionsRestored": 0,
+    "budgetRowsRestored": 0,
+    "access": "disabled"
+  },
+  "elapsedMs": 47234,
+  "syntheticBackupSha256": "c80de8ecb820a17fb7ae263cf051b2cf2dab0a4b98577ea8bcaba6babf3a1bda",
+  "syntheticCurrentLedgerSha256": "97a9f4160b2e9f42aa1749eef5e6e73d3fab3f6898fa07450e82f109a68bb75a",
+  "scriptSha256": {
+    "management-restore.mjs": "55df256302feb32d9d7f3cc15ce4d6d72cb6e7f2ff52186a10751a9dad0a73fc",
+    "test-management-restore.mjs": "f60359b510770c12e3ee9be2e0bb08465ad77cfb78d7a92ecf95bccf578309b3"
+  },
+  "stagingReadOnly": {
+    "catalogQueries": 3,
+    "appliedMigrations": 7,
+    "tablesWithRls": 15,
+    "retentionDefinitionsInspected": 3,
+    "restoreExecuted": false,
+    "mutationExecuted": false
+  },
+  "budget": {
+    "additionalCapUsd": 3,
+    "spentUsd": 0,
+    "reservedUsd": 0,
+    "paidCalls": 0,
+    "subscriptions": 0,
+    "realLedgerChanges": false
+  },
+  "limitations": [
+    "All gaps discarded; no granular gap-history restore",
+    "No managed Supabase backup/restore or operational off-site backup process",
+    "Auth helper claims are synthetic SQL fixture, not actual JWT or human MFA",
+    "Latest complete ledger and approved knowledge depend on independent operator evidence and source cutover freeze",
+    "Recovery grants read-only; no writer/provider/accounting activation",
+    "No full application release gate or production approval"
+  ],
+  "reviewHistory": [
+    "First executable run:39 checks passed",
+    "Review found initial schema-access assertion outside cleanup handler; moved into transaction and added adversarial regression",
+    "Final run:46 checks passed; legacy expired-gap reconciliation gap reproduced"
+  ],
+  "completedPackages": 12,
+  "totalPackages": 16,
+  "finalVerification": {
+    "restoreChecks": 46,
+    "managementSqlChecks": 42,
+    "sharedBudgetSqlChecks": 48,
+    "totalSqlChecks": 136,
+    "fullLint": "pass",
+    "docsAnchors": "pass",
+    "frontendDiffCheck": "pass",
+    "backendDiffCheck": "pass",
+    "privacyScan": "pass",
+    "fullApplicationGate": "not rerun; UI/routes/runtime/dependencies unchanged; preserve active preview",
+    "frontendUnitBrowserBuild": "historical only; no new claim",
+    "backendTests": "not rerun; all 116 inherited files unchanged"
+  }
+}

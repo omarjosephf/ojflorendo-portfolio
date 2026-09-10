@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-09",
+  "scope": "Synthetic-only Free staging maintenance; no model calls",
+  "localSqlChecksPassed": 36,
+  "liveTransactionalChecks": {
+    "retentionPreservesRecentPermanentOwnerAndActiveGuests": true,
+    "deletedConversationReplayRemovesRestoredChildren": true,
+    "idempotentReplay": true,
+    "syntheticRowsRolledBack": true
+  },
+  "scheduledCanary": {
+    "start": "2026-09-09T00:51:00.086590+00:00",
+    "end": "2026-09-09T00:51:00.103993+00:00",
+    "status": "succeeded",
+    "remainingUsers": 0,
+    "remainingConversations": 0
+  },
+  "finalSchedule": {
+    "retention": "hourly at minute 5 UTC",
+    "ownCronHistoryCleanup": "daily at 03:17 UTC, older than 7 days"
+  },
+  "isolatedFullBackupRestoreQualified": false,
+  "migrationSha256": {
+    "202609080001_ev_management.sql": "1dcecebde57c90e869c943619e6bcb38cb185c81702271b320a2be126ceada31",
+    "202609090001_ev_active_sessions.sql": "8f93f81ed3056fc7d1d120df04e77a16a409cd89b3b6e5bb190443735998677b",
+    "202609090002_ev_generation_receipts.sql": "08f03eb1c4d79c5c5cb20f48f69be184a49b796c3b1dab2c4020f3eae41e0f65",
+    "202609090003_ev_retention_recovery.sql": "dbd7ff8807b6455a6984ddcf1a075f015042e0a30f8c6b536812dd77c40c4c69",
+    "202609090004_ev_owner_session.sql": "6b4014100aade19a0828a42a0be3918a9bd4d8c91fbb4192c2e0884d28d69bac"
+  }
+}

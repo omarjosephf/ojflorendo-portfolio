@@ -13,6 +13,8 @@ test.describe("SEO & metadata routes", () => {
     const body = await response.text();
     expect(body).toContain("<urlset");
     expect(body).toContain("/projects/personal-portfolio-website");
+    // The background sections live here now; omitting it would hide them.
+    expect(body).toContain("/about");
   });
 
   test("manifest.webmanifest uses the approved identity", async ({ request }) => {

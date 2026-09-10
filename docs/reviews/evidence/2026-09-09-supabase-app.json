@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-09T00:30:26.052Z",
+  "checks": [
+    {
+      "name": "passive session check creates neither identity nor cookies",
+      "passed": true
+    },
+    {
+      "name": "actual app creates verified HttpOnly managed guest session",
+      "passed": true
+    },
+    {
+      "name": "actual app persists a user turn and validated reply once",
+      "passed": true
+    },
+    {
+      "name": "actual app restores question and exact stored result",
+      "passed": true
+    },
+    {
+      "name": "second real app guest cannot read or delete the first guest chat",
+      "passed": true
+    },
+    {
+      "name": "actual app deletes all conversation children and disconnects guest",
+      "passed": true
+    }
+  ],
+  "model_calls": 0,
+  "cost_usd": 0,
+  "note": "Actual loopback app and real Supabase; model service deliberately unconfigured. The saved unavailable result is not a generated-answer quality claim.",
+  "migrations": [
+    {
+      "file": "202609080001_ev_management.sql",
+      "sha256": "1dcecebde57c90e869c943619e6bcb38cb185c81702271b320a2be126ceada31"
+    },
+    {
+      "file": "202609090001_ev_active_sessions.sql",
+      "sha256": "8f93f81ed3056fc7d1d120df04e77a16a409cd89b3b6e5bb190443735998677b"
+    }
+  ]
+}

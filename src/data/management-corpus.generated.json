@@ -1,0 +1,633 @@
+{
+  "schemaVersion": 1,
+  "corpusSha256": "10ccbbc912bc9ad0ddc5a46c850d71a007705be9719ae246cd4448ef8db0af95",
+  "model": "BAAI/bge-small-en-v1.5",
+  "tokenizerSha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+  "tokenLimit": 512,
+  "targetWords": 180,
+  "overlapWords": 40,
+  "generatedAt": "2026-09-10T17:33:59.423198+00:00",
+  "chunks": [
+    {
+      "index": 0,
+      "source": "OJ_Florendo_Rayatchi_Public_CV.pdf",
+      "section": null,
+      "page": 1,
+      "text": "Public CV | Updated 30 July 2026 | No private phone number or street address included OJ FLORENDO RAYATCHI SOFTWARE DEVELOPER | AI-FOCUSED BUILDER | CREATIVE DEVELOPER Windsor, Berkshire, UK | ojflorendo.connect@gmail.com | ojfr.me | LinkedIn | GitHub PROFESSIONAL PROFILE Final-year BSc Computing and IT (Software) student and software developer building practical digital products with Next.js, React, TypeScript, Python, and responsible AI-assisted workflows. Experience spans accessible web development, data and training, UX/UI, e-commerce, marketing content, and digital operations. Focused on clear communication, security-conscious implementation, maintainable delivery, and evidence-based testing. CORE CAPABILITIES Development Next.js, React, TypeScript, JavaScript, HTML, CSS, Tailwind CSS, Python Quality & delivery Git/GitHub, Vitest, Playwright, accessibility, technical SEO, CI, Vercel AI & automation Prompt engineering, narrow assistant prototypes, knowledge workflows, human-reviewed AI-assisted engineering Data & operations Microsoft Excel, Power BI, data analysis, training content, e- commerce and digital operations SELECTED PROJECT Personal Portfolio & Professional Platform Live | 2026 ojfr.me | github.com/omarjosephf/ojflorendo-portfolio • Designed and built a responsive, accessible professional platform using Next.js, React, TypeScript, Tailwind CSS, and typed content modules. • Implemented a security-conscious foundation with a",
+      "tokens": 327,
+      "indexedSha256": "4ef52e6cea5284c0f3a1b1b820a63d5829523687e6541bdde48430c4c5e9de95"
+    },
+    {
+      "index": 1,
+      "source": "OJ_Florendo_Rayatchi_Public_CV.pdf",
+      "section": null,
+      "page": 1,
+      "text": "operations SELECTED PROJECT Personal Portfolio & Professional Platform Live | 2026 ojfr.me | github.com/omarjosephf/ojflorendo-portfolio • Designed and built a responsive, accessible professional platform using Next.js, React, TypeScript, Tailwind CSS, and typed content modules. • Implemented a security-conscious foundation with a nonce-based Content Security Policy, server-side contact validation, generic errors, rate limiting, and server-only credentials. • Established automated unit and browser testing with Vitest and Playwright, GitHub CI, preview QA, controlled releases, and Vercel deployment. • Documented AI-assisted engineering transparently while retaining human direction, verification, release authority, and responsibility for the final product. PROFESSIONAL EXPERIENCE E-commerce & Social Media Operations Lead Jan 2026 - Present Golden Galore Luxury | UK / Remote • Manage day-to-day online content, product presentation, and customer-facing digital materials for a luxury-goods brand. • Photograph and edit products, add watermarks, write descriptions, and prepare listing, promotion, raffle, giveaway, and live- selling content. • Coordinate reusable Canva templates and communications to maintain a consistent brand presentation across digital channels. Digital Marketing & Training Content Lead Dec 2025 - Present American Advanced Executive Training (AAET) | Remote • Create",
+      "tokens": 285,
+      "indexedSha256": "b3cc9edc2c4d5efc3b81fbb18b314e842511707f2c40df82664027053f4d000c"
+    },
+    {
+      "index": 2,
+      "source": "OJ_Florendo_Rayatchi_Public_CV.pdf",
+      "section": null,
+      "page": 1,
+      "text": "giveaway, and live- selling content. • Coordinate reusable Canva templates and communications to maintain a consistent brand presentation across digital channels. Digital Marketing & Training Content Lead Dec 2025 - Present American Advanced Executive Training (AAET) | Remote • Create marketing copy, professional course outlines, agendas, programme summaries, and training descriptions for international audiences. • Plan and schedule social-media content and produce Canva visuals for executive training programmes. • Use AI tools to support drafting and refinement while reviewing the final wording for clarity, accuracy, and professional tone. AI, Python & Data Training Facilitator Jul 2025 - Nov 2025 LPC / International Client Projects | UK / International • Delivered and co-delivered professional training in Python, data science, financial analysis, prompt engineering, and AI fundamentals. • Explained Python libraries, exploratory data analysis, Excel analysis, and machine-learning concepts through practical learner- focused examples. • Supported both small and large professional groups with structured technical explanations and hands-on learning activities.",
+      "tokens": 220,
+      "indexedSha256": "279215b2327ab88c7c214d8c39ef0c8225f00b2eac8fdd01f159e3f6c5aa9497"
+    },
+    {
+      "index": 3,
+      "source": "OJ_Florendo_Rayatchi_Public_CV.pdf",
+      "section": null,
+      "page": 2,
+      "text": "Public CV | Updated 30 July 2026 | No private phone number or street address included ADDITIONAL EXPERIENCE Freelance UX/UI Developer Jun 2023 - Jul 2023 Self-employed | Remote • Designed and developed simple landing pages with clear, responsive layouts and user-focused structure. • Applied wireframing, page hierarchy, visual refinement, and basic front-end implementation to improve usability. Pharmacy Assistant Apr 2023 - May 2023 Windsor Pharmacy | Windsor, Berkshire • Supported customer-facing pharmacy operations and worked accurately with pharmacy software, e-prescriptions, EHR systems, and inventory tracking. • Handled regulated information carefully within established operational processes. EDUCATION BSc (Honours) Computing and IT (Software) — The Open University | 2023 - Expected 2026 Final-year student focusing on software, computing, data, and AI-related skills. High School Diploma in General Science — Penn Foster High School, USA | 2019 - 2023 GPA: 3.8 / 4.0. CERTIFICATIONS & PROFESSIONAL DEVELOPMENT PCEP - Certified Entry-Level Python Programmer — Python Institute | July 2025 Business Intelligence: Data Analysis and Reporting Techniques — London Premier Centre | June 2025 Certified UX/UI Designer Bootcamp — School of UX Design,",
+      "tokens": 256,
+      "indexedSha256": "9277fd45a68d1604ccf80dc2f08277ef4682b534c1acc04fe6222da4356e2611"
+    },
+    {
+      "index": 4,
+      "source": "OJ_Florendo_Rayatchi_Public_CV.pdf",
+      "section": null,
+      "page": 2,
+      "text": "4.0. CERTIFICATIONS & PROFESSIONAL DEVELOPMENT PCEP - Certified Entry-Level Python Programmer — Python Institute | July 2025 Business Intelligence: Data Analysis and Reporting Techniques — London Premier Centre | June 2025 Certified UX/UI Designer Bootcamp — School of UX Design, UK | July 2023 Analyze Data with Microsoft Excel — Codecademy | July 2025 One Million Prompters: Prompt Engineering — Dubai Future Foundation | Completed July 2025 The Art of Storytelling — IESE Business School, University of Navarra | July 2025 CURRENT LEARNING - EXPECTED COMPLETION SOON CS50's Introduction to Programming with Python — Harvard University / edX | In progress - expected completion 2026 Self-paced introductory Python programme covering functions, variables, conditions, loops, objects, exceptions, file I/O, libraries, testing, and debugging. Course page AI Consultant Course — Careerpreneur Academy | In progress - expected completion 2026 Eight-week programme covering AI foundations, consulting workflows, prompt and tool use, automation, responsible implementation, client discovery, proposals, and personal positioning. Listed as current learning only; no completion certificate is claimed. Course page",
+      "tokens": 238,
+      "indexedSha256": "18b1c84ba0ae5c4241c3e8cec28fc9fd45b8efc6b1b092fb691c8204a362971f"
+    },
+    {
+      "index": 5,
+      "source": "about-oj.md",
+      "section": "Where OJ is based and located",
+      "page": null,
+      "text": "OJ is based in Windsor, in Berkshire, in the United Kingdom. Windsor is where he lives and where he works from. He works remotely, so his location does not limit where he can take on work in the UK or internationally. His location is the only geographic detail published about him: his home address and personal phone number are private and are deliberately not published anywhere.",
+      "tokens": 85,
+      "indexedSha256": "ef2ff9b0d662014a8d8ceb3fab2fb3c43ef490e7039c0363f28ff501e4740760"
+    },
+    {
+      "index": 6,
+      "source": "about-oj.md",
+      "section": "Who OJ Florendo Rayatchi is",
+      "page": null,
+      "text": "OJ Florendo Rayatchi is a software developer based in Windsor, Berkshire, United Kingdom, professionally known as OJ Florendo. His work includes websites, AI document-assistant projects, and training in AI, Python and data. He is a final-year BSc (Honours) Computing and IT (Software) student with The Open University, expected to finish in 2026. His broader background also covers Python, data, UX/UI, professional training, digital marketing, e-commerce, and social-media operations. His public professional profiles are LinkedIn at linkedin.com/in/ojflorendo and GitHub at github.com/omarjosephf.",
+      "tokens": 159,
+      "indexedSha256": "6c5265c91fbd57581a4ec78303670de6fbccc5d8aefab82301f94c35691e19fc"
+    },
+    {
+      "index": 7,
+      "source": "about-oj.md",
+      "section": "What OJ builds and what his current focus is",
+      "page": null,
+      "text": "OJ builds practical digital products with software and AI. His leading offer is a focused website or landing page for a small service business, with AI document assistants over an approved set of documents as a second line of work. He has built and deployed document assistants twice, so that is a capability he offers rather than an idea he is exploring. He focuses on real needs rather than creating technology for its own sake, combining thoughtful product decisions, responsible AI-assisted engineering, and clear communication. He aims to build products that help people understand information, complete a task, or run part of their work more easily. OJ is also developing his personal brand and exploring how AI can help him explain and market his own products. That is a direction of work rather than evidence of an established growth-marketing service, and it does not mean he sells marketing outcomes.",
+      "tokens": 183,
+      "indexedSha256": "bc989924fc710875e777b340f13c85405fa700696b5f0d7c34f964328d8b325f"
+    },
+    {
+      "index": 8,
+      "source": "about-oj.md",
+      "section": "What projects OJ has built and published",
+      "page": null,
+      "text": "What projects has OJ built? He has built two, and they are the complete answer to that question: Cited, and this portfolio platform. Both are published, both are live, and both are publicly inspectable. **Cited** is a document assistant. It answers questions from a set of documents and shows the exact passage each answer came from, refusing questions the documents do not cover. It is live at cited-demo.fly.dev. **The portfolio platform** is this website at ojfr.me. It presents OJ's work, experience, qualifications and services, and hosts the assistant answering this question. Those two are the projects currently featured on this portfolio. They are personal projects. Their presence does not establish a client list, revenue, or client results, and the featured list should not be treated as an exhaustive history of everything OJ has ever built. Each has its own document here with the full technical detail, including what each is built with and what was measured.",
+      "tokens": 217,
+      "indexedSha256": "647db31e0b7ad20d7837ebd91f74e3c49d5993d6e201b79940d2dd8728c2310f"
+    },
+    {
+      "index": 9,
+      "source": "about-oj.md",
+      "section": "What motivates OJ and how he came into technology",
+      "page": null,
+      "text": "What drives OJ professionally, and what kind of person he is to work with, comes down to this: he is most motivated by building something real and being able to show that it works. OJ's path into technology was not straightforward. Over time he found he is most motivated when turning ideas into working products, solving practical problems, and learning through the process of building. Artificial intelligence became an important part of that direction, not as a substitute for judgement but as a tool for researching, prototyping, debugging, and working more effectively. He cares about the people who will use what he creates, not only the code behind it. He aims to communicate honestly, take responsibility for the final result, and build solutions that are clear, useful, accessible, and dependable. What drives him professionally is the combination of building something real and being able to show that it works, which is why his projects carry measurements and stated limitations rather than claims alone.",
+      "tokens": 210,
+      "indexedSha256": "89d2aa89f219e4709f2b59ebcfcd68f174672d74b1feb8c5ed60227335bcc15b"
+    },
+    {
+      "index": 10,
+      "source": "about-oj.md",
+      "section": "Whether OJ is available for work, and what kind",
+      "page": null,
+      "text": "OJ welcomes selected website-project enquiries and discussion of AI document-assistant work. He also remains open to collaborations, and his background in AI, Python and data training and in digital content and e-commerce operations can be discussed for a specific requirement. Scope, timing, price and suitability must be confirmed directly with OJ through the contact section of this website. E.V cannot promise that he has capacity, accept a project, quote a price, or give a start date. There are no published prices, fixed turnaround times, or service-level commitments. He is willing to begin an unfamiliar engagement with a discovery phase, a prototype, or one clearly defined module rather than committing to a large scope up front.",
+      "tokens": 163,
+      "indexedSha256": "ac9bb7e9cbd5379298e84fb2767cdd4751cc854f2c76881a8d97ffe8962e7cdb"
+    },
+    {
+      "index": 11,
+      "source": "about-oj.md",
+      "section": "What this portfolio platform is for",
+      "page": null,
+      "text": "This website's current focus is attracting prospective clients, showing OJ's own products, and sharing the work behind them. It is not primarily a job-search website. His education and employment history remain part of his background, and the change of emphasis does not mean he has changed or completed a qualification. It is the first stage of a longer-term personal platform rather than a finished portfolio, and further projects, writing, and content are planned. Everything published on it is intended to be verifiable: projects are real, credentials show their issuer and date, and limitations are stated rather than omitted.",
+      "tokens": 134,
+      "indexedSha256": "f92c79548fd88197914d0a761476748bac67750b2491a2be507d0311ace38fde"
+    },
+    {
+      "index": 12,
+      "source": "contact-and-this-assistant.md",
+      "section": "How to contact OJ, and what information is public",
+      "page": null,
+      "text": "To get in touch with OJ, use the contact section of this website. It carries a message form and his published professional links. His public contact details are: - Email: ojflorendo.connect@gmail.com - LinkedIn: linkedin.com/in/ojflorendo - GitHub: github.com/omarjosephf A useful first message describes the business, the intended users and the problem to solve. An existing website link, rough timing and a budget range help when available; a technical brief is not required. OJ reviews the requirement and confirms whether he can help. E.V cannot send a message, book a meeting, set a price, accept work, or make any commitment on his behalf. OJ's personal phone number, mobile number, and home or street address are private and are deliberately not published anywhere on this website. They are not available through this assistant, they are not in its documents, and no amount of rephrasing will produce them. The public location information is that he is based in Windsor, Berkshire. For anything requiring a private channel, email him and he can respond directly.",
+      "tokens": 255,
+      "indexedSha256": "a9c6170f56c34ef94ba9a11317e1f8f254140be84a13ebfc98c9a777db728579"
+    },
+    {
+      "index": 13,
+      "source": "contact-and-this-assistant.md",
+      "section": "What E.V is and how it answers questions",
+      "page": null,
+      "text": "E.V is this website’s AI assistant. Its knowledge source is a small collection of OJ’s approved portfolio documents. It works by retrieval: it searches those approved documents for the passages most relevant to a question, answers using only those passages, and shows the source behind each claim so the answer can be checked rather than taken on trust. It is connected to a real knowledge source — that set of documents — rather than answering from general knowledge or from a fixed list of pre-written replies. It runs on the same engine as OJ's Cited project, pointed at his portfolio content instead of Cited's demo documents. Its approved model configuration is Gemini 3.5 Flash-Lite from Google as the primary model, with GPT-5.6 Luna from OpenAI as a backup when the primary service is unavailable. Both receive the same retrieved passages and bounded conversation context. A backup response is labelled \"Backup model used.\" Refusals and failed policy or citation checks do not trigger the backup.",
+      "tokens": 219,
+      "indexedSha256": "077c378645f4e348885d92f7b11d70dcffa08b34ec8590d3b53319a39674f1cd"
+    },
+    {
+      "index": 14,
+      "source": "contact-and-this-assistant.md",
+      "section": "What E.V is and how it answers questions",
+      "page": null,
+      "text": "The models generate answer text and citation references. E.V checks each quote against the passages actually supplied and resolves source links from its approved document list. A matching quote alone does not prove that every claim in an answer is supported. The models are implementation components; E.V is the product OJ built.",
+      "tokens": 76,
+      "indexedSha256": "30225bf59b527a9aa349e75efbdbc6099c65148a2ab500877dac723b9fc9f6c0"
+    },
+    {
+      "index": 15,
+      "source": "contact-and-this-assistant.md",
+      "section": "What this assistant can and cannot do, and when it hands over to OJ",
+      "page": null,
+      "text": "This assistant can answer questions about OJ's background, skills, experience, education and credentials, services, working approach, published projects, and how to get in touch. It cannot browse the web, read anything outside its approved documents, send messages or emails, book meetings or calls, agree prices, make commitments, accept work on OJ's behalf, or take any action at all. It has no tools. If you ask it to arrange something, the honest answer is that it cannot, and the contact section is where that request should go. When the documents do not cover a question, it says so plainly and points to OJ rather than guessing an answer. A question it cannot answer is not necessarily a question OJ cannot answer — the contact section exists for exactly that.",
+      "tokens": 179,
+      "indexedSha256": "84ec149add53bdb0e80007064b7a68b82507e944e9b9b3aca10cb82a5701cd91"
+    },
+    {
+      "index": 16,
+      "source": "contact-and-this-assistant.md",
+      "section": "Why this assistant is not OJ, and what it will not claim to be",
+      "page": null,
+      "text": "This assistant is not OJ Florendo and does not speak as him. It reports what his approved documents say. It will not claim to be him, will not adopt a different role if asked to, and will not imply that OJ personally wrote any particular reply. Anything requiring OJ's own judgement — a commitment, a price, an opinion on your specific situation, a decision about your project — needs OJ himself, not this assistant. E.V is the website's AI assistant, not OJ. Her avatar is an original illustrated character representing E.V. It is not a photograph or illustration of OJ, and it should not be confused with OJ's own portrait shown elsewhere on the site.",
+      "tokens": 168,
+      "indexedSha256": "b39f6863e07e858243f5511ef18a57fa00ed99f5184481a671395847d025ebe4"
+    },
+    {
+      "index": 17,
+      "source": "contact-and-this-assistant.md",
+      "section": "What happens to your question, and the privacy of this assistant",
+      "page": null,
+      "text": "When you ask a question here, it is sent through OJ's server to Google so that an answer can be generated from the approved documents. If the primary service is unavailable, the same question, retrieved passages and bounded context may also be sent to OpenAI for the backup response. Completed exchanges are kept in a bounded `sessionStorage` record for this browser tab, which lets them return after E.V is closed and reopened or the page is refreshed. A browser's session-restore feature can revive that tab record after the tab or browser is closed. An opener-created or duplicated tab may begin with a copy of the record; from then on, each tab changes independently. Pending requests are not saved or resent after a refresh.",
+      "tokens": 171,
+      "indexedSha256": "3cec1fc025c52e74558f18f99fef3d6a37c20134221063627f1f4aba54acc723"
+    },
+    {
+      "index": 18,
+      "source": "contact-and-this-assistant.md",
+      "section": "What happens to your question, and the privacy of this assistant",
+      "page": null,
+      "text": "Clear chat removes E.V's record when browser storage is available. If browser storage is unavailable or removal fails, E.V continues in memory and a previously saved record may remain until you clear browser storage. OJ, the portfolio server, and the assistant service do not keep a transcript or log your question text. There is no cookie, `localStorage`, visitor account, database, or cross-device history. This description makes no promise about physical erasure or the model provider's retention or training practices. Because your question does leave your browser, please do not enter personal, confidential, financial, account, or credential information here. If you type something that looks like personal data or a credential, E.V is designed to stop it in your browser and warn you before it is sent anywhere. For anything private, use the contact section instead.",
+      "tokens": 194,
+      "indexedSha256": "c65e42e0486bcc6a8d82366756205d2bb58a23be327eebd07cac94dcdf0efdb1"
+    },
+    {
+      "index": 19,
+      "source": "contact-and-this-assistant.md",
+      "section": "The honest limitations of this assistant",
+      "page": null,
+      "text": "Answers here are generated, so the wording varies between askings even when the underlying facts do not. The assistant answers only from its approved documents, so it will be unhelpful on anything they do not cover, including OJ's opinions, his personal life, and any topic outside his professional profile. It can occasionally fail to find the right passage for an unusually phrased question. Rephrasing often helps, and if it does not, the contact section does. If the assistant is unavailable for any reason, it says so honestly rather than falling back to a guess, and the rest of this website continues to work exactly as normal.",
+      "tokens": 140,
+      "indexedSha256": "7ab9e511a190318b4869b44f0f7cc3b270c2387a0b2e102f45584d26e0f91e4c"
+    },
+    {
+      "index": 20,
+      "source": "education-and-credentials.md",
+      "section": "OJ's degree and formal education",
+      "page": null,
+      "text": "OJ's degree is a BSc (Honours) in Computing and IT (Software) from The Open University, studied from 2023 and expected to complete in 2026. He is currently a final-year student on that degree, focusing on software, computing, data, and AI-related skills. This is the qualification to cite when asking what OJ is studying or what degree he is doing. Before university he completed a High School Diploma in General Science at Penn Foster High School in the USA, studied from 2019 to 2023, with a GPA of 3.8 out of 4.0. Those two qualifications are his complete formal education. He has no master's degree or doctorate.",
+      "tokens": 152,
+      "indexedSha256": "2cbb27b0b14358a350a5f31454a8c7b1a7875837e91486d6536043f64a9a6743"
+    },
+    {
+      "index": 21,
+      "source": "education-and-credentials.md",
+      "section": "OJ's professional certification: PCEP Python certification",
+      "page": null,
+      "text": "OJ holds one professional certification: PCEP, Certified Entry-Level Python Programmer, awarded by the Python Institute in July 2025. This is the certification to cite when asked whether OJ has a Python certification or any certifications at all. It is listed separately from his training and course completions because it has a formal examination behind it and they do not. It can be verified on Credly through the link published in the credentials section of the website.",
+      "tokens": 106,
+      "indexedSha256": "45111b80e335d7280efa7563fd49c5ee9d0e2c5c76626498a50d560bdb147306"
+    },
+    {
+      "index": 22,
+      "source": "education-and-credentials.md",
+      "section": "OJ's professional training courses",
+      "page": null,
+      "text": "OJ has completed two professional training programmes delivered by institutions. Business Intelligence: Data Analysis and Reporting Techniques, from London Premier Centre, completed June 2025. This is the training behind his business intelligence, data analysis, and reporting work. Certified UX/UI Designer Bootcamp, from School of UX Design in the UK, completed July 2023. This is the training behind his UX and interface design work.",
+      "tokens": 94,
+      "indexedSha256": "8a9bfc05937f53de6fe5dce392411d68fff297dfe599e45551505006e46a7303"
+    },
+    {
+      "index": 23,
+      "source": "education-and-credentials.md",
+      "section": "OJ's additional professional development courses",
+      "page": null,
+      "text": "OJ has completed three shorter professional development courses. Analyze Data with Microsoft Excel, from Codecademy, July 2025. One Million Prompters: Prompt Engineering, from the Dubai Future Foundation, completed July 2025. This is the prompt engineering credential. The Art of Storytelling, from IESE Business School at the University of Navarra, July 2025.",
+      "tokens": 86,
+      "indexedSha256": "09be02082448859aeb0d8fa01547489c7aa881fbfe9c91a5d196621f4df7bd4c"
+    },
+    {
+      "index": 24,
+      "source": "education-and-credentials.md",
+      "section": "How OJ's credentials are categorised and verified, and why",
+      "page": null,
+      "text": "OJ's credentials are deliberately presented in three separate categories: one professional certification with an examination behind it, two professional training programmes, and three additional development courses. Course completions are not professional certifications, and presenting them as though they were would be a misrepresentation, so the website keeps them apart. Each credential shows its exact title, issuer, and date as the issuer recorded them. Every credential on the website links to its certificate document, published as a PDF on this domain. OJ decided in August 2026 to publish all six certificates so that every qualification he claims can be checked directly. Before that, the website linked only to issuer verification pages, which left three credentials with no evidence at all because their issuers publish no such page. Most training providers issue a PDF and nothing more, which is ordinary.",
+      "tokens": 193,
+      "indexedSha256": "edc79212785d0ec243fdc891220053d7e693670ac3acf9025d2cbad1fb0c42cb"
+    },
+    {
+      "index": 25,
+      "source": "education-and-credentials.md",
+      "section": "How OJ's credentials are categorised and verified, and why",
+      "page": null,
+      "text": "Where an issuer does also publish a verification page, the website links to it in addition to the document, because an issuer-hosted page cannot be forged. Three credentials have one: the PCEP certification on Credly, the Codecademy course, and The Art of Storytelling on Coursera. Some certificates show OJ's legal name, Omar Joseph Florendo. That is the name on his birth certificate and the name each issuer recorded. He goes by OJ and presents professionally as OJ Florendo Rayatchi, using both family surnames. The website states this openly next to the credentials rather than hiding it, and an issuer's record is never rewritten.",
+      "tokens": 162,
+      "indexedSha256": "dabe5a21c52509f37051947028186fb9b3a3a6383ef412f4e0d01ee5ac69d1e9"
+    },
+    {
+      "index": 26,
+      "source": "experience.md",
+      "section": "Where OJ works now: E-commerce and Social Media Operations Lead at Golden Galore Luxury",
+      "page": null,
+      "text": "OJ's current job, which he has held since January 2026, is E-commerce and Social Media Operations Lead at Golden Galore Luxury, working UK-based and remote. This is one of two roles he currently holds. In this role he handles day-to-day online content and product presentation for a luxury goods brand. He takes and edits product images, adds watermarks, writes item descriptions, and prepares listing content. He creates captions, sale posts, raffle updates, giveaway announcements, and live-selling materials. He plans live-selling assets and customer communications, and keeps brand presentation consistent across channels using Canva templates.",
+      "tokens": 157,
+      "indexedSha256": "822a9e306ea8efe92dffaa514669a3fc9c61875ffe687b1a549f3f60a8820466"
+    },
+    {
+      "index": 27,
+      "source": "experience.md",
+      "section": "OJ's other current role: Digital Marketing and Training Content Lead at AAET",
+      "page": null,
+      "text": "Since December 2025 OJ has also worked remotely as Digital Marketing and Training Content Lead at American Advanced Executive Training, known as AAET. This is his second current role, held alongside the Golden Galore Luxury position. He creates marketing copy, social content, and Canva visuals for executive training programmes. He develops professional course outlines, agendas, programme summaries, and training descriptions. He plans and schedules social media content for professional and international audiences. He uses AI tools to draft and improve training materials while keeping the wording professional and reviewing the output himself.",
+      "tokens": 134,
+      "indexedSha256": "4d818132bbf8bd1363a0c03d113cfbc7f2c89bf037e0d1cf2f2be05d006e2492"
+    },
+    {
+      "index": 28,
+      "source": "experience.md",
+      "section": "OJ's teaching and training work: AI, Python and Data Training Facilitator at LPC",
+      "page": null,
+      "text": "From July 2025 to November 2025 OJ worked as an AI, Python and Data Training Facilitator for LPC and international client projects, working with UK and international learners. This is the role behind his teaching and training experience. He delivered and co-delivered professional training in Python, data science, and financial analysis. He covered prompt engineering and AI and machine-learning fundamentals for professional groups. He explained practical topics including Python libraries, exploratory data analysis, and Excel analysis, and built learner-friendly examples to help both small and large groups understand technical concepts. This work is why he is comfortable explaining technical material to non-specialist professional audiences.",
+      "tokens": 162,
+      "indexedSha256": "1faa8bd000d2ab52921946bbe1af17b0b5710e2b557ccb13436d035c27354648"
+    },
+    {
+      "index": 29,
+      "source": "experience.md",
+      "section": "OJ's freelance web development work: Freelance UX/UI Developer",
+      "page": null,
+      "text": "Between June 2023 and July 2023 OJ worked remotely as a self-employed freelance UX/UI developer. This was his first paid client-facing development work. He designed and developed simple landing pages with clear, responsive layouts, applied UX and UI skills to wireframing, page structure, and visual improvement, and focused on user-friendly presentation and basic front-end implementation.",
+      "tokens": 99,
+      "indexedSha256": "37d27691e1b6c64448e2039f20e0196515370a5a1f39ac96864f79043fe2adb4"
+    },
+    {
+      "index": 30,
+      "source": "experience.md",
+      "section": "OJ's earliest role: Pharmacy Assistant at Windsor Pharmacy",
+      "page": null,
+      "text": "From April 2023 to May 2023 OJ worked as a Pharmacy Assistant at Windsor Pharmacy in Windsor, Berkshire. He supported pharmacy operations and customer-facing service, worked with pharmacy software, e-prescriptions, electronic health record systems, and inventory tracking, and handled regulated information accurately within operational software systems. It is included because handling regulated data carefully is relevant to how he approaches privacy and security now.",
+      "tokens": 96,
+      "indexedSha256": "008de91491b1fda0f91add5af86c93209fa4a202e60c677140aa26329395a1ab"
+    },
+    {
+      "index": 31,
+      "source": "experience.md",
+      "section": "What OJ's overall career history adds up to",
+      "page": null,
+      "text": "OJ's employment history runs from April 2023 to the present and contains five roles. Two threads run through it. The technical thread is software, Python, data, and AI-assisted engineering. The commercial thread is content, e-commerce operations, marketing, training, and communicating technical material to people who are not engineers. His stronger work tends to sit where those two meet: technically substantial projects that a non-specialist can still understand and check. No year-count of experience with any particular technology is published, because he would rather point at what he has actually built than at a number.",
+      "tokens": 135,
+      "indexedSha256": "01456eaf1e8c885baba8798d24550c1c643bb10b0b1aa11ddcff0f3879d7a834"
+    },
+    {
+      "index": 32,
+      "source": "how-oj-works.md",
+      "section": "OJ's approach to starting a new project",
+      "page": null,
+      "text": "OJ's approach to a new project starts with the real problem rather than the technology. He clarifies the goal, the intended users, the constraints, and the definition of success before choosing any tool or framework. Choosing a stack before understanding the problem is how projects end up technically impressive and practically useless. He then works honestly through the engagement: saying when something is uncertain, asking questions when information is missing, and declining work outside his current capability rather than promising it. An honest limitation stated early costs far less than one discovered late. This is why unfamiliar projects often begin with a discovery phase or a single defined module rather than a large committed scope.",
+      "tokens": 145,
+      "indexedSha256": "5e64f8b9e482693ac637e8bd68ea72603797f3ea5d96ad16a3e262d2e1da9ada"
+    },
+    {
+      "index": 33,
+      "source": "how-oj-works.md",
+      "section": "How a website project runs, step by step",
+      "page": null,
+      "text": "A website project with OJ runs in four steps, and this is what someone asking \"how would a project start?\" is being told. **Understand the job.** Clarify who the site is for, what they need to know and what they should be able to do. OJ will ask about existing content, constraints and priorities. **Agree the scope.** OJ sets out the pages or features, what each side needs to provide, the review points, and how the work will be judged. Timing and price follow from that scope rather than preceding it. **Build and review.** OJ turns the agreed direction into a working version, shares progress, and uses the client's feedback to resolve the details. **Check and hand over.** OJ tests the agreed journeys, reviews mobile and keyboard use, and explains how to maintain the result. Any remaining limitations are made clear rather than left to be discovered. Throughout, the client works directly with OJ. He remains responsible for the decisions and the delivered work.",
+      "tokens": 228,
+      "indexedSha256": "dbfdf5fa2619127c6a599b422376e583ad7e0ef4fd79fc0d858e43a988b546f8"
+    },
+    {
+      "index": 34,
+      "source": "how-oj-works.md",
+      "section": "How OJ uses AI in his work, and who is accountable for the result",
+      "page": null,
+      "text": "OJ uses AI as an accountable tool rather than a substitute for judgement. He uses it to accelerate research, prototyping, implementation, debugging, and review, while testing the output and remaining responsible for the final work. His working rule is that AI-generated work is untrusted until it has been read and verified. OJ directs the decisions, approves the changes, verifies the output, and is accountable for the result. He does not present AI-assisted work as independently created or verified by the AI provider, and he does not describe his projects as built by AI, because that would obscure who is actually responsible for them. This matters more in his work than in most, since one of his projects exists specifically to demonstrate that a confident AI answer is not the same as a correct one.",
+      "tokens": 185,
+      "indexedSha256": "2fd950ce72ddf0bb8fbed20b2c07b24107d69f6a08493e6c766f39ae63e71061"
+    },
+    {
+      "index": 35,
+      "source": "how-oj-works.md",
+      "section": "What OJ considers when building: accessibility, security and performance",
+      "page": null,
+      "text": "When OJ builds something he considers clarity, accessibility, performance, security, and maintainability alongside visual quality. Accessibility is treated as a requirement rather than optional polish: keyboard access, focus visibility, colour contrast, screen-reader behaviour, reduced-motion support, and usability at 200% zoom are all part of what \"finished\" means. Performance is treated as a feature rather than a benchmark score, and he does not trade accessibility or correctness for a better audit result. On the security side he works with a minimal attack surface, secure defaults, defence in depth, and no unnecessary collection of personal data. He does not describe any system as unhackable or completely secure, because no system is.",
+      "tokens": 160,
+      "indexedSha256": "200cd9a3cdb5a3e3c650bac7f91b06c0bb99fdd5a001a31e48282e23ea9870b5"
+    },
+    {
+      "index": 36,
+      "source": "how-oj-works.md",
+      "section": "How OJ finishes a piece of work and what evidence he provides",
+      "page": null,
+      "text": "OJ finishes by reviewing the completed work, testing important behaviour, documenting meaningful decisions, and either resolving or disclosing known limitations. \"It works\" is a claim that should be supported by something a reader can check, so his projects carry measurements, test suites, and stated limits rather than assertions. Where a quality claim is made, it is reproducible: his document assistant project ships an evaluation set that scores its own accuracy and refusal behaviour with one command, and the published numbers state their sample size rather than implying more coverage than they have.",
+      "tokens": 128,
+      "indexedSha256": "04599df233bfc8eb7e84af384ef4f7ae9584f391fe7eb9888d0aecee6bdbfc05"
+    },
+    {
+      "index": 37,
+      "source": "how-oj-works.md",
+      "section": "The engineering standards and governance OJ works to",
+      "page": null,
+      "text": "OJ's platform and its supporting projects are governed by a written engineering handbook covering risk classification, security, privacy, accessibility, testing, release control, and AI-assisted engineering. In practice this means changes are risk-classified before work begins, architecture decisions are recorded in decision records with their alternatives and trade-offs, threat models are written for anything that adds a trust boundary, and quality gates covering dependency audit, linting, type checking, unit tests, production build, and end-to-end browser tests must pass before release. Publication, deployment, secret changes, and infrastructure changes require explicit approval rather than happening by implication. This is unusual for a personal portfolio and is deliberate: it is the working method he would bring to a professional team.",
+      "tokens": 164,
+      "indexedSha256": "62822937b21a154dd7eab76fd11074f1726a939c9d6a77bd19f25e0d5902d47f"
+    },
+    {
+      "index": 38,
+      "source": "project-cited.md",
+      "section": "Cited: what it is",
+      "page": null,
+      "text": "Cited is OJ's document-assistant demo. It retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It is designed to say so when the documents do not contain the answer, rather than producing a plausible one, and its evaluation set tests that behaviour as well as ordinary answering. It is live at https://cited-demo.fly.dev and the source is at https://github.com/omarjosephf/cited. Status: live.",
+      "tokens": 118,
+      "indexedSha256": "f85a9dc711ef8ffa2859a2ba3032361cb99cc0eff5501f2f8e1a5e7653c959bc"
+    },
+    {
+      "index": 39,
+      "source": "project-cited.md",
+      "section": "Cited: what it checks, and what that check does and does not prove",
+      "page": null,
+      "text": "Every quoted citation is verified locally against the passage the model was actually sent; a quote that does not appear in that passage is discarded and counted. Cited is designed to decline questions its documents do not cover, and that intended behaviour is measured by a committed evaluation set rather than asserted. Three things are worth keeping apart. Checking that a quotation appears in a passage is not the same as establishing that the passage supports every claim in the answer, and neither is the same as evidence about documents the system has never seen.",
+      "tokens": 121,
+      "indexedSha256": "95a8849802f142f61b098dbf3c3626f61e59cd484b4a728e2055a3c872e74ff6"
+    },
+    {
+      "index": 40,
+      "source": "project-cited.md",
+      "section": "Cited: why it exists",
+      "page": null,
+      "text": "Most demonstrations of this kind answer confidently whether or not they should, and ask you to trust a citation the model generated about itself. Ordinary search has the opposite problem: it returns a list of documents and leaves the reading to you. OJ wanted the version that is actually useful in a working context — one that returns the answer, shows its source, and is honest about the limits of what it was given — and to hold it to a standard where the honesty is measured rather than claimed.",
+      "tokens": 106,
+      "indexedSha256": "2fedb6bab5583ba1075cad5181bbc593d86dc1abed80d0e4daa500d8268106d2"
+    },
+    {
+      "index": 41,
+      "source": "project-cited.md",
+      "section": "Cited: how it is built",
+      "page": null,
+      "text": "The original Cited demo described here was built with Python and FastAPI, the Anthropic API with Claude Haiku 4.5, fastembed and ONNX Runtime for local embeddings, NumPy for vector search, pytest, Docker and Fly.io. The technical design behind that stack:",
+      "tokens": 78,
+      "indexedSha256": "1987777127cedba8d311b7156007d0265b7b206b4bb6e8fdf9157051bfeb4ac2"
+    },
+    {
+      "index": 42,
+      "source": "project-cited.md",
+      "section": "Cited: how it is built",
+      "page": null,
+      "text": "The original Cited demo described here was built with Python and FastAPI, the Anthropic API with Claude Haiku 4.5, fastembed and ONNX Runtime for local embeddings, NumPy for vector search, pytest, Docker and Fly.io. The technical design behind that stack: - Documents are read into passages that remain individually citable, with paths relative to the corpus root so identically named files stay distinguishable. PDFs keep their page numbers, so a citation can read `guide.pdf, p.4`. - Embeddings run locally through ONNX rather than a hosted API, so retrieval adds no per-query cost and introduces no second vendor. - Retrieval is NumPy cosine similarity behind a `Retriever` interface. At this corpus size a vector database is complexity without benefit, and the interface keeps the upgrade cheap if that changes. - Answering uses the Anthropic API's native citations, computed against the passages actually supplied, then re-verifies every quote locally — so the guarantee lives in the repository rather than in a vendor's feature list. - The HTTP layer owns transport, protection, and presentation only. It decides nothing about answers, which keeps the core usable as a library.",
+      "tokens": 275,
+      "indexedSha256": "caba950d837e543a0189cbba20bddb278d728b98d4560053ca158c4443d0ca5c"
+    },
+    {
+      "index": 43,
+      "source": "project-cited.md",
+      "section": "Cited: how it is built",
+      "page": null,
+      "text": "Technologies: Python, FastAPI, the Anthropic API with Claude Haiku 4.5, fastembed / ONNX Runtime, NumPy, Docker, Fly.io, pytest, GitHub Actions, and AI-assisted engineering with human review.",
+      "tokens": 69,
+      "indexedSha256": "5b8ca26e21a167628521889a48b5f00590b34c55530e5808fbc91f2dfb55a456"
+    },
+    {
+      "index": 44,
+      "source": "project-cited.md",
+      "section": "Cited: what was measured",
+      "page": null,
+      "text": "These measurements concern the original Haiku-based demo. They do not establish quality or latency for E.V's newer Luna and Gemini configuration. The results of evaluating Cited, measured by its committed evaluation set rather than asserted, are as follows. On the committed question set: 100% retrieval hit rate and 80% top-1, 100% answering accuracy, all unanswerable questions correctly refused, none wrongly refused, and zero citations rejected as unverifiable, across five consecutive runs. The scope of that claim is stated rather than glossed: it is fifteen questions against a ten-chunk corpus. That is enough to catch regressions, and it has already found three real bugs. It is not enough to show the system generalises. This evaluation context belongs to Cited. It is not evidence about E.V, and it is not a performance claim for any client's documents. A business pilot would need suitable documents, a broader test set, human review, and operational requirements agreed in advance. Cited is a demo, not proof of production capability for arbitrary business use.",
+      "tokens": 229,
+      "indexedSha256": "cc3ef211376d5f2b0372e63d4341285003879c5d053f71996d5525dc761b3069"
+    },
+    {
+      "index": 45,
+      "source": "project-cited.md",
+      "section": "Cited: three things that went wrong",
+      "page": null,
+      "text": "Three things went wrong while building Cited, and each changed the design. They are recorded because a project about checkable claims should be able to describe its own failures. **A similarity threshold cannot tell you what is answerable.** The plan was to refuse questions whose best retrieval score fell below a cutoff. Measurement killed it: the lowest-scoring answerable question scored 0.666 while the highest-scoring unanswerable one scored 0.755, because that question was topically adjacent to a document without being covered by it. The ranges overlap, so no cutoff separates them. Refusal became a judgement the model makes after reading the passages. **Trusting a citation the model wrote about itself.** Asking a model to include its source and hoping produces citations that look right and cannot be checked. Citations here are computed by the API against the documents actually supplied, then every quote is re-verified locally; a quote that does not appear is discarded and counted. That check has never fired, which is the point — it is the mechanism by which OJ would find out if it stopped being true.",
+      "tokens": 238,
+      "indexedSha256": "3f8f9704f9887ba8d0077ff9e3a83b102ffe9b064f655f098494ccbf0e5f630e"
+    },
+    {
+      "index": 46,
+      "source": "project-cited.md",
+      "section": "Cited: three things that went wrong",
+      "page": null,
+      "text": "**An unstable score that was not the model's fault.** Answering accuracy oscillated between 93% and 100% across runs, which looked like model variance. It was not: the scoring was inferring refusals rather than detecting them. An explicit refusal marker stabilised the figure at 100%. Before trusting a measurement, check the instrument is measuring what you think it is.",
+      "tokens": 92,
+      "indexedSha256": "ae72cf47e9ac1164849ede01239bf65dc8f6149d6c75a444d013bdd6a670b98b"
+    },
+    {
+      "index": 47,
+      "source": "project-cited.md",
+      "section": "Cited: honest limitations",
+      "page": null,
+      "text": "The demo interface is deliberately small and has the basics right — a language attribute, a single main heading, visible focus styling, colour-scheme support — but it has not been through a full accessibility audit, and OJ does not describe it as meeting the standard the rest of his work is held to until it has. Spend is bounded by request rate, a daily answer budget, and a cap on question length. The documentation is explicit that only a provider-level spend cap truly bounds the loss, because the in-process budget resets on restart.",
+      "tokens": 118,
+      "indexedSha256": "bae914801de7782bc3ced2d8aa6285403ce5e8d85a3686a7211ab675d64804fe"
+    },
+    {
+      "index": 48,
+      "source": "project-cited.md",
+      "section": "Cited: relationship to E.V",
+      "page": null,
+      "text": "E.V on this website runs on the same engine, pointed at a different corpus: OJ's own approved portfolio content instead of the demo's prompt-engineering material. The two are separate deployments with separate budgets. That second deployment is itself the evidence for the claim that Cited is a reusable product rather than a one-off. E.V's approved model configuration uses Gemini 3.5 Flash-Lite as primary and GPT-5.6 Luna as backup. This local migration uses model-generated citation references with local verification; it does not inherit the original demo's native-citation implementation or its measured results. The migration has not been qualified for release.",
+      "tokens": 152,
+      "indexedSha256": "29d3856e06be4ce8532b46ad7b79aebdf5ffd8e97a45140973defbe79f70ad5b"
+    },
+    {
+      "index": 49,
+      "source": "project-portfolio-platform.md",
+      "section": "Portfolio platform: what it is",
+      "page": null,
+      "text": "This website. It is OJ's own project: a responsive platform that brings together his project case studies, background information and a contact journey, built on a security-conscious foundation with room for future AI and content features. It is a personal project rather than client work. Its presence is not evidence of a client's revenue, lead growth or commercial return. It is live at https://ojfr.me and the source is at https://github.com/omarjosephf/ojflorendo-portfolio. Status: live.",
+      "tokens": 129,
+      "indexedSha256": "bca5f9f0e1578db9a06e24b5ec3853ef7e14e305c9b2bb9821d422ca887ae343"
+    },
+    {
+      "index": 50,
+      "source": "project-portfolio-platform.md",
+      "section": "Portfolio platform: why it exists",
+      "page": null,
+      "text": "OJ originally built the site to present his work and professional background. Its audience is now prospective clients and collaborators, his own products, and sharing the work behind them. It has to communicate clearly, remain useful without unnecessary tracking, and provide a dependable foundation for future projects, content, and a narrow AI guide. The practical question the content and design review asks is whether a visitor can understand what OJ offers, inspect relevant work, and decide whether to get in touch.",
+      "tokens": 105,
+      "indexedSha256": "b015763b3fa8c0c548948b3d65c84fc7a38a9b9bb30d15e945578d631e4e8a28"
+    },
+    {
+      "index": 51,
+      "source": "project-portfolio-platform.md",
+      "section": "Portfolio platform: goals",
+      "page": null,
+      "text": "- Present profile, capabilities, experience, qualifications, services, and work clearly and honestly. - Provide an accessible, responsive experience across keyboard, screen-reader, reduced-motion, mobile, tablet, and desktop use. - Maintain a small, security-conscious attack surface with no unnecessary tracking and no persistent user data. - Keep public content in typed data so future projects and case studies can be added coherently.",
+      "tokens": 90,
+      "indexedSha256": "3c13986e6aa2537a38c3182bb9c7f83de54f6957bf62c843d1e99cdc092c573c"
+    },
+    {
+      "index": 52,
+      "source": "project-portfolio-platform.md",
+      "section": "Portfolio platform: how OJ's own portfolio website was built",
+      "page": null,
+      "text": "OJ's portfolio website at ojfr.me was built by him with the following technical architecture. This describes his own site, not the websites he builds for clients. - Next.js App Router with React Server Components by default, and client components only where interaction requires them. - Typed content modules kept separate from presentation components. - A per-request nonce Content Security Policy generated in the Next.js proxy, with complementary security headers configured centrally. - Build-time font optimisation, with no runtime third-party font dependency. - A server-side contact route with a swappable email transport. The 3D renderers remain in the repository with their unit coverage so the decision can be reversed, but no decorative scene is mounted in the current presentation. Technologies: Next.js, React, TypeScript, Tailwind CSS, Vitest, Playwright, Vercel, Resend, and AI-assisted engineering with human review.",
+      "tokens": 215,
+      "indexedSha256": "050d3191dc4616c63173ac245d48420ab48c29958b157d758a02944319f3f28c"
+    },
+    {
+      "index": 53,
+      "source": "project-portfolio-platform.md",
+      "section": "Portfolio platform: security and privacy posture",
+      "page": null,
+      "text": "The security posture of OJ's portfolio site is a deliberately minimal attack surface with secure defaults. There are no user accounts, no database, no admin dashboard, no file uploads, no payments, and no user-generated HTML. There is exactly one server-side user-input boundary for contact messages, and a second for the assistant. There is no behavioural analytics, no advertising tracker, no fingerprinting, and no unnecessary cookie. Contact messages are not stored in a database or in browser storage, and message bodies are not logged.",
+      "tokens": 124,
+      "indexedSha256": "8b912f0249ab273992738617fe4ddf9e42b65f5550d2c1c0afa7fbda66b8cb91"
+    },
+    {
+      "index": 54,
+      "source": "project-portfolio-platform.md",
+      "section": "Portfolio platform: the 3D hero, and why it was retired",
+      "page": null,
+      "text": "Earlier versions explored a procedural 3D hero — the Digital Core scene and a particle wave. They were always progressive enhancement and never a dependency for content or navigation. They are no longer mounted. A design review recorded in ADR-0010 replaced them with typography, genuine project screenshots and finite, event-driven interaction feedback. The renderer source and its unit coverage remain in the repository so the decision can be reversed, but no continuous decorative canvas runs on the site today. Anyone describing this site should treat the 3D hero as history rather than a current feature.",
+      "tokens": 130,
+      "indexedSha256": "b2e25e2727bbd5bd4d256bd86e61208494a3fbfc782028bc1bdc10da8f994251"
+    },
+    {
+      "index": 55,
+      "source": "project-portfolio-platform.md",
+      "section": "Portfolio platform: how the work is governed",
+      "page": null,
+      "text": "Development follows a written engineering handbook: changes are risk-classified before work begins, architecture decisions are recorded, security and privacy impact is reviewed, and commit, deployment, secret, and DNS actions require explicit approval rather than happening by implication. Quality gates cover a dependency audit, linting, type checking, unit tests, a production build, and end-to-end browser tests including accessibility checks.",
+      "tokens": 91,
+      "indexedSha256": "e9e43f3a4d34e08b73a6258c62ca8e4cfd8534f582c553a4e46e8771a79f498a"
+    },
+    {
+      "index": 56,
+      "source": "project-portfolio-platform.md",
+      "section": "Portfolio platform: role and AI disclosure",
+      "page": null,
+      "text": "OJ developed this platform through an AI-assisted engineering workflow, with Claude Code and ChatGPT supporting research, planning, implementation, debugging, and review. OJ directed the product decisions, approved the changes, verified the output, and remains responsible for the final result. AI-generated suggestions were treated as untrusted until inspected and tested. Architecture, security controls, content, release decisions, and acceptance criteria remained under his authority.",
+      "tokens": 101,
+      "indexedSha256": "8757b97f3b6459ce084f0a20bd2a4e60a61b803eae3a1496d6cc927b198714e7"
+    },
+    {
+      "index": 57,
+      "source": "services.md",
+      "section": "OJ's leading offer: a focused website or landing page",
+      "page": null,
+      "text": "OJ's leading offer is a focused website or landing page for a small service business. If you want a website built, this is the service to ask about. It begins with understanding the offer, the intended visitor and the enquiry journey. Work may include content structure and page priorities, responsive design, front-end implementation, a clear contact or enquiry route, keyboard, readability and mobile checks, page titles, descriptions and technical search foundations, and agreed handover notes. He works with Next.js, React, TypeScript, HTML and CSS, and builds to the same accessibility and security standards used on his own platform. These services are available for discussion now; individual scope and timing require OJ's agreement.",
+      "tokens": 168,
+      "indexedSha256": "9387b423ad3f03fb4d136bf8e1b66206a863b5366fb3cd5475771464866d5b6e"
+    },
+    {
+      "index": 58,
+      "source": "services.md",
+      "section": "Improving an existing website",
+      "page": null,
+      "text": "OJ also considers focused improvements to an existing website. This suits a site that broadly does its job but has a specific problem: confusing navigation, difficult mobile layouts, or a page that makes the service hard to understand. The work starts with a review of the relevant pages and the user journey, then an agreed set of changes covering content structure, interface improvements, responsive layout and accessibility fixes, and verification of what was agreed. This is available now subject to a technical review: he does not promise that every existing system is within scope.",
+      "tokens": 116,
+      "indexedSha256": "472e3185a0f4d54784875fc5f19c2a10b60e7acbf2694fa1f2e3343cb03d6549"
+    },
+    {
+      "index": 59,
+      "source": "services.md",
+      "section": "AI document assistants",
+      "page": null,
+      "text": "An AI document assistant answers questions about an approved set of documents and shows the sources behind each answer, so the people relying on it can check the work. This is available now. If you want an assistant over your own documents, this is the service to ask about. It covers retrieval grounded in the approved documents, verification of every quoted passage against its source, refusing questions the documents do not cover rather than guessing, cost controls and rate limiting, an evaluation set that measures the answers, and a management view over questions, answers and gaps in the knowledge. Scope, stated limitations and handover notes are agreed as part of the work.",
+      "tokens": 133,
+      "indexedSha256": "628b41ebf479669ec6f3312c52c5d0ae79936c467bdb2f27a33b9a40783f529a"
+    },
+    {
+      "index": 60,
+      "source": "services.md",
+      "section": "AI document assistants",
+      "page": null,
+      "text": "OJ has built and deployed this twice. Cited is a deployed document assistant measured against a committed evaluation set, and E.V — the assistant on this website — is a retrieval-grounded assistant with cost controls, rate limiting and verified citations. A management interface over questions, answers and knowledge gaps has been built and works; its durable storage is still staging rather than production, and OJ says so rather than implying otherwise. What that evidence does and does not establish is worth keeping separate. Cited's evaluation measures Cited on its own corpus; it is not a measurement of any other organisation's documents. Each engagement is scoped to a defined document set and a defined job, with document suitability reviewed first. Extending an assistant beyond that agreed scope needs its own privacy review, running costs and support arrangements.",
+      "tokens": 169,
+      "indexedSha256": "323d0b7e64c0c70bf07f93bfdced7e758c3da7906159f47b45faf120c5293f81"
+    },
+    {
+      "index": 61,
+      "source": "services.md",
+      "section": "Training, data and digital operations as related background",
+      "page": null,
+      "text": "OJ has experience delivering professional training in AI, Python and data, and working in digital content and e-commerce operations. He has delivered training professionally to UK and international groups, and the content and e-commerce work is current experience from two active roles. This remains relevant background and may be discussed for a specific requirement — introductory Python applications, data organisation and analysis, Microsoft Excel and Power BI support, training resources and technical documentation, e-commerce content preparation, product presentation, social-media content planning, or digital workflow organisation. Ask about a specific requirement and OJ will confirm whether it fits. His interest in marketing his own products must not be represented as proof that he can sell revenue growth or run a managed marketing service.",
+      "tokens": 160,
+      "indexedSha256": "39e1240fc3ddf8371ad579152211df82351511a0386d1c866e6ddcbe86b90167"
+    },
+    {
+      "index": 62,
+      "source": "services.md",
+      "section": "How to start a project with OJ, and how engagements are scoped",
+      "page": null,
+      "text": "To start a project with OJ, use the contact section of this website or his published professional email. A useful first message describes the business, the intended users, the problem to solve, the current website if there is one, and any known budget or timing constraints. A technical brief is not required. He reviews each enquiry individually and will tell you honestly whether he is the right person to help, including when he is not. Larger or unfamiliar projects may begin with a discovery phase, a prototype, or one clearly defined module before expanding. This is deliberate: it gives both sides evidence before either commits to a larger scope.",
+      "tokens": 145,
+      "indexedSha256": "05b8923794e4dad1e9e78fbad68c5ac6c3e9e1bc4644776092102c90cee269a8"
+    },
+    {
+      "index": 63,
+      "source": "services.md",
+      "section": "What OJ charges, and why prices are not published",
+      "page": null,
+      "text": "OJ's prices, rates and fees are not published anywhere, and no price list, day rate, hourly rate, or project cost is available on this website or through this assistant. There are no fixed turnaround times or service-level commitments either. Pricing depends on scope and is agreed per project after the requirement is understood. Any figure quoted before that conversation would be a guess. To get a real number, describe the work through the contact section and OJ will respond with pricing based on the actual scope.",
+      "tokens": 118,
+      "indexedSha256": "88beabbe179de3845c02f99f31bd7c3cbb57e7625fe72ba3d8fa95e77fb4534a"
+    },
+    {
+      "index": 64,
+      "source": "skills.md",
+      "section": "Programming languages, frameworks and web development skills",
+      "page": null,
+      "text": "The programming languages and frameworks OJ works with are Python, TypeScript, JavaScript, HTML, and CSS, with React and Next.js as his main web frameworks. He builds responsive, accessible interfaces and practical applications on a maintainable technical foundation. His web development skills include front-end implementation with React and Next.js, TypeScript in strict mode, component and design-token systems, accessibility-conscious implementation, technical SEO foundations, automated testing with Vitest and Playwright, and technical documentation. On the Python side he has built a deployed backend service with FastAPI, containerised it with Docker, and shipped it to Fly.io with continuous integration through GitHub Actions. He does not describe himself as an expert or a master in any of these. He is a final-year Computing and IT student with practical experience, and his published projects are the evidence for what he can actually build.",
+      "tokens": 202,
+      "indexedSha256": "107758bc1ec6d2612f08f7d413620c7b2b0ab2fa6c664fe176df50bccca8fea7"
+    },
+    {
+      "index": 65,
+      "source": "skills.md",
+      "section": "AI and machine learning skills, and AI-assisted product development",
+      "page": null,
+      "text": "OJ's AI skills cover narrow AI assistant prototypes, prompt and knowledge-workflow design, AI-assisted research workflows, content workflows, small automation prototypes, and human-reviewed AI-assisted engineering. He has delivered professional training in prompt engineering and in AI and machine-learning fundamentals. Specific AI techniques he has built with rather than only read about: retrieval-augmented generation over a document corpus, local text embeddings running through ONNX, vector similarity search with NumPy, verified citations computed against supplied documents, refusal behaviour for questions a corpus cannot answer, and evaluation sets that score answer quality reproducibly. He has worked with the Anthropic API and Claude models in a deployed, cost-controlled production service. His approach to AI is deliberately cautious: he uses it as a tool for research, prototyping, implementation, and review, tests the output, and remains accountable for the result rather than presenting AI work as self-verifying.",
+      "tokens": 218,
+      "indexedSha256": "428d180551420390de76797e8c65c5482671985ba598b6136f25bad6804f393b"
+    },
+    {
+      "index": 66,
+      "source": "skills.md",
+      "section": "Data analysis, UX design and communication skills",
+      "page": null,
+      "text": "OJ's data skills include data organisation and analysis, exploratory data analysis, Microsoft Excel analysis, and Power BI reporting. He holds training in business intelligence, data analysis, and reporting techniques, and has taught data science and financial analysis to professional groups. His UX and design skills include wireframes and interface prototypes, user-focused content structure, page structure and layout, and accessibility improvements. He completed a Certified UX/UI Designer Bootcamp in 2023 and worked as a freelance UX/UI developer. His communication skills are a substantial part of his profile rather than a footnote: he has produced training materials, technical explanations, course outlines, programme summaries, and documentation, and has delivered technical training to both small and large professional groups.",
+      "tokens": 169,
+      "indexedSha256": "e400fa3ca92c9e2bf89ab69e9fed8576a79499e4cbb48dcbe8add35519057a4a"
+    },
+    {
+      "index": 67,
+      "source": "skills.md",
+      "section": "Digital marketing, e-commerce and operations skills",
+      "page": null,
+      "text": "OJ's commercial and operational skills come from real roles rather than study. They include e-commerce operations support, product presentation and photography, listing and item descriptions, social-media content planning, digital marketing content, live-selling content, marketing copy, training content, workflow organisation, and cross-functional digital support. He works with Canva for brand-consistent visual content and manages content across Facebook, Instagram, TikTok, LinkedIn, X, and Threads. This experience is why he is comfortable working with non-technical stakeholders and translating between commercial goals and technical work.",
+      "tokens": 132,
+      "indexedSha256": "528585a9bebb1aefbe663057bf915bb9c1fcaf7cc009d490caa468891c2ff522"
+    },
+    {
+      "index": 68,
+      "source": "skills.md",
+      "section": "The full list of tools and platforms OJ has worked with",
+      "page": null,
+      "text": "This is a technology inventory rather than a description of what he has built. The tools and platforms he has worked with are: Python, FastAPI, the Anthropic API with Claude Haiku, fastembed and ONNX Runtime, NumPy, pytest, Docker, Fly.io, Next.js, React, TypeScript, Tailwind CSS, Framer Motion, Three.js and React Three Fiber, Vitest, Playwright, Git, GitHub Actions, Vercel, Resend, Microsoft Excel, Power BI, and Canva. Skills not listed anywhere in this document are ones OJ has not yet demonstrated publicly, and he would say so rather than claim them.",
+      "tokens": 166,
+      "indexedSha256": "e3f2481474fd3ca0b273122f5db9286dc8aa00f77c95ff6b480a6ef9e57a5b74"
+    }
+  ]
+}

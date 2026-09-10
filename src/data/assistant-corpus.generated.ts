@@ -16,14 +16,14 @@ export interface AssistantCorpusFile {
 /** Per-file digests, path-sorted. Lets a mismatch be localised to one document. */
 export const assistantCorpusFiles: readonly AssistantCorpusFile[] = [
   { path: "OJ_Florendo_Rayatchi_Public_CV.pdf", digest: "1fccbd560745b886290350795c4e4bd4c6df68683f0ede3c043e7894a9f6c85b" },
-  { path: "about-oj.md", digest: "a36e9600cbedc63b9e4157d0166f81c3cd53086eece6695655eedc1a26209aff" },
-  { path: "contact-and-this-assistant.md", digest: "7a7fa45b357f386651dd4cfae2cad7ee9822dc679cf917ff4f29e164dc423edd" },
+  { path: "about-oj.md", digest: "9d490ad336b3bac61afba3ab3f6286d71bcc8bf818a2d8638b085efd72fbb5a2" },
+  { path: "contact-and-this-assistant.md", digest: "5af163b4eeaaaf41c398c147bf8e4b179ea68150602a006c91d80422e5475640" },
   { path: "education-and-credentials.md", digest: "5798f62edd572fc4089b9c6fdb814e92cdab3d637dcd325efd6495905768d97f" },
   { path: "experience.md", digest: "8cc229f3e3b2e80a43669da9db9047138ca6386ce80cd9125bde7d7c4f2ff27e" },
-  { path: "how-oj-works.md", digest: "884486a3bf7fd12bee50ee97281b22530533ab77417b7ac30f72c5c934eec715" },
-  { path: "project-cited.md", digest: "1255b3b34dc392d8403a8f4ea46055607d4abdc1dcd5a8d0cac3ef619084b744" },
-  { path: "project-portfolio-platform.md", digest: "4343649ff25bdefd8717f3b1a868ceb4d15d386c6088c3cd36e560f33f3aa371" },
-  { path: "services.md", digest: "5a0089192b4b1c6743d62de5d0af5cebf4c0809e0692a6e6712bb12bb525016a" },
+  { path: "how-oj-works.md", digest: "0ab01bf4a0a0e5402eec90d8af2f27bd583d1d2bb0464a6b40bd8277d88fd479" },
+  { path: "project-cited.md", digest: "fdc3eaff864fcbd18b14e93dff944fa8bc524b7140803d5d7f2b0bdc4c3712f7" },
+  { path: "project-portfolio-platform.md", digest: "5fbcd1a2713a82d338120882d0c6a6fad59fcc510b71df44ff6747c3eb46bcf0" },
+  { path: "services.md", digest: "d6c3cfda1d2c350c3160906afbd02d5c79a9369783c68b22234b00af5fdc403e" },
   { path: "skills.md", digest: "eb71e95ab21871f4ff718447c15d1b8cd6effbf94da5e2344410450409c6be79" },
 ];
 
@@ -35,4 +35,4 @@ export const assistantCorpusFiles: readonly AssistantCorpusFile[] = [
  * process rather than answering confidently from the wrong content.
  */
 export const assistantCorpusChecksum =
-  "86e8ddb479d8ca018942fa6736c2872fc6227659552c987a3d936d6a1c2bc42b";
+  "10ccbbc912bc9ad0ddc5a46c850d71a007705be9719ae246cd4448ef8db0af95";

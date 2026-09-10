@@ -44,7 +44,7 @@ export const assistantCorpusSources: readonly AssistantCorpusSource[] = [
   {
     path: "about-oj.md",
     label: "About OJ",
-    publicUrl: "/#about",
+    publicUrl: "/about#about",
   },
   {
     path: "contact-and-this-assistant.md",
@@ -54,12 +54,12 @@ export const assistantCorpusSources: readonly AssistantCorpusSource[] = [
   {
     path: "education-and-credentials.md",
     label: "Education and credentials",
-    publicUrl: "/#education",
+    publicUrl: "/about#education",
   },
   {
     path: "experience.md",
     label: "Experience",
-    publicUrl: "/#experience",
+    publicUrl: "/about#experience",
   },
   {
     path: "how-oj-works.md",
@@ -84,7 +84,7 @@ export const assistantCorpusSources: readonly AssistantCorpusSource[] = [
   {
     path: "skills.md",
     label: "Skills and capabilities",
-    publicUrl: "/#skills",
+    publicUrl: "/about#skills",
   },
 ];
 

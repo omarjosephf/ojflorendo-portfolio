@@ -1,0 +1,52 @@
+name: Encrypted E.V backups
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ev-encrypted-backups
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    # Inert until the reviewed activation explicitly sets this repository flag.
+    # No pull-request trigger and no branch selector for a secret-bearing run.
+    if: github.ref == 'refs/heads/main' && vars.EV_BACKUP_ENABLED == 'true'
+    environment: ev-backups
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout reviewed main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install locked operator dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Encrypt, upload, read back and enforce retention
+        run: node scripts/run-management-backup.mjs
+        env:
+          EV_BACKUP_ENABLED: "true"
+          EV_BACKUP_SOURCE_ID: ${{ vars.EV_BACKUP_SOURCE_ID }}
+          EV_BACKUP_R2_ACCOUNT_ID: ${{ vars.EV_BACKUP_R2_ACCOUNT_ID }}
+          EV_BACKUP_R2_BUCKET: ev-private-backups
+          EV_BACKUP_DATABASE_URL: ${{ secrets.EV_BACKUP_DATABASE_URL }}
+          EV_BACKUP_DATABASE_CA_PEM: ${{ secrets.EV_BACKUP_DATABASE_CA_PEM }}
+          EV_BACKUP_R2_ACCESS_KEY_ID: ${{ secrets.EV_BACKUP_R2_ACCESS_KEY_ID }}
+          EV_BACKUP_R2_SECRET_ACCESS_KEY: ${{ secrets.EV_BACKUP_R2_SECRET_ACCESS_KEY }}
+          EV_BACKUP_KEY_BASE64: ${{ secrets.EV_BACKUP_KEY_BASE64 }}
+
+      # No backup file, DB output, credential or debug trace is an Actions artifact.
+      # A failing exit creates a native failed run; enable owner failure notices.

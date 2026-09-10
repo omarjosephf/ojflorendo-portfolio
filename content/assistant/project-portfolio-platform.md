@@ -2,20 +2,27 @@
 
 ## Portfolio platform: what it is
 
-This website. A responsive portfolio and personal platform presenting OJ's work,
-experience, qualifications, and services, built on a security-conscious
-foundation with room for future AI and content features.
+This website. It is OJ's own project: a responsive platform that brings together
+his project case studies, background information and a contact journey, built on
+a security-conscious foundation with room for future AI and content features.
+
+It is a personal project rather than client work. Its presence is not evidence of
+a client's revenue, lead growth or commercial return.
 
 It is live at https://ojfr.me and the source is at
 https://github.com/omarjosephf/ojflorendo-portfolio. Status: live.
 
 ## Portfolio platform: why it exists
 
-As a final-year Computing and IT student pursuing junior, internship, part-time,
-freelance, and collaborative opportunities, OJ needed a professional online
-presence he controls. It had to communicate clearly to employers and potential
-clients, remain useful without unnecessary tracking, and provide a dependable
-foundation for future projects, content, and a narrow AI guide.
+OJ originally built the site to present his work and professional background. Its
+audience is now prospective clients and collaborators, his own products, and
+sharing the work behind them.
+
+It has to communicate clearly, remain useful without unnecessary tracking, and
+provide a dependable foundation for future projects, content, and a narrow AI
+guide. The practical question the content and design review asks is whether a
+visitor can understand what OJ offers, inspect relevant work, and decide whether
+to get in touch.
 
 ## Portfolio platform: goals
 
@@ -40,8 +47,9 @@ clients.
 - A per-request nonce Content Security Policy generated in the Next.js proxy,
   with complementary security headers configured centrally.
 - Build-time font optimisation, with no runtime third-party font dependency.
-- A dynamically imported 3D scene as progressive enhancement, and a server-side
-  contact route with a swappable email transport.
+- A server-side contact route with a swappable email transport. The 3D renderers
+  remain in the repository with their unit coverage so the decision can be
+  reversed, but no decorative scene is mounted in the current presentation.
 
 Technologies: Next.js, React, TypeScript, Tailwind CSS, Vitest, Playwright,
 Vercel, Resend, and AI-assisted engineering with human review.
@@ -57,12 +65,18 @@ There is no behavioural analytics, no advertising tracker, no fingerprinting, an
 no unnecessary cookie. Contact messages are not stored in a database or in
 browser storage, and message bodies are not logged.
 
-## Portfolio platform: the 3D hero
+## Portfolio platform: the 3D hero, and why it was retired
 
-The Digital Core scene is progressive enhancement and never a dependency for
-content or navigation. It is dynamically imported, respects reduced-motion
-preferences, and has a CSS fallback. If WebGL is unavailable the site loses a
-visual and nothing else.
+Earlier versions explored a procedural 3D hero — the Digital Core scene and a
+particle wave. They were always progressive enhancement and never a dependency
+for content or navigation.
+
+They are no longer mounted. A design review recorded in ADR-0010 replaced them
+with typography, genuine project screenshots and finite, event-driven interaction
+feedback. The renderer source and its unit coverage remain in the repository so
+the decision can be reversed, but no continuous decorative canvas runs on the
+site today. Anyone describing this site should treat the 3D hero as history
+rather than a current feature.
 
 ## Portfolio platform: how the work is governed
 

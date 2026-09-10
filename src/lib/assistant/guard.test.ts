@@ -147,8 +147,9 @@ describe("screenQuestion — the evaluation set reaches the service intact", () 
   it("reads the same question set the harness runs", () => {
     // Guards the parser itself: a silently empty list would make the assertion
     // below pass while testing nothing.
-    // 49 single-turn plus the 5 conversational follow-ups added with ADR-0007.
-    expect(questions.length).toBe(54);
+    // Original 54 cases, plus eight runtime-v2 prompt counterexamples, plus
+    // eight covering the September 2026 client-focused repositioning.
+    expect(questions.length).toBe(70);
   });
 
   it.each(questions)("does not intercept %s", (question) => {

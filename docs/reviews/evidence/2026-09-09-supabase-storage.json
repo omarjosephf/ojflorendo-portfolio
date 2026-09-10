@@ -1,0 +1,86 @@
+{
+  "date": "2026-09-09T00:04:08.612Z",
+  "project": "disposable Free staging",
+  "checks": [
+    {
+      "name": "managed anonymous JWTs have distinct authenticated principals",
+      "passed": true
+    },
+    {
+      "name": "unauthenticated access is denied",
+      "passed": true
+    },
+    {
+      "name": "concurrent creation retries produce one conversation",
+      "passed": true
+    },
+    {
+      "name": "guest B cannot read or claim guest A conversation",
+      "passed": true
+    },
+    {
+      "name": "concurrent user retries remain idempotent and reject changed text",
+      "passed": true
+    },
+    {
+      "name": "only server can save assistant text; concurrent retries save one atomic trace",
+      "passed": true
+    },
+    {
+      "name": "feedback is guest-owned and cannot be forged by another user",
+      "passed": true
+    },
+    {
+      "name": "real owner allowlist entry does not grant access before MFA",
+      "passed": true
+    },
+    {
+      "name": "managed TOTP AAL2 grants the synthetic owner access",
+      "passed": true
+    },
+    {
+      "name": "refresh retains guest identity and malformed JWTs are rejected",
+      "passed": true
+    },
+    {
+      "name": "guest deletion cascades without deleting another guest conversation",
+      "passed": true
+    },
+    {
+      "name": "expired conversations are hidden before the server retention purge",
+      "passed": true
+    },
+    {
+      "name": "sign-out behavior is observed without assuming JWT revocation",
+      "passed": true
+    }
+  ],
+  "notes": [
+    {
+      "kind": "getUser_after_signout",
+      "status": 403
+    },
+    {
+      "kind": "direct_database_after_signout",
+      "status": 200,
+      "visible_rows": 0
+    }
+  ],
+  "synthetic_subjects_created": 3,
+  "model_calls": 0,
+  "cost_usd": 0,
+  "limitations": [
+    "Synthetic owner TOTP is not the human owner enrollment.",
+    "No backup restore, scheduled retention or browser session lifecycle qualification in this script."
+  ],
+  "migrations": [
+    {
+      "file": "202609080001_ev_management.sql",
+      "sha256": "1dcecebde57c90e869c943619e6bcb38cb185c81702271b320a2be126ceada31"
+    },
+    {
+      "file": "202609090001_ev_active_sessions.sql",
+      "sha256": "8f93f81ed3056fc7d1d120df04e77a16a409cd89b3b6e5bb190443735998677b"
+    }
+  ]
+}
