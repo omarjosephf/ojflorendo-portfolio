@@ -79,9 +79,21 @@ next-env.d.ts
 # directory is one `git add -A` away from being published.
 /CLAUDE.local.md
 /AGENTS.local.md
-/.claude/
 /.agents/
 /.codex/
+
+# `.claude/` stays ignored by default for the reason above. Two paths are
+# deliberately tracked because they are shared project tooling, not private
+# instructions: the session bootstrap script and the settings file that
+# registers it. A web session clones this repository fresh, so an untracked
+# settings file would never register the hook at all. The negations below are
+# exact filenames, not directories, so a new private file dropped into
+# `.claude/` or `.claude/hooks/` is still ignored by default.
+/.claude/*
+!/.claude/settings.json
+!/.claude/hooks/
+/.claude/hooks/*
+!/.claude/hooks/session-start.sh
 
 # test / automation artefacts (if ever added inside the repo)
 /test-results/
