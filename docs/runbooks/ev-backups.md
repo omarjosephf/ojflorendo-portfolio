@@ -32,7 +32,7 @@ inventory fail the run. Other prefixes are untouched. Inventory is bounded to
 This cleanup happens before connecting to the source database.
 
 The exporter uses a single repeatable-read, read-only transaction as
-`ev_backup_reader`. It requires the exact nine reviewed migration versions and
+`ev_backup_reader`. It requires the exact ten reviewed migration versions and
 the exact column names/types in the [contract](../../supabase/operations/ev-backup-contract.json).
 The schema digest identifies reviewed migration source with LF-normalized line
 endings; it is not an attestation that every live grant or function is unchanged.

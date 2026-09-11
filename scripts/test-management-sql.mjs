@@ -37,10 +37,29 @@ try {
   await db.exec(await readFile(new URL("../supabase/migrations/202609090006_ev_shared_budget.sql", import.meta.url), "utf8"));
   await db.exec(await readFile(new URL("../supabase/migrations/202609090007_ev_answer_events.sql", import.meta.url), "utf8"));
   await db.exec(await readFile(new URL("../supabase/migrations/202609090008_ev_live_gap_reviews.sql", import.meta.url), "utf8"));
+  await db.exec(await readFile(new URL("../supabase/migrations/202609110001_ev_rls_auto_enable.sql", import.meta.url), "utf8"));
   await db.query("insert into auth.users(id) values($1),($2),($3)", [A,B,OWNER]);
   await db.query("update auth.users set is_anonymous=false where id=$1",[OWNER]);
   await db.exec("insert into auth.sessions(id,user_id) select id,id from auth.users");
   await db.query("insert into ev_private.owners(user_id) values($1)", [OWNER]);
+  await check("a new public table gets RLS enabled automatically", async () => {
+    // Proves the captured ensure_rls event trigger is live, not just declared.
+    // A table shipped without RLS is readable by anon through PostgREST, so the
+    // guard matters more than the object's presence in pg_event_trigger.
+    await db.exec("create table public.rls_probe(id integer)");
+    try {
+      const row = (await db.query("select relrowsecurity from pg_class where relnamespace='public'::regnamespace and relname='rls_probe'")).rows[0];
+      assert.equal(row.relrowsecurity, true, "ensure_rls did not enable RLS on a newly created public table");
+    } finally {
+      await db.exec("drop table public.rls_probe");
+    }
+  });
+  await check("rls_auto_enable is not executable by anon or authenticated", async () => {
+    for (const role of ["anon", "authenticated"]) {
+      const row = (await db.query("select has_function_privilege($1, 'public.rls_auto_enable()', 'EXECUTE') as allowed", [role])).rows[0];
+      assert.equal(row.allowed, false, `${role} can execute rls_auto_enable`);
+    }
+  });
   await check("every exposed E.V table has RLS enabled", async () => {
     const rows = (await db.query("select relname, relrowsecurity from pg_class where relnamespace='public'::regnamespace and relkind='r' and relname like 'ev_%'")).rows;
     assert.equal(rows.length, 7); assert.ok(rows.every((r) => r.relrowsecurity));
