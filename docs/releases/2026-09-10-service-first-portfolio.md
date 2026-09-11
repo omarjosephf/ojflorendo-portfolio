@@ -195,6 +195,24 @@ deleted and no `expects` was changed — the runbook rules both out.
   delivery was not exercised; local tests use the honest no-delivery mode and
   assistant tests use controlled responses. No paid provider evaluation was run.
 
+### Addressed after this release, 11 September 2026, not yet committed
+
+This section records work done in the working tree after the release above. It
+does not change what was published on 10 September 2026.
+
+- **Screenshot recaptured.** `personal-portfolio-website.webp` was recaptured
+  from a production build of the released design, at the declared 1104x320.
+- **Dead code removed.** `PortraitMark.tsx` deleted; the `.portrait-trigger`
+  branch and its keyframe array removed from `InteractionFeedback.tsx`; and 31
+  unreferenced CSS rules removed, covering the retired portrait circles
+  (`.portrait-mark`, `.portrait-trigger`, `portrait-wiggle`) and the retired
+  hero project stack (`.hero-work*`, `.hero-note*`, `.hero-project-stack`,
+  `.hero-preview*`, `.preview-bar`, `.preview-caption`, `preview-settle-*`).
+  `.preview-dots` and `.project-frame` are still rendered and were kept.
+
+Everything else above remains open. E.V's greeting-only opening is the intended
+outcome of ADR-0019 D7 and is not being changed.
+
 ## Scope
 
 No dependency, lockfile, secret, DNS, API handler, validation rule, accepted

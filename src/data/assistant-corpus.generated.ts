@@ -16,14 +16,14 @@ export interface AssistantCorpusFile {
 /** Per-file digests, path-sorted. Lets a mismatch be localised to one document. */
 export const assistantCorpusFiles: readonly AssistantCorpusFile[] = [
   { path: "OJ_Florendo_Rayatchi_Public_CV.pdf", digest: "1fccbd560745b886290350795c4e4bd4c6df68683f0ede3c043e7894a9f6c85b" },
-  { path: "about-oj.md", digest: "9d490ad336b3bac61afba3ab3f6286d71bcc8bf818a2d8638b085efd72fbb5a2" },
+  { path: "about-oj.md", digest: "afe23ec7fca088899e2ae7035a7c094445f09c42fe62468856517db7c8358341" },
   { path: "contact-and-this-assistant.md", digest: "5af163b4eeaaaf41c398c147bf8e4b179ea68150602a006c91d80422e5475640" },
   { path: "education-and-credentials.md", digest: "5798f62edd572fc4089b9c6fdb814e92cdab3d637dcd325efd6495905768d97f" },
   { path: "experience.md", digest: "8cc229f3e3b2e80a43669da9db9047138ca6386ce80cd9125bde7d7c4f2ff27e" },
   { path: "how-oj-works.md", digest: "0ab01bf4a0a0e5402eec90d8af2f27bd583d1d2bb0464a6b40bd8277d88fd479" },
-  { path: "project-cited.md", digest: "fdc3eaff864fcbd18b14e93dff944fa8bc524b7140803d5d7f2b0bdc4c3712f7" },
+  { path: "project-cited.md", digest: "bba49db5ca74672b5429f93496da79e59347f2e2872569eb8bc7de65ff337339" },
   { path: "project-portfolio-platform.md", digest: "5fbcd1a2713a82d338120882d0c6a6fad59fcc510b71df44ff6747c3eb46bcf0" },
-  { path: "services.md", digest: "d6c3cfda1d2c350c3160906afbd02d5c79a9369783c68b22234b00af5fdc403e" },
+  { path: "services.md", digest: "61e43d428e3d97214cacfe160d1948904593d414aa365eff737116e6ec4db007" },
   { path: "skills.md", digest: "eb71e95ab21871f4ff718447c15d1b8cd6effbf94da5e2344410450409c6be79" },
 ];
 
@@ -35,4 +35,4 @@ export const assistantCorpusFiles: readonly AssistantCorpusFile[] = [
  * process rather than answering confidently from the wrong content.
  */
 export const assistantCorpusChecksum =
-  "10ccbbc912bc9ad0ddc5a46c850d71a007705be9719ae246cd4448ef8db0af95";
+  "9eacd1593d6ab0d61469c1bf33dae903e0a5f2b74c835f7b0082a22c8167fd0b";

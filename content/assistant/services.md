@@ -1,9 +1,8 @@
 # Services OJ offers to clients, and how to hire him
 
-## OJ's leading offer: a focused website or landing page
+## Website development services: the work OJ takes on now
 
-OJ's leading offer is a focused website or landing page for a small service
-business. If you want a website built, this is the service to ask about.
+OJ currently offers website and landing-page development for small service businesses. This is his main service for new project enquiries. He can build a focused new website or landing page, with scope, suitability and timing agreed directly with OJ.
 
 It begins with understanding the offer, the intended visitor and the enquiry
 journey. Work may include content structure and page priorities, responsive
@@ -27,7 +26,7 @@ responsive layout and accessibility fixes, and verification of what was agreed.
 This is available now subject to a technical review: he does not promise that
 every existing system is within scope.
 
-## AI document assistants
+## AI document assistants OJ can build for clients, and the limits of the work
 
 An AI document assistant answers questions about an approved set of documents and
 shows the sources behind each answer, so the people relying on it can check the
@@ -48,12 +47,7 @@ verified citations. A management interface over questions, answers and knowledge
 gaps has been built and works; its durable storage is still staging rather than
 production, and OJ says so rather than implying otherwise.
 
-What that evidence does and does not establish is worth keeping separate. Cited's
-evaluation measures Cited on its own corpus; it is not a measurement of any other
-organisation's documents. Each engagement is scoped to a defined document set and
-a defined job, with document suitability reviewed first. Extending an assistant
-beyond that agreed scope needs its own privacy review, running costs and support
-arrangements.
+Cited's evaluation measures Cited on its own documents; it is not a measurement of any other organisation's documents. Each engagement is scoped to a defined document set and a defined job, with document suitability reviewed first. A document assistant that answers questions is different from a system that runs a support inbox or sends customer emails. Those actions are not included in the offer described here and would need their own agreed scope, privacy review, running costs and support arrangements.
 
 ## Training, data and digital operations as related background
 

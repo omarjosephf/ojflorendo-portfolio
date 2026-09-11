@@ -177,6 +177,26 @@ reviewed expiry rule. No backup credential or deployed job was activated. Export
 hourly workflow are prepared in the [runbook](../runbooks/ev-backups.md). Managed
 qualification, key custody, job activation, actual remote cleanup and isolated
 managed restoration remain work.
+## Corpus candidate checkpoint, 11 September 2026
+
+The refined assistant corpus is applied to source and the complete
+`npm run test:ci` gate passes on it with exit status 0: 614 unit tests, 120
+database checks, 82 restore checks, both dependency audits, the production
+build, 89 production-browser and 42 management-browser checks. The backend
+candidate was reassembled from its byte-verified checkpoint onto the backend's
+current remote `main` — the same commit it was already based on, so no
+reconciliation was needed — and passes 793 tests, lint, format, strict types and
+its audit. See the [candidate verification](../reviews/ev-release-candidate-verification.md#complete-gate-on-the-corpus-candidate-11-september-2026).
+
+Two release items came out of it: `eval/portfolio-source.json` still pins the
+pre-refinement corpus revision and cannot be updated until the frontend corpus
+commit exists, and the retrieval command must pass `--suite portfolio` or it is
+scored against the wrong floor.
+
+Nothing was committed, pushed or deployed, no paid call was made and no managed
+setting changed. Packages 13–16 remain unfinished; the checkpoint stays
+**12/16**.
+
 The assembled evidence above remains the baseline before the subsequent UI
 correction. The [presentation follow-up](../reviews/ev-release-candidate-verification.md#subsequent-ev-presentation-verification)
 removes E.V's duplicate theme selector and Beta badge, installs the new female

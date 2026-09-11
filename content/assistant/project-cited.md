@@ -11,7 +11,7 @@ ordinary answering.
 It is live at https://cited-demo.fly.dev and the source is at
 https://github.com/omarjosephf/cited. Status: live.
 
-## Cited: what it checks, and what that check does and does not prove
+## Cited: citation verification and limits of answering accuracy on other documents
 
 Every quoted citation is verified locally against the passage the model was
 actually sent; a quote that does not appear in that passage is discarded and
@@ -19,10 +19,7 @@ counted. Cited is designed to decline questions its documents do not cover, and
 that intended behaviour is measured by a committed evaluation set rather than
 asserted.
 
-Three things are worth keeping apart. Checking that a quotation appears in a
-passage is not the same as establishing that the passage supports every claim in
-the answer, and neither is the same as evidence about documents the system has
-never seen.
+The original Cited demo recorded a 100% automated evaluation score across five runs of the same fifteen-question set: ten answerable questions and five refusal cases. This checks expected citation and refusal outcomes; it is not an independent factual review of every answer. It does not establish accuracy on your internal policy documents or other unseen material. Quote matching, support for an answer's claims, and accuracy on a new document set need separate checks.
 
 ## Cited: why it exists
 

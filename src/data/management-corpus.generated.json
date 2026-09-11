@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "corpusSha256": "10ccbbc912bc9ad0ddc5a46c850d71a007705be9719ae246cd4448ef8db0af95",
+  "corpusSha256": "9eacd1593d6ab0d61469c1bf33dae903e0a5f2b74c835f7b0082a22c8167fd0b",
   "model": "BAAI/bge-small-en-v1.5",
   "tokenizerSha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
   "tokenLimit": 512,
   "targetWords": 180,
   "overlapWords": 40,
-  "generatedAt": "2026-09-10T17:33:59.423198+00:00",
+  "generatedAt": "2026-09-10T22:33:07.396038+00:00",
   "chunks": [
     {
       "index": 0,
@@ -74,20 +74,20 @@
     {
       "index": 7,
       "source": "about-oj.md",
-      "section": "What OJ builds and what his current focus is",
+      "section": "OJ's current services and marketing background",
       "page": null,
       "text": "OJ builds practical digital products with software and AI. His leading offer is a focused website or landing page for a small service business, with AI document assistants over an approved set of documents as a second line of work. He has built and deployed document assistants twice, so that is a capability he offers rather than an idea he is exploring. He focuses on real needs rather than creating technology for its own sake, combining thoughtful product decisions, responsible AI-assisted engineering, and clear communication. He aims to build products that help people understand information, complete a task, or run part of their work more easily. OJ is also developing his personal brand and exploring how AI can help him explain and market his own products. That is a direction of work rather than evidence of an established growth-marketing service, and it does not mean he sells marketing outcomes.",
-      "tokens": 183,
-      "indexedSha256": "bc989924fc710875e777b340f13c85405fa700696b5f0d7c34f964328d8b325f"
+      "tokens": 182,
+      "indexedSha256": "f384480cad5db6718eb0d4c306f334b6e2618634948f9784fe81ef41dbc97160"
     },
     {
       "index": 8,
       "source": "about-oj.md",
       "section": "What projects OJ has built and published",
       "page": null,
-      "text": "What projects has OJ built? He has built two, and they are the complete answer to that question: Cited, and this portfolio platform. Both are published, both are live, and both are publicly inspectable. **Cited** is a document assistant. It answers questions from a set of documents and shows the exact passage each answer came from, refusing questions the documents do not cover. It is live at cited-demo.fly.dev. **The portfolio platform** is this website at ojfr.me. It presents OJ's work, experience, qualifications and services, and hosts the assistant answering this question. Those two are the projects currently featured on this portfolio. They are personal projects. Their presence does not establish a client list, revenue, or client results, and the featured list should not be treated as an exhaustive history of everything OJ has ever built. Each has its own document here with the full technical detail, including what each is built with and what was measured.",
-      "tokens": 217,
-      "indexedSha256": "647db31e0b7ad20d7837ebd91f74e3c49d5993d6e201b79940d2dd8728c2310f"
+      "text": "The projects currently featured on OJ's portfolio are Cited and this portfolio platform. Both are published, live and publicly inspectable. This describes the current featured work; it does not limit the projects OJ may build or publish in future. **Cited** is a document assistant. It answers questions from a set of documents and shows the exact passage each answer came from, refusing questions the documents do not cover. It is live at cited-demo.fly.dev. **The portfolio platform** is this website at ojfr.me. It presents OJ's work, experience, qualifications and services, and hosts the assistant answering this question. Those two are the projects currently featured on this portfolio. They are personal projects. Their presence does not establish a client list, revenue, or client results, and the featured list should not be treated as an exhaustive history of everything OJ has ever built. Each has its own document here with the full technical detail, including what each is built with and what was measured.",
+      "tokens": 222,
+      "indexedSha256": "3d73b1af66c763ddbb62b332503819924160aed40b093c2b658f4268a2221c39"
     },
     {
       "index": 9,
@@ -362,11 +362,11 @@
     {
       "index": 39,
       "source": "project-cited.md",
-      "section": "Cited: what it checks, and what that check does and does not prove",
+      "section": "Cited: citation verification and limits of answering accuracy on other documents",
       "page": null,
-      "text": "Every quoted citation is verified locally against the passage the model was actually sent; a quote that does not appear in that passage is discarded and counted. Cited is designed to decline questions its documents do not cover, and that intended behaviour is measured by a committed evaluation set rather than asserted. Three things are worth keeping apart. Checking that a quotation appears in a passage is not the same as establishing that the passage supports every claim in the answer, and neither is the same as evidence about documents the system has never seen.",
-      "tokens": 121,
-      "indexedSha256": "95a8849802f142f61b098dbf3c3626f61e59cd484b4a728e2055a3c872e74ff6"
+      "text": "Every quoted citation is verified locally against the passage the model was actually sent; a quote that does not appear in that passage is discarded and counted. Cited is designed to decline questions its documents do not cover, and that intended behaviour is measured by a committed evaluation set rather than asserted. The original Cited demo recorded a 100% automated evaluation score across five runs of the same fifteen-question set: ten answerable questions and five refusal cases. This checks expected citation and refusal outcomes; it is not an independent factual review of every answer. It does not establish accuracy on your internal policy documents or other unseen material. Quote matching, support for an answer's claims, and accuracy on a new document set need separate checks.",
+      "tokens": 158,
+      "indexedSha256": "0a615db91e0e1a222f0c979af040495b3c534946f3a27afaf5d137a660f1280b"
     },
     {
       "index": 40,
@@ -524,11 +524,11 @@
     {
       "index": 57,
       "source": "services.md",
-      "section": "OJ's leading offer: a focused website or landing page",
+      "section": "Website development services: the work OJ takes on now",
       "page": null,
-      "text": "OJ's leading offer is a focused website or landing page for a small service business. If you want a website built, this is the service to ask about. It begins with understanding the offer, the intended visitor and the enquiry journey. Work may include content structure and page priorities, responsive design, front-end implementation, a clear contact or enquiry route, keyboard, readability and mobile checks, page titles, descriptions and technical search foundations, and agreed handover notes. He works with Next.js, React, TypeScript, HTML and CSS, and builds to the same accessibility and security standards used on his own platform. These services are available for discussion now; individual scope and timing require OJ's agreement.",
-      "tokens": 168,
-      "indexedSha256": "9387b423ad3f03fb4d136bf8e1b66206a863b5366fb3cd5475771464866d5b6e"
+      "text": "OJ currently offers website and landing-page development for small service businesses. This is his main service for new project enquiries. He can build a focused new website or landing page, with scope, suitability and timing agreed directly with OJ. It begins with understanding the offer, the intended visitor and the enquiry journey. Work may include content structure and page priorities, responsive design, front-end implementation, a clear contact or enquiry route, keyboard, readability and mobile checks, page titles, descriptions and technical search foundations, and agreed handover notes. He works with Next.js, React, TypeScript, HTML and CSS, and builds to the same accessibility and security standards used on his own platform. These services are available for discussion now; individual scope and timing require OJ's agreement.",
+      "tokens": 183,
+      "indexedSha256": "1e3a81ab0ac86cb31e69353c9951812acc5272e2550ff1830b3ad5d1ff464296"
     },
     {
       "index": 58,
@@ -542,20 +542,20 @@
     {
       "index": 59,
       "source": "services.md",
-      "section": "AI document assistants",
+      "section": "AI document assistants OJ can build for clients, and the limits of the work",
       "page": null,
       "text": "An AI document assistant answers questions about an approved set of documents and shows the sources behind each answer, so the people relying on it can check the work. This is available now. If you want an assistant over your own documents, this is the service to ask about. It covers retrieval grounded in the approved documents, verification of every quoted passage against its source, refusing questions the documents do not cover rather than guessing, cost controls and rate limiting, an evaluation set that measures the answers, and a management view over questions, answers and gaps in the knowledge. Scope, stated limitations and handover notes are agreed as part of the work.",
-      "tokens": 133,
-      "indexedSha256": "628b41ebf479669ec6f3312c52c5d0ae79936c467bdb2f27a33b9a40783f529a"
+      "tokens": 146,
+      "indexedSha256": "3f1850f0f1e628d733f5fe2de04e4fd606caeee8101c8836b26523e7911e81f5"
     },
     {
       "index": 60,
       "source": "services.md",
-      "section": "AI document assistants",
+      "section": "AI document assistants OJ can build for clients, and the limits of the work",
       "page": null,
-      "text": "OJ has built and deployed this twice. Cited is a deployed document assistant measured against a committed evaluation set, and E.V — the assistant on this website — is a retrieval-grounded assistant with cost controls, rate limiting and verified citations. A management interface over questions, answers and knowledge gaps has been built and works; its durable storage is still staging rather than production, and OJ says so rather than implying otherwise. What that evidence does and does not establish is worth keeping separate. Cited's evaluation measures Cited on its own corpus; it is not a measurement of any other organisation's documents. Each engagement is scoped to a defined document set and a defined job, with document suitability reviewed first. Extending an assistant beyond that agreed scope needs its own privacy review, running costs and support arrangements.",
-      "tokens": 169,
-      "indexedSha256": "323d0b7e64c0c70bf07f93bfdced7e758c3da7906159f47b45faf120c5293f81"
+      "text": "OJ has built and deployed this twice. Cited is a deployed document assistant measured against a committed evaluation set, and E.V — the assistant on this website — is a retrieval-grounded assistant with cost controls, rate limiting and verified citations. A management interface over questions, answers and knowledge gaps has been built and works; its durable storage is still staging rather than production, and OJ says so rather than implying otherwise. Cited's evaluation measures Cited on its own documents; it is not a measurement of any other organisation's documents. Each engagement is scoped to a defined document set and a defined job, with document suitability reviewed first. A document assistant that answers questions is different from a system that runs a support inbox or sends customer emails. Those actions are not included in the offer described here and would need their own agreed scope, privacy review, running costs and support arrangements.",
+      "tokens": 199,
+      "indexedSha256": "dbfbf88a1b6d114195b5c092fd23d8cbee2adb9f9253c5be5119e4e2f5501817"
     },
     {
       "index": 61,

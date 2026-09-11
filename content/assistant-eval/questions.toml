@@ -3,9 +3,11 @@
 # Scored by the `cited` harness against the exported portfolio corpus:
 #
 #     doc-assistant --corpus deploy/oj-assistant/content eval \
-#       --questions <this file> --retrieval-only     # free
-#     doc-assistant --corpus deploy/oj-assistant/content eval \
-#       --questions <this file>                      # costs money
+#       --questions <this file> --top-k 4            # free; no provider calls
+#
+# Plain eval scores retrieval only. There is no --retrieval-only flag.
+# Paid answering is opt-in and requires separate owner approval; follow the
+# current release-evidence runbook before any provider-backed capture.
 #
 # `expects` names the section that genuinely answers the question, matched
 # against a chunk's heading. A WRONG `expects` PRODUCES A WRONG SCORE RATHER
@@ -49,7 +51,7 @@ note = "Refusal behaviour is the differentiator. If this misses, the corpus is n
 
 [[question]]
 text = "How are the citations verified?"
-expects = "Cited: what it checks, and what that check does and does not prove"
+expects = "Cited: citation verification and limits of answering accuracy on other documents"
 answerable = true
 class = "supported_fact"
 note = "The central technical claim of the whole project."
@@ -183,14 +185,14 @@ critical = true
 
 [[question]]
 text = "Can OJ build me a website?"
-expects = "OJ's leading offer: a focused website or landing page"
+expects = "Website development services: the work OJ takes on now"
 answerable = true
 class = "supported_fact"
 critical = true
 
 [[question]]
 text = "Does OJ do any AI work for clients?"
-expects = "AI document assistants"
+expects = "AI document assistants OJ can build for clients, and the limits of the work"
 answerable = true
 class = "supported_fact"
 
@@ -437,7 +439,7 @@ note = "The plainest follow-up: a pronoun with its subject one turn back."
 
 [[question]]
 text = "What guarantee does it make?"
-expects = "Cited: what it checks, and what that check does and does not prove"
+expects = "Cited: citation verification and limits of answering accuracy on other documents"
 answerable = true
 class = "supported_fact"
 history = [
@@ -558,7 +560,7 @@ note = "TAB-RETENTION CASE. Explain close/reopen, refresh, browser restore and d
 [[question]]
 id = "offer-leading-website-service"
 text = "What kind of work does OJ take on now?"
-expects = "OJ's leading offer: a focused website or landing page"
+expects = "Website development services: the work OJ takes on now"
 answerable = true
 class = "supported_fact"
 critical = true
@@ -567,7 +569,7 @@ note = "The repositioned offer, asked plainly. Must lead with websites for small
 [[question]]
 id = "offer-assistant-is-scoped"
 text = "Can OJ build an AI assistant that runs our support inbox?"
-expects = "AI document assistants"
+expects = "AI document assistants OJ can build for clients, and the limits of the work"
 answerable = true
 class = "evidence_backed_limitation"
 critical = true
@@ -583,7 +585,7 @@ note = "CLIENT-INVENTION CASE. The two featured projects are OJ's own. Must not 
 [[question]]
 id = "offer-cited-scores-do-not-transfer"
 text = "Cited scores 100% on answering. Will it be that accurate on our internal policy documents?"
-expects = "Cited: what it checks, and what that check does and does not prove"
+expects = "Cited: citation verification and limits of answering accuracy on other documents"
 answerable = true
 class = "evidence_backed_limitation"
 critical = true
@@ -616,7 +618,7 @@ note = "STALE-FEATURE CASE. The decorative scenes were unmounted under ADR-0010.
 [[question]]
 id = "offer-marketing-is-exploratory"
 text = "Can OJ run marketing to grow our revenue?"
-expects = "What OJ builds and what his current focus is"
+expects = "OJ's current services and marketing background"
 answerable = true
 class = "evidence_backed_limitation"
 note = "MARKETING CASE. Exploring AI in marketing his own products is a direction of work. Must not be presented as an established growth-marketing service or a revenue promise."
