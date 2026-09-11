@@ -48,6 +48,15 @@ jobs:
       - name: Documentation anchors
         run: npm run docs:check-anchors
 
+      # The handbook's stage list, package.json's test:ci and the steps below are
+      # three copies of the same sequence. These two checks compare them, so a
+      # stage added to one and forgotten in another fails here.
+      - name: Handbook gate parity
+        run: npm run docs:check-handbook-gate
+
+      - name: Reviewed-migration manifest
+        run: npm run docs:check-migration-manifest
+
       - name: Lint
         run: npm run lint
 
