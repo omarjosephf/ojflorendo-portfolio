@@ -1021,8 +1021,12 @@ npm run test:e2e
 npm run test:management:preview
 ```
 
-This list is verified mechanically against `package.json` by
-`npm run docs:check-handbook-gate`, which is part of the gate itself. The stage
+This list is verified mechanically against `package.json` **and against
+`.github/workflows/ci.yml`** by `npm run docs:check-handbook-gate`, which is part
+of the gate itself. CI runs the stages as individual steps so each is reported
+separately, which makes the workflow a third copy of this list; the check asserts
+that every stage defined here is actually run there. A stage that exists only in
+`test:ci` is a stage CI never enforces. The stage
 count is deliberately not written out in prose: a number in a sentence is one
 more thing that can drift. If the two
 disagree, the gate fails: the handbook is not allowed to drift from the commands

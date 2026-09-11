@@ -20,6 +20,17 @@ if [ ! -d node_modules ] || [ -z "$(ls -A node_modules 2>/dev/null)" ]; then
   npm ci --no-audit --no-fund
 fi
 
+# PDF tooling. Screenshots, reports and specifications arrive as PDFs, and this
+# image ships neither poppler nor a working PDF library: the system
+# `cryptography` has a Rust binding that panics on import, which takes pypdf down
+# with it. Installing over it fixes that; pymupdf rasterises pages without
+# poppler, so an image-only PDF (a screenshot) can be rendered and read rather
+# than coming back as zero characters of text.
+if ! python3 -c "import pymupdf, pypdf" >/dev/null 2>&1; then
+  pip install --quiet --upgrade cryptography pypdf pymupdf >/dev/null 2>&1 \
+    || echo "note: PDF tooling unavailable this session; PDFs may be unreadable"
+fi
+
 echo "--- Project Zero repository state ---"
 
 git fetch origin --prune --quiet 2>/dev/null || echo "note: git fetch failed (offline or restricted egress)"
