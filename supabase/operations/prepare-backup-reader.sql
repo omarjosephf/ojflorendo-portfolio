@@ -3,7 +3,7 @@
 -- Existing role causes an error rather than widening an unknown credential.
 begin;
 do $$ begin
-  if (select array_agg(version order by version) from supabase_migrations.schema_migrations) is distinct from array['202609080001','202609090001','202609090002','202609090003','202609090004','202609090005','202609090006','202609090007','202609090008']::text[] then
+  if (select array_agg(version order by version) from supabase_migrations.schema_migrations) is distinct from array['202609080001','202609090001','202609090002','202609090003','202609090004','202609090005','202609090006','202609090007','202609090008','202609110001']::text[] then
     raise exception 'Reviewed migration history required';
   end if;
 end $$;

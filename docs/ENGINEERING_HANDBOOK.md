@@ -1002,12 +1002,13 @@ The canonical composite gate is:
 npm run test:ci
 ```
 
-Its sequence is exactly the following thirteen stages, in this order:
+Its sequence is exactly the following stages, in this order:
 
 ```bash
 node scripts/verify-dependency-audit.mjs
 npm run docs:check-anchors
 npm run docs:check-handbook-gate
+npm run docs:check-migration-manifest
 npm run lint
 npm run typecheck:app
 npm run typecheck:tests
@@ -1021,7 +1022,9 @@ npm run test:management:preview
 ```
 
 This list is verified mechanically against `package.json` by
-`npm run docs:check-handbook-gate`, which is part of the gate itself. If the two
+`npm run docs:check-handbook-gate`, which is part of the gate itself. The stage
+count is deliberately not written out in prose: a number in a sentence is one
+more thing that can drift. If the two
 disagree, the gate fails: the handbook is not allowed to drift from the commands
 actually run.
 
@@ -1712,15 +1715,6 @@ Before v1.1.0 became the repository source of truth:
 # Install exact dependencies
 npm ci
 
-# Individual checks
-npm audit --audit-level=moderate
-npm run lint
-npm run typecheck:app
-npm run typecheck:tests
-npm run test:unit
-npm run build
-npm run test:e2e
-
 # Required composite gate
 npm run test:ci
 
@@ -1732,6 +1726,12 @@ git diff
 git diff --cached --check
 git diff --cached --stat
 ```
+
+The individual stages that make up the gate are listed once, in Section 30, and
+are deliberately not repeated here. This appendix previously carried its own
+copy of that list; it drifted the same way Section 30 had, because a second
+copy of a list is a second thing to forget. Cite Section 30 rather than
+restating it.
 
 Commands must be run from the correct repository and interpreted, not merely invoked.
 
