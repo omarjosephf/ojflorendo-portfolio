@@ -201,14 +201,17 @@ OJ Florendo is the project owner, product decision-maker, repository authority, 
 
 ## 7. Current architecture baseline
 
-Project Zero is a Next.js App Router application built with React and strict TypeScript and deployed to Vercel.
+Project Zero is a Next.js App Router application built with React and strict TypeScript and deployed to Vercel. It is served alongside a separate Python/FastAPI retrieval backend deployed to Fly.io, which answers as the E.V assistant under ADR-0006 and carries its own corpus, spending controls and provider configuration.
 
 The approved baseline is:
 
 - static-first content and presentation;
 - dynamic server rendering where required for the per-request nonce Content Security Policy;
-- no user accounts, authentication, database, admin dashboard, file uploads, payments, comments, CMS, newsletter, or user-generated HTML in the current production baseline; approved future features are governed by Sections 47–49;
-- one server-side user-input boundary: `POST /api/contact`;
+- no file uploads, payments, comments, CMS, newsletter, or user-generated HTML in the current production baseline;
+- a retrieval-grounded assistant (E.V) is part of the production baseline under ADR-0006, answering only from its reviewed corpus and never from open-ended generation;
+- owner accounts, authentication, persistent conversation storage and the management dashboard are implemented under ADR-0016 but are deliberately **not reachable in production**: `/manage` returns 404 in a production build, asserted by `e2e/management-disabled.spec.ts`. Exposing it publicly requires its own ADR, threat model, authentication design and R3 approval;
+- approved future features are governed by Sections 47–49;
+- two visitor-facing server-side input boundaries in the production baseline: `POST /api/contact` and `POST /api/assistant`. The conversation routes (`/api/conversations`, `/api/conversations/ask`, `/api/conversation-session`) and every `/api/management/*` route exist in the tree but return 404 unless their preview gate is satisfied, so they are not production input boundaries. Adding a visitor-reachable boundary is R2 and requires a threat-model update;
 - server-only email delivery through an abstracted transport;
 - one canonical site-URL source used by metadata, Open Graph, sitemap, robots, and structured data;
 - typed content data separated from presentation components;
@@ -242,7 +245,10 @@ The approved family of technologies includes:
 - Playwright for end-to-end and browser verification;
 - npm with a committed `package-lock.json`;
 - Git and GitHub; and
-- Vercel for production hosting unless superseded by an ADR.
+- Vercel for production hosting of the web application unless superseded by an ADR;
+- Python and FastAPI for the retrieval backend that serves E.V;
+- Fly.io for that backend's deployment, including its persistent volume and single-Machine admission model, unless superseded by an ADR; and
+- Supabase PostgreSQL and Auth for management-platform persistence and identity, under ADR-0016.
 
 The current audited baseline used Next.js 16.2.11, React 19.2.4, Node.js 24, npm, Vitest, and Playwright. Exact versions are repository state, not permanent handbook policy; they must be pinned and changed through the dependency process.
 
@@ -996,17 +1002,28 @@ The canonical composite gate is:
 npm run test:ci
 ```
 
-Its expected sequence is equivalent to:
+Its sequence is exactly the following thirteen stages, in this order:
 
 ```bash
-npm audit --audit-level=moderate
+node scripts/verify-dependency-audit.mjs
+npm run docs:check-anchors
+npm run docs:check-handbook-gate
 npm run lint
 npm run typecheck:app
 npm run typecheck:tests
+npm run assistant:check-corpus
+npm run test:management:sql
+npm run test:management:restore
 npm run test:unit
 npm run build
 npm run test:e2e
+npm run test:management:preview
 ```
+
+This list is verified mechanically against `package.json` by
+`npm run docs:check-handbook-gate`, which is part of the gate itself. If the two
+disagree, the gate fails: the handbook is not allowed to drift from the commands
+actually run.
 
 A task may use narrower checks during development, but R2 work and production releases require the complete gate unless a documented exception states why a step is irrelevant or temporarily impossible.
 
