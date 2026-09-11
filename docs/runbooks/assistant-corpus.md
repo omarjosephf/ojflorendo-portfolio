@@ -58,6 +58,7 @@ content/
 npm run assistant:build-corpus
 
 # 3. Re-score retrieval. Free: no API key, no spend.
+#    --suite portfolio is REQUIRED against the release candidate; see below.
 cd ../oj-doc-assistant
 PYTHONPATH=src python -m assistant.cli \
   --corpus ../ojflorendo-portfolio-public/content/assistant eval --suite portfolio \
@@ -72,6 +73,37 @@ PYTHONPATH=src python -m assistant.cli \
 cd ../ojflorendo-portfolio-public
 npm run test:ci
 ```
+
+The existing unit-test gate also checks evaluation-set integrity in
+`src/data/assistant-eval.test.ts`: critical questions must be answerable,
+answerable questions must name an existing heading, unanswerable questions must
+not name an expected heading, and Markdown headings must be unique corpus-wide.
+The check reads the set's single-line integrity fields and fails on unsupported
+field syntax. It is not a general TOML parser: Cited still owns full question-set
+and history validation. A green unit test proves neither retrieval nor answering
+quality.
+
+**Which Cited checkout you score against changes the command and its exit code.**
+The two behave differently, and reading a run without knowing which one produced
+it is how a failing gate gets recorded as a pass.
+
+| | Release candidate | Older `oj-doc-assistant` checkout |
+| --- | --- | --- |
+| `--suite` | supported; `demo` and `portfolio` | not supported — the flag errors |
+| Gate on failure | exits **1** and prints `GATE FAIL: …` | prints the scores and exits **0** regardless |
+| Portfolio hit-rate floor | 0.75 | not enforced |
+| Critical core | must be 100%, enforced | reported only |
+
+`--suite` **defaults to `demo`**, whose floor is 1.0. Scoring the portfolio
+corpus without `--suite portfolio` therefore measures it against the wrong
+floor and fails with `GATE FAIL: retrieval hit rate 0.980 < 1.0`. That is an
+operator error, not a regression: the same run passes with the correct suite,
+because 98% clears the 0.75 portfolio floor and the critical core — the subset
+actually held to 100% — is at 100%.
+
+Against the older checkout, exit code 0 does not prove the critical gate passed.
+Read the reported thresholds rather than the exit status. Qualify a release
+against the candidate, not the older checkout.
 
 If retrieval hit rate drops, diagnose in this order: **corpus gap → retrieval
 failure → prompt failure.** Never fix it by deleting a question or by changing

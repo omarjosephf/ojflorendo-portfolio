@@ -23,7 +23,7 @@ digital marketing, e-commerce, and social-media operations. His public
 professional profiles are LinkedIn at linkedin.com/in/ojflorendo and GitHub at
 github.com/omarjosephf.
 
-## What OJ builds and what his current focus is
+## OJ's current services and marketing background
 
 OJ builds practical digital products with software and AI. His leading offer is a
 focused website or landing page for a small service business, with AI document
@@ -43,9 +43,7 @@ sells marketing outcomes.
 
 ## What projects OJ has built and published
 
-What projects has OJ built? He has built two, and they are the complete answer
-to that question: Cited, and this portfolio platform. Both are published, both
-are live, and both are publicly inspectable.
+The projects currently featured on OJ's portfolio are Cited and this portfolio platform. Both are published, live and publicly inspectable. This describes the current featured work; it does not limit the projects OJ may build or publish in future.
 
 **Cited** is a document assistant. It answers questions from a set of documents
 and shows the exact passage each answer came from, refusing questions the

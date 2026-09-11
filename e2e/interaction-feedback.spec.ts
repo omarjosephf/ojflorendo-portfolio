@@ -15,7 +15,9 @@ async function observeFeedback(page: Page) {
     const animate = Element.prototype.animate;
     Element.prototype.animate = function (frames, options) {
       const result = animate.call(this, frames, options);
-      const kind = this.matches(".portrait-mark") ? "portrait" : this.closest(".click-feedback") ? "burst" : "";
+      // The portrait wiggle was removed with the retired portrait circles, so
+      // the burst is the only interaction animation left to observe.
+      const kind = this.closest(".click-feedback") ? "burst" : "";
       if (kind) {
         const timing = result.effect!.getTiming();
         window.__interactionAnimations.push({ kind, duration: Number(timing.duration), iterations: Number(timing.iterations) });

@@ -2,14 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-const wiggle = [
-  { transform: "rotate(0deg)" },
-  { transform: "rotate(-8deg)", offset: 0.2 },
-  { transform: "rotate(6deg)", offset: 0.45 },
-  { transform: "rotate(-3deg)", offset: 0.7 },
-  { transform: "rotate(0deg)" },
-];
-
 /** Finite, event-driven decoration. Never captures pointers or delays an action. */
 export function InteractionFeedback() {
   const burstRef = useRef<HTMLDivElement>(null);
@@ -45,13 +37,6 @@ export function InteractionFeedback() {
       // Keep writing, selection, consent controls and the separate assistant quiet.
       if (target.closest("form, input, textarea, select, label, [contenteditable], .assistant-theme")) return;
       if (window.getSelection()?.isCollapsed === false) return;
-
-      const portrait = target.closest(".portrait-trigger")?.querySelector(".portrait-mark");
-      if (portrait) {
-        portrait.getAnimations().forEach((animation) => animation.cancel());
-        play(portrait, wiggle, 480);
-        return;
-      }
 
       // Click, rather than pointerdown, avoids effects during touch scrolling.
       // Keyboard activation receives feedback at the activated control's centre.

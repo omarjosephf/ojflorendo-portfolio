@@ -1,6 +1,10 @@
 # ADR-0019: Service-first portfolio, a separate About route, and an available document-assistant offer
 
-- Status: Proposed — owner approval pending; publication is a separate R3 decision
+- Status: Accepted — owner-approved, merged to protected `main` as `ea1100a` on
+  2026-09-10 and released the same day; see the
+  [release record](../releases/2026-09-10-service-first-portfolio.md). The
+  status line was left at "Proposed" through the release and is corrected here.
+  Any later corpus revision is its own R3 publication decision.
 - Date: 2026-09-10
 - Owner: OJ Florendo
 - Risk: R1 content, copy and presentation. No trust boundary, runtime, provider
@@ -130,6 +134,16 @@ answering from superseded content that contradicts the published copy. The corpu
 release is a separate R3 action, documented in
 [the corpus runbook](../runbooks/assistant-corpus.md).
 
+**Amendment, 11 September 2026.** `10ccbbc9…` is what this decision shipped and
+what `/health` confirmed after the release. The corpus has since been refined
+again — self-describing heading renames, the bounded website and AI offers, and
+the corrected description of Cited's evaluation — which moves the source
+checksum to
+`9eacd1593d6ab0d61469c1bf33dae903e0a5f2b74c835f7b0082a22c8167fd0b`. That
+revision is not yet committed or released, so source and the running service
+currently disagree by design. Treat the figure above as this decision's shipped
+value, and the corpus runbook as the operational source of the current one.
+
 ## Consequences and trade-offs
 
 - A visitor now needs one click to reach experience and credentials. That is the
@@ -140,7 +154,10 @@ release is a separate R3 action, documented in
   suitability changes, the status label must change with it.
 - The case-study screenshot for this project still shows the retired 3D hero and
   the previous hero copy. It contradicts the case study's own text and should be
-  recaptured after publication.
+  recaptured after publication. **Closed, 11 September 2026:**
+  `personal-portfolio-website.webp` was recaptured from a production build of
+  this design at the declared 1104x320, and now shows the wordmark, the offer
+  heading, both calls to action and the hero portrait.
 
 ## Rollback or migration
 

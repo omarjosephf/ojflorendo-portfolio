@@ -1,10 +1,18 @@
-# ADR-0014: Luna primary and Gemini availability fallback
+# ADR-0014: Luna primary and Gemini availability fallback — provider order superseded by ADR-0015
 
 Provider order and process-local accounting are superseded for the current
-candidate by [ADR-0015](0015-durable-budget-and-provider-order.md).
-Historical verification and approval statements below retain their dated scope.
+candidate by [ADR-0015](0015-durable-budget-and-provider-order.md), which
+reverses the pairing to **Gemini primary, Luna fallback**. The title above
+states this ADR's original arrangement and is retained for the record; it is
+not the current provider order. Historical verification and approval statements
+below retain their dated scope.
 
-- Status: Owner-approved model arrangement; local implementation unverified
+- Status: Superseded in part by
+  [ADR-0015](0015-durable-budget-and-provider-order.md) — the provider order and
+  the process-local budget description no longer apply. The remaining fallback
+  conditions, shared-evidence rules, wire v3 `model_route` contract and backup
+  disclosure still stand, and ADR-0013 continues to rely on them. Original
+  status: owner-approved model arrangement; local implementation unverified.
 - Date: 2026-09-07
 - Owner: OJ Florendo
 - Risk: R2
