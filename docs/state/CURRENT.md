@@ -1,6 +1,6 @@
 # Current state
 
-Updated 11 September 2026. This file is what a fresh session should read first.
+Updated 12 September 2026. This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -17,18 +17,20 @@ in the repository.
 
 **Portfolio website** — released 10 September, live, CI green. Effectively done.
 
-**E.V assistant** — live but answering from corpus `10ccbbc9` while `main`
-carries the refined `9eacd159`. The deployed service is **Anthropic-based**; the
-Gemini/Luna work is the candidate and has never run anywhere. No Fly volume
-exists, the durable budget has never been cut over, neither provider is
-activated.
+**E.V assistant** — **deployed 12 September.** The Gemini/Luna runtime is live on
+Fly, serving the refined corpus `9eacd1593d6a` over wire v3, on a pinned machine
+with the durable ledger mounted at `/data`. The transport mismatch that broke
+every answer since 10 September is fixed: the backend's own OpenAPI now declares
+`version: const 3` with `AnsweredResponse [version, state, answer, citations,
+model_route]`, exactly the key set `service.ts` requires. It cannot answer until
+00:00 UTC on 13 September — see the budget note below.
 
 **RAG management panel** — `/manage` returns 404 in production **by design**,
 asserted by `e2e/management-disabled.spec.ts`. Staging now has all ten
 migrations applied. The encrypted backup path is no longer blocked by migrations
 but is not activated.
 
-## Owner-gated actions: 3 of 9 complete
+## Owner-gated actions: 4 of 9 complete
 
 | # | Action | State |
 | --- | --- | --- |
@@ -36,13 +38,13 @@ but is not activated.
 | 2 | Commit the backend candidate, repin eval, re-run | Done — merged `b94e886` in `omarjosephf/cited` |
 | 3 | Owner visual and content review on a real device | Open |
 | 4 | Decide the remaining retrieval miss | Open — above floor, outside critical core |
-| 5 | Approve and provision the Fly volume | Open — spending |
+| 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | Open — spending |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
-## Open decisions, both waiting on the owner
+## Decisions, both now closed
 
 **Release-manifest schema version — closed 12 September. No change needed.**
 The concern was that fixing the Gemini thinking configuration and the
@@ -52,19 +54,21 @@ there is nothing to fix: thinking costs zero tokens and 1024 is ample. Keep v2,
 keep the pins, write no migration. Reopen this only if a future measurement
 shows thinking actually consuming budget.
 
-**Live E.V is broken for every question; cause identified 11 September.** Not a
-key, corpus or machine fault — the deployed backend is healthy. `/health`
-returns `ok`, 69 chunks, corpus `10ccbbc912bc` and `answers_remaining_today: 40`,
-so the allowance is untouched and nothing has been answered. The fault is the
-transport pair. The backend's own `/openapi.json` declares
-`AskResponse {answer, citations, grounded, refused}` — the unversioned envelope —
-while the deployed frontend bundle contains `modelRoute` and "Backup model used",
-so what Vercel serves is `main`'s wire-v3 proxy. `src/lib/assistant/service.ts`
-rejects any payload whose `version` is not `3`, so every reply fails closed as
-`unavailable`. ADR-0013 predicted exactly this for shipping the candidate proxy
-without its paired Cited release. The fix is a pairing decision — roll the
-frontend back, or release both together — not a rotation. Anthropic keys still
-expire 29–30 September; the 22 September Routine covers that separately.
+**Live E.V — resolved 12 September.** The cause was the transport pair: the
+deployed backend emitted an unversioned envelope while the frontend required
+wire v3, so every reply failed closed. Fixed by deploying the paired backend
+rather than rotating a key or rolling the frontend back. Both sides now speak
+v3, verified against the live schema.
+
+**One consequence to know about.** The ledger was initialised with a
+carry-forward of 12 attempts, derived from September's Anthropic usage
+(51,849 input tokens, about 9 calls, rounded up). But the **effective daily
+ceiling is 10 attempts, not 40** — the $0.40 daily money cap binds before the
+40-attempt cap at $0.04 per reservation. Carrying 12 charged $0.48 to today,
+so `answers_remaining_today` is 0 until 00:00 UTC. Any carry-forward of 10 or
+more would have done this. September is unaffected: $1.52 and 38 attempts
+remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
+to regain allowance is the exact operation the runbook prohibits.
 
 ## The price bound, measured
 
@@ -123,8 +127,12 @@ properly rather than extrapolating from one.
 The 11 September release packet lists four blockers "that are not owner-only".
 Checked against the actual CI run for `cited` on 12 September, three are closed:
 
-- **Linux container not built** — CI builds the image on Ubuntu every run. Local
-  Docker was never needed: `fly deploy --remote-only` builds on Fly's builder.
+- **Linux container not built** — CI builds the image on Ubuntu every run, and
+  local Docker was never needed since `fly deploy --remote-only` builds on Fly's
+  builder. But CI only *built* it: the first deploy crash-looped ten times on a
+  missing `packaging`, because a package in both requirement locks never reached
+  `/install`. Fixed in `omarjosephf/cited#10`, which also makes CI start the
+  container and import the app. Building is not running.
 - **Python 3.12.13 not exercised** — CI runs on exactly 3.12.13. Only 3.13 is
   installed locally, and the `3.12` mypy cache in the backend tree is stale from
   the old machine, not evidence of a local interpreter.
