@@ -1,6 +1,6 @@
 # Current state
 
-Updated 11 September 2026. This file is what a fresh session should read first.
+Updated 12 September 2026. This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -55,19 +55,20 @@ recorded manifests stay valid. Do not start this work without an answer — and
 measure first, because if 1024 proves sufficient the change is unnecessary and
 the whole five-file migration disappears.
 
-**Live E.V is broken for every question; cause identified 11 September.** Not a
-key, corpus or machine fault — the deployed backend is healthy. `/health`
-returns `ok`, 69 chunks, corpus `10ccbbc912bc` and `answers_remaining_today: 40`,
-so the allowance is untouched and nothing has been answered. The fault is the
-transport pair. The backend's own `/openapi.json` declares
-`AskResponse {answer, citations, grounded, refused}` — the unversioned envelope —
-while the deployed frontend bundle contains `modelRoute` and "Backup model used",
-so what Vercel serves is `main`'s wire-v3 proxy. `src/lib/assistant/service.ts`
-rejects any payload whose `version` is not `3`, so every reply fails closed as
-`unavailable`. ADR-0013 predicted exactly this for shipping the candidate proxy
-without its paired Cited release. The fix is a pairing decision — roll the
-frontend back, or release both together — not a rotation. Anthropic keys still
-expire 29–30 September; the 22 September Routine covers that separately.
+**Live E.V is broken for every question; cause identified overnight on 11–12
+September.** Not a key, corpus or machine fault — the deployed backend is
+healthy. `/health` returns `ok`, 69 chunks, corpus `10ccbbc912bc` and
+`answers_remaining_today: 40`, so the allowance is untouched and nothing has
+been answered. The fault is the transport pair. The backend's own
+`/openapi.json` declares `AskResponse {answer, citations, grounded, refused}` —
+the unversioned envelope — while the deployed frontend bundle contains
+`modelRoute` and "Backup model used", so what Vercel serves is `main`'s wire-v3
+proxy. `src/lib/assistant/service.ts` rejects any payload whose `version` is not
+`3`, so every reply fails closed as `unavailable`. ADR-0013 predicted exactly
+this for shipping the candidate proxy without its paired Cited release. The fix
+is a pairing decision — roll the frontend back, or release both together — not a
+rotation. Anthropic keys still expire 29–30 September; the 22 September Routine
+covers that separately.
 
 ## What is known about the price bound
 
