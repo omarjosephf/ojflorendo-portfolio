@@ -174,7 +174,12 @@ def main() -> int:
     }
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    # LF explicitly: .gitattributes stores this repository with LF, and ADR-0000
+    # records what a CRLF rendering cost the last time a digest was taken of a
+    # file whose line endings depended on the machine that wrote it.
+    args.output.write_text(
+        json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
 
     s = report["summary"]
     print(f"corpus {checksum[:12]}  {s['chunkCount'] if 'chunkCount' in s else report['chunkCount']} chunks  top-k {k}")
