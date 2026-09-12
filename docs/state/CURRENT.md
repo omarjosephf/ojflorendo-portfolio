@@ -25,13 +25,27 @@ every answer since 10 September is fixed: the backend's own OpenAPI now declares
 model_route]`, exactly the key set `service.ts` requires. It cannot answer until
 00:00 UTC on 13 September — see the budget note below.
 
-**Source and production now disagree on the corpus, deliberately.** Production
-serves `9eacd1593d6a`. The working tree is `7bddb04dedc7` after the 12 September
-retrieval fix, which is uncommitted. The service recomputes the digest at startup
-and **refuses to start on a mismatch**, so the frontend commit, the re-exported
-corpus and the backend deploy have to move together, and
-`cited/eval/portfolio-source.json` must be repinned after the frontend commit
-exists — until it is, backend CI scores the old corpus and passes regardless.
+**Source and production disagree on the corpus, and nothing at runtime says so.**
+`main` carries `7bddb04dedc7`, the 12 September retrieval fix, merged as
+`f53ddda` in PR #64. Production still serves `9eacd1593d6a`, confirmed from
+`GET /health` at 19:33 UTC on 12 September. The fix is merged and not live.
+
+Nothing detects that gap while it lasts. `service.ts` sends only the question
+and the recent history; no digest crosses the wire. The checksum guard is the
+backend verifying *its own* bundled corpus at startup and **refusing to start on
+a mismatch** — it catches a bad copy on the serving side and cannot see that the
+authoring side has moved.
+
+`cited/deploy/oj-assistant/` is a build artifact, not a commit: `deploy/*` is
+gitignored there. CI rebuilds it from the commit pinned in
+`cited/eval/portfolio-source.json`, and a machine deploy ships whatever
+`scripts/export-assistant-corpus.mjs` last wrote into it. The pin governs what
+CI scores; the local export governs what `fly deploy` uploads. The pin is now
+`f53ddda` — it was `b6fecb7c`, which is why the retrieval gate had been passing
+over a corpus nobody ships. Closing the gap is one owner-approved backend
+deploy, then confirming `/health` reports `7bddb04dedc7`. Until then every
+answer E.V gives comes from the pre-fix corpus, including the first real
+visitor traffic when the ledger unfreezes at 00:00 UTC on 13 September.
 
 **RAG management panel** — `/manage` returns 404 in production **by design**,
 asserted by `e2e/management-disabled.spec.ts`. Staging now has all ten
@@ -45,7 +59,7 @@ but is not activated.
 | 1 | Commit the frontend candidate | Done — merged `b6fecb7` |
 | 2 | Commit the backend candidate, repin eval, re-run | Done — merged `b94e886` in `omarjosephf/cited` |
 | 3 | Owner visual and content review on a real device | Open |
-| 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, retrieval now 50/50 |
+| 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, 50/50 in source; not yet deployed |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | Open — spending |
