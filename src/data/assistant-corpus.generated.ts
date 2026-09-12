@@ -23,7 +23,7 @@ export const assistantCorpusFiles: readonly AssistantCorpusFile[] = [
   { path: "how-oj-works.md", digest: "0ab01bf4a0a0e5402eec90d8af2f27bd583d1d2bb0464a6b40bd8277d88fd479" },
   { path: "project-cited.md", digest: "bba49db5ca74672b5429f93496da79e59347f2e2872569eb8bc7de65ff337339" },
   { path: "project-portfolio-platform.md", digest: "5fbcd1a2713a82d338120882d0c6a6fad59fcc510b71df44ff6747c3eb46bcf0" },
-  { path: "services.md", digest: "61e43d428e3d97214cacfe160d1948904593d414aa365eff737116e6ec4db007" },
+  { path: "services.md", digest: "baba51f5942517c1a6d009f881bfdf3b5b3bf48417cf4aead4352405c4b57b92" },
   { path: "skills.md", digest: "eb71e95ab21871f4ff718447c15d1b8cd6effbf94da5e2344410450409c6be79" },
 ];
 
@@ -35,4 +35,4 @@ export const assistantCorpusFiles: readonly AssistantCorpusFile[] = [
  * process rather than answering confidently from the wrong content.
  */
 export const assistantCorpusChecksum =
-  "9eacd1593d6ab0d61469c1bf33dae903e0a5f2b74c835f7b0082a22c8167fd0b";
+  "7bddb04dedc79de8c689b5f8c6f4e276c5ae1f383a9cc29353111c26de9654bc";

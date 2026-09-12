@@ -25,19 +25,27 @@ every answer since 10 September is fixed: the backend's own OpenAPI now declares
 model_route]`, exactly the key set `service.ts` requires. It cannot answer until
 00:00 UTC on 13 September — see the budget note below.
 
+**Source and production now disagree on the corpus, deliberately.** Production
+serves `9eacd1593d6a`. The working tree is `7bddb04dedc7` after the 12 September
+retrieval fix, which is uncommitted. The service recomputes the digest at startup
+and **refuses to start on a mismatch**, so the frontend commit, the re-exported
+corpus and the backend deploy have to move together, and
+`cited/eval/portfolio-source.json` must be repinned after the frontend commit
+exists — until it is, backend CI scores the old corpus and passes regardless.
+
 **RAG management panel** — `/manage` returns 404 in production **by design**,
 asserted by `e2e/management-disabled.spec.ts`. Staging now has all ten
 migrations applied. The encrypted backup path is no longer blocked by migrations
 but is not activated.
 
-## Owner-gated actions: 4 of 9 complete
+## Owner-gated actions: 5 of 9 complete
 
 | # | Action | State |
 | --- | --- | --- |
 | 1 | Commit the frontend candidate | Done — merged `b6fecb7` |
 | 2 | Commit the backend candidate, repin eval, re-run | Done — merged `b94e886` in `omarjosephf/cited` |
 | 3 | Owner visual and content review on a real device | Open |
-| 4 | Decide the remaining retrieval miss | Open — above floor, outside critical core |
+| 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, retrieval now 50/50 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | Open — spending |
@@ -114,10 +122,14 @@ properly rather than extrapolating from one.
 - Published paid rates: **$0.30 per 1M input**, **$2.50 per 1M output including
   thinking**. An earlier note in this file said ~$0.012 per answer; the measured
   figure is ~$0.0024.
-- **Still open:** a Free Tier exists at no charge, but the pricing table marks
-  free-tier traffic "used to improve our products: Yes" against "No" for paid.
-  For an assistant receiving arbitrary visitor questions that is a threat-model
-  decision, not only a billing one. Decide it before activation.
+- **Closed 12 September: paid tier.** A Free Tier exists at no charge, but the
+  pricing table marks free-tier traffic "used to improve our products: Yes"
+  against "No" for paid. For an assistant taking arbitrary visitor questions that
+  is a threat-model decision, not a billing one, and at ~$0.36/month the saving
+  was never the point. Recorded in
+  [ADR-0020](../adr/0020-gemini-paid-tier-for-visitor-input.md). **No repo field
+  carries the tier** — confirm it in the Google console and record the date
+  in that ADR.
 - `measure-gemini-thinking.py` in the workspace root reproduces the measurement.
   It needs only `GEMINI_API_KEY` and never prints it; `--dry-run` exercises it
   with no key and no call.
@@ -133,9 +145,11 @@ Checked against the actual CI run for `cited` on 12 September, three are closed:
   missing `packaging`, because a package in both requirement locks never reached
   `/install`. Fixed in `omarjosephf/cited#10`, which also makes CI start the
   container and import the app. Building is not running.
-- **Python 3.12.13 not exercised** — CI runs on exactly 3.12.13. Only 3.13 is
-  installed locally, and the `3.12` mypy cache in the backend tree is stale from
-  the old machine, not evidence of a local interpreter.
+- **Python 3.12.13 not exercised** — closed 12 September. CI runs on exactly
+  3.12.13, and so does this machine: uv keeps it under
+  `AppData\Roaming\uv\python`. "Only 3.13 is installed" was true only of
+  `AppData\Local\Programs\Python`. The backend suite now runs locally on the
+  pinned interpreter: 793 passed, 7 skipped.
 - **Eval pinned to a pre-refinement corpus** — `eval/portfolio-source.json` pins
   `b6fecb7c`, the PR #54 merge on `origin/main`, whose `content/assistant` tree
   is byte-identical to `db774af`. CI also passes `--suite portfolio` correctly.
@@ -165,10 +179,10 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   WebSearch works. A session on the owner's own machine reaches all of them, so
   live diagnosis belongs in a local session — that is how the transport fault
   above was found. Acting on Fly or Vercel still needs the owner.
-- **Playwright/Chromium mismatch.** The container's prebuilt Chromium does not
-  match the pinned Playwright version, so browser suites fail on launch for an
-  environment reason. Rely on CI for browser evidence; the hook reports the
-  current mismatch at session start.
+- **Playwright/Chromium mismatch — not present in every worktree.** It was
+  real where it was found, but on 12 September both browser suites ran clean
+  here: 89 production and 46 management checks. Try them before assuming CI is
+  the only route to browser evidence.
 - **Supabase is on the Free plan.** Leaked-password protection is Pro-only, so
   that advisor finding cannot be closed and is not neglect. There is exactly one
   account, so a strong unique password gives the same protection.

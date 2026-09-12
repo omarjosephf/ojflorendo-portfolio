@@ -28,10 +28,10 @@ every existing system is within scope.
 
 ## AI document assistants OJ can build for clients, and the limits of the work
 
-An AI document assistant answers questions about an approved set of documents and
-shows the sources behind each answer, so the people relying on it can check the
-work. This is available now. If you want an assistant over your own documents,
-this is the service to ask about.
+OJ is available now to build AI document assistants for clients. An AI document
+assistant answers questions about an approved set of documents and shows the
+sources behind each answer, so the people relying on it can check the work. If
+you want an assistant over your own documents, this is the service to ask about.
 
 It covers retrieval grounded in the approved documents, verification of every
 quoted passage against its source, refusing questions the documents do not cover
