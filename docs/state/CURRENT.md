@@ -53,11 +53,19 @@ typed `Literal` in `src/assistant/release_manifest.py`, validator-pinned
 edit. Recommendation: introduce **v3** rather than amend v2, so previously
 recorded manifests stay valid. Do not start this work without an answer.
 
-**Live E.V is reported broken.** The deployed service expects
-`ANTHROPIC_API_KEY`. If it is erroring, the cause is on the current deployment —
-key, corpus checksum, or machine — not something the Gemini candidate fixes.
-Diagnose it on its own terms. Both Anthropic keys expire 29–30 September; a
-scheduled Routine on 22 September covers rotation.
+**Live E.V is broken for every question; cause identified 11 September.** Not a
+key, corpus or machine fault — the deployed backend is healthy. `/health`
+returns `ok`, 69 chunks, corpus `10ccbbc912bc` and `answers_remaining_today: 40`,
+so the allowance is untouched and nothing has been answered. The fault is the
+transport pair. The backend's own `/openapi.json` declares
+`AskResponse {answer, citations, grounded, refused}` — the unversioned envelope —
+while the deployed frontend bundle contains `modelRoute` and "Backup model used",
+so what Vercel serves is `main`'s wire-v3 proxy. `src/lib/assistant/service.ts`
+rejects any payload whose `version` is not `3`, so every reply fails closed as
+`unavailable`. ADR-0013 predicted exactly this for shipping the candidate proxy
+without its paired Cited release. The fix is a pairing decision — roll the
+frontend back, or release both together — not a rotation. Anthropic keys still
+expire 29–30 September; the 22 September Routine covers that separately.
 
 ## What is known about the price bound
 
@@ -86,10 +94,15 @@ Verified from the code, not from documentation:
   Workspace`). Absolute paths from before 11 September are wrong. The backend's
   virtualenv still carries baked interpreter paths from the old location, so its
   console-script shims and editable install are broken — rely on CI, or rebuild
-  the venv outside OneDrive.
-- **Egress is restricted.** `fly.io`, `vercel.com`, `ai.google.dev`, `ojfr.me`
-  and `oj-assistant.fly.dev` are all blocked from cloud sessions. WebSearch
-  works. Anything touching the live site or Fly needs the owner's terminal.
+  the venv outside OneDrive. The seven worktrees under `.codex\worktrees\` broke
+  the same way; `git worktree repair` from the clone fixed all seven on
+  12 September, and nothing was lost because the repository's own back-pointers
+  had stayed correct.
+- **Egress is restricted from cloud sessions only.** `fly.io`, `vercel.com`,
+  `ai.google.dev`, `ojfr.me` and `oj-assistant.fly.dev` are blocked there;
+  WebSearch works. A session on the owner's own machine reaches all of them, so
+  live diagnosis belongs in a local session — that is how the transport fault
+  above was found. Acting on Fly or Vercel still needs the owner.
 - **Playwright/Chromium mismatch.** The container's prebuilt Chromium does not
   match the pinned Playwright version, so browser suites fail on launch for an
   environment reason. Rely on CI for browser evidence; the hook reports the
