@@ -42,7 +42,7 @@ but is not activated.
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
-## Open decisions, both waiting on the owner
+## Decisions — one closed, one still waiting on the owner
 
 **Release-manifest schema version — closed 12 September. No change needed.**
 The concern was that fixing the Gemini thinking configuration and the
