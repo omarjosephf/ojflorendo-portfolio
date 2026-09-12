@@ -1,0 +1,83 @@
+{
+  "model": "gemini-3.5-flash-lite",
+  "results": [
+    {
+      "maxOutputTokens": 1024,
+      "thinkingLevel": null,
+      "ok": true,
+      "finishReason": "STOP",
+      "promptTokenCount": 5746,
+      "candidatesTokenCount": 284,
+      "thoughtsTokenCount": null,
+      "totalTokenCount": 6030,
+      "seconds": 1.52,
+      "estimated_usd": 0.002434,
+      "within_reservation": true
+    },
+    {
+      "maxOutputTokens": 1024,
+      "thinkingLevel": "minimal",
+      "ok": true,
+      "finishReason": "STOP",
+      "promptTokenCount": 5746,
+      "candidatesTokenCount": 293,
+      "thoughtsTokenCount": null,
+      "totalTokenCount": 6039,
+      "seconds": 1.46,
+      "estimated_usd": 0.002456,
+      "within_reservation": true
+    },
+    {
+      "maxOutputTokens": 1536,
+      "thinkingLevel": null,
+      "ok": true,
+      "finishReason": "STOP",
+      "promptTokenCount": 5746,
+      "candidatesTokenCount": 288,
+      "thoughtsTokenCount": null,
+      "totalTokenCount": 6034,
+      "seconds": 1.33,
+      "estimated_usd": 0.002444,
+      "within_reservation": true
+    },
+    {
+      "maxOutputTokens": 1536,
+      "thinkingLevel": "minimal",
+      "ok": true,
+      "finishReason": "STOP",
+      "promptTokenCount": 5746,
+      "candidatesTokenCount": 388,
+      "thoughtsTokenCount": null,
+      "totalTokenCount": 6134,
+      "seconds": 1.59,
+      "estimated_usd": 0.002694,
+      "within_reservation": true
+    },
+    {
+      "maxOutputTokens": 2048,
+      "thinkingLevel": null,
+      "ok": true,
+      "finishReason": "STOP",
+      "promptTokenCount": 5746,
+      "candidatesTokenCount": 147,
+      "thoughtsTokenCount": null,
+      "totalTokenCount": 5893,
+      "seconds": 1.0,
+      "estimated_usd": 0.002091,
+      "within_reservation": true
+    },
+    {
+      "maxOutputTokens": 2048,
+      "thinkingLevel": "minimal",
+      "ok": true,
+      "finishReason": "STOP",
+      "promptTokenCount": 5746,
+      "candidatesTokenCount": 287,
+      "thoughtsTokenCount": null,
+      "totalTokenCount": 6033,
+      "seconds": 1.31,
+      "estimated_usd": 0.002441,
+      "within_reservation": true
+    }
+  ]
+}

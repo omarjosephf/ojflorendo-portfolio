@@ -28,7 +28,7 @@ asserted by `e2e/management-disabled.spec.ts`. Staging now has all ten
 migrations applied. The encrypted backup path is no longer blocked by migrations
 but is not activated.
 
-## Owner-gated actions: 2 of 9 complete
+## Owner-gated actions: 3 of 9 complete
 
 | # | Action | State |
 | --- | --- | --- |
@@ -37,23 +37,20 @@ but is not activated.
 | 3 | Owner visual and content review on a real device | Open |
 | 4 | Decide the remaining retrieval miss | Open — above floor, outside critical core |
 | 5 | Approve and provision the Fly volume | Open — spending |
-| 6 | Verify the per-attempt price bound | Open — see below |
+| 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | Open — spending |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
 ## Open decisions, both waiting on the owner
 
-**Release-manifest schema version.** Fixing the Gemini thinking configuration
-and the output-token cap means changing `answer_effort` and `answer_max_tokens`,
-which are `const`-pinned in `docs/schemas/release-manifest-v2.schema.json`,
-typed `Literal` in `src/assistant/release_manifest.py`, validator-pinned
-`ge=1024, le=1024` in settings, and asserted in three test files and
-`fly.oj-assistant.toml`. This is a versioned contract change, not a constant
-edit. Recommendation: introduce **v3** rather than amend v2, so previously
-recorded manifests stay valid. Do not start this work without an answer — and
-measure first, because if 1024 proves sufficient the change is unnecessary and
-the whole five-file migration disappears.
+**Release-manifest schema version — closed 12 September. No change needed.**
+The concern was that fixing the Gemini thinking configuration and the
+output-token cap would mean editing `answer_effort` and `answer_max_tokens`,
+which are `const`-pinned in five places, forcing a v3 schema. Measurement showed
+there is nothing to fix: thinking costs zero tokens and 1024 is ample. Keep v2,
+keep the pins, write no migration. Reopen this only if a future measurement
+shows thinking actually consuming budget.
 
 **Live E.V is broken for every question; cause identified overnight on 11–12
 September.** Not a key, corpus or machine fault — the deployed backend is
@@ -70,44 +67,57 @@ is a pairing decision — roll the frontend back, or release both together — n
 rotation. Anthropic keys still expire 29–30 September; the 22 September Routine
 covers that separately.
 
-## What is known about the price bound
+## The price bound, measured
 
-From the code, and from Google's documentation and pricing read directly on
-12 September:
+Six real calls against `gemini-3.5-flash-lite` on 12 September, using the actual
+system prompt and four real corpus documents (`measure-gemini-thinking.py`):
 
-- `GeminiAdapter` sends **no thinking parameter at all**; `OpenAIAdapter` sends
-  `reasoning: {effort: "none"}`. The fallback is protected, the primary is not.
+| | observed | bound | headroom |
+| --- | --- | --- | --- |
+| Thinking tokens | **0** | — | — |
+| Visible output | 147–388 | 1024 cap | 2.6x |
+| Latency | 1.0–1.59 s | 3 s primary | 1.9x |
+| Cost | $0.0021–$0.0027 | $0.04 reservation | 15x |
+
+Every call returned `finishReason: STOP`. None truncated, at any cap tried
+(1024, 1536, 2048), with `thinkingLevel` both absent and explicitly `minimal`.
+
+`thoughtsTokenCount` was absent from every response, and in all six
+`totalTokenCount` equalled `promptTokenCount + candidatesTokenCount` exactly.
+Since Google defines the total as prompt + thoughts + candidates, that absence
+is a real zero rather than unreported usage.
+
+So `answer_max_tokens = 1024` stands, no `thinkingConfig` is needed, and the
+$0.04 reservation is roughly fifteen times the measured cost. **This closes
+owner-gated action 6.**
+
+The honest limit of this evidence: one question, six calls. A harder question
+could think more. Before publication, run the same measurement across the
+critical-core questions — about 50 calls for roughly $0.12 — to bound it
+properly rather than extrapolating from one.
+
+### Why the bound matters, and what remains open
+
 - `maxOutputTokens` bounds thinking and visible output together — Google's
-  wording is "including thought tokens" — so the cost ceiling holds.
-- **`minimal` is supported for `gemini-3.5-flash-lite` and is that model's
-  default.** This closes the previously unverified item: `ai.google.dev` is
-  blocked from cloud sessions but reachable from a local one. Thinking already
-  runs at its floor — but *undeclared*, so if Google changes the default E.V
-  starts truncating silently. Declare `thinkingLevel: "minimal"` explicitly
-  rather than inheriting it.
-- Full thinking-off is unavailable on Flash-Lite. On hitting the cap the call
-  returns `finishReason: MAX_TOKENS` with truncated or empty output **and is
-  still billed for the thinking**. `provider_adapters.py` rejects that as
-  `provider_finish`, which by contract does not fall back, so the reservation is
-  spent and the visitor gets an error.
-- Google advises the opposite of the shipped configuration: "To reduce cost or
-  latency without truncating responses, lower `thinking_level` … instead of
-  setting a small `max_output_tokens`."
-- Published paid rates are **$0.30 per 1M input** and **$2.50 per 1M output,
-  thinking included**. A full request plus 1024 output tokens is roughly
-  **$0.005** — not the $0.012 recorded earlier — with 2048 near $0.008 and 4096
-  near $0.013. **Cost is therefore not the binding constraint on the cap; the
-  primary's three-second budget is.** Choose the cap from measured latency.
-- A Free Tier exists at no charge, but the pricing table marks free-tier traffic
-  "used to improve our products: Yes" against "No" for paid. For an assistant
-  receiving arbitrary visitor questions that is a threat-model decision, not
-  only a billing one.
-- `measure-gemini-thinking.py` in the workspace root issues the real request
-  shape against real corpus evidence and reports `thoughtsTokenCount`,
-  `candidatesTokenCount`, `finishReason` and latency across several caps. It
-  needs only `GEMINI_API_KEY` and never prints it; `--dry-run` exercises it with
-  no key and no call. **Run it before changing any cap** — if 1024 already
-  completes comfortably, no code change and no schema bump are needed at all.
+  wording is "including thought tokens". Exceeding it returns
+  `finishReason: MAX_TOKENS` with truncated output, **still billed for the
+  thinking**. `provider_adapters.py` rejects that as `provider_finish`, which by
+  contract does not fall back, so the reservation is spent and the visitor gets
+  an error. That is the failure the measurement above rules out at 1024.
+- `minimal` is supported for `gemini-3.5-flash-lite` and is its default, so the
+  adapter sending no thinking parameter already gets the floor. Measurement
+  found no difference between absent and explicit `minimal`, so declaring it
+  buys nothing today.
+- Published paid rates: **$0.30 per 1M input**, **$2.50 per 1M output including
+  thinking**. An earlier note in this file said ~$0.012 per answer; the measured
+  figure is ~$0.0024.
+- **Still open:** a Free Tier exists at no charge, but the pricing table marks
+  free-tier traffic "used to improve our products: Yes" against "No" for paid.
+  For an assistant receiving arbitrary visitor questions that is a threat-model
+  decision, not only a billing one. Decide it before activation.
+- `measure-gemini-thinking.py` in the workspace root reproduces the measurement.
+  It needs only `GEMINI_API_KEY` and never prints it; `--dry-run` exercises it
+  with no key and no call.
 
 ## Release-packet blockers that CI already closes
 
