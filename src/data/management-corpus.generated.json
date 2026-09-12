@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "corpusSha256": "9eacd1593d6ab0d61469c1bf33dae903e0a5f2b74c835f7b0082a22c8167fd0b",
+  "corpusSha256": "7bddb04dedc79de8c689b5f8c6f4e276c5ae1f383a9cc29353111c26de9654bc",
   "model": "BAAI/bge-small-en-v1.5",
   "tokenizerSha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
   "tokenLimit": 512,
   "targetWords": 180,
   "overlapWords": 40,
-  "generatedAt": "2026-09-10T22:33:07.396038+00:00",
+  "generatedAt": "2026-09-12T18:48:01.555992+00:00",
   "chunks": [
     {
       "index": 0,
@@ -544,9 +544,9 @@
       "source": "services.md",
       "section": "AI document assistants OJ can build for clients, and the limits of the work",
       "page": null,
-      "text": "An AI document assistant answers questions about an approved set of documents and shows the sources behind each answer, so the people relying on it can check the work. This is available now. If you want an assistant over your own documents, this is the service to ask about. It covers retrieval grounded in the approved documents, verification of every quoted passage against its source, refusing questions the documents do not cover rather than guessing, cost controls and rate limiting, an evaluation set that measures the answers, and a management view over questions, answers and gaps in the knowledge. Scope, stated limitations and handover notes are agreed as part of the work.",
-      "tokens": 146,
-      "indexedSha256": "3f1850f0f1e628d733f5fe2de04e4fd606caeee8101c8836b26523e7911e81f5"
+      "text": "OJ is available now to build AI document assistants for clients. An AI document assistant answers questions about an approved set of documents and shows the sources behind each answer, so the people relying on it can check the work. If you want an assistant over your own documents, this is the service to ask about. It covers retrieval grounded in the approved documents, verification of every quoted passage against its source, refusing questions the documents do not cover rather than guessing, cost controls and rate limiting, an evaluation set that measures the answers, and a management view over questions, answers and gaps in the knowledge. Scope, stated limitations and handover notes are agreed as part of the work.",
+      "tokens": 154,
+      "indexedSha256": "9ba343ffef8bd10906ef0e28e848ebca21c2c130e248cdb6ec2956f32b8470d9"
     },
     {
       "index": 60,
