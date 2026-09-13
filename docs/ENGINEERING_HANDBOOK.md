@@ -1009,6 +1009,7 @@ node scripts/verify-dependency-audit.mjs
 npm run docs:check-anchors
 npm run docs:check-handbook-gate
 npm run docs:check-migration-manifest
+npm run docs:check-budget-envelope
 npm run lint
 npm run typecheck:app
 npm run typecheck:tests

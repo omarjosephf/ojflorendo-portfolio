@@ -60,7 +60,7 @@ but is not activated.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | Approved 13 Sep (~$0.34, 67 paid calls); free rehearsal passed; capture and independent labels outstanding |
+| 7 | Approve funded answer captures | Approved 13 Sep; free rehearsal passed. **Capture blocked** — needs both ledgers and `--max-paid-calls 150`; see the section below |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
@@ -90,29 +90,62 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
-## Action 7: ready to capture, one owner step left
+## Action 7: blocked, and what it needs
 
-The environment is prepared and verified on 13 September. What remains is the
-paid run itself, which only the owner can make.
+The environment is prepared for a *free* run, and that is all. On 13 September
+the paid command was run and refused before any provider call:
+
+> Paid evaluation capture is disabled without an existing carried-forward
+> qualification allowance (--allowance-ledger and --allowance-id).
+
+Two things block it, and the second is not visible until the first is cleared.
+
+- **Neither ledger exists.** `cmd_eval` refuses without `--allowance-ledger` and
+  `--allowance-id`, and separately requires durable service accounting — a local
+  `PersistentBudget`. Both are operator-initialised by design and neither may be
+  recreated later to regain authority, so their ceilings are permanent choices.
+- **`--max-paid-calls 67` refuses on its own.** Before dispatching anything the
+  capture demands room for two attempts per case (`cli.py`:
+  `maximum = 2 * len(questions)`), so the 75-question suite needs **150**. That
+  is compared against `min(--max-paid-calls, service, allowance)`, so any ceiling
+  below 150 fails. Use `--max-paid-calls 150`; expected real spend is unchanged.
+- **A partial run cannot substitute.** `release_manifest.py` requires the saved
+  cases to equal the versioned question set exactly, so the suite cannot be
+  sliced across several smaller runs and stapled together.
+
+**The root cause was one envelope doing two jobs.** The capture inherited the
+live service's spend limits, because both build from the same `Settings` model.
+40 attempts and $0.40/day bound *visitor* traffic; they were never sized for a
+one-off qualification run needing 150.
+[ADR-0015](../adr/0015-durable-budget-and-provider-order.md) now records a
+capture-scoped envelope of 150 attempts and US$6.00, the live service unchanged
+at 40/200 and US$0.40/US$2.00. `docs:check-budget-envelope` keeps that envelope
+and the question count in step, so a suite that outgrows it fails CI rather than
+a paid run.
+
+Cost: 67 paid calls are expected of 75 questions; 8 are decided by pre-model
+policy guards and cost nothing. At the measured $0.0024 per call that is about
+**$0.16**. The $0.34 recorded when this action was approved does not reconcile
+with the measured rate — treat it as the approved ceiling, not a forecast. The
+US$6.00 envelope is reservation headroom at the pinned $0.04, not money spent.
+
+Still true, and still worth knowing:
 
 - `cited-release-candidate/.venv` is **Python 3.12.10** with the locked
   dependencies installed; `import assistant, numpy` succeeds. CI uses 3.12.13.
   The locks are compiled for 3.12 and select by `cp312` ABI, so the patch
   difference does not change which wheels install. Record it in `--reason`
   rather than leaving it unstated.
-- The free rehearsal passed. `--paid` is opt-in; without it the command scores
-  retrieval and stops, which is the cheap way to prove the pipeline first.
 - **`GEMINI_API_KEY` lives only in the owner's PowerShell session.** It is not
   persisted and is gone when that window closes. Set it with a masked
   `Read-Host -AsSecureString`; setting it inline writes the key to
   `ConsoleHost_history.txt` on disk.
-- A paid run requires `--paid`, `--max-paid-calls`, `--output` **and**
-  `--spec-version 3.0` together. Omitting the spec version refuses the run
-  before any call is made, which is easy to mistake for a failure.
-- 67 paid calls are expected of 75 questions; 8 are decided by pre-model policy
-  guards and cost nothing. About $0.34 at the measured rate.
-- The eval carries its own ceiling and calls the provider directly. It does
-  **not** draw on the deployed service's daily allowance.
+- A paid run requires `--paid`, `--max-paid-calls`, `--output`, `--spec-version
+  3.0`, `--allowance-ledger` and `--allowance-id` together. Omitting any of them
+  refuses the run before any call is made, which is easy to mistake for a
+  failure.
+- The eval calls the provider directly and does **not** draw on the deployed
+  service's daily allowance — but it does require its own durable local ledger.
 - `--output` must name a new file; the CLI refuses to overwrite evidence, and an
   unsaved paid run has to be paid for twice.
 
@@ -196,8 +229,11 @@ properly rather than extrapolating from one.
   is a threat-model decision, not a billing one, and at ~$0.36/month the saving
   was never the point. Recorded in
   [ADR-0020](../adr/0020-gemini-paid-tier-for-visitor-input.md). **No repo field
-  carries the tier** — confirm it in the Google console and record the date
-  in that ADR.
+  carries the tier**, so it was confirmed in the console on 13 September: project
+  `EVSmartAssistant` is Tier 1 with £0.02 billed since 17 August, and a £5.00
+  monthly spend cap is set. Billed usage is the proof — free-tier traffic costs
+  nothing. The cap is Google-flagged experimental with ~10 minute latency, so it
+  is a backstop rather than a bound.
 - `measure-gemini-thinking.py` in the workspace root reproduces the measurement.
   It needs only `GEMINI_API_KEY` and never prints it; `--dry-run` exercises it
   with no key and no call.

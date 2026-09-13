@@ -62,3 +62,45 @@ See [runtime v3](../runbooks/assistant-runtime-v3.md) and
 synthetic distributed qualification only. The current SQLite service/capture
 path remains active in the candidate. The new shared adapter is disconnected;
 real carry-forward, host integration and activation remain separate gates.
+## Capture-scoped reservation envelope, 13 September 2026
+
+The maxima above — 40/200 attempts and US$0.40/US$2.00 — bound *visitor-driven*
+spend on the live service. The qualification capture inherits them, because
+`cmd_eval` builds its ledger from the same `Settings` model and the same
+`PersistentBudget`. One envelope is doing two unrelated jobs, and they disagree.
+
+Before dispatching anything the capture requires room for two attempts per case
+(`cli.py`: `maximum = 2 * len(questions)`), so the 75-question portfolio suite
+needs **150 attempts** of headroom. The service envelope admits at most 40
+attempts, and the money limits bind first at 10. A complete capture over the
+versioned suite is therefore unreachable, and a partial one cannot stand in for
+it: `release_manifest.py` requires the saved cases to equal the versioned
+question set exactly.
+
+Decision: permit a **capture-scoped** ledger, distinct from the live service
+ledger, at 150 attempts and US$6.00 daily and monthly reservation. The live
+service envelope is unchanged at 40/200 attempts and US$0.40/US$2.00, and
+production continues to set those explicitly in `fly.oj-assistant.toml`.
+
+US$6.00 is reservation headroom at the pinned US$0.04 per attempt, not a spend
+forecast. The 12 September measurement recorded in
+[current state](../state/CURRENT.md) puts actual cost at US$0.0024 per call, so a
+complete 75-question capture is expected to cost about **US$0.18**. The
+reservation itself stays at US$0.04: it is pinned by this ADR and written into
+every ledger's table definition as `CHECK(micro_usd = 40000)`, so lowering it
+would invalidate the live ledger, which this ADR forbids replacing. Re-deriving
+the reservation from the measurement is worth doing and is not this change; it
+requires a planned carry-forward migration of the production ledger.
+
+Because the settings bounds must widen to admit the capture ledger, production's
+deployed values are no longer guarded by the schema alone. Two mechanical checks
+replace that guard, each in the repository holding the file it reads:
+
+- here, `docs:check-budget-envelope` asserts the capture envelope above is at
+  least twice the current versioned question count, so a suite that grows past
+  it fails CI rather than a paid run;
+- in `omarjosephf/cited`, `test_deployment.py` already asserts that
+  `fly.oj-assistant.toml` carries the live-service maxima
+  (`test_operating_caps_and_worker_settings_validate_against_runtime`), reading
+  the deployed file rather than the schema. That guard predates this change and
+  is stronger than the bound it replaces, so no new check is needed there.
