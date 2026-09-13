@@ -566,10 +566,17 @@ note = "POSSESSIVE PHRASING. \"Your model\" names the assistant as plainly as \"
 [[question]]
 id = "ground-model-question-about-another-product"
 text = "What AI model does Cited use?"
+answerable = false
+class = "not_in_corpus"
+note = "SUBJECT-BOUNDARY CASE, and the reason widening the architecture patterns needed care. This reached the architecture rule and was answered with E.V's Gemini/Luna configuration: a confident, wrong answer about a different product. It must not. It is also not answerable in the present tense: the corpus documents what the ORIGINAL demo was built with, never what Cited runs today, so a present-tense answer would be an over-claim. Verified against the live service on 13 September, which refused it. This case was first written as answerable = true, which was wrong; see the past-tense case below for the answerable form."
+
+[[question]]
+id = "ground-original-cited-demo-stack"
+text = "What was the original Cited demo built with?"
 expects = "Cited: how it is built"
 answerable = true
 class = "supported_fact"
-note = "SUBJECT-BOUNDARY CASE. The mirror of the three above, and the reason widening them needed care. This reached the architecture rule and was answered with E.V's Gemini/Luna configuration: a confident, wrong answer about a different product. It must reach the corpus, which documents Cited honestly including that its original demo ran on Claude Haiku 4.5."
+note = "The past-tense pair to the case above, and the discriminator between correct refusal and broken retrieval. Verified against the live service on 13 September: answered with a citation to project-cited.md, which proves the refusal above is grounding judgement rather than a retrieval failure. Tense is the whole difference; keep both."
 
 [[question]]
 id = "privacy-tab-retention-boundaries"
