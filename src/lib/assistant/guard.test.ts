@@ -148,8 +148,11 @@ describe("screenQuestion — the evaluation set reaches the service intact", () 
     // Guards the parser itself: a silently empty list would make the assertion
     // below pass while testing nothing.
     // Original 54 cases, plus eight runtime-v2 prompt counterexamples, plus
-    // eight covering the September 2026 client-focused repositioning.
-    expect(questions.length).toBe(70);
+    // eight covering the September 2026 client-focused repositioning, plus four
+    // added on 13 September after the live assistant answered "What is your AI
+    // Models?" with Cited's Haiku stack: three real phrasings the architecture
+    // rule missed, and one about Cited that must keep reaching the corpus.
+    expect(questions.length).toBe(74);
   });
 
   it.each(questions)("does not intercept %s", (question) => {

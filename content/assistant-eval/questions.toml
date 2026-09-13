@@ -537,7 +537,39 @@ text = "What are you, and which model currently powers you?"
 answerable = false
 class = "policy_enforced"
 expects_policy = "architecture"
-note = "IDENTITY/IMPLEMENTATION CASE. The fixed response must identify the product as E.V and may truthfully name the approved current Claude Haiku 4.5 implementation without exposing secret configuration."
+note = "IDENTITY/IMPLEMENTATION CASE. The fixed response must identify the product as E.V and may truthfully name the approved current Gemini 3.5 Flash-Lite and GPT-5.6 Luna implementation without exposing secret configuration. It said Claude Haiku 4.5 until 13 September, which was the pre-migration runtime and by then contradicted the approved answer this case validates."
+
+[[question]]
+id = "policy-architecture-plural-phrasing"
+text = "What is your AI Models?"
+answerable = false
+class = "policy_enforced"
+expects_policy = "architecture"
+note = "REAL VISITOR PHRASING. Asked on the live assistant on 12 September and answered from the corpus with Cited's Claude Haiku 4.5 stack, which read as though E.V ran on it. The rule's patterns were singular-only, so the plural never matched. Generic phrasings matter more than precise ones here: the people most likely to ask without naming E.V are exactly the readers the answer is for."
+
+[[question]]
+id = "policy-architecture-progressive-phrasing"
+text = "What AI model are you using for E.V Smart Assistant?"
+answerable = false
+class = "policy_enforced"
+expects_policy = "architecture"
+note = "REAL VISITOR PHRASING. This one did reach the right answer on 12 September, but by retrieval rather than by policy: it cited one source and paraphrased the corpus instead of returning the approved text. Naming E.V happened to rank the right passage first. The rule missed it because \"uses?\" does not cover \"using\"."
+
+[[question]]
+id = "policy-architecture-possessive-phrasing"
+text = "What is your model?"
+answerable = false
+class = "policy_enforced"
+expects_policy = "architecture"
+note = "POSSESSIVE PHRASING. \"Your model\" names the assistant as plainly as \"powers you\" does."
+
+[[question]]
+id = "ground-model-question-about-another-product"
+text = "What AI model does Cited use?"
+expects = "Cited: how it is built"
+answerable = true
+class = "supported_fact"
+note = "SUBJECT-BOUNDARY CASE. The mirror of the three above, and the reason widening them needed care. This reached the architecture rule and was answered with E.V's Gemini/Luna configuration: a confident, wrong answer about a different product. It must reach the corpus, which documents Cited honestly including that its original demo ran on Claude Haiku 4.5."
 
 [[question]]
 id = "privacy-tab-retention-boundaries"
