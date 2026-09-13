@@ -151,8 +151,10 @@ describe("screenQuestion — the evaluation set reaches the service intact", () 
     // eight covering the September 2026 client-focused repositioning, plus four
     // added on 13 September after the live assistant answered "What is your AI
     // Models?" with Cited's Haiku stack: three real phrasings the architecture
-    // rule missed, and one about Cited that must keep reaching the corpus.
-    expect(questions.length).toBe(74);
+    // rule missed, and one about Cited that must keep reaching the corpus. The
+    // 75th is its past-tense pair, added once the live service showed the
+    // present-tense form is correctly refused rather than answered.
+    expect(questions.length).toBe(75);
   });
 
   it.each(questions)("does not intercept %s", (question) => {
