@@ -17,7 +17,7 @@ export function Now() {
       id="now"
       eyebrow="02 / Now"
       title="What I'm building towards."
-      intro="My current focus, updated September 2026."
+      intro={`My current focus, updated ${now.updated}.`}
     >
       <div className="grid gap-5 sm:grid-cols-2">
         {now.items.map((item, i) => {
