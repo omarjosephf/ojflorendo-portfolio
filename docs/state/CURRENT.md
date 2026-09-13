@@ -60,7 +60,7 @@ but is not activated.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | Approved 13 Sep; free rehearsal passed. **Capture blocked** — needs both ledgers and `--max-paid-calls 150`; see the section below |
+| 7 | Approve funded answer captures | Approved 13 Sep; free rehearsal passed. **Capture blocked in `omarjosephf/cited`** — `settings.py` bounds reject the envelope ADR-0015 authorised; plan agreed 13 Sep, see below |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
@@ -90,7 +90,7 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
-## Action 7: blocked, and what it needs
+## Action 7: blocked on a code change that was authorised but never written
 
 The environment is prepared for a *free* run, and that is all. On 13 September
 the paid command was run and refused before any provider call:
@@ -98,8 +98,28 @@ the paid command was run and refused before any provider call:
 > Paid evaluation capture is disabled without an existing carried-forward
 > qualification allowance (--allowance-ledger and --allowance-id).
 
-Two things block it, and the second is not visible until the first is cleared.
+Three things block it, and each is invisible until the one before it clears.
+The third was found on 13 September by reading the code rather than this file,
+which until now asserted the run was ready to go. It was not.
 
+- **The settings bounds still reject the capture envelope.** This is the real
+  blocker, and no amount of correct command-line arguments gets past it.
+  `src/assistant/settings.py:153-156` in `omarjosephf/cited` hard-caps every
+  budget field at exactly the live service's values, so pydantic refuses the
+  capture ceilings before any ledger is opened:
+
+  | Field | Bound today | Capture needs | |
+  | --- | --- | --- | --- |
+  | `daily_answer_limit` | `le=40` | 150 | blocks |
+  | `monthly_answer_limit` | `le=200` | 150 | fits |
+  | `daily_budget_micro_usd` | `le=400_000` | `6_000_000` | blocks |
+  | `monthly_budget_micro_usd` | `le=2_000_000` | `6_000_000` | blocks |
+
+  Three bounds need widening, not four. `cmd_eval` builds `Settings(...)` and
+  passes it to `service_budget(settings)` (`cli.py:249-254`), so there is no
+  path around the model. ADR-0015's amendment authorised this widening in
+  writing; the code was never written. `omarjosephf/cited` `main` is clean at
+  `5d2dd8f` with nothing matching it in history.
 - **Neither ledger exists.** `cmd_eval` refuses without `--allowance-ledger` and
   `--allowance-id`, and separately requires durable service accounting — a local
   `PersistentBudget`. Both are operator-initialised by design and neither may be
@@ -107,8 +127,10 @@ Two things block it, and the second is not visible until the first is cleared.
 - **`--max-paid-calls 67` refuses on its own.** Before dispatching anything the
   capture demands room for two attempts per case (`cli.py`:
   `maximum = 2 * len(questions)`), so the 75-question suite needs **150**. That
-  is compared against `min(--max-paid-calls, service, allowance)`, so any ceiling
-  below 150 fails. Use `--max-paid-calls 150`; expected real spend is unchanged.
+  is compared against `min(--max-paid-calls, service, allowance)`
+  (`capture.py:131`), so all three ceilings must independently clear 150. Note
+  that US$6.00 is exactly 150 x $0.04: the money bound and the attempt bound
+  coincide, with no slack between them.
 - **A partial run cannot substitute.** `release_manifest.py` requires the saved
   cases to equal the versioned question set exactly, so the suite cannot be
   sliced across several smaller runs and stapled together.
@@ -123,14 +145,54 @@ at 40/200 and US$0.40/US$2.00. `docs:check-budget-envelope` keeps that envelope
 and the question count in step, so a suite that outgrows it fails CI rather than
 a paid run.
 
+## Action 7: the approved plan, decided 13 September
+
+Owner-approved on 13 September. The work is in `omarjosephf/cited`, not this
+repository, and is still Action 7.
+
+1. **Widen the three bounds in `settings.py`, as ADR-0015 already specifies.**
+   The alternative considered was a separate capture-scoped settings type,
+   keeping `Settings` pinned at production values. That is arguably the better
+   design — it splits the overloaded envelope instead of widening it — but
+   ADR-0015 already chose widening, stated the trade-off, and named the
+   replacement guards. Reopening it buys a distinction the deployment test
+   already enforces. **If that design is ever revisited, it is an ADR amendment,
+   not a quiet implementation choice.**
+2. **Add a CLI entrypoint for the allowance ledger**, mirroring the one
+   `persistent_budget` already has. `QualificationAllowance.initialize`
+   (`capture.py:43`) is a static method with no `__main__`, so today the only
+   way to create the ledger is an improvised snippet. Ledger creation is
+   permanent by design and cannot be redone to regain authority; improvising it
+   is the class of mistake that has no undo. Treated as non-negotiable, not a
+   nicety.
+3. **Initialise both ledgers.** Allowance ceiling **150**, carry-forward **0** —
+   there is no prior qualification spend on record to reconcile. Both values are
+   permanent; confirm them out loud at the moment of creation rather than
+   trusting this line.
+4. **Run the capture**, then the free review steps.
+
+Production stays guarded throughout by
+`test_operating_caps_and_worker_settings_validate_against_runtime`
+(`tests/test_deployment.py:417`), which reads the deployed
+`fly.oj-assistant.toml` and asserts 40/200 and the 10/50 reservation counts.
+That test is independent of the schema bounds and is unaffected by widening
+them — which is precisely why ADR-0015 judged the schema guard redundant.
+
 Cost: 67 paid calls are expected of 75 questions; 8 are decided by pre-model
 policy guards and cost nothing. At the measured $0.0024 per call that is about
 **$0.16**. The $0.34 recorded when this action was approved does not reconcile
 with the measured rate — treat it as the approved ceiling, not a forecast. The
 US$6.00 envelope is reservation headroom at the pinned $0.04, not money spent.
+None of the above changes the cost.
 
 Still true, and still worth knowing:
 
+- **`Invoke-PaidEvaluation.ps1` in the workspace root is stale and will
+  mislead you.** It is built for the retired Anthropic path: it validates an
+  `sk-ant-` key prefix, defaults to `-SpecVersion v2.1` and 60 calls against a
+  54-question set, and passes no ledger flags at all. It fails with the same
+  generic refusal as a genuine budget problem. Rewrite or delete it before the
+  run rather than discovering this mid-capture.
 - `cited-release-candidate/.venv` is **Python 3.12.10** with the locked
   dependencies installed; `import assistant, numpy` succeeds. CI uses 3.12.13.
   The locks are compiled for 3.12 and select by `cp312` ABI, so the patch
