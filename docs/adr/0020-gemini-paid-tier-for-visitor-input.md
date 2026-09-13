@@ -1,6 +1,6 @@
 # ADR-0020: Use the Gemini paid tier for visitor input
 
-- Status: Accepted — owner decision 12 September 2026; console confirmation pending
+- Status: Accepted — owner decision 12 September 2026; console-confirmed 13 September 2026
 - Date: 2026-09-12
 - Owner: OJ Florendo
 - Risk: R2 for the decision and this record; confirming or changing the Google
@@ -127,3 +127,31 @@ superseding this one, a visitor-facing disclosure, and explicit owner approval.
 Disabling answering entirely — by unsetting `ASSISTANT_SERVICE_URL`, per the
 corpus runbook — remains the fast path if the provider relationship must be cut,
 and leaves the portfolio fully usable.
+
+## Console confirmation, 13 September 2026
+
+Confirmed by the owner in Google AI Studio against project `EVSmartAssistant`,
+which resolves the "confirmation pending" status this ADR carried:
+
+- The project is on **Tier 1**, a paid tier. The decisive evidence is not the
+  badge but the billed usage — **£0.02 across 17 August to 13 September 2026**.
+  Free-tier traffic is not billed at all, so a non-zero invoice is positive proof
+  the traffic is not on the tier whose data is used to improve Google's products.
+- A **monthly spend cap of £5.00** is set, £0.02 consumed, resetting on the first
+  of each month (PST).
+
+Two things about that cap, so it is not credited with more than it does. Google
+marks it **Experimental** and warns that *"overages may occur during ~10 minute
+latency"*, so it is a backstop, not a hard bound — the controls that actually
+bound spend remain the reservation ledger in
+[ADR-0015](0015-durable-budget-and-provider-order.md) and the per-attempt cap.
+It also covers Gemini API usage only, not other Google Cloud products in the same
+project.
+
+**The console reports GBP; the ledger counts USD micro-dollars.** The US$0.40
+daily and US$2.00 monthly service limits, and the US$0.04 reservation, are not
+denominated in the currency the invoice arrives in. At present the £5.00 cap sits
+comfortably above the service's own US$2.00 monthly ceiling plus the one-off
+qualification capture, so nothing is at risk — but the two figures must not be
+compared directly, and a rate move changes the headroom without changing either
+number.

@@ -57,6 +57,9 @@ jobs:
       - name: Reviewed-migration manifest
         run: npm run docs:check-migration-manifest
 
+      - name: Capture budget envelope
+        run: npm run docs:check-budget-envelope
+
       - name: Lint
         run: npm run lint
 
