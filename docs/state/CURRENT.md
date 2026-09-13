@@ -1,6 +1,6 @@
 # Current state
 
-Updated 12 September 2026. This file is what a fresh session should read first.
+Updated 13 September 2026. This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -17,52 +17,50 @@ in the repository.
 
 **Portfolio website** — released 10 September, live, CI green. Effectively done.
 
-**E.V assistant** — **deployed 12 September.** The Gemini/Luna runtime is live on
-Fly, serving the refined corpus `9eacd1593d6a` over wire v3, on a pinned machine
-with the durable ledger mounted at `/data`. The transport mismatch that broke
-every answer since 10 September is fixed: the backend's own OpenAPI now declares
-`version: const 3` with `AnsweredResponse [version, state, answer, citations,
-model_route]`, exactly the key set `service.ts` requires. It cannot answer until
-00:00 UTC on 13 September — see the budget note below.
+**E.V assistant** — **deployed and verified 13 September.** The Gemini/Luna
+runtime is live on Fly over wire v3, on a pinned machine with the durable ledger
+mounted at `/data`, now serving corpus `7bddb04dedc7`.
 
-**Source and production disagree on the corpus, and nothing at runtime says so.**
-`main` carries `7bddb04dedc7`, the 12 September retrieval fix, merged as
-`f53ddda` in PR #64. Production still serves `9eacd1593d6a`, confirmed from
-`GET /health` at 19:33 UTC on 12 September. The fix is merged and not live.
+The source/production corpus gap is **closed**. It is worth recording what the
+13 September deploy carried, because it was three changes at once: the corpus
+move from `9eacd1593d6a` to `7bddb04dedc7`, the 12 September retrieval fix, and
+the architecture-routing fix from `omarjosephf/cited#13`. Verified afterwards
+against the live service, not inferred:
 
-Nothing detects that gap while it lasts. `service.ts` sends only the question
-and the recent history; no digest crosses the wire. The checksum guard is the
-backend verifying *its own* bundled corpus at startup and **refusing to start on
-a mismatch** — it catches a bad copy on the serving side and cannot see that the
-authoring side has moved.
+- `GET /health` reports `7bddb04dedc7`, matching the checksum the export printed
+  on the owner's machine and the one this repository computes. Two independent
+  machines, same digest.
+- "What is your AI Models?" returns the approved architecture text with **zero
+  citations**, which is what distinguishes the fixed policy response from a
+  generated one.
+- A question naming Cited no longer receives E.V's own configuration.
+- Retrieval still reaches `project-cited.md` when asked in the past tense, so
+  the present-tense refusal is grounding judgement rather than a retrieval
+  failure.
 
-`cited/deploy/oj-assistant/` is a build artifact, not a commit: `deploy/*` is
-gitignored there. CI rebuilds it from the commit pinned in
-`cited/eval/portfolio-source.json`, and a machine deploy ships whatever
-`scripts/export-assistant-corpus.mjs` last wrote into it. The pin governs what
-CI scores; the local export governs what `fly deploy` uploads. The pin is now
-`f53ddda` — it was `b6fecb7c`, which is why the retrieval gate had been passing
-over a corpus nobody ships. Closing the gap is one owner-approved backend
-deploy, then confirming `/health` reports `7bddb04dedc7`. Until then every
-answer E.V gives comes from the pre-fix corpus, including the first real
-visitor traffic when the ledger unfreezes at 00:00 UTC on 13 September.
+**The durable ledger survived a real machine restart.**
+`answers_remaining_today` came back at 3 rather than resetting to a full
+allowance. That is the first proof under production conditions of the property
+the Fly volume exists for; the old in-process counter reset on every machine
+start.
+
 
 **RAG management panel** — `/manage` returns 404 in production **by design**,
 asserted by `e2e/management-disabled.spec.ts`. Staging now has all ten
 migrations applied. The encrypted backup path is no longer blocked by migrations
 but is not activated.
 
-## Owner-gated actions: 5 of 9 complete
+## Owner-gated actions: 6 of 9 complete
 
 | # | Action | State |
 | --- | --- | --- |
 | 1 | Commit the frontend candidate | Done — merged `b6fecb7` |
 | 2 | Commit the backend candidate, repin eval, re-run | Done — merged `b94e886` in `omarjosephf/cited` |
-| 3 | Owner visual and content review on a real device | Open |
-| 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, 50/50 in source; not yet deployed |
+| 3 | Owner visual and content review on a real device | Done — 13 Sep, desktop light/dark and phone |
+| 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | Open — spending |
+| 7 | Approve funded answer captures | Approved 13 Sep (~$0.34, 67 paid calls); free rehearsal passed; capture and independent labels outstanding |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
@@ -91,6 +89,32 @@ so `answers_remaining_today` is 0 until 00:00 UTC. Any carry-forward of 10 or
 more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
+
+## Retrieval as measured on 13 September
+
+A free rehearsal run (no `--paid`, so retrieval only) against the deployed
+corpus `7bddb04dedc7` and the 75-question set at `2caff9d`:
+
+| | |
+| --- | --- |
+| Hit rate | 100% (expected section in top-k) |
+| Critical core | 100% of 16 — **PASS** |
+| top-1 | 76% |
+| Separation | -0.189, negative as ADR-0002 describes |
+
+**Three questions sit at rank 4, and `--top-k` is 4.** They pass, but one rank
+from missing entirely:
+
+- *"What was the original Cited demo built with?"* — added in PR #67 as evidence
+  that retrieval reaches `project-cited.md`. It does, marginally. The PR called
+  that "retrieval works", which was true but overstated.
+- *"What kind of work does OJ take on now?"* — the question the 12 September
+  retrieval fix was written for. The fix worked, and only just.
+- *"And what technologies did he use for that one?"*
+
+Nothing here is failing, so nothing is proposed. Recorded because a rank-4 pass
+and a rank-1 pass read identically in the headline number, and the next corpus
+edit could push any of these out without touching the hit rate until it does.
 
 ## The price bound, measured
 
