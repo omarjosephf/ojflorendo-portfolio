@@ -90,6 +90,36 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
+## Action 7: ready to capture, one owner step left
+
+The environment is prepared and verified on 13 September. What remains is the
+paid run itself, which only the owner can make.
+
+- `cited-release-candidate/.venv` is **Python 3.12.10** with the locked
+  dependencies installed; `import assistant, numpy` succeeds. CI uses 3.12.13.
+  The locks are compiled for 3.12 and select by `cp312` ABI, so the patch
+  difference does not change which wheels install. Record it in `--reason`
+  rather than leaving it unstated.
+- The free rehearsal passed. `--paid` is opt-in; without it the command scores
+  retrieval and stops, which is the cheap way to prove the pipeline first.
+- **`GEMINI_API_KEY` lives only in the owner's PowerShell session.** It is not
+  persisted and is gone when that window closes. Set it with a masked
+  `Read-Host -AsSecureString`; setting it inline writes the key to
+  `ConsoleHost_history.txt` on disk.
+- A paid run requires `--paid`, `--max-paid-calls`, `--output` **and**
+  `--spec-version 3.0` together. Omitting the spec version refuses the run
+  before any call is made, which is easy to mistake for a failure.
+- 67 paid calls are expected of 75 questions; 8 are decided by pre-model policy
+  guards and cost nothing. About $0.34 at the measured rate.
+- The eval carries its own ceiling and calls the provider directly. It does
+  **not** draw on the deployed service's daily allowance.
+- `--output` must name a new file; the CLI refuses to overwrite evidence, and an
+  unsaved paid run has to be paid for twice.
+
+After the capture, `review --run <run> --template --output <sheet>` writes the
+blank labelling sheet, and `review --review <filled>` scores against it. Both
+are free. Recruiting independent labellers is the long pole, not the money.
+
 ## Retrieval as measured on 13 September
 
 A free rehearsal run (no `--paid`, so retrieval only) against the deployed
