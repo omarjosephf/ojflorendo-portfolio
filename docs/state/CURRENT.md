@@ -98,9 +98,12 @@ the paid command was run and refused before any provider call:
 > Paid evaluation capture is disabled without an existing carried-forward
 > qualification allowance (--allowance-ledger and --allowance-id).
 
-Three things block it, and each is invisible until the one before it clears.
+Four things block it, and each is invisible until the one before it clears.
 The third was found on 13 September by reading the code rather than this file,
-which until now asserted the run was ready to go. It was not.
+which until then asserted the run was ready to go. It was not. The fourth was
+found on 14 September the same way, by checking the agreed plan against the code
+the plan assumed. This list has been wrong twice; read the code before trusting
+it complete.
 
 - **The settings bounds still reject the capture envelope.** This is the real
   blocker, and no amount of correct command-line arguments gets past it.
@@ -124,6 +127,23 @@ which until now asserted the run was ready to go. It was not.
   `--allowance-id`, and separately requires durable service accounting — a local
   `PersistentBudget`. Both are operator-initialised by design and neither may be
   recreated later to regain authority, so their ceilings are permanent choices.
+- **The budget bootstrap CLI cannot stamp a capture-scoped service ledger.**
+  Found 14 September, and it makes the commit three changes rather than two.
+  `initialize_ledger` writes the limits *into* the ledger at creation
+  (`persistent_budget.py:94`, `limits.encoded()`), and `PersistentBudget`
+  refuses at runtime on any mismatch between the stored limits and the ones it
+  is constructed with (`:193-197`,
+  `BudgetUnavailable("budget_identity_or_limits")`). But
+  `persistent_budget.main()` calls `initialize_ledger(..., BudgetLimits(), ...)`
+  — the hardcoded live defaults, 40/200/US$0.40/US$2.00. The runbook's bootstrap
+  command therefore creates a ledger permanently stamped at the live envelope.
+  Run the capture against it with the widened settings and it refuses on the
+  mismatch; run it with the live values and money binds first at 10 attempts.
+  Either way the ledger is wrong, and §5 of the runbook forbids recreating one
+  to fix it — so this must be corrected *before* step 3, not discovered during
+  it. `persistent_budget.main()` needs explicit limit flags, keeping
+  `BudgetLimits()` as the default so the production bootstrap command documented
+  in the runbook keeps its current meaning.
 - **`--max-paid-calls 67` refuses on its own.** Before dispatching anything the
   capture demands room for two attempts per case (`cli.py`:
   `maximum = 2 * len(questions)`), so the 75-question suite needs **150**. That
@@ -165,11 +185,28 @@ repository, and is still Action 7.
    permanent by design and cannot be redone to regain authority; improvising it
    is the class of mistake that has no undo. Treated as non-negotiable, not a
    nicety.
-3. **Initialise both ledgers.** Allowance ceiling **150**, carry-forward **0** —
-   there is no prior qualification spend on record to reconcile. Both values are
-   permanent; confirm them out loud at the moment of creation rather than
-   trusting this line.
-4. **Run the capture**, then the free review steps.
+3. **Give `persistent_budget.main()` explicit limit flags.** Added 14 September;
+   see the fourth blocker above. Without this there is no way to create the
+   capture's durable *service* ledger at 150 / US$6.00, and the ledger it does
+   create cannot be corrected afterwards. Steps 1-3 are one commit and one PR;
+   none of them creates a ledger or spends anything.
+4. **Initialise both ledgers.** Allowance ceiling **150**, carry-forward **0** —
+   there is no prior qualification spend on record to reconcile. The service
+   ledger takes the capture envelope, 150 attempts and US$6.00 daily and
+   monthly. All of these values are permanent; confirm them out loud at the
+   moment of creation rather than trusting this line.
+5. **Run the capture**, then the free review steps.
+
+**Widening the bounds does not set the values.** `cmd_eval` builds
+`Settings(retrieval_top_k=args.top_k)` (`cli.py:251`) and the `evaluate`
+subcommand has no budget flags, so widening only makes 150 / `6_000_000`
+*admissible* — the run still has to supply them. `Settings` declares no
+`env_prefix` and the workspace has no `.env`, only `.env.example`, so they come
+from the shell session as `DAILY_ANSWER_LIMIT`, `MONTHLY_ANSWER_LIMIT`,
+`DAILY_BUDGET_MICRO_USD` and `MONTHLY_BUDGET_MICRO_USD`, alongside
+`BUDGET_PATH` and `BUDGET_LEDGER_ID`. Leave `FLY_APP_NAME` and
+`budget_machine_id` unset locally, or `service_budget` applies the Fly mount
+checks (`capture.py:120-149`) and refuses.
 
 Production stays guarded throughout by
 `test_operating_caps_and_worker_settings_validate_against_runtime`
