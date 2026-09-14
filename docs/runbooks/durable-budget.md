@@ -106,6 +106,50 @@ cost. Usage estimates and request timeouts cannot establish final charges.
    image with in-memory counters does not inherit these safeguards; do not
    silently reactivate it as though the budget remained durable.
 
+### Qualification allowance ledger
+
+The paid qualification capture in `omarjosephf/cited` draws on a second
+permanent ledger that the steps above do not create. `QualificationAllowance`
+is a lifetime ceiling with no daily or monthly rollover and no refunds,
+initialized once by an operator. Item 5 governs it exactly as it governs the
+service ledger: it may not be deleted, truncated, recreated, cloned or restored
+to regain an allowance.
+
+**Its ceiling and its carry-forward are money in micro-USD, never attempt
+counts.** One attempt reserves 40,000 micro-USD (US$0.04), so the 150-attempt
+capture envelope of
+[ADR-0015](../adr/0015-durable-budget-and-provider-order.md) is `6000000`. A
+ceiling given as `150` is US$0.00015 and buys no attempts at all. The
+entrypoint refuses that, but it cannot detect a wrong value that happens to buy
+some other number of attempts: `400000` — the live service's daily money cap,
+and the number sitting beside this one in every other document — silently
+creates a usable 10-attempt ledger that can never be corrected. Read the
+attempt count the command echoes back before it creates anything, and confirm
+it aloud.
+
+Generate a fresh 64-character hex identity, record it privately, then run:
+
+```bash
+python -m assistant.capture --path <allowance-path> --ledger-id <id> --ceiling-micro-usd 6000000 --carried-micro-usd 0
+```
+
+Carry forward all reviewed prior qualification spend in micro-USD; use `0` only
+when there is genuinely none on record.
+
+The capture separately requires its own durable *service* ledger at the same
+envelope. Item 3's command creates one stamped at the live service envelope
+unless it is given explicit limit flags:
+
+```bash
+python -m assistant.persistent_budget --path <service-path> --ledger-id <id> --carry-forward-attempts 0 --daily-attempts 150 --monthly-attempts 150 --daily-micro-usd 6000000 --monthly-micro-usd 6000000
+```
+
+Without those flags the ledger is stamped at 40/200 attempts and
+US$0.40/US$2.00, and `PersistentBudget` then refuses every capture attempt on
+the limits mismatch — a ledger that is wrong on creation and, under item 5,
+cannot be replaced. Neither command makes a provider call, and both refuse an
+existing or partial ledger.
+
 ## Verification
 
 Offline tests cover restart persistence, concurrent instances, shared worker

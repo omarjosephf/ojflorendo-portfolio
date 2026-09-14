@@ -190,11 +190,17 @@ repository, and is still Action 7.
    capture's durable *service* ledger at 150 / US$6.00, and the ledger it does
    create cannot be corrected afterwards. Steps 1-3 are one commit and one PR;
    none of them creates a ledger or spends anything.
-4. **Initialise both ledgers.** Allowance ceiling **150**, carry-forward **0** —
-   there is no prior qualification spend on record to reconcile. The service
-   ledger takes the capture envelope, 150 attempts and US$6.00 daily and
-   monthly. All of these values are permanent; confirm them out loud at the
-   moment of creation rather than trusting this line.
+4. **Initialise both ledgers**, using the exact commands in the durable-budget
+   runbook's [qualification allowance
+   ledger](../runbooks/durable-budget.md#qualification-allowance-ledger)
+   subsection rather than values transcribed from here. **The allowance ceiling
+   is money in micro-USD, not a count of attempts**: the 150-attempt envelope
+   is `6000000`, and a ceiling of `150` is US$0.00015 and buys nothing. The
+   service ledger takes both, and needs all four limit flags or it is stamped
+   at the live envelope. Carry-forward is **0** on both — there is no prior
+   qualification spend on record to reconcile. Every one of these values is
+   permanent; read the attempt count each command echoes back and confirm it
+   aloud at the moment of creation rather than trusting this line.
 5. **Run the capture**, then the free review steps.
 
 **Widening the bounds does not set the values.** `cmd_eval` builds
