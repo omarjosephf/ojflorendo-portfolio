@@ -60,9 +60,16 @@ but is not activated.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | Approved 13 Sep; free rehearsal passed. Steps 1-3 merged as `omarjosephf/cited#15` (`main` `4e08207`). **Steps 4-5 blocked** — `eval/portfolio-source.json` pins a 70-question revision and the suite is 75; see below |
+| 7 | Approve funded answer captures | Approved 13 Sep; free rehearsal passed. All code work merged — `omarjosephf/cited#15` and `#16`. **Steps 4-5 remain**: create two permanent ledgers, then run the capture. Owner actions at a keyboard; nothing blocks them |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
+
+**Rows 8 and 9 have not been checked against the code.** Everything this file
+says about Action 7 was read out of `omarjosephf/cited` at `4e08207` on 14
+September. Rows 8 and 9 are carried forward from earlier notes, and this file
+has been wrong about implemented state three times in a week — so treat them as
+what was believed, not what is proven. **Verifying them is the first task after
+Action 7 closes**, before either is planned or scheduled.
 
 ## Decisions, both now closed
 
@@ -90,22 +97,26 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
-## Action 7: steps 1-3 merged; the capture is blocked on a stale pin
+## Action 7: the code work is done; steps 4-5 are owner actions
 
-Steps 1-3 landed as `omarjosephf/cited#15`. `cited` `main` is `4e08207`, GitHub
-CI is green, and the complete gate passes locally on the pinned interpreter.
-That closed the two code defects below, and only those two. On 13 September the
-paid command was run and refused before any provider call:
+Steps 1-3 landed as `omarjosephf/cited#15` and the portfolio pin as
+`omarjosephf/cited#16`. `cited` `main` is `4e08207` plus that pin, GitHub CI is
+green, and the complete gate passes locally on the pinned interpreter. **No
+code change stands between the project and the paid capture.** What remains is
+step 4 — creating two permanent ledgers — and step 5, the run itself. Both are
+owner actions at a keyboard, and neither can be undone.
+
+On 13 September the paid command was run and refused before any provider call:
 
 > Paid evaluation capture is disabled without an existing carried-forward
 > qualification allowance (--allowance-ledger and --allowance-id).
 
-Each was invisible until the one before it cleared. The third was found on 13
-September by reading the code rather than this file, which until then asserted
-the run was ready to go. It was not. The fourth was found on 14 September the
-same way. **A fifth, found the same way on 14 September, is open and is now the
-live blocker.** Each bullet below is marked with what it is today. This list has
-been wrong three times; read the code before trusting it complete.
+Five things blocked it, and each was invisible until the one before it cleared.
+The third was found on 13 September by reading the code rather than this file,
+which until then asserted the run was ready to go. It was not. The fourth and
+fifth were found on 14 September the same way. Each bullet below is marked with
+what it is today. This list has been wrong three times; read the code before
+trusting it complete.
 
 - **CLOSED by `cited#15` — the settings bounds rejected the capture envelope.**
   This was the real blocker, and no amount of correct command-line arguments got
@@ -162,21 +173,22 @@ been wrong three times; read the code before trusting it complete.
 - **STANDING — a partial run cannot substitute.** `release_manifest.py` requires
   the saved cases to equal the versioned question set exactly, so the suite
   cannot be sliced across several smaller runs and stapled together.
-- **OPEN — `cited` pins a portfolio revision the question set has outgrown.**
-  `eval/portfolio-source.json` pins `f53ddda`, whose
-  `content/assistant-eval/questions.toml` holds **70** questions. Portfolio
-  `main` (`fb77028`) holds **75**. CI reads that pin, checks the revision out,
-  stages `deploy/oj-assistant` from it and evaluates *its* set
+- **CLOSED by `cited#16` — `cited` pinned a portfolio revision the question set
+  had outgrown.** `eval/portfolio-source.json` now pins `fb77028`; it pinned
+  `f53ddda`, whose `content/assistant-eval/questions.toml` holds **70**
+  questions, where the suite is **75**. CI reads that pin, checks the revision
+  out, stages `deploy/oj-assistant` from it and evaluates *its* set
   (`ci.yml:73-99`). The corpus and the system prompt are byte-identical across
   the two revisions — only the question set moved, in `bc55d8b` and `ed21ea2` —
-  so advancing the pin changes the cases and nothing else. **It cannot be left
-  until after the capture.** `capture.py` only ever inserts into the allowance's
+  so advancing the pin changed the cases and nothing else. **It could not be
+  left until after the capture,** which is why it is recorded here rather than
+  fixed quietly. `capture.py` only ever inserts into the allowance's
   `reservations` table and never deletes, so a completed 70-question capture
   spends roughly 63 of a 150-attempt lifetime ceiling. The 75-question capture
   is gated on the full 150 being available *before* it dispatches anything, so
   it could then never run — and item 5 of the durable-budget runbook forbids a
-  replacement ledger. Advance the pin first, through a reviewed change, per
-  `docs/runbooks/builds.md`.
+  replacement ledger. `docs/runbooks/builds.md` governs how the pin moves: a
+  reviewed companion change, never a quiet edit alongside a capture.
 
 **The root cause was one envelope doing two jobs.** The capture inherited the
 live service's spend limits, because both build from the same `Settings` model.
@@ -203,10 +215,23 @@ command that touches the allowance ledger decides it.
 Owner-approved on 13 September. The work is in `omarjosephf/cited`, not this
 repository, and is still Action 7.
 
-**Steps 1-3 are done and merged** as `omarjosephf/cited#15`; `main` is
-`4e08207`. They are kept below as the record of what was decided and why. Step 4
-is next, and is blocked until the portfolio pin is advanced — see the fifth
-blocker above.
+**Steps 1-3 are done and merged** as `omarjosephf/cited#15`, and the portfolio
+pin as `omarjosephf/cited#16`. They are kept below as the record of what was
+decided and why. **Step 4 is next and nothing blocks it** — it needs an owner at
+a keyboard, not another change.
+
+Do steps 4 and 5 in one sitting, in this order:
+
+1. Create the **service** ledger, then the **allowance** ledger, with the
+   runbook commands verbatim. Check the command line before pressing Enter:
+   `persistent_budget` echoes its stamped limits only *after* it has created the
+   ledger, and `capture.py` echoes the attempt count but does not pause.
+2. Run `Invoke-PaidEvaluation.ps1` **without** `-Paid`. It is free, refuses on a
+   pin mismatch, and reports the specific configuration or ledger fault instead
+   of the CLI's single generic line.
+3. Run it again **with** `-Paid`. The portfolio capture must be the first
+   command that ever touches the allowance ledger — see the ordering constraint
+   above.
 
 1. **Widen the three bounds in `settings.py`, as ADR-0015 already specifies.**
    The alternative considered was a separate capture-scoped settings type,
@@ -418,9 +443,14 @@ Checked against the actual CI run for `cited` on 12 September, three are closed:
   `AppData\Roaming\uv\python`. "Only 3.13 is installed" was true only of
   `AppData\Local\Programs\Python`. The backend suite now runs locally on the
   pinned interpreter: 793 passed, 7 skipped.
-- **Eval pinned to a pre-refinement corpus** — `eval/portfolio-source.json` pins
-  `b6fecb7c`, the PR #54 merge on `origin/main`, whose `content/assistant` tree
-  is byte-identical to `db774af`. CI also passes `--suite portfolio` correctly.
+- **Eval pinned to a pre-refinement corpus** — closed 12 September, when
+  `eval/portfolio-source.json` pinned `b6fecb7c`, the PR #54 merge, whose
+  `content/assistant` tree is byte-identical to `db774af`. CI also passes
+  `--suite portfolio` correctly. **The pin has moved twice since and this line
+  should not be read as its current value:** it is `fb77028` as of 14 September
+  (`omarjosephf/cited#16`). The corpus was never the problem the second time —
+  the *question set* had outgrown the pinned revision. See the Action 7 blocker
+  list above, and read the file rather than this paragraph.
 
 The fourth, the timing-marginal management accessibility test, was fixed by
 measuring it rather than guessing. Splitting the full-page screenshot into its
