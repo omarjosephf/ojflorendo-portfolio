@@ -60,7 +60,7 @@ but is not activated.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | Approved 13 Sep; free rehearsal passed. **Capture blocked in `omarjosephf/cited`** — `settings.py` bounds reject the envelope ADR-0015 authorised; plan agreed 13 Sep, see below |
+| 7 | Approve funded answer captures | Approved 13 Sep; free rehearsal passed. Steps 1-3 merged as `omarjosephf/cited#15` (`main` `4e08207`). **Steps 4-5 blocked** — `eval/portfolio-source.json` pins a 70-question revision and the suite is 75; see below |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
@@ -90,26 +90,29 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
-## Action 7: blocked on a code change that was authorised but never written
+## Action 7: steps 1-3 merged; the capture is blocked on a stale pin
 
-The environment is prepared for a *free* run, and that is all. On 13 September
-the paid command was run and refused before any provider call:
+Steps 1-3 landed as `omarjosephf/cited#15`. `cited` `main` is `4e08207`, GitHub
+CI is green, and the complete gate passes locally on the pinned interpreter.
+That closed the two code defects below, and only those two. On 13 September the
+paid command was run and refused before any provider call:
 
 > Paid evaluation capture is disabled without an existing carried-forward
 > qualification allowance (--allowance-ledger and --allowance-id).
 
-Four things block it, and each is invisible until the one before it clears.
-The third was found on 13 September by reading the code rather than this file,
-which until then asserted the run was ready to go. It was not. The fourth was
-found on 14 September the same way, by checking the agreed plan against the code
-the plan assumed. This list has been wrong twice; read the code before trusting
-it complete.
+Each was invisible until the one before it cleared. The third was found on 13
+September by reading the code rather than this file, which until then asserted
+the run was ready to go. It was not. The fourth was found on 14 September the
+same way. **A fifth, found the same way on 14 September, is open and is now the
+live blocker.** Each bullet below is marked with what it is today. This list has
+been wrong three times; read the code before trusting it complete.
 
-- **The settings bounds still reject the capture envelope.** This is the real
-  blocker, and no amount of correct command-line arguments gets past it.
-  `src/assistant/settings.py:153-156` in `omarjosephf/cited` hard-caps every
-  budget field at exactly the live service's values, so pydantic refuses the
-  capture ceilings before any ledger is opened:
+- **CLOSED by `cited#15` — the settings bounds rejected the capture envelope.**
+  This was the real blocker, and no amount of correct command-line arguments got
+  past it. `src/assistant/settings.py:153-156` in `omarjosephf/cited` hard-capped
+  every budget field at exactly the live service's values, so pydantic refused
+  the capture ceilings before any ledger was opened. The bounds now read
+  `le=150` / `le=200` / `le=6_000_000` / `le=6_000_000`; as they stood:
 
   | Field | Bound today | Capture needs | |
   | --- | --- | --- | --- |
@@ -118,17 +121,21 @@ it complete.
   | `daily_budget_micro_usd` | `le=400_000` | `6_000_000` | blocks |
   | `monthly_budget_micro_usd` | `le=2_000_000` | `6_000_000` | blocks |
 
-  Three bounds need widening, not four. `cmd_eval` builds `Settings(...)` and
+  Three bounds needed widening, not four. `cmd_eval` builds `Settings(...)` and
   passes it to `service_budget(settings)` (`cli.py:249-254`), so there is no
   path around the model. ADR-0015's amendment authorised this widening in
-  writing; the code was never written. `omarjosephf/cited` `main` is clean at
-  `5d2dd8f` with nothing matching it in history.
-- **Neither ledger exists.** `cmd_eval` refuses without `--allowance-ledger` and
+  writing, and for a while the code was simply never written — `main` sat clean
+  at `5d2dd8f` with nothing matching it in history. `cited#15` wrote it.
+- **OPEN — neither ledger exists.** This one is step 4 itself, not an obstacle
+  to it. `cmd_eval` refuses without `--allowance-ledger` and
   `--allowance-id`, and separately requires durable service accounting — a local
   `PersistentBudget`. Both are operator-initialised by design and neither may be
   recreated later to regain authority, so their ceilings are permanent choices.
-- **The budget bootstrap CLI cannot stamp a capture-scoped service ledger.**
-  Found 14 September, and it makes the commit three changes rather than two.
+- **CLOSED by `cited#15` — the budget bootstrap CLI could not stamp a
+  capture-scoped service ledger.** `persistent_budget.main()` now takes
+  `--daily-attempts`, `--monthly-attempts`, `--daily-micro-usd` and
+  `--monthly-micro-usd`, defaulting to `BudgetLimits()`. As found on 14
+  September, and why it made the commit three changes rather than two:
   `initialize_ledger` writes the limits *into* the ledger at creation
   (`persistent_budget.py:94`, `limits.encoded()`), and `PersistentBudget`
   refuses at runtime on any mismatch between the stored limits and the ones it
@@ -144,16 +151,32 @@ it complete.
   it. `persistent_budget.main()` needs explicit limit flags, keeping
   `BudgetLimits()` as the default so the production bootstrap command documented
   in the runbook keeps its current meaning.
-- **`--max-paid-calls 67` refuses on its own.** Before dispatching anything the
-  capture demands room for two attempts per case (`cli.py`:
+- **STANDING — `--max-paid-calls 67` refuses on its own.** Not a defect; this is
+  how the tool behaves, and it still governs the run. Before dispatching
+  anything the capture demands room for two attempts per case (`cli.py`:
   `maximum = 2 * len(questions)`), so the 75-question suite needs **150**. That
   is compared against `min(--max-paid-calls, service, allowance)`
   (`capture.py:131`), so all three ceilings must independently clear 150. Note
   that US$6.00 is exactly 150 x $0.04: the money bound and the attempt bound
   coincide, with no slack between them.
-- **A partial run cannot substitute.** `release_manifest.py` requires the saved
-  cases to equal the versioned question set exactly, so the suite cannot be
-  sliced across several smaller runs and stapled together.
+- **STANDING — a partial run cannot substitute.** `release_manifest.py` requires
+  the saved cases to equal the versioned question set exactly, so the suite
+  cannot be sliced across several smaller runs and stapled together.
+- **OPEN — `cited` pins a portfolio revision the question set has outgrown.**
+  `eval/portfolio-source.json` pins `f53ddda`, whose
+  `content/assistant-eval/questions.toml` holds **70** questions. Portfolio
+  `main` (`fb77028`) holds **75**. CI reads that pin, checks the revision out,
+  stages `deploy/oj-assistant` from it and evaluates *its* set
+  (`ci.yml:73-99`). The corpus and the system prompt are byte-identical across
+  the two revisions — only the question set moved, in `bc55d8b` and `ed21ea2` —
+  so advancing the pin changes the cases and nothing else. **It cannot be left
+  until after the capture.** `capture.py` only ever inserts into the allowance's
+  `reservations` table and never deletes, so a completed 70-question capture
+  spends roughly 63 of a 150-attempt lifetime ceiling. The 75-question capture
+  is gated on the full 150 being available *before* it dispatches anything, so
+  it could then never run — and item 5 of the durable-budget runbook forbids a
+  replacement ledger. Advance the pin first, through a reviewed change, per
+  `docs/runbooks/builds.md`.
 
 **The root cause was one envelope doing two jobs.** The capture inherited the
 live service's spend limits, because both build from the same `Settings` model.
@@ -165,10 +188,25 @@ at 40/200 and US$0.40/US$2.00. `docs:check-budget-envelope` keeps that envelope
 and the question count in step, so a suite that outgrows it fails CI rather than
 a paid run.
 
+**The allowance funds exactly one portfolio capture, and the order is a
+permanent choice.** `release_manifest.py:203-215` requires evaluations for
+*both* suites, each with `capture_state == "complete"`, and only the paid path
+ever writes that field — so the 15-question demo suite needs a paid capture of
+its own, gated at 30 attempts. Portfolio first spends roughly 67 of the 150 and
+leaves room for the demo's 30. Demo first spends from the same lifetime ceiling,
+and the portfolio gate — which needs the full 150 available before dispatch —
+can never be met again. Nothing in the code enforces this order: the first
+command that touches the allowance ledger decides it.
+
 ## Action 7: the approved plan, decided 13 September
 
 Owner-approved on 13 September. The work is in `omarjosephf/cited`, not this
 repository, and is still Action 7.
+
+**Steps 1-3 are done and merged** as `omarjosephf/cited#15`; `main` is
+`4e08207`. They are kept below as the record of what was decided and why. Step 4
+is next, and is blocked until the portfolio pin is advanced — see the fifth
+blocker above.
 
 1. **Widen the three bounds in `settings.py`, as ADR-0015 already specifies.**
    The alternative considered was a separate capture-scoped settings type,
@@ -230,25 +268,46 @@ None of the above changes the cost.
 
 Still true, and still worth knowing:
 
-- **`Invoke-PaidEvaluation.ps1` in the workspace root is stale and will
-  mislead you.** It is built for the retired Anthropic path: it validates an
-  `sk-ant-` key prefix, defaults to `-SpecVersion v2.1` and 60 calls against a
-  54-question set, and passes no ledger flags at all. It fails with the same
-  generic refusal as a genuine budget problem. Rewrite or delete it before the
-  run rather than discovering this mid-capture.
+- **`Invoke-PaidEvaluation.ps1` in the workspace root was rewritten on 14
+  September.** The old one was built for the retired Anthropic path: it
+  validated an `sk-ant-` key prefix, defaulted to `-SpecVersion v2.1` and 60
+  calls against a 54-question set, passed no ledger flags, and pushed into
+  `$cfg.Service`, whose path in `assistant-ops.psm1` points at a `Downloads\`
+  directory that no longer exists. Every one of those failures surfaces as the
+  same generic refusal as a real budget problem. The replacement is free unless
+  given `-Paid`, refuses on a pin mismatch, refuses to create either ledger, and
+  runs a free preflight that constructs `Settings`, `service_budget` and both
+  ledgers read-only before anything can spend.
 - `cited-release-candidate/.venv` is **Python 3.12.10** with the locked
   dependencies installed; `import assistant, numpy` succeeds. CI uses 3.12.13.
   The locks are compiled for 3.12 and select by `cp312` ABI, so the patch
   difference does not change which wheels install. Record it in `--reason`
   rather than leaving it unstated.
-- **`GEMINI_API_KEY` lives only in the owner's PowerShell session.** It is not
-  persisted and is gone when that window closes. Set it with a masked
-  `Read-Host -AsSecureString`; setting it inline writes the key to
-  `ConsoleHost_history.txt` on disk.
+- **`GEMINI_API_KEY` lives only in the owner's PowerShell session,** and it is
+  not sufficient on its own. `cmd_eval` requires `settings.answering_enabled`,
+  which needs all seven of `GEMINI_API_KEY`, `GEMINI_PROJECT_ID`,
+  `GEMINI_ACCOUNT_VERIFIED`, `OPENAI_API_KEY`, `OPENAI_PROJECT_ID`,
+  `OPENAI_ACCOUNT_VERIFIED` and `ENABLE_FALLBACK` (`settings.py:290-308`).
+  Neither key is persisted; both are gone when the window closes. Set them with
+  a masked `Read-Host -AsSecureString`; setting one inline writes it to
+  `ConsoleHost_history.txt` on disk. `Set-Provider-Keys.ps1` is **not** the tool
+  for this — it writes Fly secrets, not session variables.
 - A paid run requires `--paid`, `--max-paid-calls`, `--output`, `--spec-version
   3.0`, `--allowance-ledger` and `--allowance-id` together. Omitting any of them
   refuses the run before any call is made, which is easy to mistake for a
   failure.
+- **The suite and its inputs are not defaulted, and the defaults are wrong.**
+  The run also needs `--suite portfolio`, `--questions <the pinned portfolio
+  set>` and `--corpus deploy/oj-assistant/content` — the last a *global* flag,
+  so it goes before `eval`, not after — plus
+  `SYSTEM_PROMPT_FILE=deploy/oj-assistant/system-prompt.md`, which
+  `fly.oj-assistant.toml` serves and `release_manifest.py` compares the capture
+  against. Left at their defaults these give cited's own 15-question demo set,
+  the demo corpus and the built-in prompt: a paid run the manifest rejects.
+- **Exit 1 is the expected outcome of a good capture,** not a failure.
+  `answer_failures` reports every answer awaiting claim-level review, and
+  immediately after a capture that is all of them. Only exit 2 is a refusal.
+  Re-running a paid capture on a 1 spends the allowance a second time.
 - The eval calls the provider directly and does **not** draw on the deployed
   service's daily allowance — but it does require its own durable local ledger.
 - `--output` must name a new file; the CLI refuses to overwrite evidence, and an
