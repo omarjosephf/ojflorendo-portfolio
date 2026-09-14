@@ -1,7 +1,7 @@
 # Assistant release evidence
 
 The corpus export remains owned by this repository. Cited's
-`docs/schemas/release-manifest-v2.schema.json` defines the current release tuple
+`docs/schemas/release-manifest-v3.schema.json` defines the current release tuple
 and its `assistant.release_manifest` command validates the prepared artifacts.
 Record exact frontend/backend commits, backend image digest, runtime dependency
 lock, corpus, prompt, model/tokenizer lock, vectors, policy/evaluator versions
