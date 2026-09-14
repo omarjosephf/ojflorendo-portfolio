@@ -1,6 +1,6 @@
 # Current state
 
-Updated 13 September 2026. This file is what a fresh session should read first.
+Updated 14 September 2026. This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -60,14 +60,14 @@ but is not activated.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | Approved 13 Sep; free rehearsal passed. All code work merged — `omarjosephf/cited#15` and `#16`. **Steps 4-5 remain**: create two permanent ledgers, then run the capture. Owner actions at a keyboard; nothing blocks them |
+| 7 | Approve funded answer captures | **Step 4 done; step 5 waits on an unmerged fix.** Both ledgers created, verified correct, entirely unspent. Step 5 refused before dispatch on the sixth blocker — `AnswerConfiguration` carried the live-service budget bounds. Design decided 14 Sep (ADR-0015 amendment); fix written on a branch in `omarjosephf/cited`, gate green locally, **not reviewed, not merged** |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
 **Rows 8 and 9 have not been checked against the code.** Everything this file
-says about Action 7 was read out of `omarjosephf/cited` at `4e08207` on 14
+says about Action 7 was read out of `omarjosephf/cited` at `e513730` on 14
 September. Rows 8 and 9 are carried forward from earlier notes, and this file
-has been wrong about implemented state three times in a week — so treat them as
+has been wrong about implemented state four times in a week — so treat them as
 what was believed, not what is proven. **Verifying them is the first task after
 Action 7 closes**, before either is planned or scheduled.
 
@@ -97,26 +97,49 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
-## Action 7: the code work is done; steps 4-5 are owner actions
+## Action 7: step 4 is done; step 5 waits on an unmerged fix
 
 Steps 1-3 landed as `omarjosephf/cited#15` and the portfolio pin as
 `omarjosephf/cited#16`. `cited` `main` is `4e08207` plus that pin, GitHub CI is
-green, and the complete gate passes locally on the pinned interpreter. **No
-code change stands between the project and the paid capture.** What remains is
-step 4 — creating two permanent ledgers — and step 5, the run itself. Both are
-owner actions at a keyboard, and neither can be undone.
+green, and the complete gate passes locally on the pinned interpreter.
+
+**Step 4 is done.** On 14 September both permanent ledgers were created and then
+verified by reading them back: the service ledger stamped
+`150/150/6000000/6000000`, the allowance with ceiling `6000000` and carried `0`,
+which the command echoed as 150 attempts. Both are correct, and both remain
+**entirely unspent** — zero rows in each `reservations` table. Nothing about
+them needs redoing, and item 5 of the durable-budget runbook never came into
+play.
+
+**Step 5 was refused, and not by anything an owner could fix at a keyboard.**
+The paid capture was run on 14 September and refused before dispatching a single
+call; no output file was created, which independently confirms no provider
+request was made. The cause is a sixth blocker, below — a code defect in
+`omarjosephf/cited`. This section previously stated that no code change stood
+between the project and the paid capture. That was the fourth time this file has
+been wrong about implemented state, and it was wrong in the most expensive place
+available: at the confirmation prompt, with the spend already authorised.
+
+**Where it stands now.** The design question the blocker raised was decided on
+14 September and recorded as an ADR-0015 amendment: spend ceilings leave the
+evidence identity, and the release manifest goes to v3. The fix is written, the
+complete gate passes locally, and it is **on a branch with no PR open and no
+owner review**. Step 5 becomes runnable when that change is reviewed and merged
+— not before, and this file should not be read as saying otherwise until the
+merge is recorded here.
 
 On 13 September the paid command was run and refused before any provider call:
 
 > Paid evaluation capture is disabled without an existing carried-forward
 > qualification allowance (--allowance-ledger and --allowance-id).
 
-Five things blocked it, and each was invisible until the one before it cleared.
+Six things blocked it, and each was invisible until the one before it cleared.
 The third was found on 13 September by reading the code rather than this file,
 which until then asserted the run was ready to go. It was not. The fourth and
-fifth were found on 14 September the same way. Each bullet below is marked with
-what it is today. This list has been wrong three times; read the code before
-trusting it complete.
+fifth were found on 14 September the same way. The sixth was found later that
+day by running the paid command, because nothing free reaches it. Each bullet
+below is marked with what it is today. This list has been wrong four times; read
+the code before trusting it complete.
 
 - **CLOSED by `cited#15` — the settings bounds rejected the capture envelope.**
   This was the real blocker, and no amount of correct command-line arguments got
@@ -189,6 +212,83 @@ trusting it complete.
   it could then never run — and item 5 of the durable-budget runbook forbids a
   replacement ledger. `docs/runbooks/builds.md` governs how the pin moves: a
   reviewed companion change, never a quiet edit alongside a capture.
+- **DECIDED 14 Sep, fix written, NOT MERGED — `AnswerConfiguration` carried the
+  live service's budget bounds.** This is what refused the 14 September paid
+  run. It was the first blocker's defect repeated in a second model that
+  `cited#15` did not touch: `release_manifest.py:142-145` declared
+  `daily_attempt_limit` `le=40`, `monthly_attempt_limit` `le=200`,
+  `daily_budget_micro_usd` `le=400000` and `monthly_budget_micro_usd`
+  `le=2000000`. `cmd_eval` calls `_answer_configuration(settings, top_k)`
+  (`cli.py:277`) to build the evidence identity record, and pydantic rejected
+  three of the four — the same three, with `monthly_attempt_limit` again the one
+  that already fits. It failed closed before dispatch, which is the design
+  working.
+
+  **Point (b) is now traced, and it holds — more strongly than first written.**
+  The capture's recorded values were never a free parameter.
+  `PersistentBudget._check_identity` (`persistent_budget.py:185-198`) refuses
+  any settings that disagree with its ledger's stamped limits, so a capture
+  against the 150-stamped service ledger can only ever record
+  `150/150/6000000/6000000`; `Invoke-PaidEvaluation.ps1:185-188` already sets
+  exactly those. `release_manifest.py:249-250` then requires that config to
+  equal `manifest.answer_configuration` — for **every** evaluation, against a
+  **single** manifest field, so both suites are bound to the same envelope. The
+  deployment that evidence qualifies runs at 40 / `400000` / `2000000`,
+  asserted against `fly.oj-assistant.toml` by
+  `test_operating_caps_and_worker_settings_validate_against_runtime`. One field
+  cannot hold both. So widening the three bounds would not have fixed anything:
+  it would have moved the refusal from a free pre-dispatch check to the release
+  gate, after the one capture the allowance funds had been spent — or bought a
+  green gate with a manifest that misdescribes the running service.
+
+  The schema conflict was also understated. `tests/test_release_manifest.py`
+  asserts the checked-in schema equals `ReleaseManifest.model_json_schema()`
+  exactly, so widening the model fails CI; the only way to keep it green
+  without a new version is to rewrite the published v2 document in place.
+
+  **Decision, 14 September: the four spend ceilings are removed from
+  `AnswerConfiguration`, and the manifest goes to v3.** Recorded as an
+  amendment to
+  [ADR-0015](../adr/0015-durable-budget-and-provider-order.md#spend-ceilings-leave-the-evidence-identity-14-september-2026).
+  v3 rather than an in-place v2 edit because removing required fields breaks in
+  both directions, and two incompatible shapes must never both stamp
+  `schema_version: 2`. No v2 instance is known to exist, which makes v3 cheap
+  rather than making an in-place edit safe. v1 and v2 stay on disk, referenced
+  by nothing.
+
+  **The fix is written and unmerged.** It is on branch
+  `fix/evidence-identity-excludes-spend-ceilings` in `omarjosephf/cited`,
+  branched from `e513730`. `ruff format`, `ruff check`, `mypy src tests` and
+  the full `pytest` suite pass locally on the pinned interpreter. **No PR is
+  open, nothing is committed, and the owner has not reviewed it.** Do not read
+  this bullet as "the capture can run" — that is precisely the sentence this
+  file has been wrong about four times.
+- **CLOSED by the same unmerged change — no free path built the evidence
+  identity.** This is why a three-line bound mismatch survived to the
+  confirmation prompt rather than being caught in CI months earlier. Nothing
+  free reached `_answer_configuration`: the preflight never called it, and the
+  13 September rehearsal has no `config` key at all
+  (`eval/results/portfolio-rehearsal.json`, verified), because the call sat
+  inside the paid branch. `docs:check-budget-envelope` keeps the envelope and
+  the question count in step but does not reach `AnswerConfiguration`, and
+  still does not — it is a Node script that never imports the Python.
+
+  The free evaluation path now builds and validates the same record a capture
+  writes, and records it in the rehearsal evidence. Because the ceilings no
+  longer reach it, that record is byte-identical to the paid capture's —
+  verified by running the free path under the exact `150/150/6000000/6000000`
+  environment that refused on 14 September, which now passes. The operator
+  preflight in `Invoke-PaidEvaluation.ps1` builds it too, so a run that goes
+  straight to `-Paid` still meets a free, specific failure before the
+  confirmation prompt. A half-configured credential environment still completes
+  a free retrieval run: a configured credential alone never triggers inference,
+  and the absence of one must not break a free run either.
+
+  **Note for whoever touches this next: `_write_run` (`cli.py`) is dead code.**
+  It is a second, fully-formed writer of the same identity record, called from
+  nowhere in the repository. It was left in place rather than deleted, because
+  removing it is a separate decision — but it is not a free path, and reading
+  it as one is an easy mistake.
 
 **The root cause was one envelope doing two jobs.** The capture inherited the
 live service's spend limits, because both build from the same `Settings` model.
@@ -217,10 +317,13 @@ repository, and is still Action 7.
 
 **Steps 1-3 are done and merged** as `omarjosephf/cited#15`, and the portfolio
 pin as `omarjosephf/cited#16`. They are kept below as the record of what was
-decided and why. **Step 4 is next and nothing blocks it** — it needs an owner at
-a keyboard, not another change.
+decided and why. **Step 4 was completed on 14 September. Step 5 is blocked by
+the sixth blocker above** — a code decision in `omarjosephf/cited`, not an owner
+action. The sitting below is kept because step 1 is done and steps 2 and 3 still
+describe how the run is made once the blocker clears; do not treat it as ready.
 
-Do steps 4 and 5 in one sitting, in this order:
+Superseded as a plan; retained as the procedure. Steps 4 and 5 were to be done
+in one sitting, in this order:
 
 1. Create the **service** ledger, then the **allowance** ledger, with the
    runbook commands verbatim. Check the command line before pressing Enter:

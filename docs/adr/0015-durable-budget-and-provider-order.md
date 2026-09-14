@@ -104,3 +104,65 @@ replace that guard, each in the repository holding the file it reads:
   (`test_operating_caps_and_worker_settings_validate_against_runtime`), reading
   the deployed file rather than the schema. That guard predates this change and
   is stronger than the bound it replaces, so no new check is needed there.
+
+## Spend ceilings leave the evidence identity, 14 September 2026
+
+The amendment above split the *ledger* envelope and stopped there. It did not
+split the *identity* envelope, and the two are not the same thing. This closes
+that gap; it is an amendment to the decision above, not a new one.
+
+`AnswerConfiguration` in `omarjosephf/cited` is the non-secret record of the
+behaviour an answer was produced under. It carried `daily_attempt_limit`,
+`monthly_attempt_limit`, `daily_budget_micro_usd` and `monthly_budget_micro_usd`
+alongside model, effort, token cap, top-k, timeouts and wire version. The
+capture refused on those bounds at the paid confirmation prompt on 14 September,
+with the spend already authorised.
+
+Widening them, as the amendment above did for `Settings`, is not available here,
+and the reason is worth stating because it is not obvious. The capture's
+recorded values are not a free parameter. `PersistentBudget` refuses any
+settings that disagree with its ledger's stamped limits, so a capture against
+the capture-scoped ledger can only ever record 150 attempts and US$6.00. The
+release gate requires one `answer_configuration` to equal the config of every
+capture *and* to describe the release. The deployment those captures qualify
+runs at 40 attempts and US$0.40. One field cannot hold both. Widening the bounds
+would not fix that; it would move the refusal from a free pre-dispatch check to
+the release gate, after the one capture the allowance funds had been spent.
+
+Decision: **the four spend ceilings are removed from `AnswerConfiguration`.**
+They govern how many answers may be asked for, never what any one of them says,
+which is the only thing that record exists to pin. `attempt_reservation_micro_usd`
+and `shared_worker_limit` stay: the reservation price is pinned by this ADR and
+written into every ledger's `CHECK` constraint, and the worker limit is the
+concurrency the runtime admits.
+
+The deployed envelope keeps the guard this ADR already accepted for it —
+`test_operating_caps_and_worker_settings_validate_against_runtime` reads the
+limits out of `fly.oj-assistant.toml`, the file that is actually deployed,
+rather than out of a schema. That substitution was the amendment above's
+reasoning for widening the settings bounds; this applies it one level up.
+
+**The release manifest goes to v3.** Removing required fields breaks in both
+directions: a v2 document is invalid against v3 and a v3 document is invalid
+against v2. Editing the published v2 in place would have left two incompatible
+shapes both stamped `schema_version: 2`. No v2 manifest instance is known to
+exist, which makes v3 cheap rather than making an in-place edit safe — there is
+no migration to write either way. This reopens and settles the schema-version
+question closed on 12 September, on a trigger that decision did not anticipate;
+that decision's own reopen condition concerned thinking-token measurement and is
+untouched. v1 and v2 stay on disk, referenced by nothing, exactly as v1 already
+sat. The gates in
+[ADR-0011](0011-assistant-release-evidence.md) are unchanged in substance; they
+now read a v3 manifest.
+
+**A free path builds the identity.** Nothing free had ever constructed that
+record: the preflight did not reach it, and the free rehearsal wrote no `config`
+key at all, because it was built inside the paid branch. A three-line bound
+mismatch could therefore surface at exactly one moment, and did. The free
+evaluation path now builds and validates the same record a capture writes, and
+records it in the rehearsal evidence. Because the spend ceilings no longer reach
+it, that record is byte-identical to the paid capture's, so a clean rehearsal is
+now a real rehearsal of the identity rather than a check of everything except
+it. A half-configured credential environment still runs a free retrieval scoring
+to completion — a configured credential alone never triggers inference, and the
+absence of one must not break a free run either.
