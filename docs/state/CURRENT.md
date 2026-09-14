@@ -60,13 +60,13 @@ but is not activated.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | **Step 4 done; step 5 waits on an unmerged fix.** Both ledgers created, verified correct, entirely unspent. Step 5 refused before dispatch on the sixth blocker — `AnswerConfiguration` carried the live-service budget bounds. Design decided 14 Sep (ADR-0015 amendment); fix written on a branch in `omarjosephf/cited`, gate green locally, **not reviewed, not merged** |
+| 7 | Approve funded answer captures | **Steps 1-4 done; every code blocker to step 5 is closed.** Both ledgers created, verified correct, entirely unspent. The sixth blocker — `AnswerConfiguration` carrying the live-service budget bounds — was fixed by `omarjosephf/cited#17`, merged 14 Sep as `6237ab5`, CI green. Verified against the merged code on 15 Sep. **Step 5, the paid capture, has not been run.** |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
-**Rows 8 and 9 have not been checked against the code.** Everything this file
-says about Action 7 was read out of `omarjosephf/cited` at `e513730` on 14
-September. Rows 8 and 9 are carried forward from earlier notes, and this file
+**Rows 8 and 9 have not been checked against the code.** What this file says
+about Action 7 was read out of `omarjosephf/cited` at `6237ab5` on 15 September,
+except where a line says otherwise. Rows 8 and 9 are carried forward from earlier notes, and this file
 has been wrong about implemented state four times in a week — so treat them as
 what was believed, not what is proven. **Verifying them is the first task after
 Action 7 closes**, before either is planned or scheduled.
@@ -97,11 +97,12 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
-## Action 7: step 4 is done; step 5 waits on an unmerged fix
+## Action 7: steps 1-4 done; step 5's code blockers are all closed
 
-Steps 1-3 landed as `omarjosephf/cited#15` and the portfolio pin as
-`omarjosephf/cited#16`. `cited` `main` is `4e08207` plus that pin, GitHub CI is
-green, and the complete gate passes locally on the pinned interpreter.
+Steps 1-3 landed as `omarjosephf/cited#15`, the portfolio pin as
+`omarjosephf/cited#16`, and the evidence-identity fix as `omarjosephf/cited#17`.
+`cited` `main` is **`6237ab5`**, GitHub CI is green on it, and the complete gate
+passes locally on the pinned interpreter.
 
 **Step 4 is done.** On 14 September both permanent ledgers were created and then
 verified by reading them back: the service ledger stamped
@@ -122,11 +123,27 @@ available: at the confirmation prompt, with the spend already authorised.
 
 **Where it stands now.** The design question the blocker raised was decided on
 14 September and recorded as an ADR-0015 amendment: spend ceilings leave the
-evidence identity, and the release manifest goes to v3. The fix is written, the
-complete gate passes locally, and it is **on a branch with no PR open and no
-owner review**. Step 5 becomes runnable when that change is reviewed and merged
-— not before, and this file should not be read as saying otherwise until the
-merge is recorded here.
+evidence identity, and the release manifest goes to v3. That fix is **merged** —
+`omarjosephf/cited#17`, merge commit `6237ab5`, both CI checks green.
+
+**Read the next two paragraphs as a pair; they are not the same claim.**
+
+*Verified in the merged code on 15 September,* by reading `main` at `6237ab5`
+rather than this file: all four spend ceilings are absent from
+`release_manifest.py`, `ReleaseManifest.schema_version` is `Literal[3]`, and
+`release-manifest-v3.schema.json` is on disk with v1 and v2 retained beside it.
+The pin still holds: nothing under `content/` has changed between `fb77028` and
+this repository's `main`, and the question set is 75 at both ends. Format, lint,
+mypy and the full suite passed on Python 3.12.10 before the push, and CI passed
+the same tree against the pinned revision afterwards.
+
+*Not verified on 15 September:* the state of either ledger, and the contents of
+`Invoke-PaidEvaluation.ps1`. Both were deliberately left untouched. The ledger
+claim above still rests on the 14 September readback and nothing newer. **Step 5
+has not been run.** What closed is the last code defect standing in front of it;
+what remains is an operator action against a non-renewing allowance, and this
+file has been wrong four times at exactly the point where those two get
+conflated.
 
 On 13 September the paid command was run and refused before any provider call:
 
@@ -212,8 +229,8 @@ the code before trusting it complete.
   it could then never run — and item 5 of the durable-budget runbook forbids a
   replacement ledger. `docs/runbooks/builds.md` governs how the pin moves: a
   reviewed companion change, never a quiet edit alongside a capture.
-- **DECIDED 14 Sep, fix written, NOT MERGED — `AnswerConfiguration` carried the
-  live service's budget bounds.** This is what refused the 14 September paid
+- **CLOSED by `cited#17` — `AnswerConfiguration` carried the live service's
+  budget bounds.** This is what refused the 14 September paid
   run. It was the first blocker's defect repeated in a second model that
   `cited#15` did not touch: `release_manifest.py:142-145` declared
   `daily_attempt_limit` `le=40`, `monthly_attempt_limit` `le=200`,
@@ -256,15 +273,14 @@ the code before trusting it complete.
   rather than making an in-place edit safe. v1 and v2 stay on disk, referenced
   by nothing.
 
-  **The fix is written and unmerged.** It is on branch
-  `fix/evidence-identity-excludes-spend-ceilings` in `omarjosephf/cited`,
-  branched from `e513730`. `ruff format`, `ruff check`, `mypy src tests` and
-  the full `pytest` suite pass locally on the pinned interpreter. **No PR is
-  open, nothing is committed, and the owner has not reviewed it.** Do not read
-  this bullet as "the capture can run" — that is precisely the sentence this
-  file has been wrong about four times.
-- **CLOSED by the same unmerged change — no free path built the evidence
-  identity.** This is why a three-line bound mismatch survived to the
+  **The fix is merged.** It went in as `omarjosephf/cited#17` from branch
+  `fix/evidence-identity-excludes-spend-ceilings`, squash-merged to `6237ab5`
+  on 14 September after owner review, with both CI checks green. An unrelated
+  build-lock bump found in the same working tree was split onto
+  `chore/build-lock-bump` and deliberately left unmerged with no PR: those are
+  build packages feeding the image digest the manifest tuple pins, so they want
+  the dependency review a Dependabot bump gets, not a silent lock refresh.
+- **CLOSED by `cited#17` — no free path built the evidence identity.** This is why a three-line bound mismatch survived to the
   confirmation prompt rather than being caught in CI months earlier. Nothing
   free reached `_answer_configuration`: the preflight never called it, and the
   13 September rehearsal has no `config` key at all
@@ -317,10 +333,12 @@ repository, and is still Action 7.
 
 **Steps 1-3 are done and merged** as `omarjosephf/cited#15`, and the portfolio
 pin as `omarjosephf/cited#16`. They are kept below as the record of what was
-decided and why. **Step 4 was completed on 14 September. Step 5 is blocked by
-the sixth blocker above** — a code decision in `omarjosephf/cited`, not an owner
-action. The sitting below is kept because step 1 is done and steps 2 and 3 still
-describe how the run is made once the blocker clears; do not treat it as ready.
+decided and why. **Step 4 was completed on 14 September. The sixth blocker
+closed on 14 September with `omarjosephf/cited#17`, so step 5 is no longer
+blocked by code.** What is left is the operator action itself, against a
+non-renewing allowance: read steps 2 and 3 below for how the run is made, and
+re-read `docs/runbooks/durable-budget.md` and both ledgers before typing
+anything. Step 5 has not been run.
 
 Superseded as a plan; retained as the procedure. Steps 4 and 5 were to be done
 in one sitting, in this order:
