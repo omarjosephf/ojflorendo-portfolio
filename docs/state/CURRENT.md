@@ -137,13 +137,42 @@ this repository's `main`, and the question set is 75 at both ends. Format, lint,
 mypy and the full suite passed on Python 3.12.10 before the push, and CI passed
 the same tree against the pinned revision afterwards.
 
-*Not verified on 15 September:* the state of either ledger, and the contents of
-`Invoke-PaidEvaluation.ps1`. Both were deliberately left untouched. The ledger
-claim above still rests on the 14 September readback and nothing newer. **Step 5
-has not been run.** What closed is the last code defect standing in front of it;
-what remains is an operator action against a non-renewing allowance, and this
-file has been wrong four times at exactly the point where those two get
-conflated.
+*Not verified on 15 September:* the state of either ledger. It was deliberately
+left untouched, so the claim above still rests on the 14 September readback and
+nothing newer. **Step 5 has not been run.** What closed is the last code defect
+standing in front of it; what remains is an operator action against a
+non-renewing allowance, and this file has been wrong four times at exactly the
+point where those two get conflated.
+
+**`Invoke-PaidEvaluation.ps1` was read for the first time on 15 September, and
+it is sound.** It had never been inspected, which on this project's record was
+its own risk. Verified line by line against the merged code: `$SpecVersion` is
+`'3.0'` and `release_evaluation.SPEC_VERSION` is `"3.0"`; `$MaxPaidCalls` is
+150, matching the ADR-0015 envelope and the 2 x 75 headroom the CLI demands; it
+is free by default and refuses to create either ledger. Its free preflight now
+builds `_answer_configuration`, which is the check that did not exist on 14
+September.
+
+**Its pin gate covers the question set only.** `git diff --quiet $pinCommit --
+$pinQuestions` compares `questions.toml` against the pinned revision and refuses
+on a mismatch, but nothing compares the *corpus* or the *system prompt*, and
+`deploy/oj-assistant` is gitignored — a staged artifact that CI rebuilds from
+the pin on every run while the local copy is whatever was last staged. Checked
+by hand on 15 September and clean: the staged corpus is byte-identical to
+`fb77028:content/assistant`, the staged `system-prompt.md` byte-identical to
+`fb77028:content/assistant-system-prompt.md`, and the corpus tree is
+`94d7014` at `f53ddda`, at `fb77028` and at this repository's `main` — it has
+not moved at all, so the earlier pin change could not have staled it. That is
+true today and is not enforced by anything. Restage from the pin before the
+capture rather than trusting this paragraph.
+
+**Nobody but the owner can run step 5.** The script reads both provider keys
+through `Read-Host -AsSecureString` at the keyboard. No agent can supply them
+and none should be asked to, so both the free preflight and the paid capture are
+owner-operated by construction. The free preflight is the correct way to verify
+both ledgers: it opens them read-only, reserves nothing, and prints
+`service remaining`, `allowance left` and the effective ceiling before anything
+can be spent. Run it, read those three numbers, and only then consider `-Paid`.
 
 On 13 September the paid command was run and refused before any provider call:
 
