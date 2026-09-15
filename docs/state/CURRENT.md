@@ -97,12 +97,32 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
-## Action 7: steps 1-4 done; step 5's code blockers are all closed
+## Action 7: step 5 ran, failed at question 37, and spent 36 of 150 attempts
 
 Steps 1-3 landed as `omarjosephf/cited#15`, the portfolio pin as
 `omarjosephf/cited#16`, and the evidence-identity fix as `omarjosephf/cited#17`.
 `cited` `main` is **`6237ab5`**, GitHub CI is green on it, and the complete gate
 passes locally on the pinned interpreter.
+
+**Step 5 ran on 15 September and did not complete.** It stopped at question 37
+of 75 with exit 2, having spent **36 of the 150-attempt lifetime allowance**.
+114 attempts remain. The portfolio suite is gated on 150 being free *before* it
+dispatches anything, so **this allowance can no longer fund it**, and item 5 of
+the durable-budget runbook forbids a replacement ledger to regain one. Both
+ledgers now hold 36 reservations, and `integrity_check` is still `ok` on each.
+
+**Neither the providers nor the budget were involved.** All 36 calls returned
+`provider_outcome: "completed"` — 36 calls for 36 cases, so nothing fell back
+and the fallback headroom recorded below was never in play. The preflight had
+been clean: `answering_enabled: True`, the evidence identity built and
+validated, and all three ceilings reading 150 against a need of 150.
+
+The capture died writing a file. That is the seventh blocker, below, and it is
+fixed in `omarjosephf/cited#18`. Completing the suite is no longer an operator
+action: it needs a new allowance ledger carrying the 1,440,000 micro-USD already
+spent, which puts the ceiling above ADR-0015's envelope and therefore requires a
+reviewed budget decision and an amendment. **Do not re-run the capture** — at
+114 remaining it refuses, and refusing costs nothing but proves nothing.
 
 **Step 4 is done.** On 14 September both permanent ledgers were created and then
 verified by reading them back: the service ledger stamped
@@ -374,6 +394,40 @@ the code before trusting it complete.
   nowhere in the repository. It was left in place rather than deleted, because
   removing it is a separate decision — but it is not a free path, and reading
   it as one is an easy mistake.
+
+- **FIXED by `cited#18` — a refused `os.replace` ended the capture and spent
+  the allowance.** This stopped the 15 September run, and unlike the six above
+  it was not found before the money went. `save_capture`
+  (`capture.py:146-160`) writes `<output>.pending`, fsyncs it, then calls
+  `os.replace`. At the top of iteration 36 the temp write succeeded and the
+  replace did not. The proof is the pair of files left in `eval/results/`,
+  identical but for one key: `active_case` is `35` in the output and `36` in the
+  `.pending`, which only a written-but-not-replaced temp file produces.
+  `cmd_eval`'s bare `except Exception` (`cli.py:333`) then discarded which
+  exception it was, so neither the console nor the file named the cause; the
+  failure was reconstructed from those two files afterwards.
+
+  On Windows a file-sync client, search indexer or malware scanner holding the
+  target for a moment is enough to refuse a replace, and this repository sits
+  under `OneDrive\Documents` — a location *Environment facts* below already
+  records as having broken every absolute path once and the backend virtualenv
+  since. That history makes OneDrive the leading candidate. Be precise about
+  what is established, though: the failed `os.replace` is proven by the two
+  files, and its cause is inference. The fix does not depend on which of them
+  held the handle.
+
+  `cited#18` retries the replace over roughly thirteen seconds before believing
+  it, and stops requiring exclusive creation of `.pending` so that one
+  interrupted replacement cannot make every later save fail with
+  `FileExistsError`. Verified against a real `CreateFileW` handle with
+  share mode 0 held on the target — what a sync client actually does — which
+  reproduces `PermissionError [WinError 5]` on the old code and clears in 1.50s
+  on the new.
+
+  **The blindness is not fixed.** The bare `except Exception` is deliberate:
+  provider exceptions and secrets must never reach the console, so narrowing it
+  is a security decision rather than a bug fix and it was left alone. It is why
+  this cost a forensic session instead of a line of output.
 
 **The root cause was one envelope doing two jobs.** The capture inherited the
 live service's spend limits, because both build from the same `Settings` model.
@@ -661,7 +715,11 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   the venv outside OneDrive. The seven worktrees under `.codex\worktrees\` broke
   the same way; `git worktree repair` from the clone fixed all seven on
   12 September, and nothing was lost because the repository's own back-pointers
-  had stayed correct.
+  had stayed correct. On 15 September the same directory cost a paid capture:
+  a refused `os.replace` on a file under it ended the run and spent 36 of a
+  non-renewable 150-attempt allowance. `cited#18` makes that survivable, but
+  the standing advice is unchanged and now has a price attached — **run
+  captures against a path outside the synced tree.**
 - **Egress is restricted from cloud sessions only.** `fly.io`, `vercel.com`,
   `ai.google.dev`, `ojfr.me` and `oj-assistant.fly.dev` are blocked there;
   WebSearch works. A session on the owner's own machine reaches all of them, so
