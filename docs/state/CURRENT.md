@@ -137,12 +137,20 @@ this repository's `main`, and the question set is 75 at both ends. Format, lint,
 mypy and the full suite passed on Python 3.12.10 before the push, and CI passed
 the same tree against the pinned revision afterwards.
 
-*Not verified on 15 September:* the state of either ledger. It was deliberately
-left untouched, so the claim above still rests on the 14 September readback and
-nothing newer. **Step 5 has not been run.** What closed is the last code defect
-standing in front of it; what remains is an operator action against a
-non-renewing allowance, and this file has been wrong four times at exactly the
-point where those two get conflated.
+*Verified on 15 September, after the above:* the state of both ledgers, read
+directly with `sqlite3` in `mode=ro` rather than through the script. The
+allowance holds ceiling `6000000` and carried `0`. The service ledger is stamped
+`150/150/6000000/6000000`, which equals the four limits the script exports, so
+`PersistentBudget` has no mismatch to refuse on. **Both `reservations` tables
+are empty** — neither ledger has been drawn on at all — and
+`integrity_check` returns `ok` on both. By `capture.py:97-99`
+(`(ceiling - carried) // 40000 - count`) that is 150 attempts of allowance and
+150 of service against an envelope of 150, so the capture clears all three
+ceilings with exactly zero slack. This supersedes the 14 September readback as
+the newest evidence; nothing was reserved to obtain it. **Step 5 has not been
+run.** What closed is the last code defect standing in front of it; what
+remains is an operator action against a non-renewing allowance, and this file
+has been wrong four times at exactly the point where those two get conflated.
 
 **`Invoke-PaidEvaluation.ps1` was read for the first time on 15 September, and
 it is sound.** It had never been inspected, which on this project's record was
@@ -163,8 +171,14 @@ by hand on 15 September and clean: the staged corpus is byte-identical to
 `fb77028:content/assistant-system-prompt.md`, and the corpus tree is
 `94d7014` at `f53ddda`, at `fb77028` and at this repository's `main` — it has
 not moved at all, so the earlier pin change could not have staled it. That is
-true today and is not enforced by anything. Restage from the pin before the
-capture rather than trusting this paragraph.
+true today and is not enforced by anything. **The restage was then done on 15
+September rather than trusted:** `deploy/oj-assistant` was rebuilt by exporting
+the portfolio at `fb77028` with `git archive` and running that revision's own
+`scripts/export-assistant-corpus.mjs` against the export, which is what
+`ci.yml:88` does. It produced checksum `7bddb04d` and a recursive diff against
+the pre-restage copy found no change at all: the staging was already correct,
+and is now correct by construction rather than by inspection. Restage again if
+anything touches that directory before the capture.
 
 **Nobody but the owner can run step 5.** The script reads both provider keys
 through `Read-Host -AsSecureString` at the keyboard. No agent can supply them
@@ -173,6 +187,16 @@ owner-operated by construction. The free preflight is the correct way to verify
 both ledgers: it opens them read-only, reserves nothing, and prints
 `service remaining`, `allowance left` and the effective ceiling before anything
 can be spent. Run it, read those three numbers, and only then consider `-Paid`.
+
+The key prompt sits *above* the preflight block and is **not** gated on `-Paid`,
+so the free half is owner-operated for the same reason the paid half is. A
+handoff that asks an agent to "run the free preflight and read the three
+ceilings" is asking for something that cannot be done. What an agent can do
+without keys is everything else: restage from the pin, run the pin gate, diff
+the staged corpus and system prompt against the pinned revision, and read both
+ledgers read-only as recorded above. What it cannot reach is `answering_enabled`
+and `_answer_configuration` — precisely the two checks the preflight exists
+to perform, and they remain unverified until the owner runs it.
 
 On 13 September the paid command was run and refused before any provider call:
 
