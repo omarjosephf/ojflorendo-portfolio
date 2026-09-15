@@ -266,6 +266,22 @@ the code before trusting it complete.
 - **STANDING — a partial run cannot substitute.** `release_manifest.py` requires
   the saved cases to equal the versioned question set exactly, so the suite
   cannot be sliced across several smaller runs and stapled together.
+- **STANDING — the release needs *two* paid captures, and one allowance funds
+  both.** Verified against the code on 15 September, because nothing recorded
+  it. `release_manifest.py:232` requires both the `demo` and `portfolio` suites
+  to be present, and the loop that follows applies
+  `capture_state == "complete"` to **every** evaluation (`:244`), not only the
+  deployment's selected one — `selected` narrows the corpus/prompt identity
+  check at `:282` and nothing else. The demo suite therefore needs its own paid
+  capture, gated at 2 x 15 = **30**, drawn from the same 150-attempt lifetime
+  allowance. Portfolio still goes first, because its gate needs all 150 free.
+  It spends 75 if every question answers on the primary, plus one more for each
+  question that falls back to the backup, so **at most 45 of the 75 may fall
+  back** before the demo capture becomes impossible and the manifest can never
+  validate. Fallback is availability-only — billing, quota and authentication
+  failures do not consume one — so this needs a primary outage mid-capture to
+  bite, and there is no recovery if it does. Budget the demo capture as part of
+  the same allowance, not as a later decision.
 - **CLOSED by `cited#16` — `cited` pinned a portfolio revision the question set
   had outgrown.** `eval/portfolio-source.json` now pins `fb77028`; it pinned
   `f53ddda`, whose `content/assistant-eval/questions.toml` holds **70**
