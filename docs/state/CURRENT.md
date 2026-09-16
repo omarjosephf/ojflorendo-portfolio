@@ -97,12 +97,32 @@ more would have done this. September is unaffected: $1.52 and 38 attempts
 remain. **Do not re-initialise the ledger to clear this** — recreating a ledger
 to regain allowance is the exact operation the runbook prohibits.
 
-## Action 7: steps 1-4 done; step 5's code blockers are all closed
+## Action 7: step 5 ran, failed at question 37, and spent 36 of 150 attempts
 
 Steps 1-3 landed as `omarjosephf/cited#15`, the portfolio pin as
 `omarjosephf/cited#16`, and the evidence-identity fix as `omarjosephf/cited#17`.
 `cited` `main` is **`6237ab5`**, GitHub CI is green on it, and the complete gate
 passes locally on the pinned interpreter.
+
+**Step 5 ran on 15 September and did not complete.** It stopped at question 37
+of 75 with exit 2, having spent **36 of the 150-attempt lifetime allowance**.
+114 attempts remain. The portfolio suite is gated on 150 being free *before* it
+dispatches anything, so **this allowance can no longer fund it**, and item 5 of
+the durable-budget runbook forbids a replacement ledger to regain one. Both
+ledgers now hold 36 reservations, and `integrity_check` is still `ok` on each.
+
+**Neither the providers nor the budget were involved.** All 36 calls returned
+`provider_outcome: "completed"` — 36 calls for 36 cases, so nothing fell back
+and the fallback headroom recorded below was never in play. The preflight had
+been clean: `answering_enabled: True`, the evidence identity built and
+validated, and all three ceilings reading 150 against a need of 150.
+
+The capture died writing a file. That is the seventh blocker, below, and it is
+fixed in `omarjosephf/cited#18`. Completing the suite is no longer an operator
+action: it needs a new allowance ledger carrying the 1,440,000 micro-USD already
+spent, which puts the ceiling above ADR-0015's envelope and therefore requires a
+reviewed budget decision and an amendment. **Do not re-run the capture** — at
+114 remaining it refuses, and refusing costs nothing but proves nothing.
 
 **Step 4 is done.** On 14 September both permanent ledgers were created and then
 verified by reading them back: the service ledger stamped
@@ -137,12 +157,20 @@ this repository's `main`, and the question set is 75 at both ends. Format, lint,
 mypy and the full suite passed on Python 3.12.10 before the push, and CI passed
 the same tree against the pinned revision afterwards.
 
-*Not verified on 15 September:* the state of either ledger. It was deliberately
-left untouched, so the claim above still rests on the 14 September readback and
-nothing newer. **Step 5 has not been run.** What closed is the last code defect
-standing in front of it; what remains is an operator action against a
-non-renewing allowance, and this file has been wrong four times at exactly the
-point where those two get conflated.
+*Verified on 15 September, after the above:* the state of both ledgers, read
+directly with `sqlite3` in `mode=ro` rather than through the script. The
+allowance holds ceiling `6000000` and carried `0`. The service ledger is stamped
+`150/150/6000000/6000000`, which equals the four limits the script exports, so
+`PersistentBudget` has no mismatch to refuse on. **Both `reservations` tables
+are empty** — neither ledger has been drawn on at all — and
+`integrity_check` returns `ok` on both. By `capture.py:97-99`
+(`(ceiling - carried) // 40000 - count`) that is 150 attempts of allowance and
+150 of service against an envelope of 150, so the capture clears all three
+ceilings with exactly zero slack. This supersedes the 14 September readback as
+the newest evidence; nothing was reserved to obtain it. **Step 5 has not been
+run.** What closed is the last code defect standing in front of it; what
+remains is an operator action against a non-renewing allowance, and this file
+has been wrong four times at exactly the point where those two get conflated.
 
 **`Invoke-PaidEvaluation.ps1` was read for the first time on 15 September, and
 it is sound.** It had never been inspected, which on this project's record was
@@ -163,8 +191,14 @@ by hand on 15 September and clean: the staged corpus is byte-identical to
 `fb77028:content/assistant-system-prompt.md`, and the corpus tree is
 `94d7014` at `f53ddda`, at `fb77028` and at this repository's `main` — it has
 not moved at all, so the earlier pin change could not have staled it. That is
-true today and is not enforced by anything. Restage from the pin before the
-capture rather than trusting this paragraph.
+true today and is not enforced by anything. **The restage was then done on 15
+September rather than trusted:** `deploy/oj-assistant` was rebuilt by exporting
+the portfolio at `fb77028` with `git archive` and running that revision's own
+`scripts/export-assistant-corpus.mjs` against the export, which is what
+`ci.yml:88` does. It produced checksum `7bddb04d` and a recursive diff against
+the pre-restage copy found no change at all: the staging was already correct,
+and is now correct by construction rather than by inspection. Restage again if
+anything touches that directory before the capture.
 
 **Nobody but the owner can run step 5.** The script reads both provider keys
 through `Read-Host -AsSecureString` at the keyboard. No agent can supply them
@@ -173,6 +207,16 @@ owner-operated by construction. The free preflight is the correct way to verify
 both ledgers: it opens them read-only, reserves nothing, and prints
 `service remaining`, `allowance left` and the effective ceiling before anything
 can be spent. Run it, read those three numbers, and only then consider `-Paid`.
+
+The key prompt sits *above* the preflight block and is **not** gated on `-Paid`,
+so the free half is owner-operated for the same reason the paid half is. A
+handoff that asks an agent to "run the free preflight and read the three
+ceilings" is asking for something that cannot be done. What an agent can do
+without keys is everything else: restage from the pin, run the pin gate, diff
+the staged corpus and system prompt against the pinned revision, and read both
+ledgers read-only as recorded above. What it cannot reach is `answering_enabled`
+and `_answer_configuration` — precisely the two checks the preflight exists
+to perform, and they remain unverified until the owner runs it.
 
 On 13 September the paid command was run and refused before any provider call:
 
@@ -242,6 +286,22 @@ the code before trusting it complete.
 - **STANDING — a partial run cannot substitute.** `release_manifest.py` requires
   the saved cases to equal the versioned question set exactly, so the suite
   cannot be sliced across several smaller runs and stapled together.
+- **STANDING — the release needs *two* paid captures, and one allowance funds
+  both.** Verified against the code on 15 September, because nothing recorded
+  it. `release_manifest.py:232` requires both the `demo` and `portfolio` suites
+  to be present, and the loop that follows applies
+  `capture_state == "complete"` to **every** evaluation (`:244`), not only the
+  deployment's selected one — `selected` narrows the corpus/prompt identity
+  check at `:282` and nothing else. The demo suite therefore needs its own paid
+  capture, gated at 2 x 15 = **30**, drawn from the same 150-attempt lifetime
+  allowance. Portfolio still goes first, because its gate needs all 150 free.
+  It spends 75 if every question answers on the primary, plus one more for each
+  question that falls back to the backup, so **at most 45 of the 75 may fall
+  back** before the demo capture becomes impossible and the manifest can never
+  validate. Fallback is availability-only — billing, quota and authentication
+  failures do not consume one — so this needs a primary outage mid-capture to
+  bite, and there is no recovery if it does. Budget the demo capture as part of
+  the same allowance, not as a later decision.
 - **CLOSED by `cited#16` — `cited` pinned a portfolio revision the question set
   had outgrown.** `eval/portfolio-source.json` now pins `fb77028`; it pinned
   `f53ddda`, whose `content/assistant-eval/questions.toml` holds **70**
@@ -334,6 +394,40 @@ the code before trusting it complete.
   nowhere in the repository. It was left in place rather than deleted, because
   removing it is a separate decision — but it is not a free path, and reading
   it as one is an easy mistake.
+
+- **FIXED by `cited#18` — a refused `os.replace` ended the capture and spent
+  the allowance.** This stopped the 15 September run, and unlike the six above
+  it was not found before the money went. `save_capture`
+  (`capture.py:146-160`) writes `<output>.pending`, fsyncs it, then calls
+  `os.replace`. At the top of iteration 36 the temp write succeeded and the
+  replace did not. The proof is the pair of files left in `eval/results/`,
+  identical but for one key: `active_case` is `35` in the output and `36` in the
+  `.pending`, which only a written-but-not-replaced temp file produces.
+  `cmd_eval`'s bare `except Exception` (`cli.py:333`) then discarded which
+  exception it was, so neither the console nor the file named the cause; the
+  failure was reconstructed from those two files afterwards.
+
+  On Windows a file-sync client, search indexer or malware scanner holding the
+  target for a moment is enough to refuse a replace, and this repository sits
+  under `OneDrive\Documents` — a location *Environment facts* below already
+  records as having broken every absolute path once and the backend virtualenv
+  since. That history makes OneDrive the leading candidate. Be precise about
+  what is established, though: the failed `os.replace` is proven by the two
+  files, and its cause is inference. The fix does not depend on which of them
+  held the handle.
+
+  `cited#18` retries the replace over roughly thirteen seconds before believing
+  it, and stops requiring exclusive creation of `.pending` so that one
+  interrupted replacement cannot make every later save fail with
+  `FileExistsError`. Verified against a real `CreateFileW` handle with
+  share mode 0 held on the target — what a sync client actually does — which
+  reproduces `PermissionError [WinError 5]` on the old code and clears in 1.50s
+  on the new.
+
+  **The blindness is not fixed.** The bare `except Exception` is deliberate:
+  provider exceptions and secrets must never reach the console, so narrowing it
+  is a security decision rather than a bug fix and it was left alone. It is why
+  this cost a forensic session instead of a line of output.
 
 **The root cause was one envelope doing two jobs.** The capture inherited the
 live service's spend limits, because both build from the same `Settings` model.
@@ -621,7 +715,11 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   the venv outside OneDrive. The seven worktrees under `.codex\worktrees\` broke
   the same way; `git worktree repair` from the clone fixed all seven on
   12 September, and nothing was lost because the repository's own back-pointers
-  had stayed correct.
+  had stayed correct. On 15 September the same directory cost a paid capture:
+  a refused `os.replace` on a file under it ended the run and spent 36 of a
+  non-renewable 150-attempt allowance. `cited#18` makes that survivable, but
+  the standing advice is unchanged and now has a price attached — **run
+  captures against a path outside the synced tree.**
 - **Egress is restricted from cloud sessions only.** `fly.io`, `vercel.com`,
   `ai.google.dev`, `ojfr.me` and `oj-assistant.fly.dev` are blocked there;
   WebSearch works. A session on the owner's own machine reaches all of them, so
