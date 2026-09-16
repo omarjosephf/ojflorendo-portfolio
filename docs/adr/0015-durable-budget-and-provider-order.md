@@ -166,3 +166,79 @@ now a real rehearsal of the identity rather than a check of everything except
 it. A half-configured credential environment still runs a free retrieval scoring
 to completion — a configured credential alone never triggers inference, and the
 absence of one must not break a free run either.
+
+## Qualification allowance raised to 225 attempts, 17 September 2026
+
+The 13 September amendment sized two ledgers to one number. That was right for
+the service ledger and wrong for the allowance, and the 15 September capture
+paid for the difference.
+
+`QualificationAllowance` and `PersistentBudget` are not the same kind of thing.
+`QualificationAllowance._remaining` counts every row its `reservations` table
+has ever held; the table is `(id INTEGER PRIMARY KEY)` and carries no date
+column, so it cannot forget. `PersistentBudget._totals` counts
+`WHERE month = ?`. Sizing a lifetime ceiling and a per-month ceiling at the same
+150 attempts made them look interchangeable. They are not: a month's
+reservations come back, a lifetime's do not.
+
+On 15 September the portfolio capture failed at question 37 of 75 on a refused
+`os.replace` under OneDrive, spending 36 attempts. The service ledger returns
+those on 1 October. The allowance does not, and the 114 it leaves cannot fund a
+suite that demands 150 free before it dispatches anything. The envelope was
+exactly 150 against a need of exactly 150, and one transient file lock was
+enough to end it permanently. `omarjosephf/cited#18` closed that specific fault;
+the per-case loop in `capture_answers` still has no `except` and there is no
+resume, so any provider or parsing error forfeits a whole run the same way.
+
+Decision: **the qualification allowance is raised to 10,440,000 micro-USD
+(US$10.44), carrying forward the 1,440,000 micro-USD already spent.** By
+`capture.py`'s `(ceiling - carried) // 40000` that leaves **225 attempts**.
+
+225 is not a round number; it is the smallest one that buys a complete second
+chance. A capture can restart only while the attempts consumed so far are no
+more than the allowance less the 150-attempt gate. At 225 that is 75 — one per
+question across the whole suite — so a run that crashes at *any* question can be
+run again in full, with the demo capture's 30 still fitting afterwards. At 200
+the cover runs out at question 50, which is past where the last run died.
+
+**The service envelope does not move, and that is a code constraint rather than
+a preference.** `Settings` bounds `daily_answer_limit` at `le=150`, and both
+`daily_budget_micro_usd` and `monthly_budget_micro_usd` at `le=6_000_000`. A
+ledger stamped above those could not be used at all: the settings that must
+match it would not validate, and `PersistentBudget` refuses any settings that
+disagree with its ledger's stamped limits. The capture-scoped service ledger
+therefore stays at 150 attempts and US$6.00, exactly as the 13 September
+decision states it, and that sentence is left untouched here.
+`docs:check-budget-envelope` reads the first match of its pattern in this file,
+so a second sentence in the same shape would either be silently ignored or be
+taken for a service envelope it does not describe. The allowance above is
+stated in micro-USD and attempts, and never in that form.
+
+**One consequence of leaving it there.** The service ledger admits 150 attempts
+per calendar month and the portfolio gate demands 150 free before dispatch, so
+the portfolio capture must be the first paid work of a calendar month, and a
+retry cannot happen in the same one. A clean portfolio run consumes 75, leaving
+75 — enough for the demo suite's 30, not for another portfolio run's 150. The
+raised allowance buys retries in later months, not faster ones.
+
+**What this authorises and what it costs are different numbers.** US$10.44 is
+reservation headroom at the pinned US$0.04 per attempt, not a spend forecast. At
+the 12 September measured US$0.0024 per call, the expected outcome — a
+75-question portfolio capture and a 15-question demo capture — is about
+**US$0.22**, and that figure is the same under any ceiling considered. Real
+exposure is bounded twice over independently of this decision: `--max-paid-calls`
+is 150 per run and the service ledger admits 150 per month, so no allowance can
+produce more than about US$0.36 of real spend in a month. A higher ceiling buys
+more months of trying, not a faster burn. The reservation stays at US$0.04,
+pinned by this ADR and written into every ledger as `CHECK(micro_usd = 40000)`;
+re-deriving it from the measurement remains separate work requiring a planned
+carry-forward migration of the production ledger.
+
+**This cannot be corrected afterwards.** Item 5 of
+[the durable-budget runbook](../runbooks/durable-budget.md) forbids deleting,
+truncating, recreating, cloning or restoring a ledger to regain an allowance,
+and it governs this one exactly as it governs the service ledger. Both flags on
+the creation command are money in micro-USD, never attempt counts: `225` is
+US$0.000225 and is refused outright, but `400000` would silently create a usable
+ten-attempt ledger that could never be replaced. Read the attempt count the
+command echoes back before confirming it.

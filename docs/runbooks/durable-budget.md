@@ -116,10 +116,12 @@ service ledger: it may not be deleted, truncated, recreated, cloned or restored
 to regain an allowance.
 
 **Its ceiling and its carry-forward are money in micro-USD, never attempt
-counts.** One attempt reserves 40,000 micro-USD (US$0.04), so the 150-attempt
-capture envelope of
-[ADR-0015](../adr/0015-durable-budget-and-provider-order.md) is `6000000`. A
-ceiling given as `150` is US$0.00015 and buys no attempts at all. The
+counts.** One attempt reserves 40,000 micro-USD (US$0.04), and the ceiling must
+cover the carry-forward *on top of* the attempts wanted:
+`ceiling = attempts × 40000 + carried`. The allowance
+[ADR-0015](../adr/0015-durable-budget-and-provider-order.md) approved on
+17 September 2026 is `10440000` carrying `1440000`, which leaves 225 attempts. A
+ceiling given as `225` is US$0.000225 and buys no attempts at all. The
 entrypoint refuses that, but it cannot detect a wrong value that happens to buy
 some other number of attempts: `400000` — the live service's daily money cap,
 and the number sitting beside this one in every other document — silently
@@ -130,11 +132,14 @@ it aloud.
 Generate a fresh 64-character hex identity, record it privately, then run:
 
 ```bash
-python -m assistant.capture --path <allowance-path> --ledger-id <id> --ceiling-micro-usd 6000000 --carried-micro-usd 0
+python -m assistant.capture --path <allowance-path> --ledger-id <id> --ceiling-micro-usd 10440000 --carried-micro-usd 1440000
 ```
 
 Carry forward all reviewed prior qualification spend in micro-USD; use `0` only
-when there is genuinely none on record.
+when there is genuinely none on record. The `1440000` above is the 36 attempts
+the 15 September 2026 capture spent before it failed at question 37, and it is
+not optional: a replacement ledger that does not carry it regains an allowance,
+which item 5 forbids.
 
 The capture separately requires its own durable *service* ledger at the same
 envelope. Item 3's command creates one stamped at the live service envelope
