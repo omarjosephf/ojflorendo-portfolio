@@ -551,20 +551,30 @@ in "Free and read-only" would answer identically against the deployment it
 replaced, exactly as in the first, second and fourth entries. Under the practice
 those entries record, a documentation deploy gets no run of its own.
 
-**What is new is why this entry exists: nothing approved the merge.** Auto-merge
-had been switched on part-way through the session, as one of four settings
-enabled together rather than as a decision about this pull request. It fired
-seven seconds after the required gate went green — `verify` completed `success`
-on `069fbc5` at 17:20:59 UTC, and the merge landed at 17:21:06 UTC. A request to
-disable it arrived after that and was refused as already merged.
+**What is new is why this entry exists: no one confirmed the merge.**
+Auto-merge had been switched on part-way through the session, as one of four
+settings enabled together rather than as a decision about this pull request. It
+fired seven seconds after the required gate went green — `verify` completed
+`success` on `069fbc5` at 17:20:59 UTC, and the merge landed at 17:21:06 UTC. A
+request to disable it arrived after that and was refused as already merged.
+
+**GitHub attributes that merge to the owner's account.** `mergedBy` on #96 reads
+`omarjosephf`, because auto-merge lands as the account that enabled it. So the
+record is not that some other party merged to protected `main` — it is that the
+owner's account did, without the owner confirming it at the time. Those are
+different claims and this log should not blur them: what is missing is the
+confirmation §11 requires immediately before the action, not the authority to
+merge.
 
 Every earlier deployment recorded here followed an owner's decision to merge.
-This one followed a switch. `docs/ENGINEERING_HANDBOOK.md` §11 classes a merge to
-protected `main` as R3 and requires explicit confirmation *immediately before*
-the action; §34 step 4 requires that approval before the promotion. **Auto-merge
-does not fail that requirement, it removes it** — the gate stays enforced and the
-approval does not, so every green run becomes a deployment. The gate passing is
-not the approval.
+This one followed a switch bearing the owner's name.
+`docs/ENGINEERING_HANDBOOK.md` §11 classes a merge to protected `main` as R3 and
+requires explicit confirmation *immediately before* the action; §34 step 4
+requires that approval before the promotion. **Auto-merge does not fail that
+requirement, it removes it** — the gate stays enforced and the approval does
+not, so every green run becomes a deployment. The gate passing is not the
+approval, and an account that merges automatically is not an owner who decided
+to.
 
 **That this change was R0 is a fact about its blast radius, not a defence of the
 missing step.** The switch is not scoped to documentation, and the next pull
