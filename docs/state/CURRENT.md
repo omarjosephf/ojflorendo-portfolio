@@ -925,6 +925,30 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   defect happening once already. `docs:check-handbook-checksum` normalises
   before hashing, verified byte-exact against git's clean filter; anything else
   that hashes a tracked file must do the same.
+- **React is held at 19.2 by `@react-three/fiber`, not by preference.** r3f
+  declares `react: ">=19 <19.3"`, so any bump to 19.3 fails `npm ci` at
+  resolution in about ten seconds, before a single test runs. It did exactly
+  that on all three head SHAs the `minor-and-patch` group PR #82 ever had.
+  9.7.0 is the newest published r3f and still caps below 19.3, so nothing
+  upstream closes this yet, and r3f is what renders the hero particle wave
+  (ADR-0002, ADR-0008, ADR-0009) — a forced resolution would put the landing
+  page's headline effect on an arrangement upstream calls unsupported. #90
+  holds `react`, `react-dom` and both type packages at minor **and** major in
+  `.github/dependabot.yml`; patch updates inside 19.2.x still flow, so security
+  fixes are not blocked. The hold lifts when r3f widens its peer range, and
+  that condition is recorded in the config beside the TypeScript 7 and
+  ESLint 10 deferrals. **The time this saves is diagnostic:** a group PR
+  carrying react will fail at install, and reading that as a fault in this
+  repository is the wrong conclusion.
+- **The September group bump is closed and not yet rebuilt.** #82 closed
+  itself four seconds after #90 merged, because the new ignore rules
+  invalidated it; its branch is gone, so `@dependabot recreate` had nothing to
+  act on and did nothing. The seven unrelated bumps that were trapped behind
+  react — including the `next` 16.3.5 patch — wait for the next weekly
+  Dependabot run, **Wednesday 23 September 2026 around 12:55 UTC**, unless
+  someone triggers one sooner from Insights → Dependency graph → Dependabot →
+  *Check for updates*. That is a console action; no REST endpoint triggers a
+  version-update run.
 
 ## The bug class this project keeps hitting
 
