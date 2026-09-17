@@ -961,6 +961,14 @@ belongs to.
 of the gate, so **any commit touching `docs/ENGINEERING_HANDBOOK.md` now fails
 CI unless it updates the checksum in ADR-0000 in the same commit.** That is the
 intent, not a defect. The owner re-ratified the current bytes on 17 September;
-the recorded value is `060e0387`. Landed as `f542749` on
-`docs/action-7-allowance-envelope` and pushed — **it is not on `main`**, so the
-check guards this branch only until it merges. The gate is now 16 stages.
+the recorded value is `060e0387`. Landed as `f542749` and **merged to `main` as
+PR #84 on 17 September**, so the check now guards every branch rather than only
+the one it was written on. The gate is 16 stages.
+
+**This paragraph said "it is not on `main`" until the merge, and stayed that way
+for the rest of the day.** A line that describes where a commit currently sits
+goes stale the moment it moves, which is the same repo-versus-reality shape as
+the migration drift above — the fact lived in GitHub, not in the repository, so
+nothing here could notice. Prefer recording what a change *does* over where it
+has got to; where it has got to is answerable with `git log` and does not need
+writing down.
