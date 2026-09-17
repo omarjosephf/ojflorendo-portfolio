@@ -940,15 +940,18 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   ESLint 10 deferrals. **The time this saves is diagnostic:** a group PR
   carrying react will fail at install, and reading that as a fault in this
   repository is the wrong conclusion.
-- **The September group bump is closed and not yet rebuilt.** #82 closed
-  itself four seconds after #90 merged, because the new ignore rules
-  invalidated it; its branch is gone, so `@dependabot recreate` had nothing to
-  act on and did nothing. The seven unrelated bumps that were trapped behind
-  react — including the `next` 16.3.5 patch — wait for the next weekly
-  Dependabot run, **Wednesday 23 September 2026 around 12:55 UTC**, unless
-  someone triggers one sooner from Insights → Dependency graph → Dependabot →
-  *Check for updates*. That is a console action; no REST endpoint triggers a
-  version-update run.
+- **The hold was exercised the same day and it worked.** #82 closed itself
+  four seconds after #90 merged, because the new ignore rules invalidated it,
+  and its branch went with it — so the `@dependabot recreate` issued a minute
+  later was answered with *"looks like this PR is closed"* and acted on
+  nothing. Dependabot opened **#91** at 15:21:46 UTC regardless: the same
+  group, rebuilt to **8 updates with react, react-dom and both type packages
+  absent**, the `next` 16.3.5 patch among them. Whether the comment or the
+  config landing on `main` triggered that run is not determinable from
+  outside; the timestamps fit either. The outcome is determinable: the group
+  resolves, and #91's Vercel deployment passed — the step #82 never reached on
+  any of its three head SHAs. #91 is open and unreviewed; its own gate, not
+  this note, is what proves the eight bumps are safe.
 
 ## The bug class this project keeps hitting
 
