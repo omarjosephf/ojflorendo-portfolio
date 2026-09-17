@@ -60,16 +60,17 @@ but is not activated.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | **Steps 1-4 done; every code blocker to step 5 is closed.** Both ledgers created, verified correct, entirely unspent. The sixth blocker — `AnswerConfiguration` carrying the live-service budget bounds — was fixed by `omarjosephf/cited#17`, merged 14 Sep as `6237ab5`, CI green. Verified against the merged code on 15 Sep. **Step 5, the paid capture, has not been run.** |
+| 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Both ledgers now hold 36 reservations and read **114 attempts remaining** — read read-only on 17 Sep, `integrity_check` `ok` on each. Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. The raise to 225 attempts is approved as an ADR-0015 amendment, 17 Sep, but **the replacement allowance ledger has not been created**, and the service ledger is monthly and does not return to 150 until 1 Oct. **No complete capture exists.** |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
 **Rows 8 and 9 have not been checked against the code.** What this file says
-about Action 7 was read out of `omarjosephf/cited` at `6237ab5` on 15 September,
-except where a line says otherwise. Rows 8 and 9 are carried forward from earlier notes, and this file
-has been wrong about implemented state four times in a week — so treat them as
-what was believed, not what is proven. **Verifying them is the first task after
-Action 7 closes**, before either is planned or scheduled.
+about Action 7 was read out of `omarjosephf/cited` at `6237ab5` on 15 September
+and re-checked against `origin/main` at `360e8fa` on 17 September, except where
+a line says otherwise. Rows 8 and 9 are carried forward from earlier notes, and
+this file has been wrong about implemented state four times in a week — so
+treat them as what was believed, not what is proven. **Verifying them is the
+first task after Action 7 closes**, before either is planned or scheduled.
 
 ## Decisions, both now closed
 
@@ -101,15 +102,28 @@ to regain allowance is the exact operation the runbook prohibits.
 
 Steps 1-3 landed as `omarjosephf/cited#15`, the portfolio pin as
 `omarjosephf/cited#16`, and the evidence-identity fix as `omarjosephf/cited#17`.
-`cited` `main` is **`6237ab5`**, GitHub CI is green on it, and the complete gate
-passes locally on the pinned interpreter.
+`cited` `origin/main` is **`360e8fa`** — the locked-replace fix `cited#18`,
+squash-merged after `6237ab5`. GitHub CI is green on it. This file said
+`6237ab5` until 17 September, which was true only until `cited#18` landed.
+
+**The local clone is not on `main`.** It sits on branch
+`fix/capture-survives-a-locked-replace` at `5b8ad79`, working tree clean and
+byte-identical to `origin/main`; its local `main` is stale at `6237ab5`. The
+code a capture would run is therefore correct, but the checkout does not say so
+on its face. **Check out `main` and pull before the capture**, so the evidence
+comes from a checkout that is provably the merged code. The complete gate passed
+locally on the pinned interpreter at `6237ab5`; it has not been re-run against
+`360e8fa` on this machine.
 
 **Step 5 ran on 15 September and did not complete.** It stopped at question 37
 of 75 with exit 2, having spent **36 of the 150-attempt lifetime allowance**.
 114 attempts remain. The portfolio suite is gated on 150 being free *before* it
-dispatches anything, so **this allowance can no longer fund it**, and item 5 of
-the durable-budget runbook forbids a replacement ledger to regain one. Both
-ledgers now hold 36 reservations, and `integrity_check` is still `ok` on each.
+dispatches anything, so **this allowance can no longer fund it**. Item 5 of the
+durable-budget runbook forbids a replacement ledger that *regains* an allowance;
+the 17 September amendment below authorises one that carries the 1,440,000
+micro-USD already spent forward, which does not. Both ledgers now hold 36
+reservations, and `integrity_check` is still `ok` on each — re-read read-only on
+17 September, and both still read 114.
 
 **Neither the providers nor the budget were involved.** All 36 calls returned
 `provider_outcome: "completed"` — 36 calls for 36 cases, so nothing fell back
@@ -118,19 +132,43 @@ been clean: `answering_enabled: True`, the evidence identity built and
 validated, and all three ceilings reading 150 against a need of 150.
 
 The capture died writing a file. That is the seventh blocker, below, and it is
-fixed in `omarjosephf/cited#18`. Completing the suite is no longer an operator
-action: it needs a new allowance ledger carrying the 1,440,000 micro-USD already
-spent, which puts the ceiling above ADR-0015's envelope and therefore requires a
-reviewed budget decision and an amendment. **Do not re-run the capture** — at
-114 remaining it refuses, and refusing costs nothing but proves nothing.
+fixed and merged as `omarjosephf/cited#18` (`360e8fa`).
+
+**The budget decision it needed was taken on 17 September** and is recorded as
+an [ADR-0015
+amendment](../adr/0015-durable-budget-and-provider-order.md#qualification-allowance-raised-to-225-attempts-17-september-2026):
+the qualification allowance rises to **10,440,000 micro-USD carrying 1,440,000,
+leaving 225 attempts**. The carry-forward is exactly the 36 attempts already
+spent (36 x 40,000), so the replacement regains nothing. The service envelope
+deliberately does not move — `Settings` bounds `daily_answer_limit` at `le=150`
+and both money limits at `le=6_000_000`, so a ledger stamped higher could not be
+used at all.
+
+**The amendment is approved. The ledger is not created.** Read read-only on
+17 September, `allowance.sqlite3` still holds ceiling `6000000`, carried `0` and
+36 reservations — 114 attempts, the old envelope. Creating the replacement is
+still an unperformed, permanent operator act; see the runbook's [qualification
+allowance ledger](../runbooks/durable-budget.md#qualification-allowance-ledger)
+subsection for the exact command, and read the attempt count it echoes before
+confirming.
+
+**Creating it does not make the capture runnable in September.** The service
+ledger counts `WHERE month = ?` (`persistent_budget.py:226`), so its 36 rows
+from 15 September stay inside the September window and it also reads 114 until
+the month turns. The portfolio gate needs 150 free on all three ceilings
+independently, so **the earliest possible capture is 1 October 2026 UTC**, and
+it must be the first paid work of that month. **Do not re-run the capture before
+then** — it refuses, and refusing costs nothing but proves nothing.
 
 **Step 4 is done.** On 14 September both permanent ledgers were created and then
 verified by reading them back: the service ledger stamped
 `150/150/6000000/6000000`, the allowance with ceiling `6000000` and carried `0`,
-which the command echoed as 150 attempts. Both are correct, and both remain
-**entirely unspent** — zero rows in each `reservations` table. Nothing about
-them needs redoing, and item 5 of the durable-budget runbook never came into
-play.
+which the command echoed as 150 attempts. Both were stamped correctly, and both
+were **entirely unspent as at 14 September** — zero rows in each `reservations`
+table. **That is no longer their state.** The 15 September capture put 36 rows
+in each and both now read 114. The stamping was right and the service ledger
+needs no redoing; the allowance ledger must nonetheless be replaced under the
+17 September amendment, because its ceiling is the superseded one.
 
 **Step 5 was refused, and not by anything an owner could fix at a keyboard.**
 The paid capture was run on 14 September and refused before dispatching a single
@@ -166,11 +204,16 @@ are empty** — neither ledger has been drawn on at all — and
 `integrity_check` returns `ok` on both. By `capture.py:97-99`
 (`(ceiling - carried) // 40000 - count`) that is 150 attempts of allowance and
 150 of service against an envelope of 150, so the capture clears all three
-ceilings with exactly zero slack. This supersedes the 14 September readback as
-the newest evidence; nothing was reserved to obtain it. **Step 5 has not been
-run.** What closed is the last code defect standing in front of it; what
-remains is an operator action against a non-renewing allowance, and this file
-has been wrong four times at exactly the point where those two get conflated.
+ceilings with exactly zero slack. Nothing was reserved to obtain it.
+
+**That readback is superseded, and by the capture itself.** It was taken earlier
+on 15 September, before step 5 ran. Step 5 ran later the same day and spent 36,
+so the state is now 36 reservations and 114 attempts in each ledger — read
+read-only on 17 September and recorded at the top of this section. Read both
+15 September paragraphs above as the record of a moment that has passed, not as
+the ledgers' state. This file has been wrong four times at exactly the point
+where a closed code defect and an unperformed operator action get conflated,
+which is why the readback is marked rather than deleted.
 
 **`Invoke-PaidEvaluation.ps1` was read for the first time on 15 September, and
 it is sound.** It had never been inspected, which on this project's record was
@@ -204,9 +247,27 @@ anything touches that directory before the capture.
 through `Read-Host -AsSecureString` at the keyboard. No agent can supply them
 and none should be asked to, so both the free preflight and the paid capture are
 owner-operated by construction. The free preflight is the correct way to verify
-both ledgers: it opens them read-only, reserves nothing, and prints
-`service remaining`, `allowance left` and the effective ceiling before anything
-can be spent. Run it, read those three numbers, and only then consider `-Paid`.
+both ledgers: it reserves nothing, and prints `service remaining`,
+`allowance left` and the effective ceiling before anything can be spent. Run it,
+read those three numbers, and only then consider `-Paid`.
+
+**It is not read-only, and this file and the script both said it was until
+17 September.** Both classes open their database `mode=rw` and take a
+`BEGIN IMMEDIATE` write lock even when not reserving (`capture.py:79-82`,
+`persistent_budget.py:172-203`), and `QualificationAllowance.__init__` calls
+`self.remaining`, so merely constructing it locks the file. The allowance is
+locked but not written — its only write is the `INSERT` under `if reserve:`.
+**The service ledger is written on every read:**
+`UPDATE identity SET last_seen` sits outside that guard
+(`persistent_budget.py:255`) and commits each time. Its stored value read
+`2026-09-15T02:32:28Z` on 17 September — the capture, not a later touch.
+
+None of that consumes an attempt or moves money, so "reserves nothing" holds and
+the preflight stays free. But `last_seen` is a monotonic clock guard: `_totals`
+refuses with `budget_clock_regressed` if the clock is ever behind it, so each
+preflight advances a watermark the ledger will afterwards insist on. Worth
+knowing before running one on a machine whose clock is about to be corrected
+backwards.
 
 The key prompt sits *above* the preflight block and is **not** gated on `-Paid`,
 so the free half is owner-operated for the same reason the paid half is. A
@@ -214,9 +275,25 @@ handoff that asks an agent to "run the free preflight and read the three
 ceilings" is asking for something that cannot be done. What an agent can do
 without keys is everything else: restage from the pin, run the pin gate, diff
 the staged corpus and system prompt against the pinned revision, and read both
-ledgers read-only as recorded above. What it cannot reach is `answering_enabled`
-and `_answer_configuration` — precisely the two checks the preflight exists
-to perform, and they remain unverified until the owner runs it.
+ledgers read-only as recorded above.
+
+**Do not widen that into "the preflight's own checks are out of reach."** Of the
+two, only `answering_enabled` is. `_answer_configuration` is built on the free
+path: `cli.py:213` opens `if not args.paid:` and `cli.py:241` builds the record
+inside it, needing no credential. It was run keylessly on 16 September with both
+suites passing, and traced field by field on 17 September. The record it
+produces is identical to the capture's — `_answer_configuration` (`cli.py:423`)
+reads nine values off `Settings`, `top_k` from the caller and `WIRE_VERSION`
+from the transport module, plus a block of literals, and **not one of them is a
+budget field or a credential**. Nothing the capture's environment exports can
+move it. The equivalence holds as long as the free run passes `--top-k 4`, the
+only caller-supplied field.
+
+**Exactly one check still needs the owner: `answering_enabled`** — the
+seven-variable credential gate at `settings.py:290-308`, read at `cli.py:291` on
+the paid path and in the script's preflight. Everything else the preflight
+reports is now either reachable without keys or has been read directly out of
+the ledger files.
 
 On 13 September the paid command was run and refused before any provider call:
 
@@ -395,9 +472,10 @@ the code before trusting it complete.
   removing it is a separate decision — but it is not a free path, and reading
   it as one is an easy mistake.
 
-- **FIXED by `cited#18` — a refused `os.replace` ended the capture and spent
-  the allowance.** This stopped the 15 September run, and unlike the six above
-  it was not found before the money went. `save_capture`
+- **FIXED by `cited#18`, merged as `360e8fa` with CI green — a refused
+  `os.replace` ended the capture and spent the allowance.** This stopped the
+  15 September run, and unlike the six above it was not found before the money
+  went. `save_capture`
   (`capture.py:146-160`) writes `<output>.pending`, fsyncs it, then calls
   `os.replace`. At the top of iteration 36 the temp write succeeded and the
   replace did not. The proof is the pair of files left in `eval/results/`,
@@ -461,7 +539,10 @@ closed on 14 September with `omarjosephf/cited#17`, so step 5 is no longer
 blocked by code.** What is left is the operator action itself, against a
 non-renewing allowance: read steps 2 and 3 below for how the run is made, and
 re-read `docs/runbooks/durable-budget.md` and both ledgers before typing
-anything. Step 5 has not been run.
+anything. **Step 5 ran on 15 September and failed at question 37 of 75**, so
+step 1 below has to be done again for the allowance ledger alone, under the
+17 September amendment, before step 3 can be attempted. The current state is at
+the top of this file; this section is the procedure, not the status.
 
 Superseded as a plan; retained as the procedure. Steps 4 and 5 were to be done
 in one sitting, in this order:
