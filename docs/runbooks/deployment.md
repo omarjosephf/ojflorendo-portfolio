@@ -67,11 +67,40 @@ serves the intended SHA or a unique build fingerprint. **The application exposes
 neither.** There is no version route, no commit SHA in a header or meta tag, and
 no custom `generateBuildId` — verified by inspection on 17 September 2026.
 
-So the deployed commit is answerable only from the Vercel dashboard or API, which
-maps a deployment to its source commit. That is an owner console action; no agent
-can do it. Until a fingerprint exists, treat the Vercel deployment record as the
-authoritative answer, and record the SHA you read rather than the SHA you
-expected.
+So the deployed commit is not answerable from the response at all. It is
+answerable from the deployment record, which maps a deployment to its source
+commit. Until a fingerprint exists, treat that record as the authoritative
+answer, and record the SHA you read rather than the SHA you expected.
+
+**That record is not only in the Vercel console, and this file said it was until
+17 September 2026.** Vercel's GitHub integration writes every production
+deployment to GitHub's own Deployments API with its source SHA and a status, so
+the step needs no Vercel credential, no console and no owner:
+
+```bash
+gh api repos/omarjosephf/ojflorendo-portfolio/deployments --jq '.[] | select(.environment=="Production") | {sha:.sha[0:7],created:.created_at}' | head -3
+```
+
+Take the newest entry's `id` and read its status, which must be `success`:
+
+```bash
+gh api repos/omarjosephf/ojflorendo-portfolio/deployments/<id>/statuses --jq '.[0] | {state,created_at}'
+```
+
+**Be clear what that establishes.** It proves Vercel created a production
+deployment for that commit and reported success, and that it is the newest such
+record. It reads nothing from the live response, so a manual rollback or a
+promotion made in the console afterwards would not show up here. It is far
+stronger than anything this runbook had before, and still weaker than a
+fingerprint served in the response.
+
+The Vercel MCP connector available to an agent session is **not** a route to the
+same answer, tested on 17 September 2026: it returns `403 Forbidden` with
+"Trying to access resource under scope `oj-s-personal-projects`. You must
+re-authenticate to this scope." That is the same shape as the Cloudflare
+connector reaching the wrong account, which `docs/state/CURRENT.md` already
+records. Re-authenticating it would be an owner console action; reading the
+GitHub record instead needs nothing.
 
 **Two candidates were tested on 17 September and neither works.** Next.js 16
 serves its assets under a fixed `/_next/static/immutable/` segment, so the asset
@@ -80,10 +109,12 @@ path carries no per-build identifier the way an older `buildId` path did. And
 identity. Both were checked against the live site rather than reasoned about, so
 this is a closed question until something is deliberately exposed.
 
-Exposing a fingerprint would make this step self-serve and is worth doing. It
-changes a response surface, so it is R2 and needs a plan first. The cost of not
-having one is concrete and now recorded in the evidence log: a post-deploy smoke
-run cannot tell a new deployment from the one it replaced.
+Exposing a fingerprint is still worth doing, but for a narrower reason than this
+section once gave. It changes a response surface, so it is R2 and needs a plan
+first. What it would add is proof from the *response* that a particular build is
+serving, which the deployment record cannot give: the record is Vercel's report
+of what it deployed, not the live site's account of what it is running. Short of
+that, a smoke run pairs a healthy site with a deployment record and stops there.
 
 ## Smoke checks
 
@@ -402,3 +433,54 @@ overstating a partial pass is the failure this file keeps correcting.
 The deployed commit SHA was again not read from Vercel, and nothing in a browser
 changes that — no check here identifies a build any more than the curl checks
 above do.
+
+**17 September 2026, fourth run of the free checks against `https://ojfr.me`,**
+from a session on the owner's machine, after PR #94 was squash-merged to `main`
+as `4231867` at 16:45:45 UTC. It is still **not** a release smoke pass.
+
+**This is the first entry that identifies the deployment it ran against.** The
+production deployment for `4231867` was created at 16:46:15 UTC and reported
+`state: success`; every check below ran after that. It was read from GitHub's
+Deployments API, not from the Vercel console — see "Identifying what production
+is serving" above, which was wrong to say no agent could do this and is
+corrected in the same commit as this entry. **§34 step 6 is therefore answered
+here for the first time.**
+
+Every check in the "Free and read-only" section passed:
+
+- Apex serves 200 over HTTPS; `https://www.ojfr.me` returns 308 to
+  `https://ojfr.me/`.
+- All security headers present and unchanged from the previous three runs: CSP
+  with a per-request nonce and `strict-dynamic` and no `'unsafe-inline'` for
+  scripts, HSTS `max-age=63072000; includeSubDomains; preload`,
+  `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy:
+  strict-origin-when-cross-origin`, `X-Permitted-Cross-Domain-Policies: none`,
+  and no `X-Powered-By`.
+- Three consecutive requests returned three distinct nonces.
+- `/`, `/about`, both project routes, `/robots.txt`, `/sitemap.xml` and
+  `/manifest.webmanifest` all 200; an unknown route 404.
+- `rel="canonical"`, `og:url` and the sitemap's first `<loc>` all resolve to
+  `https://ojfr.me`, and the served HTML contains no `vercel.app` reference.
+- `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations`
+  all returned **404**.
+
+**What changed is what the run can claim, not what it found.** #94 shipped
+documentation only — no code, no dependency, no response surface — so every
+check above would have passed identically against the deployment it replaced,
+exactly as in the first and second entries. The difference is that this run is
+tied to a named commit by a deployment record rather than left ambiguous. Health
+after a deploy and identity of the deploy are now separately evidenced, where
+before only the first was available.
+
+**Not executed:** contact delivery, the assistant, and every browser check. The
+browser checks were run once, earlier the same day, against the pre-`4231867`
+deployment; that pass is the entry above and was not repeated here.
+`prefers-reduced-motion` remains untested by any run.
+
+**This entry's own merge will deploy, and is deliberately not smoke-run.** The
+practice in force is to smoke-run deployments that change what is served, not
+every deployment: #92 and #93 both merged and deployed without a run of their
+own, and #91 got one because it was the first merge to change the build. This
+entry is documentation, so it changes nothing served and gets no run. Recorded
+rather than left silent, because §31 and §50 both treat an undisclosed skipped
+check as worse than a disclosed one.
