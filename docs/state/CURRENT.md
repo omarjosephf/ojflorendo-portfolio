@@ -870,13 +870,41 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   account, so a strong unique password gives the same protection.
 - **Cloudflare connector reaches a different account** than the one holding
   `ev-private-backups`. It cannot verify the backup bucket.
+- **The handbook is CRLF in the working tree and LF in git.** `.gitattributes`
+  sets `*.md text eol=lf`, so the committed blob is LF while the file on disk
+  here is CRLF. Hashing the raw bytes produces a value that passes in CI and
+  fails locally on the identical, untampered file — ADR-0000 records that exact
+  defect happening once already. `docs:check-handbook-checksum` normalises
+  before hashing, verified byte-exact against git's clean filter; anything else
+  that hashes a tracked file must do the same.
 
 ## The bug class this project keeps hitting
 
-A list written in more than one place with nothing keeping the copies honest.
-It has appeared four times: the handbook gate versus `package.json`; the
-reviewed migration versions across three files; `test:ci` versus `ci.yml`; and
-Appendix A's duplicate of the gate list. Two mechanical checks now guard these —
-`docs:check-handbook-gate` and `docs:check-migration-manifest` — and each caught
-a real instance within hours of being written. When adding a list that must
-match another, add the check with it.
+A list — or a pinned value — written in more than one place with nothing keeping
+the copies honest. It has appeared five times: the handbook gate versus
+`package.json`; the reviewed migration versions across three files; `test:ci`
+versus `ci.yml`; Appendix A's duplicate of the gate list; and, found on
+17 September, the handbook's ratified SHA-256 in ADR-0000 versus the handbook
+itself. Three mechanical checks now guard these — `docs:check-handbook-gate`,
+`docs:check-migration-manifest` and `docs:check-handbook-checksum` — and each
+caught a real instance within hours of being written. When adding a list or a
+pinned value that must match another, add the check with it.
+
+**The fifth one failed in two directions at once.** ADR-0000's recorded checksum
+went stale for six days across four commits to the handbook — three of them
+*compelled* by §30, which `docs:check-handbook-gate` requires to match
+`package.json` and `ci.yml`, so adding a gate stage forces a handbook edit. A
+checksum pinned to a ratification event cannot survive that. Separately, a second
+copy of the value inside ADR-0000 still labelled the **v1.1.0** hash as
+"Current — the version to verify against", unrevised through two later
+ratifications: one document, two answers, three versions apart. Both are
+corrected, and every recorded value is now verified against the commit it
+belongs to.
+
+**It has an operational consequence.** `docs:check-handbook-checksum` is stage 4
+of the gate, so **any commit touching `docs/ENGINEERING_HANDBOOK.md` now fails
+CI unless it updates the checksum in ADR-0000 in the same commit.** That is the
+intent, not a defect. The owner re-ratified the current bytes on 17 September;
+the recorded value is `060e0387`. Landed as `f542749` on
+`docs/action-7-allowance-envelope` and pushed — **it is not on `main`**, so the
+check guards this branch only until it merges. The gate is now 16 stages.
