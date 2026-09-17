@@ -46,9 +46,16 @@ start.
 
 
 **RAG management panel** — `/manage` returns 404 in production **by design**,
-asserted by `e2e/management-disabled.spec.ts`. Staging now has all ten
-migrations applied. The encrypted backup path is no longer blocked by migrations
-but is not activated.
+asserted by `e2e/management-disabled.spec.ts`. Staging has all ten migrations
+applied. The encrypted backup path is no longer blocked by migrations but is not
+activated.
+
+**That migration claim was checked against the live database on 17 September and
+is true** — the first time it had been verified rather than repeated. It had sat
+here unchecked since 11 September while two other documents said the opposite,
+and this file happened to be the one that was right. The objects were read out
+of the catalogs, not just the version rows, and the security advisors agree; the
+[migration runbook](../runbooks/ev-staging-migrations.md) carries the evidence.
 
 ## Owner-gated actions: 6 of 9 complete
 
@@ -61,8 +68,8 @@ but is not activated.
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. **The replacement allowance ledger was created on 17 Sep** as `allowance-225.sqlite3`, ceiling `10440000` carrying `1440000`, 0 reservations, `integrity_check` `ok`, reading **225 attempts**; the retired `allowance.sqlite3` is kept unspent-from at 114 under runbook item 5. The **service** ledger still holds its 36 September reservations and reads 114 until the month turns. So the remaining blocker is the calendar: **the earliest capture is 1 Oct 2026 UTC**. **No complete capture exists.** |
-| 8 | Managed qualification | **Checked against the code 17 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` ran here on 17 Sep, 46 isolated checks passed, with a recovery contract and evidence review behind it. "Recovery" is two things: application-data recovery is those 46 checks; **managed Supabase recovery and off-site backups are not started** (package 13). **CAPTCHA is code-complete, wired into the owner sign-in and locally qualified**; what remains is a Turnstile site key in `EV_AUTH_TURNSTILE_SITE_KEY` and the enforcement setting inside Supabase Auth — console actions, not code. **Package 15 is blocked on Action 7's answer captures** and on independent human labels. |
-| 9 | Final publication approval and smoke checks | Open |
+| 8 | Managed qualification | **Checked against the code 17 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` ran here on 17 Sep, 46 isolated checks passed, with a recovery contract and evidence review behind it. "Recovery" is two things: application-data recovery is those 46 checks; **managed Supabase recovery and off-site backups are not started** (package 13). **CAPTCHA is code-complete, wired into the owner sign-in and locally qualified**; what remains is a Turnstile site key in `EV_AUTH_TURNSTILE_SITE_KEY` and the enforcement setting inside Supabase Auth — console actions, not code. **Package 15 is blocked on Action 7's answer captures** and on independent human labels. **Re-checked 17 Sep against the live staging database**, which had never been done: all ten migrations are applied and their objects exist, so package 13's *event staging* is complete and only the deployed backend call, managed recovery and CAPTCHA remain on it. |
+| 9 | Final publication approval and smoke checks | Open — still unverified against code. The production-denial side exists and is asserted (`e2e/management-disabled.spec.ts` plus the `storageAllowed` gate in `src/lib/management/access.ts`), but **there is no smoke-check runbook** under `docs/runbooks/`; row 9's "smoke checks" are described only in the release packet and handbook §34. Writing one is unstarted work, not a missing verification. |
 
 **Row 8 was checked against the code on 17 September; row 9 still has not
 been.** What this file says about Action 7 was read out of `omarjosephf/cited`
@@ -80,7 +87,29 @@ believe the checks.
 
 **Row 9 is carried forward from earlier notes and remains unproven.** Verifying
 it is still outstanding work, and nothing below should be read as having
-established it.
+established it. What was established on 17 September is narrow and negative: the
+production-denial code and its assertions exist, and no smoke-check procedure
+does. Do not read row 9 as blocked on evidence gathering; part of it has not
+been written yet.
+
+**Action 8 was carried further on 17 September, against the live staging
+database rather than against documents.** All ten migrations are applied —
+verified by reading the objects each one creates out of the catalogs, and
+corroborated by the security advisors showing exactly the change the runbook
+predicted. 122 database checks and 46 restore checks were executed here, 0
+failed. The tracker and the migration runbook were both stale and are corrected;
+see [the reconciliation checkpoint](../roadmaps/ev-management-progress.md#reconciliation-checkpoint-17-september-2026).
+
+**Package 13's last reachable item needs the owner and costs nothing.** The
+deployed backend event integration is implemented at both ends and deployed —
+the backend has emitted `X-Assistant-Event` since the same commit that
+introduced wire v3, which is what the 13 September deploy carried, and the live
+`/health` still reports that corpus. One end-to-end call would prove it. That
+call needs `X-Assistant-Secret` at the keyboard, so no agent can make it. It
+need not spend money: `screen_question` runs before retrieval and before any
+paid call, and a question retrieving nothing is refused at the prefilter, so a
+deliberately off-corpus question returns a real event with `route: "none"` and
+`model: null` without dispatching a provider request.
 
 ## Decisions, both now closed
 
@@ -881,14 +910,41 @@ a real failure still fails. Treat the packet's section 6 as historical from here
 ## The bug class this project keeps hitting
 
 A list — or a pinned value — written in more than one place with nothing keeping
-the copies honest. It has appeared five times: the handbook gate versus
+the copies honest. It has appeared six times: the handbook gate versus
 `package.json`; the reviewed migration versions across three files; `test:ci`
-versus `ci.yml`; Appendix A's duplicate of the gate list; and, found on
-17 September, the handbook's ratified SHA-256 in ADR-0000 versus the handbook
-itself. Three mechanical checks now guard these — `docs:check-handbook-gate`,
-`docs:check-migration-manifest` and `docs:check-handbook-checksum` — and each
-caught a real instance within hours of being written. When adding a list or a
-pinned value that must match another, add the check with it.
+versus `ci.yml`; Appendix A's duplicate of the gate list; the handbook's ratified
+SHA-256 in ADR-0000 versus the handbook itself; and, found on 17 September,
+**whether the staging migrations are applied — written in three documents that
+gave two different answers.** Three mechanical checks now guard the first five —
+`docs:check-handbook-gate`, `docs:check-migration-manifest` and
+`docs:check-handbook-checksum` — and each caught a real instance within hours of
+being written. When adding a list or a pinned value that must match another, add
+the check with it.
+
+**The sixth is a different shape from the other five, and no check would have
+caught it.** The duplicated value was not in two files in this repository; it was
+in this repository and in a live managed database. `docs:check-migration-manifest`
+passed throughout, correctly — it compares the filenames, the backup contract and
+the reader setup, all three of which agreed on ten. What nothing compared was
+that list against `supabase_migrations.schema_migrations` on the actual project,
+because doing so needs network access and a credential that CI does not have.
+
+So three documents drifted apart unnoticed: the tracker said 007 and 008 were
+unapplied, the runbook said nothing in it had been run, and this file said all
+ten were applied. **This file was the one that was right, and it was right
+without ever having been checked** — which is luck, not a control. The
+migrations had in fact been applied on 11 September, in version order, in one
+session, following the runbook's own procedure; only its status header was never
+flipped. A runbook that describes completed work as pending is the dangerous
+direction of this bug: following it would have meant re-applying migrations to a
+live database.
+
+**The lesson is about which copies matter.** Five of these were repository-versus-
+repository and are now mechanically guarded. This one was repository-versus-
+reality, and the guard for that is not a script but a habit: when a document
+asserts the state of something outside the repository — a live database, a
+deployed service, a ledger file, a console setting — say when it was last read
+and from where, or do not assert it.
 
 **The fifth one failed in two directions at once.** ADR-0000's recorded checksum
 went stale for six days across four commits to the handbook — three of them
@@ -905,6 +961,14 @@ belongs to.
 of the gate, so **any commit touching `docs/ENGINEERING_HANDBOOK.md` now fails
 CI unless it updates the checksum in ADR-0000 in the same commit.** That is the
 intent, not a defect. The owner re-ratified the current bytes on 17 September;
-the recorded value is `060e0387`. Landed as `f542749` on
-`docs/action-7-allowance-envelope` and pushed — **it is not on `main`**, so the
-check guards this branch only until it merges. The gate is now 16 stages.
+the recorded value is `060e0387`. Landed as `f542749` and **merged to `main` as
+PR #84 on 17 September**, so the check now guards every branch rather than only
+the one it was written on. The gate is 16 stages.
+
+**This paragraph said "it is not on `main`" until the merge, and stayed that way
+for the rest of the day.** A line that describes where a commit currently sits
+goes stale the moment it moves, which is the same repo-versus-reality shape as
+the migration drift above — the fact lived in GitHub, not in the repository, so
+nothing here could notice. Prefer recording what a change *does* over where it
+has got to; where it has got to is answerable with `git log` and does not need
+writing down.

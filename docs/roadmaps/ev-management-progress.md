@@ -1,12 +1,19 @@
 # E.V management delivery checklist
 
-Updated: 2026-09-09. Count: 16 work packages. Packages differ in effort;
+Updated: 2026-09-17. Count: 16 work packages. Packages differ in effort;
 completion is not a percentage of elapsed time or production readiness.
+
+**The prose below the table is dated and was not all written on the same day.**
+Where a checkpoint paragraph and an executed check disagree, believe the check.
+The table rows and the 17 September notes were reconciled against the live
+staging project, the repository and the suites actually run on that date; the
+older checkpoint sections are retained as the record of what was true when they
+were written, not as current status.
 
 | # | Work package | Status | Acceptance evidence |
 | --- | --- | --- | --- |
 | 1 | Roadmap, storage architecture and hosting cost research | Complete | Owner-approved roadmap and hosting review |
-| 2 | Prompt review and exact chunk token audit | Complete | Review document; 67 chunks, none above 512 tokens |
+| 2 | Prompt review and exact chunk token audit | Complete; audited corpus has since moved | Review document; 67 chunks, none above 512 tokens. The corpus was refined on 11–12 September and is now **69 chunks over 10 sources**, checksum `7bddb04d`, so the token audit predates the shipped corpus |
 | 3 | Provider fallback and durable budget local candidate | Complete locally | Prior 739 backend / 419 frontend / 73 browser checks; release remains package 16 |
 | 4 | Management ADR, threat model and operations guide | Complete locally | ADR-0016; linked threat model/runbook; document links verified |
 | 5 | Private responsive management preview | Complete locally | All six sections pass desktop/mobile accessibility and overflow checks; production gate checked separately |
@@ -14,10 +21,10 @@ completion is not a percentage of elapsed time or production readiness.
 | 7 | Event-derived analytics and source exposure signals | Complete locally | UTC window, distinct-session, feedback denominator and source-count tests pass |
 | 8 | Gap diagnosis and triage | Complete locally | Review notes survive reload; failures distinguished from content gaps |
 | 9 | Knowledge editor and durable local drafts | Complete locally | Real file persistence, stale/concurrent save and failed-write checks; browser reload test passes |
-| 10 | Actual source and chunk inspection | Complete locally | Actual 10-source/67-chunk snapshot; exact tokens and indexed-text digests checked |
-| 11 | Supabase schema, grants and RLS isolation tests | Complete locally | 42 executed PostgreSQL checks; real operations remain package 13 |
+| 10 | Actual source and chunk inspection | Complete locally | Actual 10-source/67-chunk snapshot; exact tokens and indexed-text digests checked. The committed snapshot `src/data/management-corpus.generated.json` is current at **69 chunks, 10 sources, `7bddb04d…`**, generated 12 September and equal to the checksum the live backend reports; this row's "67" is the original audit |
+| 11 | Supabase schema, grants and RLS isolation tests | Complete locally | 42 executed PostgreSQL checks when written; the same suite is now **44** and passes |
 | 12 | Durable guest repository/API and idempotency | Complete locally and in staging | Real app-to-Supabase save/replay/resume/delete checks and six browser checks pass; managed guest cookies and signed save-only retry implemented |
-| 13 | Live Supabase Auth, MFA, storage and retention qualification | In progress | Free staging, managed owner MFA/inbox, scheduled retention and deletion replay qualified; live drafts/reporting and concurrent edit protection qualified; 46-check isolated application-data recovery passes locally; owner confirms authenticator and inbox work; trusted answer events now qualified locally; event staging/backend integration, managed recovery/off-site backups and CAPTCHA remain |
+| 13 | Live Supabase Auth, MFA, storage and retention qualification | In progress | Free staging, managed owner MFA/inbox, scheduled retention and deletion replay qualified; live drafts/reporting and concurrent edit protection qualified; 46-check isolated application-data recovery passes locally; owner confirms authenticator and inbox work; trusted answer events qualified locally. **Event staging is done** — all ten migrations are applied to staging, verified object-by-object on 17 September. Remaining: deployed backend event integration (owner-run, needs the service secret), managed recovery/off-site backups (R3, paid tier) and CAPTCHA enforcement (owner console) |
 | 14 | Single app-host qualification for both Python workloads | Optional consolidation deferred | Both fixed Python retrieval workloads measured on a protected Linux preview; 252 local checks and 46 cloud checks pass, 38 frozen rankings agree; initial alias exposure contained; shared admission passes 48 local SQL and 11 staging checks; real accounting migration and full application qualification remain |
 | 15 | Grounded-answer qualification; further embedding comparison deferred | In progress | 12 development comparisons plus six frozen new-question comparisons completed; independent human labels, full answer captures/review and advanced scenario coverage remain |
 | 16 | Owner preview review and verified public release | Remaining | Owner preview feedback, complete release gates and production smoke check |
@@ -126,7 +133,15 @@ Owner authenticator setup and the live inbox are confirmed working. The new
 focused local integration and recovery checks. This does not complete the live
 release gates above or imply that a public deployment has occurred.
 
-The [live gap-review workflow](../reviews/ev-live-gap-qualification.md) is now locally qualified, including revision conflicts, deletion-linked notes and draft references. Migrations 007 and 008 remain unapplied to staging. This advances package 13 without claiming it complete.
+The [live gap-review workflow](../reviews/ev-live-gap-qualification.md) is now locally qualified, including revision conflicts, deletion-linked notes and draft references. This advances package 13 without claiming it complete.
+
+**This paragraph said "Migrations 007 and 008 remain unapplied to staging" until
+17 September.** They were applied on 11 September, together with `202609110001`,
+and this line was never updated — as was the status header of
+[the migration runbook](../runbooks/ev-staging-migrations.md), which went on
+saying "prepared, not executed" for six days. Both are corrected. The live
+project now carries all ten reviewed versions and the objects each one creates;
+see that runbook for the verification.
 
 
 The [managed Auth CAPTCHA implementation](../reviews/ev-auth-captcha-qualification.md)
@@ -203,3 +218,56 @@ removes E.V's duplicate theme selector and Beta badge, installs the new female
 avatar, and preserves the chat layout. A new production build, 23 component
 tests and 42 focused browser checks pass. Managed integration/recovery, funded
 answer review, mounted-host qualification and final publication remain open.
+
+## Reconciliation checkpoint, 17 September 2026
+
+This tracker had drifted from the repository and from the live staging project.
+The rows above are reconciled against evidence executed or read on this date;
+this section records what that evidence was, so the next session can tell which
+lines were checked rather than inherited.
+
+**Staging schema — read live, read-only.** All ten reviewed migrations are
+applied to `ev-management-staging` (`clekxlhhclwgtmismogv`). Version rows were
+not taken on trust: `ev_complete_generation_event`, `ev_owner_gaps` and
+`ev_review_gap` exist; `ev_gap_reviews` carries all four columns migration 008
+adds and `authenticated` holds no write grant on it; the `ensure_rls` trigger is
+enabled and `rls_auto_enable()` is revoked from `public` and `authenticated`.
+The security advisors agree — the `rls_auto_enable` SECURITY DEFINER finding is
+gone and the eight deny-all `rls_enabled_no_policy` INFO findings remain. Every
+affected table still reads zero rows.
+
+**Suites executed here on 17 September.** 122 database checks across the four
+SQL suites — 44 management, 48 shared budget, 16 answer event, 14 live gap — and
+46 isolated application-data restore checks. **0 failed.** The migration
+manifest and documentation anchor checks pass. This is not a complete
+`npm run test:ci` run; lint, types, build and both browser suites were not run.
+
+**Corpus identity agrees at three points.** The repository's committed snapshot,
+its generated checksum and the deployed backend's `/health` all report
+`7bddb04d`, 69 chunks over 10 sources. The "67 chunks" in rows 2 and 10 is the
+original audit, not the shipped corpus.
+
+**Package 13's remaining work, stated precisely.** Event *staging* is complete.
+Deployed backend event integration is implemented at both ends — the frontend
+sends `X-Assistant-Event: 1` and validates the returned header against the
+public response body, and the backend has emitted it since the same commit that
+introduced wire v3, which is the commit the 13 September deploy carried. What
+has not happened is one end-to-end call proving it against the live service.
+That call needs `X-Assistant-Secret`, which is read from the keyboard, so it is
+owner-operated for the same reason the paid preflight is. It need not cost
+money: `screen_question` runs before retrieval and before any paid call, and a
+question that retrieves nothing is refused at the prefilter, so a deliberately
+off-corpus question returns a real event with `route: "none"` and `model: null`
+and dispatches no provider request.
+
+**Not attempted, and why.** Managed Supabase disaster recovery and off-site
+backup activation need a paid Supabase tier, scoped database reader credentials,
+R2 credentials and key custody. Enabling a paid service is R3 under handbook §11
+and every input to it is an owner console action, so no part of it was started.
+CAPTCHA enforcement is likewise blocked on `EV_AUTH_TURNSTILE_SITE_KEY` and the
+Supabase Auth setting. Package 15 remains blocked on Action 7's captures, which
+cannot run before 1 October 2026 UTC, and on independent human labels.
+
+The checkpoint remains **12/16**. Nothing was committed, pushed, deployed or
+activated, no paid call was made, no managed setting was changed and no ledger
+was opened.
