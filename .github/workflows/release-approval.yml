@@ -1,0 +1,57 @@
+# Supplies the `release-approval` status context that branch protection on
+# `main` requires alongside `verify`.
+#
+# `verify` proves the change is correct. This proves someone decided to ship it.
+# ENGINEERING_HANDBOOK.md §11 classes a merge to protected `main` as R3 and
+# requires explicit confirmation immediately before the action; §34 step 4
+# requires that approval before promotion. A green gate is not that approval,
+# and on 17 September 2026 two merges reached production on a green gate alone.
+# This job makes the approval a thing that must exist, not a thing that should.
+#
+# The approval is the `approved-to-deploy` label. New commits revoke it, so the
+# approval always refers to the commits actually being merged.
+name: Release approval
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: release-approval-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  release-approval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require owner approval to merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          ACTION: ${{ github.event.action }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -euo pipefail
+
+          if [ "$ACTION" = "synchronize" ]; then
+            if gh api -X DELETE "repos/$REPO/issues/$PR/labels/approved-to-deploy" >/dev/null 2>&1; then
+              echo "New commits were pushed, so approved-to-deploy has been removed."
+            else
+              echo "New commits were pushed. There was no approval to revoke."
+            fi
+            echo "::error::These commits have not been approved. Review them, then add the 'approved-to-deploy' label."
+            exit 1
+          fi
+
+          if printf '%s' "$LABELS" | grep -q '"approved-to-deploy"'; then
+            echo "approved-to-deploy is present. Merging this pull request is approved."
+            exit 0
+          fi
+
+          echo "::error::Merging to main deploys to production. Add the 'approved-to-deploy' label to record that approval immediately before merging."
+          exit 1
