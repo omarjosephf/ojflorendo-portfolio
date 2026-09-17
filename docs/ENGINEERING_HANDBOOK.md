@@ -1008,6 +1008,7 @@ Its sequence is exactly the following stages, in this order:
 node scripts/verify-dependency-audit.mjs
 npm run docs:check-anchors
 npm run docs:check-handbook-gate
+npm run docs:check-handbook-checksum
 npm run docs:check-migration-manifest
 npm run docs:check-budget-envelope
 npm run lint

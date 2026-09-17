@@ -54,6 +54,13 @@ jobs:
       - name: Handbook gate parity
         run: npm run docs:check-handbook-gate
 
+      # ADR-0000 records the SHA-256 of the handbook bytes the owner ratified.
+      # Nothing recomputed it until 17 September 2026, by which point the record
+      # had been stale for six days. This recomputes it, so a handbook edit that
+      # was never re-ratified fails here rather than being found by hand.
+      - name: Handbook ratification checksum
+        run: npm run docs:check-handbook-checksum
+
       - name: Reviewed-migration manifest
         run: npm run docs:check-migration-manifest
 
