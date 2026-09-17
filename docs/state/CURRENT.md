@@ -69,7 +69,7 @@ of the catalogs, not just the version rows, and the security advisors agree; the
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. **The replacement allowance ledger was created on 17 Sep** as `allowance-225.sqlite3`, ceiling `10440000` carrying `1440000`, 0 reservations, `integrity_check` `ok`, reading **225 attempts**; the retired `allowance.sqlite3` is kept unspent-from at 114 under runbook item 5. The **service** ledger still holds its 36 September reservations and reads 114 until the month turns. So the remaining blocker is the calendar: **the earliest capture is 1 Oct 2026 UTC**. **No complete capture exists.** |
 | 8 | Managed qualification | **Checked against the code 17 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` ran here on 17 Sep, 46 isolated checks passed, with a recovery contract and evidence review behind it. "Recovery" is two things: application-data recovery is those 46 checks; **managed Supabase recovery and off-site backups are not started** (package 13). **CAPTCHA is code-complete, wired into the owner sign-in and locally qualified**; what remains is a Turnstile site key in `EV_AUTH_TURNSTILE_SITE_KEY` and the enforcement setting inside Supabase Auth — console actions, not code. **Package 15 is blocked on Action 7's answer captures** and on independent human labels. **Re-checked 17 Sep against the live staging database**, which had never been done: all ten migrations are applied and their objects exist, so package 13's *event staging* is complete and only the deployed backend call, managed recovery and CAPTCHA remain on it. |
-| 9 | Final publication approval and smoke checks | Open, but advanced on 17 Sep. **The smoke-check runbook now exists** — [`docs/runbooks/deployment.md`](../runbooks/deployment.md), the file handbook §38 required and §34 assumed, absent until now. Its free read-only checks were executed against `https://ojfr.me` the same day, so **the production denial is verified against the live deployment** for the first time: `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all return 404 on the real Vercel instance, not merely on a local build. What remains: contact delivery, the assistant check, every browser check, reading the deployed SHA from Vercel, and the owner's publication approval. **A first pass of the free checks is not a release smoke pass.** |
+| 9 | Final publication approval and smoke checks | Open, but advanced on 17 Sep. **The smoke-check runbook now exists** — [`docs/runbooks/deployment.md`](../runbooks/deployment.md), the file handbook §38 required and §34 assumed, absent until now. Its free read-only checks were executed against `https://ojfr.me` the same day, so **the production denial is verified against the live deployment** for the first time: `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all return 404 on the real Vercel instance, not merely on a local build. **The free checks were then run a second time, after a deployment**, and passed identically — so the denial holds across a deploy rather than at one moment. What remains: contact delivery, the assistant check, every browser check, reading the deployed SHA from Vercel, and the owner's publication approval. **Two passes of the free checks are still not a release smoke pass**, and neither can say which deployment answered: no build fingerprint is exposed, which was tested against the live site rather than assumed. |
 
 **Rows 8 and 9 were both checked against the code on 17 September**, row 9 later
 the same day and against the live deployment as well as the tree. What this
@@ -95,6 +95,21 @@ conversation paths return 404 on the deployed instance, which `e2e` could only
 ever assert against a local build. The rest of row 9 is still unproven — the
 paid and browser checks are unrun and publication is unapproved. Do not read the
 runbook's existence as the row being closed.
+
+**The free checks were run a second time the same day, after a deployment**, and
+every one passed again. That is worth more than a repeat: the first run happened
+with nothing deployed that day, so it proved the denial at a moment; the second
+proves it survives a deploy. Both runs are in the runbook's evidence log.
+
+**Neither run can say which deployment answered it, and that is now a settled
+question rather than an open one.** Two candidate fingerprints were tested
+against the live site: Next.js 16 serves assets under a fixed
+`/_next/static/immutable/` segment carrying no per-build identifier, and
+`X-Vercel-Id` changes on every request because it is a request trace. So a smoke
+pass establishes that production is healthy, never that a particular commit is
+the one serving — and reading the deployed SHA stays a Vercel console action, as
+§34 step 6 requires and no agent can perform. Exposing a fingerprint would change
+that; it alters a response surface, so it is R2 and needs a plan first.
 
 **Action 8 was carried further on 17 September, against the live staging
 database rather than against documents.** All ten migrations are applied —
