@@ -370,7 +370,19 @@ that reaches no route, and of the two packages named as the reason to look, only
 answered them. What does not survive is the stated reason to reach for a
 browser. ADR-0002, ADR-0003 and ADR-0009 all still read `Status: Accepted` and
 none of them carries a pointer to ADR-0010, so the superseded decision is the
-one a reader meets first.
+one a reader meets first *(true as a diagnosis, wrong as a present-tense claim;
+corrected immediately below)*.
+
+**The three ADRs were fixed by the commit that carries this sentence.**
+`4231867` rewrote all four `Status:` lines across them — ADR-0003 has two, one
+on the ADR and one on its amendment — to `Superseded 7 September 2026 by
+ADR-0010 — see the closing note`, and appended to each a closing note that links
+ADR-0010 and records what the tree showed at `486b4f0`. So the sentence above
+records the diagnosis that prompted the fix, not a state that outlived it, and
+it was never moved into the past tense. **Nothing is outstanding against those
+ADRs.** `docs/ENGINEERING_HANDBOOK.md` §10 requires both a status drawn from its
+vocabulary and links to superseding ADRs; all three satisfy both, verified by
+inspection on 17 September 2026.
 
 **This correction is not a smoke pass and discharges nothing above.** It records
 one finding from looking at a single surface. The browser checks were run
