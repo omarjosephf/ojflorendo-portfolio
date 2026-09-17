@@ -1,6 +1,6 @@
 # ADR-0009: The phone particle wave runs on raw WebGL
 
-- Status: Accepted
+- Status: Superseded 7 September 2026 by ADR-0010 — see the closing note
 - Date: 2026-08-31
 - Owner: OJ Florendo
 - Risk class: R2 (user-visible presentation change on mobile, touching the
@@ -134,3 +134,21 @@ that passed every cost-based gate and looked wrong.
 Remove `<MobileWaveGLLazy />` from `src/app/layout.tsx`; phones return to the
 ambient glow. Deleting `src/components/webgl/` removes the feature. The shader
 extraction is independent and can stay either way.
+
+---
+
+## Superseded — 7 September 2026
+
+**Superseded by [ADR-0010](0010-warm-portfolio-and-finite-motion.md)**, which
+unmounted every decorative scene, phones included. Retained as a historical
+implementation record; no longer governing.
+
+Checked against the tree at `486b4f0` on 17 September 2026: `src/components/webgl/`
+is still present with `MobileWaveGL.tsx` and its lazy wrapper, and
+`MobileWaveGLLazy` is imported by nothing. The rollback above describes removing
+it from `src/app/layout.tsx`, where it no longer appears, and returning phones
+"to the ambient glow" — that glow no longer exists either, as
+`src/app/globals.css` defines no `body::before` or `body::after`.
+
+The shader extraction is independent of the mounting decision and, as the
+rollback section already notes, can stay either way. It is still in the tree.
