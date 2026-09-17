@@ -538,3 +538,38 @@ own, and #91 got one because it was the first merge to change the build. This
 entry is documentation, so it changes nothing served and gets no run. Recorded
 rather than left silent, because §31 and §50 both treat an undisclosed skipped
 check as worse than a disclosed one.
+
+**17 September 2026, deployment of `3c443be`, not smoke-run.** PR #96 was
+squash-merged to `main` at 17:21:06 UTC, and the production deployment was
+created at 17:21:41 UTC reporting `state: success` — deployment `6508309203`,
+read from GitHub's Deployments API as the fourth entry describes. No check in
+this file was run against it.
+
+**It changes nothing served, which is the ordinary reason.** #96 edited one
+prose file — the correction appended to the third entry above — so every check
+in "Free and read-only" would answer identically against the deployment it
+replaced, exactly as in the first, second and fourth entries. Under the practice
+those entries record, a documentation deploy gets no run of its own.
+
+**What is new is why this entry exists: nothing approved the merge.** Auto-merge
+had been switched on part-way through the session, as one of four settings
+enabled together rather than as a decision about this pull request. It fired
+seven seconds after the required gate went green — `verify` completed `success`
+on `069fbc5` at 17:20:59 UTC, and the merge landed at 17:21:06 UTC. A request to
+disable it arrived after that and was refused as already merged.
+
+Every earlier deployment recorded here followed an owner's decision to merge.
+This one followed a switch. `docs/ENGINEERING_HANDBOOK.md` §11 classes a merge to
+protected `main` as R3 and requires explicit confirmation *immediately before*
+the action; §34 step 4 requires that approval before the promotion. **Auto-merge
+does not fail that requirement, it removes it** — the gate stays enforced and the
+approval does not, so every green run becomes a deployment. The gate passing is
+not the approval.
+
+**That this change was R0 is a fact about its blast radius, not a defence of the
+missing step.** The switch is not scoped to documentation, and the next pull
+request to merge under it need not be.
+
+**Not executed:** every check in this file. The deployed SHA is known from the
+deployment record rather than from the response, for the reason "Identifying
+what production is serving" gives above.
