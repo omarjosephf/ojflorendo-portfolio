@@ -1,6 +1,6 @@
 # Current state
 
-Updated 14 September 2026. This file is what a fresh session should read first.
+Updated 17 September 2026. This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -60,7 +60,7 @@ but is not activated.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Both ledgers now hold 36 reservations and read **114 attempts remaining** — read read-only on 17 Sep, `integrity_check` `ok` on each. Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. The raise to 225 attempts is approved as an ADR-0015 amendment, 17 Sep, but **the replacement allowance ledger has not been created**, and the service ledger is monthly and does not return to 150 until 1 Oct. **No complete capture exists.** |
+| 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. **The replacement allowance ledger was created on 17 Sep** as `allowance-225.sqlite3`, ceiling `10440000` carrying `1440000`, 0 reservations, `integrity_check` `ok`, reading **225 attempts**; the retired `allowance.sqlite3` is kept unspent-from at 114 under runbook item 5. The **service** ledger still holds its 36 September reservations and reads 114 until the month turns. So the remaining blocker is the calendar: **the earliest capture is 1 Oct 2026 UTC**. **No complete capture exists.** |
 | 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
 | 9 | Final publication approval and smoke checks | Open |
 
@@ -106,14 +106,20 @@ Steps 1-3 landed as `omarjosephf/cited#15`, the portfolio pin as
 squash-merged after `6237ab5`. GitHub CI is green on it. This file said
 `6237ab5` until 17 September, which was true only until `cited#18` landed.
 
-**The local clone is not on `main`.** It sits on branch
-`fix/capture-survives-a-locked-replace` at `5b8ad79`, working tree clean and
-byte-identical to `origin/main`; its local `main` is stale at `6237ab5`. The
-code a capture would run is therefore correct, but the checkout does not say so
-on its face. **Check out `main` and pull before the capture**, so the evidence
-comes from a checkout that is provably the merged code. The complete gate passed
-locally on the pinned interpreter at `6237ab5`; it has not been re-run against
-`360e8fa` on this machine.
+**The local clone is on `main` at `360e8fa`, as of 17 September.** It was
+fast-forwarded from the stale `6237ab5` and its working tree is clean and
+byte-identical to `origin/main`; `fix/capture-survives-a-locked-replace` is
+retained locally and on the remote, and nothing was rewritten. Until then the
+clone sat on that branch — the code a capture would run was already correct, but
+the checkout did not say so on its face, and evidence should come from a
+checkout that is provably the merged code.
+
+**The complete gate has still not been re-run against `360e8fa` on this
+machine**; it last passed locally on the pinned interpreter at `6237ab5`. What
+was run against `360e8fa` on 17 September is narrower and should not be read as
+the gate: `tests/test_capture.py` only, 10 passed on Python 3.12.10, including
+all three of `cited#18`'s locked-replace tests. GitHub CI is green on the full
+tree.
 
 **Step 5 ran on 15 September and did not complete.** It stopped at question 37
 of 75 with exit 2, having spent **36 of the 150-attempt lifetime allowance**.
@@ -121,9 +127,13 @@ of 75 with exit 2, having spent **36 of the 150-attempt lifetime allowance**.
 dispatches anything, so **this allowance can no longer fund it**. Item 5 of the
 durable-budget runbook forbids a replacement ledger that *regains* an allowance;
 the 17 September amendment below authorises one that carries the 1,440,000
-micro-USD already spent forward, which does not. Both ledgers now hold 36
-reservations, and `integrity_check` is still `ok` on each — re-read read-only on
-17 September, and both still read 114.
+micro-USD already spent forward, which does not, and which was created on
+17 September. The two ledgers that existed on 15 September — the now-retired
+`allowance.sqlite3` and the service ledger — each hold 36 reservations and each
+still read 114; `integrity_check` is `ok` on both, re-read read-only on
+17 September. **There are now three ledger files and only the service one is
+still in play**, the retired allowance being kept as a record and the
+replacement carrying its spend forward.
 
 **Neither the providers nor the budget were involved.** All 36 calls returned
 `provider_outcome: "completed"` — 36 calls for 36 cases, so nothing fell back
@@ -144,13 +154,45 @@ deliberately does not move — `Settings` bounds `daily_answer_limit` at `le=150
 and both money limits at `le=6_000_000`, so a ledger stamped higher could not be
 used at all.
 
-**The amendment is approved. The ledger is not created.** Read read-only on
-17 September, `allowance.sqlite3` still holds ceiling `6000000`, carried `0` and
-36 reservations — 114 attempts, the old envelope. Creating the replacement is
-still an unperformed, permanent operator act; see the runbook's [qualification
-allowance ledger](../runbooks/durable-budget.md#qualification-allowance-ledger)
-subsection for the exact command, and read the attempt count it echoes before
-confirming.
+**The amendment is approved and the ledger now exists.** The owner created it on
+17 September 2026 at `allowance-225.sqlite3`, using the runbook's
+[qualification allowance
+ledger](../runbooks/durable-budget.md#qualification-allowance-ledger) command.
+It echoed `leaving 225 attempts`, and the file was then read back read-only
+rather than trusted: ceiling `10440000`, carried `1440000`, **zero** reservation
+rows, `integrity_check` `ok`, stamped identity equal to the one passed on the
+command line, and `(ceiling - carried) // 40000 - 0` = **225 attempts**.
+
+The retired `allowance.sqlite3` is untouched beside it — same size and
+timestamp, still ceiling `6000000`, carried `0`, 36 reservations, 114 attempts.
+It is kept rather than deleted under item 5, and nothing should ever be drawn
+from it again. **Both files now sit in the same directory and only the filename
+distinguishes them**, which is why the replacement is named for its envelope.
+
+**The replacement cannot be created at the retired ledger's path, and no
+document said so until 17 September.** `QualificationAllowance.initialize` opens
+its target with `path.open("xb")`, so aimed at the existing `allowance.sqlite3`
+it raises `FileExistsError` and creates nothing. The replacement is therefore a
+second file beside the first — created as `allowance-225.sqlite3`, named for the
+envelope stamped inside it — and the retired ledger stays on disk under item 5.
+Every later run must be pointed at the new file by hand: `-AllowanceLedger` is a
+mandatory argument that nothing cross-checks, and a run aimed at the retired
+ledger would find 114 attempts and refuse on headroom, which reads exactly like
+a budget fault. `Invoke-PaidEvaluation.ps1`'s `.EXAMPLE` block named the retired
+ledger until 17 September, when it was corrected to name the replacement and to
+carry a note saying why; the script parses clean and nothing else in it changed.
+That file lives in the workspace root, is not under version control, and is not
+covered by any check here — so treat this sentence as a record of what was done,
+not as a guarantee of what the file says today.
+
+**The 225 arithmetic was rehearsed on 17 September, not merely computed.** The
+approved flags were run against a throwaway path outside both repositories,
+echoed `ceiling 10440000 micro-USD (US$10.44), carried 1440000 micro-USD
+(US$1.44), leaving 225 attempts`, and read back `remaining: 225`; the throwaway
+file was then deleted. The command prints and creates in one breath, so this
+retires the arithmetic risk before the one-shot run rather than after it. It
+does not retire the path or identity risk, which are per-run and still the
+operator's.
 
 **Creating it does not make the capture runnable in September.** The service
 ledger counts `WHERE month = ?` (`persistent_budget.py:226`), so its 36 rows
@@ -538,11 +580,14 @@ decided and why. **Step 4 was completed on 14 September. The sixth blocker
 closed on 14 September with `omarjosephf/cited#17`, so step 5 is no longer
 blocked by code.** What is left is the operator action itself, against a
 non-renewing allowance: read steps 2 and 3 below for how the run is made, and
-re-read `docs/runbooks/durable-budget.md` and both ledgers before typing
-anything. **Step 5 ran on 15 September and failed at question 37 of 75**, so
-step 1 below has to be done again for the allowance ledger alone, under the
-17 September amendment, before step 3 can be attempted. The current state is at
-the top of this file; this section is the procedure, not the status.
+re-read `docs/runbooks/durable-budget.md` and the two ledgers now in play —
+`allowance-225.sqlite3` and the service ledger — before typing anything.
+**Step 5 ran on 15 September and failed at question 37 of 75**, so step 1 below
+had to be done again for the allowance ledger alone, under the 17 September
+amendment; **that was completed on 17 September** and step 1 is now closed for
+both ledgers. What remains is step 3, and it is blocked on the calendar rather
+than on any action. The current state is at the top of this file; this section
+is the procedure, not the status.
 
 Superseded as a plan; retained as the procedure. Steps 4 and 5 were to be done
 in one sitting, in this order:

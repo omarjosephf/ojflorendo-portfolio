@@ -132,8 +132,32 @@ it aloud.
 Generate a fresh 64-character hex identity, record it privately, then run:
 
 ```bash
-python -m assistant.capture --path <allowance-path> --ledger-id <id> --ceiling-micro-usd 10440000 --carried-micro-usd 1440000
+python -m assistant.capture --path <new-allowance-path> --ledger-id <id> --ceiling-micro-usd 10440000 --carried-micro-usd 1440000
 ```
+
+**`<new-allowance-path>` must be a path that does not yet exist.**
+`QualificationAllowance.initialize` opens it with `path.open("xb")` — exclusive
+creation — so pointing it at the retired `allowance.sqlite3` raises
+`FileExistsError` and creates nothing at all. That refusal is the control
+working: it is what stops a replacement overwriting a ledger. But it means the
+replacement is a *second file* beside the first, not a rewrite of it, and the
+retired ledger stays on disk because item 5 forbids deleting it and because its
+reservation rows are the allowance-side record of the spend the carry-forward
+reconciles.
+
+Name the replacement for the envelope stamped inside it — `allowance-225.sqlite3`
+against the retired `allowance.sqlite3` — rather than by sequence. The two files
+differ only in a ceiling that cannot be read off the filename otherwise, and
+they are passed to `-AllowanceLedger` by hand.
+
+**Every later run must name the new file, and nothing verifies that it does.**
+`Invoke-PaidEvaluation.ps1` never creates a ledger and takes the path as a
+mandatory argument, so a run pointed at the retired one is not detected as such:
+it finds 114 attempts, refuses on headroom, and reads exactly like a budget
+fault. That script's worked example was corrected on 17 September 2026 to name
+the replacement and to say why, but it is an operator convenience outside this
+repository — the path you pass is the control, not the example you copied it
+from.
 
 Carry forward all reviewed prior qualification spend in micro-USD; use `0` only
 when there is genuinely none on record. The `1440000` above is the 36 attempts
