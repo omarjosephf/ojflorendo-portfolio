@@ -2,10 +2,10 @@
 
 Status: **procedure, written 17 September 2026. It has not yet been used for a
 full release pass.** The read-only checks under "Free and read-only" below were
-executed against `https://ojfr.me` on that date, and three of the four "Checks
-that need a browser" were executed later the same day; their results are in the
-evidence log at the foot of this file. The checks with side effects, and
-`prefers-reduced-motion`, are described and unrun.
+executed against `https://ojfr.me` on that date, and all four "Checks that need
+a browser" were executed later the same day; their results are in the evidence
+log at the foot of this file. Only the checks with side effects are described
+and unrun.
 
 This is the runbook `docs/ENGINEERING_HANDBOOK.md` §38 requires and §34 assumes.
 It did not exist until now, so the post-deploy smoke checks §34 step 7 lists had
@@ -410,8 +410,9 @@ passed:
 
 **The fourth item was not run at all.** `prefers-reduced-motion` could not be
 tested: the browser used exposes colour-scheme emulation only, so the media
-feature cannot be forced. That check remains entirely unexecuted, and it is the
-one this runbook's own list cares about most after a motion-related change.
+feature cannot be forced. **It was run later the same day with Playwright, which
+can force it — see the fifth entry.** The limitation recorded here is the
+browser's, not the site's, and naming it is what made the gap fixable.
 
 **Four limits on what the three passing checks are worth.** Recorded because
 overstating a partial pass is the failure this file keeps correcting.
@@ -476,6 +477,47 @@ before only the first was available.
 browser checks were run once, earlier the same day, against the pre-`4231867`
 deployment; that pass is the entry above and was not repeated here.
 `prefers-reduced-motion` remains untested by any run.
+
+**Also on 17 September: `prefers-reduced-motion`, the last browser item.** Run
+with Playwright rather than the browser pane, because `emulateMedia` can force
+the media feature. A standalone script against `https://ojfr.me`, not the `e2e`
+suite, whose `playwright.config.ts` pins `baseURL` to localhost and always
+starts a local build.
+
+**It passes, and a no-preference control was run alongside it so the pass means
+something.** Under `reduce` on `/`: `document.getAnimations()` is **0**,
+`.hero-offer > span` computes `transform: none`, the hero image and
+`#services-heading` are present, and two screenshots two seconds apart are
+byte-identical. The control, same page and viewport with `no-preference`,
+reports **5** animations with one running and `transform: matrix(1, 0, 0, 1, 0,
+0)`. So zero under `reduce` is the preference taking effect, not a page with
+nothing to animate. `/about` under `reduce` is likewise 0 and static.
+
+**Content is complete without motion**, which is the accessibility requirement
+rather than the animation count: `document.body.innerText.length` is **6901 in
+both states**, identical.
+
+Those are the same two assertions `e2e/home.spec.ts` makes in "reduced motion is
+complete and static" — `getAnimations().length` of 0 and `transform: none` —
+which CI has only ever run against a local build. Production now matches what
+the gate proves locally.
+
+**A correction to the entry above, found by the control.** That entry reports no
+console errors on `/`. In a fresh browser context there are **two**, and they are
+third-party: both come from
+`challenges.cloudflare.com/cdn-cgi/challenge-platform/...`, Turnstile's challenge
+script, logging through `%c` with `color:transparent` to hide its own output.
+None originates from this site's code. The earlier statement was true of that run
+in that browser and is **incomplete as a claim about production** — Turnstile
+loads the challenge script when it has no prior state, which a fresh context
+always lacks. Read "the console is clean" here as "this site emits nothing";
+Cloudflare's widget emits warnings and errors of its own on any page carrying the
+contact form.
+
+**That closes the browser section.** All four items have now been executed at
+least once against the deployment. None of them was run against `4231867`
+specifically: the first three ran before it, and this one after. What remains
+unrun anywhere are the two checks with side effects.
 
 **This entry's own merge will deploy, and is deliberately not smoke-run.** The
 practice in force is to smoke-run deployments that change what is served, not
