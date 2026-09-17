@@ -69,7 +69,7 @@ of the catalogs, not just the version rows, and the security advisors agree; the
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. **The replacement allowance ledger was created on 17 Sep** as `allowance-225.sqlite3`, ceiling `10440000` carrying `1440000`, 0 reservations, `integrity_check` `ok`, reading **225 attempts**; the retired `allowance.sqlite3` is kept unspent-from at 114 under runbook item 5. The **service** ledger still holds its 36 September reservations and reads 114 until the month turns. So the remaining blocker is the calendar: **the earliest capture is 1 Oct 2026 UTC**. **No complete capture exists.** |
 | 8 | Managed qualification | **Checked against the code 17 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` ran here on 17 Sep, 46 isolated checks passed, with a recovery contract and evidence review behind it. "Recovery" is two things: application-data recovery is those 46 checks; **managed Supabase recovery and off-site backups are not started** (package 13). **CAPTCHA is code-complete, wired into the owner sign-in and locally qualified**; what remains is a Turnstile site key in `EV_AUTH_TURNSTILE_SITE_KEY` and the enforcement setting inside Supabase Auth — console actions, not code. **Package 15 is blocked on Action 7's answer captures** and on independent human labels. **Re-checked 17 Sep against the live staging database**, which had never been done: all ten migrations are applied and their objects exist, so package 13's *event staging* is complete and only the deployed backend call, managed recovery and CAPTCHA remain on it. |
-| 9 | Final publication approval and smoke checks | Open, but advanced on 17 Sep. **The smoke-check runbook now exists** — [`docs/runbooks/deployment.md`](../runbooks/deployment.md), the file handbook §38 required and §34 assumed, absent until now. Its free read-only checks were executed against `https://ojfr.me` the same day, so **the production denial is verified against the live deployment** for the first time: `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all return 404 on the real Vercel instance, not merely on a local build. **The free checks have now run three times**, the second after a deployment and the third over a genuinely changed build, passing identically each time — so the denial holds across a deploy and across a dependency upgrade, not merely at one moment. **The browser checks were run for the first time on 17 Sep**, and three of their four items passed: navigation and interactions, console and network errors, and responsive. What remains: contact delivery, the assistant check, `prefers-reduced-motion` — the one browser item nothing has touched — reading the deployed SHA from Vercel, and the owner's publication approval. **None of this is a release smoke pass**, and nothing run so far can say which deployment answered: no build fingerprint is exposed, which was tested against the live site rather than assumed. |
+| 9 | Final publication approval and smoke checks | Open, but advanced on 17 Sep. **The smoke-check runbook now exists** — [`docs/runbooks/deployment.md`](../runbooks/deployment.md), the file handbook §38 required and §34 assumed, absent until now. Its free read-only checks were executed against `https://ojfr.me` the same day, so **the production denial is verified against the live deployment** for the first time: `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all return 404 on the real Vercel instance, not merely on a local build. **The free checks have now run three times**, the second after a deployment and the third over a genuinely changed build, passing identically each time — so the denial holds across a deploy and across a dependency upgrade, not merely at one moment. **The browser checks were run for the first time on 17 Sep, and all four items now pass**: navigation and interactions, console and network errors, responsive, and `prefers-reduced-motion` — the last run with Playwright against production, with a no-preference control proving the preference takes effect rather than the page having nothing to animate. **The deployed SHA is no longer outstanding.** A fourth free run on 17 Sep, after #94 merged as `4231867`, is the first to name the deployment it tested: GitHub's Deployments API records that commit's production deployment as `success`, and the checks ran after it. §34 step 6 is answered, and it needed no Vercel console. What remains: contact delivery, the assistant check — both owner-operated, both with side effects — and the owner's publication approval. **None of this is a release smoke pass**, and no single run has covered everything: the browser items straddle the `4231867` deploy, three before it and one after. |
 
 **Rows 8 and 9 were both checked against the code on 17 September**, row 9 later
 the same day and against the live deployment as well as the tree. What this
@@ -108,15 +108,34 @@ pass that followed them. **This file knew only of the first two until now** —
 #93 recorded the third in the runbook and never came back here, which is the
 same drift this file keeps cataloguing.
 
-**No run can say which deployment answered it, and that is now a settled
-question rather than an open one.** Two candidate fingerprints were tested
-against the live site: Next.js 16 serves assets under a fixed
-`/_next/static/immutable/` segment carrying no per-build identifier, and
-`X-Vercel-Id` changes on every request because it is a request trace. So a smoke
-pass establishes that production is healthy, never that a particular commit is
-the one serving — and reading the deployed SHA stays a Vercel console action, as
-§34 step 6 requires and no agent can perform. Exposing a fingerprint would change
-that; it alters a response surface, so it is R2 and needs a plan first.
+**No *response* identifies the build, and that half is settled.** Two candidate
+fingerprints were tested against the live site: Next.js 16 serves assets under a
+fixed `/_next/static/immutable/` segment carrying no per-build identifier, and
+`X-Vercel-Id` changes on every request because it is a request trace. So no
+check against the live site can say which commit is serving.
+
+**The other half was wrong, and was corrected on 17 September.** This file said
+reading the deployed SHA "stays a Vercel console action... no agent can perform".
+It is not a console action: Vercel's GitHub integration writes every production
+deployment to GitHub's own Deployments API with its source SHA and a status,
+readable with `gh` by anyone who can read the repository. That is how the fourth
+smoke run identified `4231867`. The claim had never been tested — it was
+inferred from the fingerprint result and then repeated, which is the same shape
+as the migration drift below: an assertion about something outside this
+repository, made without reading it.
+
+**The two are not equivalent, and the distinction is the point.** The deployment
+record is Vercel's report of what it deployed; a fingerprint would be the live
+site's account of what it is running. A rollback or promotion made in the console
+afterwards would not show in the record. So exposing a fingerprint is still worth
+doing and is still R2 — but it now buys a narrower thing than this file claimed,
+and §34 step 6 no longer waits on it.
+
+**The Vercel MCP connector is not the route.** Tested 17 September: `403
+Forbidden`, "Trying to access resource under scope `oj-s-personal-projects`. You
+must re-authenticate to this scope." Same shape as the Cloudflare connector
+reaching the wrong account, recorded below. Re-authenticating it is an owner
+console action; reading the GitHub record needs nothing.
 
 **Action 8 was carried further on 17 September, against the live staging
 database rather than against documents.** All ten migrations are applied —
