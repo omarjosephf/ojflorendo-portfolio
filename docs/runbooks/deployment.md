@@ -583,3 +583,40 @@ request to merge under it need not be.
 **Not executed:** every check in this file. The deployed SHA is known from the
 deployment record rather than from the response, for the reason "Identifying
 what production is serving" gives above.
+
+**17 September 2026, two deployments recorded together, neither smoke-run.**
+This entry closes a gap the entry above left, and one it would otherwise have
+opened in turn.
+
+**`2f8ba78`, deployed 17:35:18 UTC** — deployment `6508548710`, `state:
+success`. This is the deployment *of* the entry above: PR #97, merged at
+17:34:50 UTC, eighteen seconds after `verify` completed `success` at 17:34:32.
+It went unrecorded at the time because the entry describing the first such merge
+was itself the change that merged second, and a third entry written then would
+have had this log chasing its own tail.
+
+**It is the second unapproved deployment, and the last one.** Auto-merge had
+been disabled on that pull request at 17:28:35 UTC and its timeline carries no
+re-enable, so whatever performed the merge did not use GitHub's auto-merge
+feature — the fact that ruled out the narrower fix. See
+[ADR-0021](../adr/0021-recorded-approval-to-merge-main.md).
+
+**`7bcbd71`, deployed 17:54:04 UTC** — deployment `6508874896`, `state:
+success`. PR #98, merged at 17:53:35 UTC. **This is the first deployment in this
+log that an approval preceded.** The merge required the `approved-to-deploy`
+label, applied on the owner's explicit instruction and attributed in a comment
+on that pull request before the merge landed.
+
+Neither changes what is served — #97 was prose, and #98 added a workflow that
+runs only on pull requests — so under the practice this log records, neither
+gets a smoke run. Every check in "Free and read-only" would answer identically
+against the deployment each replaced.
+
+**What changed between them is the thing worth reading this log for.** `2f8ba78`
+merged because a green gate was sufficient. `7bcbd71` merged because someone
+said so, and the gate that merge installed is why the next one will have to. The
+two are nineteen minutes apart.
+
+**Not executed:** every check in this file, for both. The deployed SHAs are
+known from the deployment record rather than from the response, for the reason
+"Identifying what production is serving" gives above.
