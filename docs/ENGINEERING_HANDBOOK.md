@@ -1011,6 +1011,7 @@ npm run docs:check-handbook-gate
 npm run docs:check-handbook-checksum
 npm run docs:check-migration-manifest
 npm run docs:check-budget-envelope
+npm run docs:check-required-docs
 npm run lint
 npm run typecheck:app
 npm run typecheck:tests
@@ -1182,7 +1183,7 @@ The repository should maintain:
 - `docs/adr/` — material architecture decisions;
 - `docs/runbooks/deployment.md`;
 - `docs/runbooks/rollback.md`;
-- `docs/runbooks/contact-delivery.md`;
+- `docs/runbooks/contact-email-delivery.md`;
 - `docs/runbooks/security-incident.md`;
 - release notes or changelog; and
 - `.env.example` with safe variable descriptions.

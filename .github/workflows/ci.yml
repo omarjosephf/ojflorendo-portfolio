@@ -67,6 +67,12 @@ jobs:
       - name: Capture budget envelope
         run: npm run docs:check-budget-envelope
 
+      # Handbook §38 names the documents the repository must maintain. Nothing
+      # resolved those paths until 17 September 2026, when two of the four
+      # runbooks it names turned out not to exist.
+      - name: Required documentation
+        run: npm run docs:check-required-docs
+
       - name: Lint
         run: npm run lint
 

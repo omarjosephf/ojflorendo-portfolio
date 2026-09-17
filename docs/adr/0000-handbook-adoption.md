@@ -61,12 +61,13 @@ this ADR is amended rather than superseded.
 
 ### Ratified document SHA-256
 
-**Current — the value to verify against.** Handbook v1.2.1 with §30 extended to
-list `docs:check-handbook-checksum`, made under the 17 September 2026 approval
+**Current — the value to verify against.** Handbook v1.2.1 with §38 corrected to
+name the contact-delivery runbook that exists and §30 extended to list
+`docs:check-required-docs`, made under the second 17 September 2026 approval
 recorded below:
 
 ```text
-060e0387af18dd5efab28a5558b2106964292bd7abca90635721c0c63de8c2ee
+1d97c9166e36e4e300d6524a04a112e7b5ca4b79500fdb9ca0777bbf48e58f5f
 ```
 
 **This value is now enforced mechanically.** `npm run docs:check-handbook-checksum`
@@ -85,6 +86,7 @@ and none is authoritative now:
 
 | Version | Ratified | Commit | Committed bytes (LF) |
 | --- | --- | --- | --- |
+| 1.2.1 | re-ratified 2026-09-17 | `f542749` | `060e0387…8c2ee` |
 | 1.2.1 | re-ratified 2026-09-17 | `3e9880c` | `ae68ad30…b5b021` |
 | 1.2.1 | 2026-09-08 | `2969c19` | `9bdf6a7c…d8f366` |
 | 1.2.0 | 2026-08-29 | `1319554` | `fa3e88c6…086128` |
@@ -322,6 +324,58 @@ approved plan predicted, and the mechanism working rather than a defect in it.
 What the check proves is bounded: that the handbook and this ADR agree. It cannot
 prove the owner ratified anything, and updating the recorded value to clear a red
 gate, rather than because the change was approved, defeats the control entirely.
+
+### Re-ratification, 17 September 2026 — §38 named a file nobody wrote
+
+The second re-ratification of the same day, and unrelated to the first. §38 lists
+the documents the repository must maintain. Three of the four runbooks it named
+did not exist at the paths it gave, and nothing had ever compared that list
+against `docs/runbooks/`.
+
+- **Effective date:** 17 September 2026
+- **Effective checksum (SHA-256 of the committed file, LF line endings):**
+  `1d97c9166e36e4e300d6524a04a112e7b5ca4b79500fdb9ca0777bbf48e58f5f`
+
+**What changed in the handbook.** Two lines, in one commit:
+
+| Section | Change |
+| --- | --- |
+| §38 | `docs/runbooks/contact-delivery.md` corrected to `docs/runbooks/contact-email-delivery.md` |
+| §30 | `npm run docs:check-required-docs` added, making the gate 17 stages |
+
+**Neither is a policy change.** §38's entry was a name for a document that exists
+under a different one — six other files in this repository already cited it
+correctly, so the handbook was the single copy that had drifted, and correcting
+it is what §39 requires rather than merely permits. The requirement itself, that
+the repository maintain a contact-delivery runbook, is unchanged. §30's addition
+records a gate stage that now runs; it adds no obligation that was not already
+implied by §38 naming the files in the first place.
+
+The version is therefore deliberately unchanged, on the same reasoning as the
+earlier re-ratification above: this settles which bytes carry the owner's
+approval and is not a new handbook version, so no changelog entry is made. A
+changelog entry here would assert a policy change that did not happen.
+
+**The other two runbooks were written rather than delisted.**
+`docs/runbooks/deployment.md` and `docs/runbooks/security-incident.md` were both
+written on 17 September, so §38's list is now satisfied by files that exist
+rather than by editing the requirement down to what was convenient. That
+distinction is the whole point: a handbook that names a document nobody wrote
+reads, to anyone who has not gone looking, exactly like a document that exists.
+
+**The ordering was again the mechanism working.** Adding the stage edited §30 and
+correcting the drift edited §38; both changed the handbook's bytes, which the
+same commit had to record here. That is the second time
+`docs:check-handbook-checksum` has compelled its own ADR update in the commit
+that earned it, and it is the intended behaviour rather than friction to route
+around.
+
+**What was verified, and how.** The recorded value was taken from git's own clean
+filter — the handbook staged, `git show :docs/ENGINEERING_HANDBOOK.md | sha256sum`
+read back, then unstaged — and independently reproduced by the check's own
+LF-normalising hash. Two methods, one value. The superseded `060e0387…` was
+confirmed against `f542749` before being moved into the table above, rather than
+assumed from where it sat.
 
 ## Rollback or migration
 

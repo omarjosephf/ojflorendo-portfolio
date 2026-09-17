@@ -10,16 +10,20 @@ It did not exist until now, so the post-deploy smoke checks §34 step 7 lists ha
 no written procedure — they were named in the release packet and in the handbook
 and nowhere else. Writing them down is the whole point of this file.
 
-Two of §38's other named runbooks still do not exist at the paths it gives.
-`docs/runbooks/security-incident.md` is genuinely absent. `contact-delivery.md`
-is a naming drift rather than a real hole — `docs/runbooks/contact-email-delivery.md`
-covers that ground; §38 and the tree simply disagree about what it is called.
+§38's other named runbooks are no longer a problem, and all of it was settled on
+17 September. `docs/runbooks/security-incident.md` was written later the same
+day. `contact-delivery.md` was never a real hole — it was a name §38 gave to the
+file that exists as `docs/runbooks/contact-email-delivery.md`, and §38 was
+corrected to say so, which changed the handbook's bytes and required the owner to
+re-ratify the checksum in `docs/adr/0000-handbook-adoption.md`.
 
-Either way the mechanism is the same: §38's list is prose, and nothing compares
-it against `docs/runbooks/`, so a file the handbook requires can be missing — or
-renamed out from under the requirement — indefinitely. That is the
+The mechanism behind both was the same: §38's list is prose, and nothing compared
+it against `docs/runbooks/`, so a file the handbook requires could be missing —
+or renamed out from under the requirement — indefinitely. That is the
 repository-versus-repository shape of the bug class `docs/state/CURRENT.md`
-tracks, and it is mechanically checkable.
+tracks, and it is mechanically checkable. It is now checked, and enforced:
+`npm run docs:check-required-docs` reads §38's list, asserts every path it names
+resolves, and runs as a stage of the required gate.
 
 ## Scope
 
