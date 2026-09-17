@@ -61,16 +61,26 @@ but is not activated.
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. **The replacement allowance ledger was created on 17 Sep** as `allowance-225.sqlite3`, ceiling `10440000` carrying `1440000`, 0 reservations, `integrity_check` `ok`, reading **225 attempts**; the retired `allowance.sqlite3` is kept unspent-from at 114 under runbook item 5. The **service** ledger still holds its 36 September reservations and reads 114 until the month turns. So the remaining blocker is the calendar: **the earliest capture is 1 Oct 2026 UTC**. **No complete capture exists.** |
-| 8 | Managed qualification | Partly — migrations applied; CAPTCHA, recovery, restore outstanding |
+| 8 | Managed qualification | **Checked against the code 17 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` ran here on 17 Sep, 46 isolated checks passed, with a recovery contract and evidence review behind it. "Recovery" is two things: application-data recovery is those 46 checks; **managed Supabase recovery and off-site backups are not started** (package 13). **CAPTCHA is code-complete, wired into the owner sign-in and locally qualified**; what remains is a Turnstile site key in `EV_AUTH_TURNSTILE_SITE_KEY` and the enforcement setting inside Supabase Auth — console actions, not code. **Package 15 is blocked on Action 7's answer captures** and on independent human labels. |
 | 9 | Final publication approval and smoke checks | Open |
 
-**Rows 8 and 9 have not been checked against the code.** What this file says
-about Action 7 was read out of `omarjosephf/cited` at `6237ab5` on 15 September
-and re-checked against `origin/main` at `360e8fa` on 17 September, except where
-a line says otherwise. Rows 8 and 9 are carried forward from earlier notes, and
-this file has been wrong about implemented state four times in a week — so
-treat them as what was believed, not what is proven. **Verifying them is the
-first task after Action 7 closes**, before either is planned or scheduled.
+**Row 8 was checked against the code on 17 September; row 9 still has not
+been.** What this file says about Action 7 was read out of `omarjosephf/cited`
+at `6237ab5` on 15 September and re-checked against `origin/main` at `360e8fa`
+on 17 September, except where a line says otherwise.
+
+Row 8's check was requested by the owner ahead of Action 7 closing, and it found
+the previous row materially wrong: it listed restore as outstanding when restore
+passes 46 checks, and it collapsed two different kinds of recovery into one
+word. That is the fifth time this file has been wrong about implemented state.
+**The evidence is the two suites executed on 17 September plus the package
+tracker**, which is itself dated 9 September — so the tracker's prose may
+understate progress, while the executed checks are current. Where they disagree,
+believe the checks.
+
+**Row 9 is carried forward from earlier notes and remains unproven.** Verifying
+it is still outstanding work, and nothing below should be read as having
+established it.
 
 ## Decisions, both now closed
 
