@@ -958,12 +958,41 @@ absent, while `contact-delivery.md` is a naming drift — `contact-email-deliver
 covers it, and only the name disagrees. `docs:check-anchors`
 could not catch it, because it resolves *section* anchors like
 `docs/ENGINEERING_HANDBOOK.md §19.1` and §38's entries are backticked paths, not
-links. Nothing else looked. **`deployment.md` was written on 17 September**, so
-the §34 step 7 smoke checks finally have a procedure; the other two are still
-missing. This is repository-versus-repository, so by this file's own rule it
-deserves a check rather than a resolution to remember — comparing §38's list
-against `docs/runbooks/` is a few lines, and would have failed the day the
-handbook named a file nobody wrote.
+links. Nothing else looked. **All three were resolved on 17 September.**
+`deployment.md` and `security-incident.md` were written, so the §34 step 7 smoke
+checks and the §28/§37 incident procedures finally have a procedure behind them;
+`contact-delivery.md` was the handbook naming a file that exists as
+`contact-email-delivery.md`, and §38 was corrected rather than the file renamed —
+six other documents already used the real name, so the handbook was the single
+copy that had drifted. This is repository-versus-repository, so by this file's
+own rule it deserves a check rather than a resolution to remember. **That check
+now exists, and is enforced.**
+`npm run docs:check-required-docs` reads §38's list out of the handbook, takes
+every backticked path from it and asserts each one resolves on disk. It reads the
+list rather than restating it, so the script is not itself a second copy to
+forget, and it fails loudly if §38 or its introducing sentence moves, rather than
+matching nothing and passing. The comparison runs one way only: §38 is a minimum,
+so the thirteen runbooks that exist without being named there are not failures.
+
+It tells the two kinds of failure apart by looking for similarly named files
+beside the missing one: a naming drift, where the document exists under another
+name, reads differently from a genuine absence, where nobody wrote it. That
+distinction decided how each was fixed — the two absences were written, the drift
+was corrected in the handbook. It reported 2 of 9 unresolved when it was written
+and **passes today**.
+
+**It is now stage 7 of the required gate**, which is what makes it a control
+rather than a script. Adding it cost a handbook edit to §30 and therefore a
+second re-ratification of the checksum, in the same commit as the §38 correction;
+`1d97c916` is the value that covers both. None of it was allowed to go in while
+the check was red, because §31 forbids weakening a check to clear a gate, and a
+required stage that is knowingly failing teaches everyone to ignore it.
+
+**What is still unguarded is the other direction.** The check asserts that every
+path §38 names exists; nothing asserts that a runbook which exists is any good,
+or that `security-incident.md` describes a procedure anyone could follow under
+pressure. It has never been exercised. Treat a green stage 7 as proof that the
+files are there, and nothing more.
 
 **The fifth one failed in two directions at once.** ADR-0000's recorded checksum
 went stale for six days across four commits to the handbook — three of them
@@ -979,10 +1008,16 @@ belongs to.
 **It has an operational consequence.** `docs:check-handbook-checksum` is stage 4
 of the gate, so **any commit touching `docs/ENGINEERING_HANDBOOK.md` now fails
 CI unless it updates the checksum in ADR-0000 in the same commit.** That is the
-intent, not a defect. The owner re-ratified the current bytes on 17 September;
-the recorded value is `060e0387`. Landed as `f542749` and **merged to `main` as
-PR #84 on 17 September**, so the check now guards every branch rather than only
-the one it was written on. The gate is 16 stages.
+intent, not a defect. The owner re-ratified the bytes twice on 17 September: once
+for `060e0387` (landed as `f542749`, **merged to `main` as PR #84**, so the check
+guards every branch rather than only the one it was written on), and again for
+`1d97c916` after §38's naming drift was corrected and §30 gained
+`docs:check-required-docs`. The gate is 17 stages.
+
+**The second re-ratification is the mechanism, not a stumble.** Correcting §38
+and adding a gate stage both edit the handbook, so both force the checksum
+forward in the commit that makes them. ADR-0000 predicted exactly this when the
+check was built, and it has now happened twice.
 
 **This paragraph said "it is not on `main`" until the merge, and stayed that way
 for the rest of the day.** A line that describes where a commit currently sits
