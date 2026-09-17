@@ -1,6 +1,6 @@
 # ADR-0002: Site-wide particle-wave background
 
-- Status: Accepted
+- Status: Superseded 7 September 2026 by ADR-0010 — see the closing note
 - Date: 2026-07-31
 - Ratified: 2026-08-02 by OJ Florendo
 - Owner: OJ Florendo
@@ -199,3 +199,31 @@ with no other change.
 - `docs/adr/0000-handbook-adoption.md`
 - Handbook §17 (styling), §19.1 (motion and 3D), §20.1 (performance regression
   review), §23 (CSP), §25 (supply chain).
+
+---
+
+## Superseded — 7 September 2026
+
+**Superseded by [ADR-0010](0010-warm-portfolio-and-finite-motion.md)**, which
+unmounted the particle wave and the Digital Core as part of the warm-portfolio
+redesign and explicitly replaces the requirement to mount decorative scenes.
+ADR-0010 asks that the prior scene ADRs be kept as historical implementation
+records, so this one is retained in full. It is no longer governing.
+
+What that leaves true and false, checked against the tree at `486b4f0` and
+against production on 17 September 2026:
+
+- `ParticleWave.tsx`, `wave-geometry.ts` and their unit coverage are still in the
+  repository. `ParticleWaveLazy` is imported by nothing, and `.site-wave` — the
+  class the decision above mounts it under — has no CSS rule anywhere.
+- Production serves no `<canvas>` on any route at any width, and the shared
+  three.js chunk whose budget this ADR sets is not in the deployed bundle.
+- The coverage direction has flipped. `e2e/home.spec.ts` now asserts zero
+  canvases on phone **and** desktop, so a scene returning fails the gate.
+- **The rollback section above is stale.** It says the static `body::before` glow
+  remains; `src/app/globals.css` now defines no `body::before` or `body::after`
+  at all, so rolling this ADR back is no longer the one-line change described.
+
+Nothing in the measured evidence, the defect analysis or the astigmatism
+constraint is withdrawn. They remain the record of why the scene was built the
+way it was, and they are why the rollback is not free.

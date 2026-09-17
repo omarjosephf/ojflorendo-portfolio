@@ -69,7 +69,7 @@ of the catalogs, not just the version rows, and the security advisors agree; the
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. **The replacement allowance ledger was created on 17 Sep** as `allowance-225.sqlite3`, ceiling `10440000` carrying `1440000`, 0 reservations, `integrity_check` `ok`, reading **225 attempts**; the retired `allowance.sqlite3` is kept unspent-from at 114 under runbook item 5. The **service** ledger still holds its 36 September reservations and reads 114 until the month turns. So the remaining blocker is the calendar: **the earliest capture is 1 Oct 2026 UTC**. **No complete capture exists.** |
 | 8 | Managed qualification | **Checked against the code 17 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` ran here on 17 Sep, 46 isolated checks passed, with a recovery contract and evidence review behind it. "Recovery" is two things: application-data recovery is those 46 checks; **managed Supabase recovery and off-site backups are not started** (package 13). **CAPTCHA is code-complete, wired into the owner sign-in and locally qualified**; what remains is a Turnstile site key in `EV_AUTH_TURNSTILE_SITE_KEY` and the enforcement setting inside Supabase Auth — console actions, not code. **Package 15 is blocked on Action 7's answer captures** and on independent human labels. **Re-checked 17 Sep against the live staging database**, which had never been done: all ten migrations are applied and their objects exist, so package 13's *event staging* is complete and only the deployed backend call, managed recovery and CAPTCHA remain on it. |
-| 9 | Final publication approval and smoke checks | Open, but advanced on 17 Sep. **The smoke-check runbook now exists** — [`docs/runbooks/deployment.md`](../runbooks/deployment.md), the file handbook §38 required and §34 assumed, absent until now. Its free read-only checks were executed against `https://ojfr.me` the same day, so **the production denial is verified against the live deployment** for the first time: `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all return 404 on the real Vercel instance, not merely on a local build. **The free checks were then run a second time, after a deployment**, and passed identically — so the denial holds across a deploy rather than at one moment. What remains: contact delivery, the assistant check, every browser check, reading the deployed SHA from Vercel, and the owner's publication approval. **Two passes of the free checks are still not a release smoke pass**, and neither can say which deployment answered: no build fingerprint is exposed, which was tested against the live site rather than assumed. |
+| 9 | Final publication approval and smoke checks | Open, but advanced on 17 Sep. **The smoke-check runbook now exists** — [`docs/runbooks/deployment.md`](../runbooks/deployment.md), the file handbook §38 required and §34 assumed, absent until now. Its free read-only checks were executed against `https://ojfr.me` the same day, so **the production denial is verified against the live deployment** for the first time: `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all return 404 on the real Vercel instance, not merely on a local build. **The free checks have now run three times**, the second after a deployment and the third over a genuinely changed build, passing identically each time — so the denial holds across a deploy and across a dependency upgrade, not merely at one moment. **The browser checks were run for the first time on 17 Sep**, and three of their four items passed: navigation and interactions, console and network errors, and responsive. What remains: contact delivery, the assistant check, `prefers-reduced-motion` — the one browser item nothing has touched — reading the deployed SHA from Vercel, and the owner's publication approval. **None of this is a release smoke pass**, and nothing run so far can say which deployment answered: no build fingerprint is exposed, which was tested against the live site rather than assumed. |
 
 **Rows 8 and 9 were both checked against the code on 17 September**, row 9 later
 the same day and against the live deployment as well as the tree. What this
@@ -93,15 +93,22 @@ procedure did. The procedure now exists as
 checks turned up the first live evidence for row 9: the four management and
 conversation paths return 404 on the deployed instance, which `e2e` could only
 ever assert against a local build. The rest of row 9 is still unproven — the
-paid and browser checks are unrun and publication is unapproved. Do not read the
-runbook's existence as the row being closed.
+checks with side effects are unrun, `prefers-reduced-motion` is untested, and
+publication is unapproved. Do not read the runbook's existence as the row being
+closed.
 
-**The free checks were run a second time the same day, after a deployment**, and
-every one passed again. That is worth more than a repeat: the first run happened
-with nothing deployed that day, so it proved the denial at a moment; the second
-proves it survives a deploy. Both runs are in the runbook's evidence log.
+**The free checks were run a second and then a third time the same day**, and
+every one passed each time. That is worth more than a repeat: the first run
+happened with nothing deployed that day, so it proved the denial at a moment;
+the second followed a deployment, so it proves the denial survives one; and the
+third followed #91, the first merge recorded here that changed what is served
+rather than shipping documentation, so it proves the denial survives a dependency
+upgrade as well. All three are in the runbook's evidence log, as is the browser
+pass that followed them. **This file knew only of the first two until now** —
+#93 recorded the third in the runbook and never came back here, which is the
+same drift this file keeps cataloguing.
 
-**Neither run can say which deployment answered it, and that is now a settled
+**No run can say which deployment answered it, and that is now a settled
 question rather than an open one.** Two candidate fingerprints were tested
 against the live site: Next.js 16 serves assets under a fixed
 `/_next/static/immutable/` segment carrying no per-build identifier, and
@@ -930,9 +937,22 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   resolution in about ten seconds, before a single test runs. It did exactly
   that on all three head SHAs the `minor-and-patch` group PR #82 ever had.
   9.7.0 is the newest published r3f and still caps below 19.3, so nothing
-  upstream closes this yet, and r3f is what renders the hero particle wave
-  (ADR-0002, ADR-0008, ADR-0009) — a forced resolution would put the landing
-  page's headline effect on an arrangement upstream calls unsupported. #90
+  upstream closes this yet. **What this file said until 17 September — that r3f
+  renders the hero particle wave (ADR-0002, ADR-0008, ADR-0009), so a forced
+  resolution would put the landing page's headline effect on an arrangement
+  upstream calls unsupported — is wrong.** r3f renders nothing the site serves.
+  [ADR-0010](../adr/0010-warm-portfolio-and-finite-motion.md) unmounted the
+  particle wave and the Digital Core on 7 September and supersedes the mounting
+  decisions in ADR-0002, ADR-0003 and ADR-0009; ADR-0008 had been withdrawn since
+  31 August, so one of the three citations was already dead when it was written.
+  Checked both ways on 17 September: at `486b4f0` `ParticleWaveLazy`,
+  `DigitalCoreLazy` and `MobileWaveGLLazy` are imported by nothing and
+  `.site-wave` has no CSS rule; production serves no `<canvas>` on `/` or
+  `/about` at 1024, 512 or 375 px, over 199 KiB of JavaScript in 11 chunks where
+  the three.js bundle alone is ~234 KiB. **The hold itself is unchanged and still
+  correct** — r3f is still a declared dependency, so `npm ci` still fails at
+  resolution in about ten seconds. It protects an unused dependency, not the
+  landing page. #90
   holds `react`, `react-dom` and both type packages at minor **and** major in
   `.github/dependabot.yml`; patch updates inside 19.2.x still flow, so security
   fixes are not blocked. The hold lifts when r3f widens its peer range, and

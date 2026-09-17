@@ -1,6 +1,6 @@
 # ADR-0003: No WebGL scenes on phone-sized viewports
 
-- Status: Accepted
+- Status: Superseded 7 September 2026 by ADR-0010 — see the closing note
 - Date: 2026-07-31
 - Ratified: 2026-08-02 by OJ Florendo
 - Owner: OJ Florendo
@@ -102,7 +102,7 @@ wherever WebGL exists, and mobile Performance returns to its previous range.
 
 ## Amendment — 30 August 2026: ambient motion returns to phones
 
-- Status: Accepted
+- Status: Superseded 7 September 2026 by ADR-0010 — see the closing note
 - Risk class: R2
 - Approved by: OJ Florendo, 30 August 2026
 
@@ -232,3 +232,34 @@ because arithmetic and a paint trace both said "fine" about something invisible.
 Delete the `@media (max-width: 767px)` animation block in `src/app/globals.css`.
 The layers return to static gradients, visually identical to the state before
 this amendment. No JavaScript, no bundle change and no data to unwind.
+
+---
+
+## Superseded — 7 September 2026
+
+**Superseded by [ADR-0010](0010-warm-portfolio-and-finite-motion.md)**, which
+unmounted both WebGL scenes at every viewport rather than only on phones, and
+which records that "No continuous decorative canvas or infinite CSS animation is
+mounted." That second clause reaches the 30 August amendment above as well as the
+original decision. Retained as a historical implementation record; no longer
+governing.
+
+Checked against the tree at `486b4f0` on 17 September 2026:
+
+- The original decision is moot rather than reversed. No WebGL scene mounts at
+  any width, so the `max-width: 767px` gate has nothing left to gate.
+  `useSceneEnabled()` still exists in `src/components/three/hooks.ts`, imported
+  only by components that are themselves imported by nothing.
+- **The amendment's ambient drift is gone.** `src/app/globals.css` defines no
+  `body::before` or `body::after`, so neither the gradient glow nor its 44s/61s
+  phone animation exists. The rollback instruction above — delete the
+  `@media (max-width: 767px)` animation block — has nothing to delete.
+- The coverage this ADR added was inverted, not dropped. `e2e/home.spec.ts`
+  asserted zero canvases at 390x844 and a non-zero count at 1440x900; it now
+  asserts zero at both. The gate still fails loudly if a scene returns, which is
+  the property the amendment wanted from it.
+
+The Lighthouse measurements stand as the record of why phones were taken off
+three.js, and the amendment's process lesson — that a feature can pass every
+gate while measuring cost and never effect — is not tied to the code it was
+learned on.

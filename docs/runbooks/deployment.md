@@ -2,8 +2,10 @@
 
 Status: **procedure, written 17 September 2026. It has not yet been used for a
 full release pass.** The read-only checks under "Free and read-only" below were
-executed against `https://ojfr.me` on that date and their results are in the
-evidence log at the foot of this file; the rest are described and unrun.
+executed against `https://ojfr.me` on that date, and three of the four "Checks
+that need a browser" were executed later the same day; their results are in the
+evidence log at the foot of this file. The checks with side effects, and
+`prefers-reduced-motion`, are described and unrun.
 
 This is the runbook `docs/ENGINEERING_HANDBOOK.md` §38 requires and §34 assumes.
 It did not exist until now, so the post-deploy smoke checks §34 step 7 lists had
@@ -284,8 +286,9 @@ earlier merge recorded here shipped documentation or repository configuration,
 so the checks could not have distinguished the new build from the old one even
 in principle. #91 upgraded eight packages, `next` 16.3.4 to 16.3.5, `three`
 0.185.1 to 0.186.0 and `framer-motion` 13.2.0 to 13.3.0 among them — and the
-last two feed the hero particle wave. So these checks ran against a genuinely
-different build for the first time.
+last two feed the hero particle wave *(wrong; corrected at the end of this
+entry)*. So these checks ran against a genuinely different build for the first
+time.
 
 Every check in the "Free and read-only" section above passed:
 
@@ -315,3 +318,87 @@ serving. Reading the deployed SHA remains a Vercel console action.
 deployed commit SHA was again not read from Vercel. The upgrade most worth a
 browser is the particle wave, since `three` and `framer-motion` both moved
 beneath it, and no check here exercises it.
+
+**Corrected 17 September 2026, by looking at the wave this entry asked for.**
+The two sentences marked above are wrong. They are left standing rather than
+deleted, because the plan they produced was acted on and a reader needs to see
+why. **There is no particle wave to exercise.**
+[ADR-0010](../adr/0010-warm-portfolio-and-finite-motion.md) unmounted the
+particle wave and the Digital Core on 7 September 2026, superseding the mounting
+decisions in ADR-0002, ADR-0003 and ADR-0009. Verified both ways: at `486b4f0`
+`ParticleWaveLazy`, `DigitalCoreLazy` and `MobileWaveGLLazy` are imported by
+nothing and `.site-wave` has no CSS rule; and production serves no `<canvas>` on
+`/` or `/about` at 1024, 512 or 375 px, over 199 KiB of JavaScript in 11 chunks
+where the three.js bundle alone is ~234 KiB. So `three` is a declared dependency
+that reaches no route, and of the two packages named as the reason to look, only
+`framer-motion` ships — `src/components/layout/Nav.tsx` and
+`src/components/sections/ExperienceTimeline.tsx` import it.
+
+**The entry's conclusion survives this.** #91 did change what is served, through
+`next` and `framer-motion`, and these checks still cannot say which commit
+answered them. What does not survive is the stated reason to reach for a
+browser. ADR-0002, ADR-0003 and ADR-0009 all still read `Status: Accepted` and
+none of them carries a pointer to ADR-0010, so the superseded decision is the
+one a reader meets first.
+
+**This correction is not a smoke pass and discharges nothing above.** It records
+one finding from looking at a single surface. The browser checks were run
+separately later the same day — see the fourth entry, which discharges three of
+the four.
+
+**17 September 2026, browser checks against `https://ojfr.me`,** from a session
+on the owner's machine. **No deployment preceded this run.** Unlike the second
+and third entries it follows no merge, so it says nothing about a new build; it
+exists because every entry above listed the browser checks as not executed, and
+this is the first time any of them has been run. It is **not** a release smoke
+pass.
+
+It was prompted by the third entry's closing line, which named the particle wave
+as the thing most worth a browser. There is no particle wave — see the
+correction appended to that entry. No `<canvas>` exists on any route at any
+width tested.
+
+Three of the four items in "Checks that need a browser" were exercised and
+passed:
+
+- **Navigation and critical interactions.** The header "Services" link resolves
+  to `/#services` and lands the section 96 px below the sticky header; browser
+  back returns to `/` at scroll 0; browser forward restores `/#services` at the
+  same offset. At 375x812 the menu opens (`aria-expanded` true, label "Open
+  menu" to "Close menu", focus moved to the first link), Escape closes it, and
+  focus returns to the toggle. The panel is a disclosure, not a modal — no
+  `role="dialog"`, no focus trap, body scroll not locked.
+- **Console, page and network errors.** No console errors on `/`, `/about`,
+  `/projects/cited` or `/projects/personal-portfolio-website`. 134 requests
+  across the pass, every one 200 or 304, none failed. The only console output
+  anywhere was four `postMessage` warnings emitted by Cloudflare's own
+  `challenges.cloudflare.com/turnstile/v0/api.js`, which the homepage contact
+  form loads; no widget is rendered at load and no iframe is created.
+- **Responsive.** No horizontal overflow at 1024, 512 or 375 px on the homepage,
+  `/about` and both case studies.
+
+**The fourth item was not run at all.** `prefers-reduced-motion` could not be
+tested: the browser used exposes colour-scheme emulation only, so the media
+feature cannot be forced. That check remains entirely unexecuted, and it is the
+one this runbook's own list cares about most after a motion-related change.
+
+**Four limits on what the three passing checks are worth.** Recorded because
+overstating a partial pass is the failure this file keeps correcting.
+
+- **200% zoom was approximated, not performed.** A 512x384 viewport stands in for
+  200% zoom of 1024x768. Real zoom also scales text metrics and can expose
+  overflow that a viewport resize does not.
+- **The mobile pass was emulation.** 375x812 with a phone user agent and touch
+  points advertised, but pointer events still arrive as mouse clicks, so it is
+  not a touch test.
+- **One engine only.** Everything ran in a single Chromium-based browser.
+  ADR-0002's verification covered Chromium, Firefox and WebKit across eight
+  viewports, so this pass is narrower than work this project has already done.
+- **CSP violations were read from the console, not from a listener.** Chromium
+  reports them as console errors and none appeared, but that is weaker than the
+  `securitypolicyviolation` event check ADR-0002 ran.
+
+**Not executed:** contact delivery, the assistant, and `prefers-reduced-motion`.
+The deployed commit SHA was again not read from Vercel, and nothing in a browser
+changes that — no check here identifies a build any more than the curl checks
+above do.
