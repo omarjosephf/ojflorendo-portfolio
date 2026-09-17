@@ -1,6 +1,7 @@
 # ADR-0000: Adopt Project Zero Engineering Handbook (v1.1.0, then v1.2.0)
 
-- Status: Accepted — adopted 2026-07-28, amended 2026-08-01, v1.2.0 ratified 2026-08-29
+- Status: Accepted — adopted 2026-07-28, amended 2026-08-01, v1.2.0 ratified
+  2026-08-29, v1.2.1 ratified 2026-09-08, current bytes re-ratified 2026-09-17
 - Date: 2026-07-28 (amended 2026-08-01)
 - Owner: OJ Florendo
 
@@ -60,22 +61,44 @@ this ADR is amended rather than superseded.
 
 ### Ratified document SHA-256
 
-**Current — ratified 2026-08-01, the version to verify against:**
+**Current — the value to verify against.** Handbook v1.2.1 with §30 extended to
+list `docs:check-handbook-checksum`, made under the 17 September 2026 approval
+recorded below:
 
 ```text
-fe7c954f1e1ed6a3e12a7df7ff7cc37aa55862fa0ceb82b480d279b76b963c34
+060e0387af18dd5efab28a5558b2106964292bd7abca90635721c0c63de8c2ee
 ```
 
-Superseded — the 2026-07-28 ratification of the uncorrected bytes, retained for
-audit history only:
+**This value is now enforced mechanically.** `npm run docs:check-handbook-checksum`
+runs as a stage of the required gate, recomputes the handbook's SHA-256 over
+LF-normalised bytes, and fails when it disagrees with the value above. A handbook
+edit that does not update this line fails CI in the commit that makes it.
 
-```text
-f2c7b0029e36b6ffd70d36a909af7cce13ae5813d5f62b5c362cc0971e6d7f59
-```
+Verifying by hand is unchanged. The checksum must be recomputed from the committed `docs/ENGINEERING_HANDBOOK.md`
+— LF line endings, as `git show <ref>:docs/ENGINEERING_HANDBOOK.md | sha256sum`
+produces — and compared against the **current** value above. Any mismatch blocks
+adoption until explained and approved.
 
-The checksum must be recomputed from the committed `docs/ENGINEERING_HANDBOOK.md`
-and compared against the **current** value above. Any mismatch blocks adoption
-until explained and approved.
+Superseded values, retained for audit history only. Each was verified on
+17 September 2026 to be the SHA-256 of the committed bytes at the commit named,
+and none is authoritative now:
+
+| Version | Ratified | Commit | Committed bytes (LF) |
+| --- | --- | --- | --- |
+| 1.2.1 | re-ratified 2026-09-17 | `3e9880c` | `ae68ad30…b5b021` |
+| 1.2.1 | 2026-09-08 | `2969c19` | `9bdf6a7c…d8f366` |
+| 1.2.0 | 2026-08-29 | `1319554` | `fa3e88c6…086128` |
+| 1.1.0 | 2026-08-01 | `9003e05` | `fe7c954f…b963c34` |
+| 1.1.0 | 2026-07-28 | `dc7803c` | `f2c7b002…e6d7f59` — the uncorrected bytes, before the 1 August amendment |
+
+**This section named `fe7c954f…` as "Current" until 17 September 2026.** That was
+correct on 1 August 2026 and was never revised through the two ratifications that
+followed, which recorded their values in the sections below instead. The result
+was two places in one document each claiming to hold the authoritative checksum,
+disagreeing by three versions: anyone following this section's own instruction
+would have compared the committed file against a v1.1.0 hash and found a mismatch
+that meant nothing. The values are consolidated here so there is one place to
+read and one place to update.
 
 ## Alternatives considered
 
@@ -126,8 +149,10 @@ separately controlled.
 
 - The handbook now states its own status correctly, so the authority question can
   be answered by reading the document rather than by reading this ADR first.
-- The ratified byte sequence changed once, deliberately and on the record. Two
-  checksums exist; only the current one is authoritative.
+- The ratified byte sequence has changed several times, each time deliberately
+  and on the record. Every value it has held is listed under **Ratified
+  document SHA-256**; only the current one is authoritative, and that section
+  is the single place to read or update it.
 - v1.0.0 remains available in Git history but is no longer citable as governing.
 - Repository adoption is incomplete until the corrected file and this amended ADR
   are committed and published through the approved workflow.
@@ -222,6 +247,81 @@ For the record, the corrected historical value:
 
 v1.2.0 is superseded and neither value is now authoritative; the row exists so
 the discrepancy is explained rather than left to be rediscovered.
+
+### Re-ratification, 17 September 2026 — the recorded checksum had fallen behind the file
+
+The value recorded for v1.2.1, `9bdf6a7c…`, is the hash of the bytes ratified on
+8 September at `2969c19`. It is still true of those bytes. It stopped being true
+of the committed file three days later, and nothing noticed for six.
+
+`docs/ENGINEERING_HANDBOOK.md` changed four times after its ratification:
+
+| Commit | Date | What it changed in the handbook |
+| --- | --- | --- |
+| `472f907` | 11 Sep | §7 and §8.1 corrected to describe the Fly/FastAPI retrieval backend, Supabase, and the two real visitor-facing input boundaries; §30 rewritten to list the gate's actual stages; Appendix A's duplicate stage list removed |
+| `72bfe46` | 11 Sep | `docs:check-migration-manifest` added to §30; the written-out stage count removed |
+| `06affe5` | 11 Sep | §30's parity note extended to cover `.github/workflows/ci.yml` |
+| `3e9880c` | 13 Sep | `docs:check-budget-envelope` added to §30 |
+
+**None of them changed policy.** Each corrected a description that had drifted
+from what the repository actually does, which §39 requires rather than merely
+permits. The authority model, risk classification, and every security, privacy,
+accessibility, testing and release obligation are unchanged from the ratified
+version.
+
+**Three of the four were compelled by the handbook's own gate.**
+`docs:check-handbook-gate` fails CI unless §30's stage list matches
+`package.json` and `.github/workflows/ci.yml`, so adding a gate stage *forces* an
+edit to §30. Two controls were therefore pulling against each other: this ADR's
+checksum says the governing bytes are frozen at ratification, and §30 says those
+bytes must change whenever the gate does. A checksum pinned to a ratification
+event cannot survive a section that is mechanically required to change. This was
+not an oversight that better discipline would have prevented; it was two correct
+controls with incompatible assumptions, and the weaker one lost silently.
+
+**It went unnoticed because nothing recomputes it.** The repository mechanically
+checks the gate list, documentation anchors, the migration manifest and the
+budget envelope. It has no check for this. The one control in this ADR meant to
+detect substituted bytes was, in practice, a sentence asking someone to remember
+— and on the evidence above, six days of ordinary work is enough to forget.
+
+**Decision: OJ Florendo re-ratified the current committed bytes on 17 September
+2026,** after reviewing the four commits above and confirming that none alters
+policy.
+
+- **Effective date:** 17 September 2026
+- **Effective checksum (SHA-256 of the committed file, LF line endings, at
+  `3e9880c`):**
+  `ae68ad305f292d7dc0c2708f6e1c73544eb884a68995a09515624874c6b5b021`
+
+**The version is deliberately unchanged.** Re-ratification settles *which bytes*
+carry the owner's approval; it is not a new handbook version, because no policy
+moved. The Versioning rule requires a changelog entry for a ratified version, and
+this is not one — recording a changelog entry here would assert a policy change
+that did not happen.
+
+**The gap is now closed mechanically.** The owner approved the R2 plan on
+17 September 2026 and `docs:check-handbook-checksum` was built the same day. It
+recomputes the handbook's SHA-256 and compares it to the value recorded above,
+and it runs as stage 4 of the required gate — in `package.json`, in §30, and as
+its own step in `.github/workflows/ci.yml`, the three copies
+`docs:check-handbook-gate` holds in agreement.
+
+It normalises CRLF to LF before hashing, and this repository is why that is not a
+formality: `.gitattributes` stores the handbook as LF while a Windows working
+copy of it is CRLF on disk, so hashing the raw bytes passes in CI and fails
+locally on the identical, untampered file. That is the 8 September defect above,
+still live in the working tree. The normalisation was verified byte-exact against
+git's own clean filter rather than assumed.
+
+**This entry is the first change to go through the new rule.** Adding the stage
+edited §30, which changed the handbook's bytes from `ae68ad30…` to the value
+recorded above, which the same commit had to record here — the ordering the
+approved plan predicted, and the mechanism working rather than a defect in it.
+
+What the check proves is bounded: that the handbook and this ADR agree. It cannot
+prove the owner ratified anything, and updating the recorded value to clear a red
+gate, rather than because the change was approved, defeats the control entirely.
 
 ## Rollback or migration
 
