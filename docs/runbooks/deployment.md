@@ -273,3 +273,45 @@ consequence rather than left as a footnote in the section above.
 
 **Not executed:** contact delivery, the assistant, and every browser check. The
 deployed commit SHA was again not read from Vercel.
+
+**17 September 2026, third run, read-only against `https://ojfr.me`,** from a
+session on the owner's machine, after PR #91 was squash-merged to `main` as
+`b69eff1` at 15:28:56 UTC. The Vercel production deployment for that commit
+reported success. It is still **not** a release smoke pass.
+
+**This is the first entry whose deployment changed what is served.** Every
+earlier merge recorded here shipped documentation or repository configuration,
+so the checks could not have distinguished the new build from the old one even
+in principle. #91 upgraded eight packages, `next` 16.3.4 to 16.3.5, `three`
+0.185.1 to 0.186.0 and `framer-motion` 13.2.0 to 13.3.0 among them — and the
+last two feed the hero particle wave. So these checks ran against a genuinely
+different build for the first time.
+
+Every check in the "Free and read-only" section above passed:
+
+- Apex serves 200 over HTTPS; `https://www.ojfr.me` returns 308 to
+  `https://ojfr.me/`.
+- All security headers present and unchanged from the previous two runs: HSTS
+  `max-age=63072000; includeSubDomains; preload`, `X-Content-Type-Options`,
+  `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`,
+  `X-Permitted-Cross-Domain-Policies: none`, and no `X-Powered-By`. CSP carries
+  a per-request nonce with `strict-dynamic` and no `'unsafe-inline'` for
+  scripts.
+- Two consecutive requests returned different nonces.
+- `/`, `/about`, both project routes, `/robots.txt`, `/sitemap.xml` and
+  `/manifest.webmanifest` all 200; an unknown route 404.
+- `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations`
+  all returned **404**, so the production denial survives a dependency upgrade
+  as well as a deployment.
+
+**A changed build still does not make these checks identify it.** Every check
+above is a status code or a response header, and none of the eight upgrades
+alters either, so this run would have passed identically against the previous
+deployment. The second entry's conclusion is unchanged and now better tested:
+a smoke pass establishes that production is healthy, never which commit is
+serving. Reading the deployed SHA remains a Vercel console action.
+
+**Not executed:** contact delivery, the assistant, and every browser check. The
+deployed commit SHA was again not read from Vercel. The upgrade most worth a
+browser is the particle wave, since `three` and `framer-motion` both moved
+beneath it, and no check here exercises it.
