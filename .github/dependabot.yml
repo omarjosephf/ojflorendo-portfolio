@@ -30,6 +30,34 @@ updates:
       # eslint-plugin-react.
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
+      # React 19.3 is held back by @react-three/fiber, not by anything here.
+      # r3f declares `react: ">=19 <19.3"`, so `npm ci` fails at resolution
+      # before a single test runs (PR #82, run 35233724689). 9.7.0 is the
+      # newest r3f release and still caps at <19.3, so no upgrade closes this
+      # today. r3f renders the hero particle wave (ADR-0002, ADR-0008,
+      # ADR-0009), so accepting a forced resolution would put the landing
+      # page's headline effect on an arrangement upstream says is unsupported.
+      # Patch updates inside 19.2.x still flow, so security fixes are not
+      # blocked. Revisit when @react-three/fiber widens its react peer range.
+      - dependency-name: "react"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
+      - dependency-name: "react-dom"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
+      # The type packages describe the runtime, so they move with it. Letting
+      # them reach 19.3 while React stays on 19.2 would typecheck the app
+      # against APIs that are not there at runtime.
+      - dependency-name: "@types/react"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
+      - dependency-name: "@types/react-dom"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
 
   - package-ecosystem: "github-actions"
     directory: "/"
