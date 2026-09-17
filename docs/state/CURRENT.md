@@ -925,6 +925,35 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   defect happening once already. `docs:check-handbook-checksum` normalises
   before hashing, verified byte-exact against git's clean filter; anything else
   that hashes a tracked file must do the same.
+- **React is held at 19.2 by `@react-three/fiber`, not by preference.** r3f
+  declares `react: ">=19 <19.3"`, so any bump to 19.3 fails `npm ci` at
+  resolution in about ten seconds, before a single test runs. It did exactly
+  that on all three head SHAs the `minor-and-patch` group PR #82 ever had.
+  9.7.0 is the newest published r3f and still caps below 19.3, so nothing
+  upstream closes this yet, and r3f is what renders the hero particle wave
+  (ADR-0002, ADR-0008, ADR-0009) — a forced resolution would put the landing
+  page's headline effect on an arrangement upstream calls unsupported. #90
+  holds `react`, `react-dom` and both type packages at minor **and** major in
+  `.github/dependabot.yml`; patch updates inside 19.2.x still flow, so security
+  fixes are not blocked. The hold lifts when r3f widens its peer range, and
+  that condition is recorded in the config beside the TypeScript 7 and
+  ESLint 10 deferrals. **The time this saves is diagnostic:** a group PR
+  carrying react will fail at install, and reading that as a fault in this
+  repository is the wrong conclusion.
+- **The hold was exercised the same day and it worked.** #82 closed itself
+  four seconds after #90 merged, because the new ignore rules invalidated it,
+  and its branch went with it — so the `@dependabot recreate` issued a minute
+  later was answered with *"looks like this PR is closed"* and acted on
+  nothing. **Merging the config is what rebuilt the group, and it was
+  immediate.** Two `Dependabot Updates` workflow runs were created at
+  15:19:52 UTC, six seconds after #90 merged and 31 seconds *before* the
+  recreate comment existed; the second ran until 15:21:55 and opened **#91**
+  at 15:21:46. So the comment cannot have caused it. **The practical rule: a
+  merged `dependabot.yml` change triggers an update run at once — there is no
+  need to wait for the weekly schedule, and no need for `recreate`.** #91 came
+  back as 8 updates with react, react-dom and both type packages absent, the
+  `next` 16.3.5 patch among them, and passed the full gate in 5m42s where #82
+  had failed at install on all three of its head SHAs. Merged as `b69eff1`.
 
 ## The bug class this project keeps hitting
 
