@@ -1,13 +1,52 @@
-# Applying the pending E.V management migrations to staging
+# Applying the E.V management migrations to staging — done
 
-Status: **prepared, not executed.** Every step below is an owner-gated action
-against a live managed database. Nothing here has been run. Prepared
-11 September 2026 from a read-only inspection of the staging project.
+Status: **executed. All ten reviewed migrations are applied to staging.**
+Verified read-only against the live project on 17 September 2026; the procedure
+below is retained as the record of what was run and as the rollback reference.
 
-## Measured starting state
+**This file said "prepared, not executed. Nothing here has been run" until
+17 September**, six days after the migrations were in fact applied. That was
+wrong in the direction that costs the most: a runbook whose steps are already
+done reads as work outstanding, and following it would have meant re-applying
+migrations to a live managed database. The status line is the one part of a
+runbook that must never be stale, and nothing checked it.
+
+## Verified end state, 17 September 2026
 
 Read-only inspection of the Supabase project `ev-management-staging`
-(`clekxlhhclwgtmismogv`, eu-west-1, PostgreSQL 17.6) on 11 September 2026.
+(`clekxlhhclwgtmismogv`, eu-west-1, PostgreSQL 17.6).
+
+| | |
+| --- | --- |
+| Migrations applied | **10 — `202609080001` through `202609110001`** |
+| Migrations pending | **0** |
+
+Version rows alone were not trusted, because a version row proves only that
+something recorded the version. The objects each migration creates were read
+out of the catalogs directly:
+
+- `202609090007` — `public.ev_complete_generation_event` exists.
+- `202609090008` — `ev_gap_reviews` carries `message_id`, `revision`,
+  `last_request_id` and `last_input_sha256`; `ev_owner_gaps` and `ev_review_gap`
+  exist; `authenticated` holds no `INSERT` or `UPDATE` on `ev_gap_reviews`.
+- `202609110001` — the `ensure_rls` event trigger is present and enabled, and
+  `EXECUTE` on `rls_auto_enable()` is revoked from both `public` and
+  `authenticated`.
+
+The security advisors agree independently: the `rls_auto_enable` SECURITY
+DEFINER finding that step 6 predicted would disappear is gone, and the eight
+`rls_enabled_no_policy` INFO findings on `ev_private.*` and `budget_private.*`
+remain, which is the intended deny-all posture. Leaked-password protection is
+still disabled and still Pro-only.
+
+**They were applied in the order this runbook prescribes.** The three rows sit
+at consecutive transaction ids (2124, 2126, 2128) well after the first seven
+(1206–1572), so they were applied in version order in one session, in separate
+transactions rather than batched — steps 3, 4 and 5 below, executed as written.
+That places the work on 11 September between this file being written and
+`docs/state/CURRENT.md` recording all ten as applied the same evening.
+
+## Starting state as measured on 11 September 2026, before the work
 
 | | |
 | --- | --- |
@@ -24,7 +63,7 @@ change to an unused database, not a data migration.
 That will stop being true the moment real conversations are stored. Re-run the
 counts before applying if any time has passed.
 
-## What each pending migration does
+## What each migration did
 
 **`202609090007_ev_answer_events`** — alters the `ev_events_read` policy and the
 `ev_answer_events` table, then adds `public.ev_complete_generation_event()` with
@@ -45,17 +84,28 @@ the function body is identical and the trigger already exists, so the only
 material effect is the `revoke execute … from public, anon, authenticated`,
 which closes the advisor finding. See that file's own comments.
 
-## Why this is blocking
+## Why this was blocking, and what it unblocked
 
 `scripts/management-backup-export.mjs` compares the live
 `supabase_migrations.schema_migrations` list against
 `supabase/operations/ev-backup-contract.json` and aborts on any difference, and
 `supabase/operations/prepare-backup-reader.sql` refuses to create the reader role
 unless the same list matches. With seven of ten applied, the encrypted backup
-path cannot run at all. Everything downstream — an isolated managed restore,
-off-site backup activation, the recovery drill — is blocked behind this.
+path could not run at all. Everything downstream — an isolated managed restore,
+off-site backup activation, the recovery drill — was blocked behind this.
 
-## Application procedure
+**That blocker is cleared.** The live list is the same ten versions the contract
+names, and `npm run docs:check-migration-manifest` passes, so the exporter's
+comparison and the reader setup both have a list to match. Nothing downstream is
+thereby *activated*: the reader role, its password, the R2 credentials and the
+backup job all remain separate owner actions under
+[the backup runbook](ev-backups.md), and none has been taken.
+
+## Application procedure, as executed
+
+Retained as the record of what was run on 11 September 2026 and as the shape of
+the work if this ever has to be done against another project. **Do not re-run
+these steps against `ev-management-staging`** — all ten are applied.
 
 Apply in version order. Do not batch them into one transaction: each migration
 already opens and commits its own, and a combined failure is harder to read.
@@ -95,6 +145,13 @@ migrations alone:
   `Reviewed migration history required`.
 - The exporter's live-version comparison passes.
 
+**Neither has been executed against the live project**, because both need the
+scoped reader credentials that have not been minted. What is established as of
+17 September is the precondition they test: the live version list and the
+contract's ten agree, read directly out of
+`supabase_migrations.schema_migrations`. Treat the two bullets above as the
+remaining proof, not as done.
+
 Creating the reader role, generating its password, minting R2 credentials and
 enabling the workflow all remain separate owner actions under
 [the backup runbook](ev-backups.md). Applying these migrations does not activate
@@ -102,7 +159,8 @@ any backup.
 
 ## Rollback
 
-Every table is empty, so rollback is a schema concern only.
+Every table was empty when these were applied and every affected table still
+reads zero rows on 17 September, so rollback remains a schema concern only.
 
 - `202609110001` — drop the event trigger and function, or re-grant execute.
 - `202609090008` — the added columns, replaced constraint and new functions are
@@ -118,9 +176,9 @@ Reverting also requires reverting the repository side: the contract's
 [the backup runbook](ev-backups.md) all describe ten reviewed migrations.
 `npm run docs:check-migration-manifest` enforces that those three agree.
 
-## Still owner-gated after this is done
+## Still owner-gated now that this is done
 
-Applying these migrations clears one blocker. It does not qualify the managed
+Applying these migrations cleared one blocker. It did not qualify the managed
 platform. Outstanding, per the release packet: real backend event integration,
 CAPTCHA enforcement, owner access and recovery testing, an isolated managed
 restore, off-site backup activation with key custody, and the deployed
