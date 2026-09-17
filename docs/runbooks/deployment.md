@@ -71,8 +71,17 @@ can do it. Until a fingerprint exists, treat the Vercel deployment record as the
 authoritative answer, and record the SHA you read rather than the SHA you
 expected.
 
+**Two candidates were tested on 17 September and neither works.** Next.js 16
+serves its assets under a fixed `/_next/static/immutable/` segment, so the asset
+path carries no per-build identifier the way an older `buildId` path did. And
+`X-Vercel-Id` changes on every request — it is a request trace, not a build
+identity. Both were checked against the live site rather than reasoned about, so
+this is a closed question until something is deliberately exposed.
+
 Exposing a fingerprint would make this step self-serve and is worth doing. It
-changes a response surface, so it is R2 and needs a plan first.
+changes a response surface, so it is R2 and needs a plan first. The cost of not
+having one is concrete and now recorded in the evidence log: a post-deploy smoke
+run cannot tell a new deployment from the one it replaced.
 
 ## Smoke checks
 
@@ -208,7 +217,8 @@ Do not claim success because a deployment reports ready.
 **17 September 2026, read-only against `https://ojfr.me`,** from a session on the
 owner's machine. This was a first execution of the free checks, to confirm this
 runbook describes reality. It is **not** a release smoke pass, and no deployment
-was made on this date.
+had been made when these ran. (One was made later the same day — see the second
+entry below.)
 
 - Apex serves 200 over HTTPS; `https://www.ojfr.me` returns 308 to
   `https://ojfr.me/`.
@@ -229,3 +239,37 @@ was made on this date.
 
 **Not executed:** contact delivery, the assistant, and every browser check. The
 deployed commit SHA was not read from Vercel.
+
+**17 September 2026, second run, read-only against `https://ojfr.me`,** from a
+session on the owner's machine, after PR #87 was squash-merged to `main` as
+`4cd21c9`. That merge triggered a production deployment, so this is the first
+execution of these checks following one. It is still **not** a release smoke
+pass.
+
+Every check in the "Free and read-only" section above passed:
+
+- Apex serves 200 over HTTPS; `https://www.ojfr.me` returns 308 to
+  `https://ojfr.me/`.
+- All security headers present and unchanged from the first run, including HSTS
+  with `preload` and no `X-Powered-By`. CSP carries a per-request nonce with
+  `strict-dynamic` and no `'unsafe-inline'` for scripts; the Turnstile origins on
+  `connect-src` and `frame-src` are as before.
+- **Three** consecutive requests returned three distinct nonces.
+- `/`, `/about`, both project routes, `/robots.txt`, `/sitemap.xml` and
+  `/manifest.webmanifest` all 200; an unknown route 404.
+- `rel="canonical"`, `og:url` and the sitemap all resolve to `https://ojfr.me`,
+  not to a preview host.
+- `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all
+  returned **404**, so the production denial holds across a deployment rather
+  than only at one moment.
+
+**This run cannot prove the new deployment is the one serving it.** Every check
+above would have passed identically against the pre-merge deployment, because the
+merged change ships nothing into the build. What it establishes is that
+production is healthy after a deploy, not that `4cd21c9` is what production is
+running. Distinguishing those needs the Vercel deployment record, and that is
+precisely what the missing build fingerprint costs — recorded here as a
+consequence rather than left as a footnote in the section above.
+
+**Not executed:** contact delivery, the assistant, and every browser check. The
+deployed commit SHA was again not read from Vercel.
