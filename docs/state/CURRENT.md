@@ -944,14 +944,16 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   four seconds after #90 merged, because the new ignore rules invalidated it,
   and its branch went with it — so the `@dependabot recreate` issued a minute
   later was answered with *"looks like this PR is closed"* and acted on
-  nothing. Dependabot opened **#91** at 15:21:46 UTC regardless: the same
-  group, rebuilt to **8 updates with react, react-dom and both type packages
-  absent**, the `next` 16.3.5 patch among them. Whether the comment or the
-  config landing on `main` triggered that run is not determinable from
-  outside; the timestamps fit either. The outcome is determinable: the group
-  resolves, and #91's Vercel deployment passed — the step #82 never reached on
-  any of its three head SHAs. #91 is open and unreviewed; its own gate, not
-  this note, is what proves the eight bumps are safe.
+  nothing. **Merging the config is what rebuilt the group, and it was
+  immediate.** Two `Dependabot Updates` workflow runs were created at
+  15:19:52 UTC, six seconds after #90 merged and 31 seconds *before* the
+  recreate comment existed; the second ran until 15:21:55 and opened **#91**
+  at 15:21:46. So the comment cannot have caused it. **The practical rule: a
+  merged `dependabot.yml` change triggers an update run at once — there is no
+  need to wait for the weekly schedule, and no need for `recreate`.** #91 came
+  back as 8 updates with react, react-dom and both type packages absent, the
+  `next` 16.3.5 patch among them, and passed the full gate in 5m42s where #82
+  had failed at install on all three of its head SHAs. Merged as `b69eff1`.
 
 ## The bug class this project keeps hitting
 
