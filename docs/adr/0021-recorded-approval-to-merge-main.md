@@ -159,8 +159,10 @@ Read back from GitHub on 17 September 2026, after applying:
 [ADR-0000](0000-handbook-adoption.md) ratifies the handbook whose §11 and §34
 this enforces.
 
-The [deployment runbook](../runbooks/deployment.md) evidence log records the
-deployment of `3c443be` and the circumstances of its merge. **The deployment of
-`2f8ba78` is not recorded there**, because the entry describing the first
-instance was itself the change that deployed second. That gap is known and
-outstanding.
+The [deployment runbook](../runbooks/deployment.md) evidence log records both
+unapproved deployments and the circumstances of each merge. `3c443be` was
+recorded at the time; `2f8ba78` was not, because the entry describing the first
+instance was itself the change that deployed second, and a third entry written
+then would have had that log chasing its own tail. It is recorded in the same
+change as this ADR, together with `7bcbd71` — the deployment of the gate
+itself, and the first in that log an approval preceded.
