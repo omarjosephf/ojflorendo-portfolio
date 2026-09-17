@@ -69,10 +69,11 @@ of the catalogs, not just the version rows, and the security advisors agree; the
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
 | 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. **The replacement allowance ledger was created on 17 Sep** as `allowance-225.sqlite3`, ceiling `10440000` carrying `1440000`, 0 reservations, `integrity_check` `ok`, reading **225 attempts**; the retired `allowance.sqlite3` is kept unspent-from at 114 under runbook item 5. The **service** ledger still holds its 36 September reservations and reads 114 until the month turns. So the remaining blocker is the calendar: **the earliest capture is 1 Oct 2026 UTC**. **No complete capture exists.** |
 | 8 | Managed qualification | **Checked against the code 17 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` ran here on 17 Sep, 46 isolated checks passed, with a recovery contract and evidence review behind it. "Recovery" is two things: application-data recovery is those 46 checks; **managed Supabase recovery and off-site backups are not started** (package 13). **CAPTCHA is code-complete, wired into the owner sign-in and locally qualified**; what remains is a Turnstile site key in `EV_AUTH_TURNSTILE_SITE_KEY` and the enforcement setting inside Supabase Auth — console actions, not code. **Package 15 is blocked on Action 7's answer captures** and on independent human labels. **Re-checked 17 Sep against the live staging database**, which had never been done: all ten migrations are applied and their objects exist, so package 13's *event staging* is complete and only the deployed backend call, managed recovery and CAPTCHA remain on it. |
-| 9 | Final publication approval and smoke checks | Open — still unverified against code. The production-denial side exists and is asserted (`e2e/management-disabled.spec.ts` plus the `storageAllowed` gate in `src/lib/management/access.ts`), but **there is no smoke-check runbook** under `docs/runbooks/`; row 9's "smoke checks" are described only in the release packet and handbook §34. Writing one is unstarted work, not a missing verification. |
+| 9 | Final publication approval and smoke checks | Open, but advanced on 17 Sep. **The smoke-check runbook now exists** — [`docs/runbooks/deployment.md`](../runbooks/deployment.md), the file handbook §38 required and §34 assumed, absent until now. Its free read-only checks were executed against `https://ojfr.me` the same day, so **the production denial is verified against the live deployment** for the first time: `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all return 404 on the real Vercel instance, not merely on a local build. What remains: contact delivery, the assistant check, every browser check, reading the deployed SHA from Vercel, and the owner's publication approval. **A first pass of the free checks is not a release smoke pass.** |
 
-**Row 8 was checked against the code on 17 September; row 9 still has not
-been.** What this file says about Action 7 was read out of `omarjosephf/cited`
+**Rows 8 and 9 were both checked against the code on 17 September**, row 9 later
+the same day and against the live deployment as well as the tree. What this
+file says about Action 7 was read out of `omarjosephf/cited`
 at `6237ab5` on 15 September and re-checked against `origin/main` at `360e8fa`
 on 17 September, except where a line says otherwise.
 
@@ -85,12 +86,15 @@ tracker**, which is itself dated 9 September — so the tracker's prose may
 understate progress, while the executed checks are current. Where they disagree,
 believe the checks.
 
-**Row 9 is carried forward from earlier notes and remains unproven.** Verifying
-it is still outstanding work, and nothing below should be read as having
-established it. What was established on 17 September is narrow and negative: the
-production-denial code and its assertions exist, and no smoke-check procedure
-does. Do not read row 9 as blocked on evidence gathering; part of it has not
-been written yet.
+**Row 9's unwritten half is now written, and one slice of it is proven.** The
+earlier note here said the production-denial code existed but no smoke-check
+procedure did. The procedure now exists as
+[`docs/runbooks/deployment.md`](../runbooks/deployment.md), and running its free
+checks turned up the first live evidence for row 9: the four management and
+conversation paths return 404 on the deployed instance, which `e2e` could only
+ever assert against a local build. The rest of row 9 is still unproven — the
+paid and browser checks are unrun and publication is unapproved. Do not read the
+runbook's existence as the row being closed.
 
 **Action 8 was carried further on 17 September, against the live staging
 database rather than against documents.** All ten migrations are applied —
@@ -910,12 +914,13 @@ a real failure still fails. Treat the packet's section 6 as historical from here
 ## The bug class this project keeps hitting
 
 A list — or a pinned value — written in more than one place with nothing keeping
-the copies honest. It has appeared six times: the handbook gate versus
+the copies honest. It has appeared seven times: the handbook gate versus
 `package.json`; the reviewed migration versions across three files; `test:ci`
 versus `ci.yml`; Appendix A's duplicate of the gate list; the handbook's ratified
-SHA-256 in ADR-0000 versus the handbook itself; and, found on 17 September,
-**whether the staging migrations are applied — written in three documents that
-gave two different answers.** Three mechanical checks now guard the first five —
+SHA-256 in ADR-0000 versus the handbook itself; **whether the staging migrations
+are applied — written in three documents that gave two different answers**; and
+**handbook §38's required-documentation list versus the files that exist**, both
+found on 17 September. Three mechanical checks now guard the first five —
 `docs:check-handbook-gate`, `docs:check-migration-manifest` and
 `docs:check-handbook-checksum` — and each caught a real instance within hours of
 being written. When adding a list or a pinned value that must match another, add
@@ -945,6 +950,20 @@ reality, and the guard for that is not a script but a habit: when a document
 asserts the state of something outside the repository — a live database, a
 deployed service, a ledger file, a console setting — say when it was last read
 and from where, or do not assert it.
+
+**The seventh shows the first category is not finished.** Handbook §38 lists four
+runbooks the repository "should maintain". Three did not exist at the paths it
+gives: `docs/runbooks/deployment.md` and `security-incident.md` were genuinely
+absent, while `contact-delivery.md` is a naming drift — `contact-email-delivery.md`
+covers it, and only the name disagrees. `docs:check-anchors`
+could not catch it, because it resolves *section* anchors like
+`docs/ENGINEERING_HANDBOOK.md §19.1` and §38's entries are backticked paths, not
+links. Nothing else looked. **`deployment.md` was written on 17 September**, so
+the §34 step 7 smoke checks finally have a procedure; the other two are still
+missing. This is repository-versus-repository, so by this file's own rule it
+deserves a check rather than a resolution to remember — comparing §38's list
+against `docs/runbooks/` is a few lines, and would have failed the day the
+handbook named a file nobody wrote.
 
 **The fifth one failed in two directions at once.** ADR-0000's recorded checksum
 went stale for six days across four commits to the handbook — three of them
