@@ -1,9 +1,10 @@
 # ADR-0023: Isolated destination for the managed restore rehearsal
 
-- Status: **Proposed.** Drafted 18 September 2026 and awaiting an owner
-  decision. Nothing here has been bought, created or run. ADR-0022 is settled;
-  this record exists because acting on ADR-0022's trigger is currently blocked
-  by a requirement no record resolves
+- Status: **Accepted — owner decision 18 September 2026.** Nothing here has
+  been bought, created or run. Accepted means the decision is settled, not that
+  the rehearsal has happened or that a clone exists. ADR-0022 is settled; this
+  record exists because acting on ADR-0022's trigger was blocked by a
+  requirement no record resolved
 - Date: 2026-09-18
 - Owner: OJ Florendo
 - Risk: R2 for this record. The rehearsal it describes is **R3** — it creates a
@@ -100,17 +101,35 @@ with hashed passwords intact. It is not a stricter or looser version of the
 contract — it is a different operation that the contract's language was never
 written to cover.
 
-One concrete consequence, verified in this repository rather than reasoned from
-the documentation. `supabase/operations/schedule-retention.sql` schedules
-`ev-retention` hourly to run `ev_private.run_maintenance()`. A clone carries that
-job. Left alone, the clone's own retention purge would fire against restored rows
-**before** the current deletion ledger has been merged — mutating the evidence
-the rehearsal exists to check, on a schedule, without anyone acting.
+One concrete consequence, verified against the live source project and this
+repository on 18 September 2026 rather than reasoned from the documentation.
+`supabase/operations/schedule-retention.sql` has been run: `ev-management-staging`
+carries **two active `pg_cron` jobs**, `ev-retention` hourly at minute 5 and
+`ev-cron-history` daily at 03:17. A clone carries both.
+
+`ev_private.run_maintenance()`, the hourly job's payload, performs **three**
+deletions, not one
+([migration 202609090003](../../supabase/migrations/202609090003_ev_retention_recovery.sql)):
+
+1. `public.ev_purge_expired()` — expired conversations and their descendants.
+2. `delete from auth.users` — anonymous accounts over 30 days old with no
+   conversations, ownership or drafts. The clone would therefore mutate the very
+   `auth.*` material this record says must be observed first and dropped
+   deliberately, on its own schedule.
+3. `delete from ev_private.deleted_conversations where deleted_at < now() -
+   interval '45 days'` — **it prunes the deletion-tombstone ledger itself.**
+
+The third is the sharpest of the three and the reason lockdown cannot wait. The
+[recovery contract](../runbooks/ev-application-restore.md) requires tombstones
+retained for 45 days (step 3) and merged before anything is exposed (step 5).
+Left alone, the clone would not merely mutate restored rows ahead of the merge —
+it would delete the evidence the merge depends on, on a schedule, without anyone
+acting.
 
 ## Decision
 
-**Proposed, for owner acceptance. Separate the two exercises, and buy nothing
-until the rehearsal is actually about to run.**
+**Accepted by the owner on 18 September 2026. Separate the two exercises, and
+buy nothing until the rehearsal is actually about to run.**
 
 1. **Managed recovery qualification is a platform exercise, not a contract
    restore.** What it measures is whether Supabase can bring this project back,
@@ -124,11 +143,18 @@ until the rehearsal is actually about to run.**
 3. **The clone is a disposable measurement rig.** It is never promoted to a
    working environment, never read by the application, and never used as the
    source of a real recovery. It cannot be cloned onward in any case.
-4. **Lockdown runs first, before any inspection**, in this order: disable
-   `pg_cron` and every external-operation extension; revoke application roles;
-   leave Auth unconfigured; and treat all carried-over `auth.*` rows as material
-   to be dropped, never as identities. Step 4 is the whole reason this record
-   exists — a clone is unsafe in its default state.
+4. **Lockdown runs first, before any inspection**, in this order: unschedule
+   `ev-retention` and `ev-cron-history` and disable `pg_cron` and every other
+   external-operation extension; revoke application roles; leave Auth
+   unconfigured; and treat all carried-over `auth.*` rows as material to be
+   dropped, never as identities. Step 4 is the whole reason this record exists —
+   a clone is unsafe in its default state. On the source as read on 18 September
+   2026 this is a closeable checklist rather than an open-ended sweep: `pg_cron`
+   is the only external-operation extension actually installed, and it carries
+   exactly the two jobs named above. `pg_net`, `wrappers`, `http`, `dblink` and
+   `postgres_fdw` are available on the platform but not installed, so they cannot
+   be carried. Re-read the source's installed extensions before the rehearsal
+   rather than trusting this sentence; it is a snapshot, not a guarantee.
 5. **The clone's compute is accepted as a bounded rehearsal cost, not rider 3's
    second project.** It exists for hours and is deleted. If it is ever kept
    beyond the rehearsal, it becomes rider 3's separate decision and needs that
@@ -172,14 +198,26 @@ be a relaxation of the contract; it would be abandoning it while still claiming
 it.
 
 **Use a CLI logical restore into a throwaway project as the managed rehearsal.**
-The strongest alternative, and not rejected on the merits. It is cheaper, it
-matches the contract's shape, and it is what Supabase recommends to Free
-projects. It is set aside because it measures the export-and-reload path that
-the 46 local checks in
+The strongest alternative, and not rejected on the merits. It matches the
+contract's shape, it is what Supabase recommends to Free projects, and it is
+**free today rather than merely cheaper**: the Free plan grants two active
+projects per organization, so a throwaway project costs nothing on the current
+plan. That cuts both ways, and the direction matters. Because a plan is
+organization-wide and plans cannot be mixed within an organization, the same
+throwaway project costs roughly US$10/month once Pro is bought. If this path is
+ever wanted, it is cheapest run **before** the purchase, not after it.
+
+It is nonetheless set aside as the *managed* rehearsal, because it would measure
+the export-and-reload path rather than the platform's own restore — which is the
+one thing Pro is being bought for. Its added value over the 46 local checks in
 [the restore qualification](../reviews/ev-application-restore-qualification.md)
-already cover, rather than the platform's own restore — which is the one thing
-Pro is being bought for. It should be adopted as the fallback if the Beta clone
-feature proves unusable in practice.
+is real but narrow: those checks exercise the same logical shape in in-memory
+PGlite, so a throwaway project would add real-Postgres and real-network fidelity
+and nothing about managed recovery. Package 13's managed recovery item therefore
+cannot close on it, and reporting it as having done so would be the failure this
+record is written to prevent. It stays the fallback if the Beta clone feature
+proves unusable in practice — taken then in full knowledge that it answers a
+different question.
 
 **Defer all of it until package 16.** Rejected for the reason
 [ADR-0022](0022-supabase-pro-for-managed-recovery.md) already gave: a first
@@ -196,9 +234,12 @@ No credential is entered by any agent; project creation and deletion are owner
 console actions.
 
 The carried `ev-retention` job is a privacy-relevant hazard, not only an
-operational one: it would delete restored rows on its own schedule before the
-current deletion ledger is merged, which is the opposite of the reconciliation
-the contract requires.
+operational one, and in all three of its effects. It would delete restored rows
+on its own schedule before the current deletion ledger is merged; it would delete
+carried `auth.*` rows before they have been observed and dropped deliberately;
+and it would prune the tombstone ledger the merge reads. Each is the opposite of
+the reconciliation the contract requires, and the third destroys the evidence
+rather than the data.
 
 No new third party, no new data flow, and no new secret in the repository.
 Supabase already holds this data. A Beta feature on the path is an accepted
@@ -233,14 +274,27 @@ long as it exists.
 exists, and no rehearsal has been run.** When the owner accepts this record and
 the rehearsal is next, record the result here rather than assuming it:
 
-- Accepted on: _pending_
+- Accepted on: **18 September 2026**, owner decision, this record only. No
+  purchase, clone or rehearsal is authorised by the acceptance itself; each
+  remains its own R3 owner action taken with confirmation immediately before it
 - Pro purchased per ADR-0022: _pending_
-- Clone created from `ev-management-staging`: _pending_
-- `pg_cron` and external-operation extensions disabled in the clone: _pending_
+- Clone created from `ev-management-staging`, creation time recorded: _pending_
+- `ev-retention` and `ev-cron-history` unscheduled; `pg_cron` and every other
+  external-operation extension disabled in the clone: _pending_
 - Application roles revoked; Auth left unconfigured: _pending_
 - Carried `auth.*` rows dropped: _pending_
 - Restore duration and data-loss window measured: _pending_
-- Clone deleted: _pending_
+- Clone deleted **in the same working session as its creation**: _pending_
+- Deletion confirmed independently — the organization lists one project again:
+  _pending_
+
+The last two lines are the control that distinguishes this decision from rider
+3's second project, and they are not a formality. A clone's mirrored compute is
+a few cents an hour; an undeleted clone is roughly US$10/month for as long as
+nobody notices. Same-session deletion and an independent project count are what
+keep the cost bounded in practice rather than only on paper. Do not close the
+rehearsal with either line pending, and do not skip them because the rehearsal
+failed.
 
 ## Rollback or migration
 

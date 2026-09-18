@@ -950,12 +950,17 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   **The trigger is itself blocked, and not by money.** The rehearsal has to
   restore into an isolated destination, which ADR-0016, the encrypted backup
   qualification and the restore runbook all forbid being the staging project.
-  [ADR-0023](../adr/0023-isolated-destination-for-managed-restore.md) proposes a
-  locked-down disposable clone, and records that a physical Supabase clone is a
-  different operation from this project's logical recovery contract — it carries
-  roles, grants and `auth.*`, which that contract excludes. It is **Proposed and
-  unaccepted**: a draft, not a decision, with an empty Verification block of its
-  own. Do not read it as settling anything.
+  [ADR-0023](../adr/0023-isolated-destination-for-managed-restore.md) is
+  **accepted (18 September 2026)** and settles that destination: a locked-down
+  disposable clone, deleted in the same working session it is created. It also
+  records that a physical Supabase clone is a different operation from this
+  project's logical recovery contract — it carries roles, grants and `auth.*`,
+  which that contract excludes, plus both live `pg_cron` jobs, one of which
+  prunes the deletion-tombstone ledger the contract's merge depends on.
+  **Accepted settles the decision and authorises nothing.** No clone exists, no
+  Pro subscription has been bought, and ADR-0023's own Verification block is
+  empty. Managed recovery is no longer blocked on a decision; it is simply not
+  done.
 - **Cloudflare connector reaches a different account** than the one holding
   `ev-private-backups`. It cannot verify the backup bucket.
 - **The handbook is CRLF in the working tree and LF in git.** `.gitattributes`
