@@ -947,6 +947,15 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   trigger is the restore rehearsal, not a date. As with ADR-0020, **no repo field
   carries the plan**: check the `Project Zero` organisation before assuming Pro
   is in force. That ADR's Verification block is the record, and it is empty.
+  **The trigger is itself blocked, and not by money.** The rehearsal has to
+  restore into an isolated destination, which ADR-0016, the encrypted backup
+  qualification and the restore runbook all forbid being the staging project.
+  [ADR-0023](../adr/0023-isolated-destination-for-managed-restore.md) proposes a
+  locked-down disposable clone, and records that a physical Supabase clone is a
+  different operation from this project's logical recovery contract — it carries
+  roles, grants and `auth.*`, which that contract excludes. It is **Proposed and
+  unaccepted**: a draft, not a decision, with an empty Verification block of its
+  own. Do not read it as settling anything.
 - **Cloudflare connector reaches a different account** than the one holding
   `ev-private-backups`. It cannot verify the backup bucket.
 - **The handbook is CRLF in the working tree and LF in git.** `.gitattributes`
