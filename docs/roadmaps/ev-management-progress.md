@@ -1,7 +1,13 @@
 # E.V management delivery checklist
 
-Updated: 2026-09-17. Count: 16 work packages. Packages differ in effort;
+Updated: 2026-09-18. Count: 18 work packages. Packages differ in effort;
 completion is not a percentage of elapsed time or production readiness.
+
+**Packages 17 and 18 did not come from this plan.** They were set by the AI
+Consultant Course instructor on 17 September 2026 and are recorded here so that
+the work has a reason to exist in the tracker rather than appearing later as
+unexplained scope. They are independent of packages 13–16 and do not block or
+unblock them.
 
 **The prose below the table is dated and was not all written on the same day.**
 Where a checkpoint paragraph and an executed check disagree, believe the check.
@@ -28,10 +34,14 @@ were written, not as current status.
 | 14 | Single app-host qualification for both Python workloads | Optional consolidation deferred | Both fixed Python retrieval workloads measured on a protected Linux preview; 252 local checks and 46 cloud checks pass, 38 frozen rankings agree; initial alias exposure contained; shared admission passes 48 local SQL and 11 staging checks; real accounting migration and full application qualification remain |
 | 15 | Grounded-answer qualification; further embedding comparison deferred | In progress | 12 development comparisons plus six frozen new-question comparisons completed; independent human labels, full answer captures/review and advanced scenario coverage remain |
 | 16 | Owner preview review and verified public release | Remaining | Owner preview feedback, complete release gates and production smoke check |
+| 17 | RAG configuration surface in the management panel | Remaining; specified, not built | Instructor-set. Surface the retrieval setup the panel already holds but never displays: chunk target and overlap, the embedding model, the token limit and the tokenizer/corpus checksums — all present in `src/data/management-corpus.generated.json` and typed as `CorpusSnapshot`, currently shown only as two chunk metrics. Plus per-question cost. **Read-only by design**: chunk size and embedding model cannot change without re-indexing the corpus in the `cited` repository, so an editable control would misrepresent the system. **The cost half is the unresolved part** — [`docs/assistant-service-costs.md`](../assistant-service-costs.md) is dated 28 August 2026 and prices `claude-haiku-4-5`, while the deployed runtime has been Gemini since 13 September, so the only costing in this repository describes a model that is no longer running. A task specification exists outside the repository; no code has been written |
+| 18 | Blog multi-agent system design | Design drafted; nothing built | Instructor-set, and the deliverable asked for was a **design, not an implementation**. [The design](../reviews/blog-multi-agent-system-design.md) is written in the course's own vocabulary — the think/plan/act/observe agent loop, the six workflow building blocks, the four defensive lines of guardrails, MCP and cron — and grounded in this repository: content is typed modules rather than a CMS, so the pipeline's output is a pull request; the `release-approval` gate means no agent can reach production; and a published post would have to re-enter E.V's corpus or the checksum check fails. **No blog exists on this site**, no agent runs, and building any of it would need its own ADR |
 
-Current checkpoint: **12 complete locally/staging, 4 unfinished** (packages 13–16). This table will be updated from
+Current checkpoint: **12 complete locally/staging, 6 unfinished** (packages 13–18). This table will be updated from
 executed checks, not from the existence of a plan. Public release is not implied
-by a locally complete package. No subscriptions have been purchased.
+by a locally complete package. No subscriptions have been purchased. Packages 17
+and 18 are instructor-set coursework and are not release gates: public release
+remains defined by packages 13–16 alone.
 
 ## Verified checkpoint
 
