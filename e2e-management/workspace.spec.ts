@@ -81,14 +81,14 @@ for (const theme of ["light", "dark"] as const) for (const width of [1280, 390])
     // Six full axe scans measured 28.7s on an idle machine, against Playwright's
     // 30-second default — roughly a second of headroom, so it failed under load
     // for timing reasons rather than a real regression. This declares the work's
-    // measured cost instead of trimming the checks: all six sections are still
+    // measured cost instead of trimming the checks: all seven sections are still
     // scanned, and a genuine failure still fails. Re-measure before lowering it.
     test.setTimeout(90_000);
     await page.setViewportSize({ width, height: 900 }); await page.goto("/manage");
     await page.getByLabel("Workspace color theme").selectOption(theme);
     await page.reload();
     await expect(page.getByLabel("Workspace color theme")).toHaveValue(theme);
-    for (const section of ["Overview", "Conversations", "Questions & gaps", "Knowledge drafts", "Sources & chunks", "Quality & operations"]) {
+    for (const section of ["Overview", "Conversations", "Questions & gaps", "Knowledge drafts", "Sources & chunks", "Quality & operations", "RAG configuration"]) {
       await page.getByRole("navigation", { name: "Management sections" }).getByRole("button", { name: new RegExp(section.replace(/[&]/g, "&")) }).click();
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(section);
       const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
