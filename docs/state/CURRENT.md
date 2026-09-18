@@ -942,6 +942,11 @@ a real failure still fails. Treat the packet's section 6 as historical from here
 - **Supabase is on the Free plan.** Leaked-password protection is Pro-only, so
   that advisor finding cannot be closed and is not neglect. There is exactly one
   account, so a strong unique password gives the same protection.
+  [ADR-0022](../adr/0022-supabase-pro-for-managed-recovery.md) accepts buying Pro
+  for managed recovery, but **the subscription has not been purchased** and its
+  trigger is the restore rehearsal, not a date. As with ADR-0020, **no repo field
+  carries the plan**: check the `Project Zero` organisation before assuming Pro
+  is in force. That ADR's Verification block is the record, and it is empty.
 - **Cloudflare connector reaches a different account** than the one holding
   `ev-private-backups`. It cannot verify the backup bucket.
 - **The handbook is CRLF in the working tree and LF in git.** `.gitattributes`

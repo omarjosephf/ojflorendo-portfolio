@@ -283,3 +283,17 @@ domain/CORS/bucket lock and the reviewed six-day backup-prefix expiry with one-d
 multipart cleanup. Existing default cleanup remains intact. This decision does
 not activate database credentials, encryption keys, real exports, scheduled
 backups, managed recovery or public application release. No data was uploaded.
+
+## Managed recovery tier recorded separately, 18 September 2026
+
+[ADR-0022](0022-supabase-pro-for-managed-recovery.md) decides Supabase Pro for
+managed daily backups and a seven-day restore window. It is accepted and not
+purchased; its trigger is the restore rehearsal.
+
+Two consequences land on this record. Managed daily backups add a retention
+surface Supabase holds for up to seven days, so the contract above governs them
+too, not only the off-site encrypted files it was written for: restore into an
+isolated destination with access disabled, merge the *current* deletion ledger,
+and if that ledger cannot be recovered, do not restore old transcripts. And the
+tier changes nothing about the encrypted off-site job recorded above — it runs on
+Free and remains uncredentialed and inert.

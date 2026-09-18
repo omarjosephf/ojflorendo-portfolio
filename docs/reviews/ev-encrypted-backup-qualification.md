@@ -125,6 +125,9 @@ Current read-only inventory showed one managed staging project. No second projec
 was created, no Auth setting changed, and no source transcript was exported.
 Supabase recommends off-site exports for Free projects; its managed backup
 features and local application-data recovery are distinct.
+[ADR-0022](../adr/0022-supabase-pro-for-managed-recovery.md) accepts Supabase Pro
+for the managed side and changes nothing here: this job reads on Free, and the
+five activation steps above are credentials, custody and verification, not a tier.
 [Supabase backups](https://supabase.com/docs/guides/platform/backups).
 
 See [application recovery](../runbooks/ev-application-restore.md) and the
