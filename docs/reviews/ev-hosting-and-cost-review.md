@@ -24,6 +24,13 @@ eligibility rule can require an upgrade before traffic grows. Supabase Pro shoul
 be purchased when its reliability, backup or capacity features are needed, after
 the total operating cost is accepted.
 
+[ADR-0022](../adr/0022-supabase-pro-for-managed-recovery.md) applies that rule to
+this account. Supabase Pro is accepted for managed recovery at the US$25/month
+starting price recorded below, with the Spend Cap left on, Point-in-Time Recovery
+deliberately not enabled and the organisation held at one project. The trigger is
+the restore rehearsal rather than a date, and as of 18 September 2026 no charge
+has been incurred.
+
 | Service | Current documented price / behavior | Appropriate trigger |
 | --- | --- | --- |
 | Vercel Hobby | Free, non-commercial personal use | Eligible personal work and experiments within limits |

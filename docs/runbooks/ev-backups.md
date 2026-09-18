@@ -5,6 +5,14 @@ The owner-approved R2 subscription and empty private EU bucket are active. No
 managed reader, backup credential, encryption key or live backup has been created.
 Activating this runbook requires the owner's separate operational approval.
 
+**This path does not need a paid Supabase tier.** The exporter reads over
+`EV_BACKUP_DATABASE_URL`, which works on Free.
+[ADR-0022](../adr/0022-supabase-pro-for-managed-recovery.md) decides Supabase Pro
+for *managed* recovery and leaves this job explicitly unchanged: built,
+uncredentialed and inert. What it still lacks is the reader login, the R2 access
+keys, agreed key custody and the activation flag — none of which a subscription
+buys.
+
 ## Prepared job
 
 The [workflow](../../.github/workflows/ev-backups.yml) runs hourly at minute 17
