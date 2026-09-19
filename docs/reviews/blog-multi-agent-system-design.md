@@ -1,338 +1,286 @@
-# Blog multi-agent system design
+# Package 18: secure multi-agent portfolio blog
 
-- Status: **Proposed design, nothing built.** Produced for the AI Consultant
-  Course (Week 6), which asked for the system design rather than an
-  implementation. No blog exists on this site and no agent runs.
-- Date: 2026-09-18
-- Owner: OJ Florendo
-- Risk: R0 for this document. Building any part of it would be R2 and needs its
-  own ADR first — this record decides nothing
-- Related: [package 18](../roadmaps/ev-management-progress.md)
+- Status: **Approved architecture; Phase 18.1 is implemented on its feature
+  branch and awaits owner review/publication. Phases 18.2–18.5 are not
+  implemented.**
+- Date: 2026-09-19
+- Owner and final approval authority: OJ Florendo
+- Risk: Phase 18.1 is R1 while it remains a static, repository-managed blog with
+  no new runtime service or trust boundary. Provider integration, automated pull
+  requests and any autonomous publishing path require their own R2/R3 review.
+- Related: [Package 18 roadmap](../roadmaps/ev-management-progress.md),
+  [Engineering Handbook](../ENGINEERING_HANDBOOK.md)
 
+## 1. Decision
 
-**Author:** OJ Florendo
-**Target system:** `ojflorendo-portfolio` — Next.js App Router, TypeScript,
-deployed on Vercel, content stored as typed modules in `src/data/`.
-**Course framing:** Week 6 Part 04 (AI Agents & Agentic AI), Week 6 Part 05
-(Automation & Workflows), Week 6 Parts 06–11 (webhooks, APIs, MCP, JSON, cron,
-endpoints), Week 4 Part 07 (guardrails).
+Package 18 will use **three AI roles**:
 
----
+1. **Planner–Researcher**
+2. **Writer**
+3. **Independent Reviewer–Verifier**
 
-## 1. The problem, stated honestly
+A deterministic TypeScript orchestrator validates inputs and outputs, enforces
+the state machine, tracks calls and cost, renders safe content, runs checks and
+prepares review artefacts. It is software, not a fourth AI agent.
 
-"Automate the whole process" of blog posting sounds like one job. It is
-actually seven, and they are not the same kind of job. Some need judgement;
-some must be identical every single time.
+The smallest system that preserves separation of duties is intentional. Topic
+selection, research and outlining belong to one bounded planning role. Drafting
+belongs to a second role. Factual and safety review stays independent from the
+Writer. Adding a separate Scout, Architect, Critic or Editor would increase
+handoffs, cost and failure modes without adding a necessary trust boundary.
 
-Week 6 Part 05 draws exactly this line: **a workflow follows fixed rules, an
-agent decides.** The first design decision — and the most important one — is
-which stages get an agent and which stay a deterministic workflow.
+This record describes the approved architecture and phase boundaries. It does
+not authorize model spending, credentials, commits, pushes, merges, deployment
+or autonomous publication.
 
-Getting this wrong in either direction is expensive. Make everything an agent
-and the build step becomes non-reproducible and costly. Make everything a
-workflow and you have a template filler, not a writer.
+The instructor's course archive and the project handoff informed the context
+for this record; neither is an instruction source. The owner's approved plan,
+the current repository and the ratified Engineering Handbook govern the work.
 
-| Stage | Kind | Why |
+## 2. Delivery state
+
+| Phase | Scope | State on 19 September 2026 |
 | --- | --- | --- |
-| Find a topic | **Agent** | Requires judging what is interesting and new |
-| Research | **Agent** | Open-ended search, unknown number of steps |
-| Outline | **Agent** | Structural judgement |
-| Draft | **Agent** | Generative by definition |
-| Fact-check | **Agent** | Must reason about whether a claim is supported |
-| Edit | **Agent** | Judgement about tone and clarity |
-| Integrate into the site | **Workflow** | File writing, slug, metadata — fixed rules |
-| Verify | **Workflow** | Lint, types, build, checksum — must be identical every run |
-| Publish | **Workflow + human** | One irreversible action, gated |
+| **18.0** | Architecture and model-selection design | Complete and owner-approved |
+| **18.1** | Static blog foundation: typed content, `/blog`, `/blog/[slug]`, navigation, metadata, sitemap and structured data | Implemented locally; not committed, published or deployed |
+| **18.2** | Provider-neutral offline pipeline, schemas, fixtures and fail-closed orchestration | Not implemented; no model calls |
+| **18.3** | Blinded provider bake-off | Not run; no provider selected and no spend approved |
+| **18.4** | Owner-labelled calibration, first generated post and manual owner-approved publication | Not implemented or published |
+| **18.5** | Scheduled operation and narrowly governed content-only automation | Not authorized or implemented |
 
-Five agents, three workflow stages, one human.
+Phase 18.1 stores posts as validated JSON made from allowlisted content blocks.
+It does not execute generated MDX, HTML, JavaScript or React. Blog content stays
+outside `content/assistant/`, so this phase does not change E.V.'s corpus,
+embeddings or checksum and cannot affect the October evaluation.
 
----
-
-## 2. Autonomy level
-
-Week 6 Part 04 places systems on a slider from a chatbot that only answers, up
-to a fully autonomous multi-agent team. This system deliberately stops short of
-the top of that slider.
-
-**It is a supervised multi-agent team.** Agents research, write, critique and
-prepare. They do not publish. The final step is a human approval that already
-exists in the repository's infrastructure and cannot be bypassed by an agent
-(see §6).
-
-This is not timidity. The site is the author's professional identity. An agent
-publishing an unreviewed claim about his own work does reputational damage that
-no amount of speed repays.
-
----
+Each later phase must be started and accepted separately. A design for a later
+phase is not evidence that its code, accounts, credentials, tests, governance
+or production controls exist.
 
 ## 3. Architecture
 
-```
-                        ┌──────────────────────────┐
-     TRIGGER  ────────► │       ORCHESTRATOR       │
-   cron / webhook       │  holds shared JSON state │
-                        │  routes · budgets · retries│
-                        └─────────────┬────────────┘
-                                      │
-   ┌──────────┬───────────┬───────────┼───────────┬────────────┐
-   ▼          ▼           ▼           ▼           ▼            ▼
-┌──────┐  ┌────────┐  ┌────────┐  ┌───────┐  ┌────────┐   ┌────────┐
-│SCOUT │─►│RESEARCH│─►│ARCHITECT│─►│WRITER │◄─┤ CRITIC │──►│ EDITOR │
-│topic │  │ sources│  │ outline │  │ draft │  │ verify │   │ polish │
-└──────┘  └────────┘  └────────┘  └───────┘  └────────┘   └────┬───┘
-                                      ▲           │             │
-                                      └─ retry ───┘             │
-                                        (max 3)                 ▼
-                                                        ┌───────────────┐
-                                                        │  INTEGRATOR   │ workflow
-                                                        │ content module│
-                                                        │ slug·metadata │
-                                                        │ OG image      │
-                                                        │ corpus regen  │
-                                                        └───────┬───────┘
-                                                                ▼
-                                                        ┌───────────────┐
-                                                        │   VERIFIER    │ workflow
-                                                        │ lint·types    │
-                                                        │ build·a11y    │
-                                                        │ checksum      │
-                                                        └───────┬───────┘
-                                                                ▼
-                                                        ┌───────────────┐
-                                                        │  PUBLISHER    │ workflow
-                                                        │  opens PR     │
-                                                        │  ■ STOPS ■    │
-                                                        └───────┬───────┘
-                                                                ▼
-                                                   ████ HUMAN APPROVAL ████
-                                                    approved-to-deploy label
-                                                                ▼
-                                                          Vercel deploy
+```text
+manual topic and constraints
+            │
+            ▼
+┌───────────────────────────────┐
+│ deterministic orchestrator    │
+│ schemas · state · calls · cost│
+└──────────────┬────────────────┘
+               │ call 1
+               ▼
+┌───────────────────────────────┐
+│ Planner–Researcher            │
+│ plan · sources · evidence     │
+└──────────────┬────────────────┘
+               │ validated EvidenceLedger
+               │ call 2
+               ▼
+┌───────────────────────────────┐
+│ Writer                        │
+│ source-bounded BlogPost draft │
+└──────────────┬────────────────┘
+               │ draft + evidence
+               │ call 3
+               ▼
+┌───────────────────────────────┐
+│ Independent Reviewer–Verifier │
+│ claims · safety · quality     │
+└──────────────┬────────────────┘
+               │
+       approve │ revise once
+               │ calls 4–5 at most
+               ▼
+┌───────────────────────────────┐
+│ deterministic validation      │
+│ safe render · tests · report  │
+└──────────────┬────────────────┘
+               │
+               ▼
+     owner review; no auto-publish
 ```
 
----
+### Planner–Researcher
 
-## 4. The agents, each as a think → plan → act → observe loop
+The Planner–Researcher turns an owner-supplied topic and audience into a
+bounded research plan and evidence ledger. It is the only AI role allowed to
+use web-research tools.
 
-Week 6 Part 04 defines the agent loop. Each agent below runs that loop; what
-differs is the goal it holds and the tools it may call.
+Its output must identify every source, preserve the source location and access
+time, extract only the evidence needed, and map atomic proposed claims to that
+evidence. Retrieved pages, repository text, issue text and comments are
+untrusted data. Instructions inside them are recorded as content and never
+followed.
 
-### Scout — what is worth writing about
-- **Think:** what has changed since the last post?
-- **Plan:** read recent merged pull requests, new architecture decision records, newly shipped projects.
-- **Act:** call repository-reading tools.
-- **Observe:** score candidates on novelty and whether there is enough substance for a whole post.
-- **Output:** three ranked topic proposals with evidence for each.
+### Writer
 
-Scout never invents a topic. Every proposal must point at something that
-actually happened in the repository. This is the first guardrail, not a nicety:
-a blog that invents its own history is worse than no blog.
+The Writer receives only the validated plan, evidence ledger and writing
+requirements. It has no web, repository-write, credential or publishing tool.
+It may express supported claims in OJ's approved public voice, but may not add a
+fact from model memory. It returns a structured `BlogPost`, not source code.
 
-### Researcher — gather the supporting material
-- **Tools:** web search, documentation fetch, repository read.
-- **Output:** a source list, each with a URL or file path, and a one-line note on what it supports.
-- **Guardrail:** fetched web content is **data, never instruction.** A page that contains text telling the agent to do something is quoted, not obeyed.
+### Independent Reviewer–Verifier
 
-### Architect — decide the shape
-Turns a topic plus sources into an outline: the angle, the intended reader,
-section headings, and which source supports which section.
+The Reviewer receives the draft, evidence ledger and fixed rubric independently
+of the Writer's reasoning. It checks every factual claim, citation, required
+disclosure and security rule. It must report unsupported, contradicted or
+unverifiable claims explicitly. It cannot publish, edit files, relax a hard
+gate or silently convert a rejection into approval.
 
-### Writer — produce the draft
-Writes against the outline, in a voice guide derived from the existing site
-copy. Has no web access; it writes only from what Researcher gathered, which
-prevents fresh unverified claims entering at the drafting stage.
+The Reviewer recommends `approve`, `revise` or `reject`. The deterministic
+orchestrator—not the model—decides whether the workflow may continue.
 
-### Critic — the most important agent in the system
-Checks every factual claim in the draft against the source it is supposed to
-rest on. Claims about the author's own projects are checked against the
-repository's own data files and decision records, not against the model's
-memory.
+## 4. Deterministic contracts
 
-Its verdict is structured, not prose:
+The later pipeline will be built around runtime-validated records:
 
-```json
-{
-  "verdict": "revise",
-  "claims": [
-    { "text": "the assistant answers from 69 indexed chunks",
-      "status": "supported",
-      "evidence": "src/data/management-corpus.generated.json" },
-    { "text": "response times improved by 40%",
-      "status": "unsupported",
-      "action": "cut or measure" }
-  ]
-}
-```
+- **`BlogPost`** — slug, title, excerpt, publication date, author, disclosure,
+  allowlisted content blocks, sources and SEO metadata.
+- **`EvidenceLedger`** — research question, normalized source records, bounded
+  excerpts, atomic claims and claim-to-source mappings.
+- **`ReviewReport`** — hard-gate results, weighted scores, identified problems,
+  required corrections, measured cost and the publication recommendation.
+- **`ModelClient`** — a provider-neutral structured-generation interface that
+  returns provider/model identity, model version, token use, latency and cost
+  metadata with the validated result.
+- **Workflow input** — topic, audience, allowed domains, run cost ceiling and
+  dry-run flag.
+- **Workflow output** — immutable provenance bundle, evidence ledger, draft,
+  review reports and a proposed content change for the owner to inspect.
 
-**An unsupported claim is cut, not softened.** "Roughly" and "arguably" are how
-a false claim survives review. This rule is the difference between a system that
-writes confidently and one that writes truthfully.
+Schema-invalid or incomplete output fails closed. The orchestrator will not
+repair factual fields by guessing, execute model-supplied code, or accept prose
+where a validated contract is required.
 
-### Editor — clarity, not truth
-Runs last among the agents. Tone, length, readability, heading structure,
-plain-language explanations of technical terms. It may not introduce new
-factual claims; anything it adds re-enters Critic.
+## 5. Bounded workflow
 
----
+A normal run makes at most five model calls:
 
-## 5. The workflow stages, as the six building blocks
+1. Planner–Researcher produces the plan and evidence ledger.
+2. Writer produces the first draft.
+3. Reviewer checks the first draft.
+4. If and only if the verdict is `revise`, Writer makes one evidence-bounded
+   correction.
+5. Reviewer makes the final decision on the corrected draft.
 
-Week 6 Part 05 gives six building blocks of any workflow. The whole pipeline
-maps onto them:
+There is no second rewrite and no unbounded agent conversation. `reject`, a
+second failed review, exhausted budget, malformed output, provider failure or a
+hard-gate failure ends the run and preserves the artefacts for owner review.
+It never lowers the threshold to manufacture a successful result.
 
-| Block | In this system |
-| --- | --- |
-| **Trigger** | A weekly cron schedule, or a webhook fired when a pull request merges — meaning new material exists to write about |
-| **Action** | Each agent invocation; each file written by the Integrator |
-| **Condition** | Critic's verdict (`approve` / `revise` / `reject`); Verifier's pass or fail |
-| **Loop** | Writer ↔ Critic, bounded to three attempts |
-| **Data** | One shared JSON state object carried through every stage |
-| **Notification** | The opened pull request, plus a message to the author |
+## 6. Evidence and security gates
 
-**Integrator** writes the post as a typed content module matching the existing
-`src/data/` pattern, generates the slug, metadata and social preview image, and
-adds the sitemap entry. All fixed rules — no model judgement.
+The following are hard gates, regardless of any aggregate quality score:
 
-**Verifier** runs the repository's existing gate: lint, type checks, production
-build, accessibility checks, and corpus checksum consistency. It is
-deterministic by design. A build that passes on one run and fails on the next
-tells you nothing.
+- every externally verifiable factual claim maps to usable evidence;
+- no citation is fabricated or points to evidence that does not support the
+  claim;
+- contradictory or insufficient evidence is surfaced, not blended into a
+  confident statement;
+- instructions embedded in source material are not obeyed;
+- no secret, private document, personal data, system prompt or credential is
+  disclosed to a model or emitted in an artefact;
+- generated content contains no executable HTML, MDX, JavaScript, React or
+  repository instruction;
+- all runtime schemas, call limits and the approved per-run cost ceiling pass;
+- deterministic repository checks pass; and
+- the owner performs the required review before publication.
 
-**Publisher** opens a pull request and stops.
+Only dedicated provider credentials may be introduced in a later approved
+phase. Browser-exposed keys, personal subscription assumptions and reuse of
+Cited's existing Gemini credential are prohibited. Provider credentials are
+never made available to a model as data.
 
----
+## 7. Model selection and spending
 
-## 6. Where the human sits, and why it is structural
+**No provider or production model is selected.** Gemini 3.8 Flash is the
+current price/performance front-runner, not the winner by default. Phase 18.3
+will compare the same source-locked cases using:
 
-Most designs of this kind say "human review" and draw a box. Here the box is
-enforced by infrastructure that already exists.
+- `gemini-3.8-flash`;
+- `gpt-5.6-terra`; and
+- `claude-sonnet-5`.
 
-The repository requires a recorded owner approval before anything reaches the
-production branch: a required status check fails on every pull request until
-the author adds an `approved-to-deploy` label. The check's only step is named
-*"Require owner approval to merge."* New commits revoke the label
-automatically, so an approval always refers to the exact commits being merged.
+The bake-off will blind provider labels and measure groundedness, reviewer error
+detection, writing quality, injection resistance, latency and actual usage.
+Fabricated citations, a high-severity false pass, prompt-injection obedience,
+privacy leakage or persistent schema failure disqualifies a configuration.
 
-This gives the design three properties that are otherwise hard to guarantee:
+Every contender receives identical prompts and source packs for the same three
+cases: a normally supported article; contradictory or insufficient evidence;
+and a malicious source containing prompt injection plus an unsupported claim.
+Provider labels are randomized before OJ reviews the results.
 
-1. **An agent cannot publish**, even if it is compromised, confused, or
-   instructed by malicious content it read on the web. It has no path to the
-   production branch.
-2. **The approval is auditable.** It is a label on a specific commit, not a
-   verbal "looks good".
-3. **The approval cannot go stale.** If the agent pushes a revision after
-   approval, the approval is withdrawn automatically.
+The scoring weights are groundedness and citation quality 30%, reviewer error
+detection 25%, writing and voice 20%, security and robustness 15%, and measured
+latency and cost 10%. If passing contenders finish within five percentage
+points, the lower-cost configuration wins. A mixed-provider production design
+is considered only if it improves high-severity reviewer recall by at least 15
+percentage points. A premium reviewer is a separately approved follow-up only
+if the baseline reviewers fail or tie: Gemini 2.5 Pro, GPT-6 Astra or Claude
+Opus 5.
 
-The correct term from Week 6 Part 04 is a **guardrail** — and the strongest
-guardrails are the ones the agent has no ability to remove.
+The proposed round-one inference ceiling is US$2. It is a ceiling, not spending
+approval. Provider credit purchases, minimum deposits and paid requests require
+fresh owner approval immediately before the action. Auto-reload remains off.
+Google and OpenAI may each require an initial US$5 credit purchase; those are
+account balances rather than expected round-one consumption. Anthropic's live
+funding requirement must be read from its billing screen before any purchase.
+The recurring budget will be set from measured bake-off and calibration usage,
+not guessed in advance.
 
----
+Pricing and model availability must be rechecked immediately before the paid
+phase against the official [Gemini models and pricing](https://ai.google.dev/gemini-api/docs/pricing),
+[OpenAI models and pricing](https://developers.openai.com/api/docs/pricing) and
+[Claude models and pricing](https://platform.claude.com/docs/en/about-claude/pricing)
+references.
 
-## 7. The four defensive lines of guardrails
+## 8. Publication and autonomy boundary
 
-Week 4 Part 07 gives four lines of defence. Each has a concrete implementation
-here:
+Phase 18.1 adds a static reading experience only. It does not add a cron job,
+webhook, GitHub App, content-writing workflow, provider key or publisher.
 
-| Line | Implementation |
-| --- | --- |
-| **Stay in scope** | Scout may only propose topics evidenced by real repository activity |
-| **Never give a wrong answer** | Critic verifies claims against source files; unsupported claims are cut |
-| **Resist manipulation** | Fetched web content is treated as data; an instruction found inside a page is quoted to the human, never executed |
-| **Hand off to a human** | The pull request gate — structural, not advisory |
+Before the September 24 demonstration, Phase 18.4 will calibrate the selected
+configuration with nine owner-labelled examples: three complete drafts and six
+focused pass/fail excerpts. A score of 75 is provisional until that evidence is
+measured, and hard gates always override the aggregate score.
 
-A fifth, specific to spending money: **a per-run budget**, modelled on the
-reservation ledger the author's assistant already uses. The orchestrator
-reserves a token budget before the run and refuses to start an agent that would
-exceed it. Bounded retries (three) stop a Writer–Critic disagreement from
-looping until the budget is gone.
+The demonstration will use a manual `workflow_dispatch` and produce review
+artefacts plus a content-only proposal. A content-only pull request may be
+created only after the owner reviews and approves that action.
+The first planned generated article is **“Inside E.V. RAG,”** covering the
+180-word chunk target, 40-word overlap, `BAAI/bge-small-en-v1.5`, its 512-token
+limit and measured cost assumptions. Its public byline will be **OJ Florendo**
+with a concise, truthful disclosure that AI assisted and a human verified it.
 
----
+Any pull request, merge or production deployment remains behind the existing
+owner-controlled release process. The exact head commit and required checks
+must be verified, and publication requires explicit owner approval. A model
+verdict cannot substitute for that approval.
 
-## 8. Technical backbone
+Unattended scheduling belongs only to Phase 18.5, after successful calibration,
+an accepted governance amendment and ADR, least-privilege GitHub App design,
+alerting, rollback and a narrowly defined content-only merge policy. Normal
+code, secrets, releases and production actions remain owner-gated. Nothing in
+this design authorizes spoofing or bypassing the repository's approval gate.
 
-Drawn from Week 6 Parts 06–11, using infrastructure the project already has:
+## 9. Acceptance boundaries
 
-- **Cron (Part 10)** — a scheduled GitHub Actions workflow. The course names
-  GitHub Actions among the six real homes for cron, and the repository already
-  runs scheduled workflows, so this needs no new platform.
-- **Webhook (Part 06)** — GitHub emits a pull-request-merged event; the
-  orchestrator can use it as an alternative trigger, so a post is drafted when
-  there is genuinely something new to say rather than merely because a week
-  passed.
-- **API (Part 07)** — the Claude API provides agent inference. Each agent is an
-  API call with its own system prompt, tool set and token ceiling.
-- **MCP (Part 08)** — agents receive their tools through Model Context Protocol
-  servers rather than bespoke integrations: a filesystem server to read the
-  repository, a GitHub server to open the pull request. The course's framing
-  applies directly — the host runs the agent, the client connects, and the
-  server offers its three gifts of tools, resources and prompts. Using MCP means
-  the tool surface is declared and auditable instead of scattered through code.
-- **JSON (Part 09)** — the shared state object and every structured agent
-  output, including Critic's verdict above.
-- **Endpoint (Part 11)** — the pull request is this system's output endpoint:
-  the single, observable place its work arrives.
+Phase 18.1 is complete only when the static blog routes, safe content validation,
+responsive and keyboard-accessible rendering, metadata, sitemap and
+`BlogPosting` structured data pass their relevant checks and the E.V. corpus
+checksum is unchanged.
 
----
+It does **not** claim that:
 
-## 9. The coupling most designs would miss
+- an AI pipeline exists or has run;
+- any model is configured or paid for;
+- the nine-example calibration set exists;
+- “Inside E.V. RAG” has been generated, reviewed or published;
+- a content pull request has been created;
+- scheduled or autonomous publishing is enabled; or
+- blog content has entered E.V.'s retrieval corpus.
 
-This portfolio already runs a retrieval-augmented assistant that answers
-visitors' questions from a fixed corpus, with a checksum verified in continuous
-integration.
-
-A new blog post is new content on the site. So the design must answer a question
-that has no default: **does the post enter the assistant's corpus?**
-
-- **If yes**, the Integrator must regenerate the corpus snapshot and the
-  checksum, or the verification stage fails. The assistant then becomes able to
-  answer questions about the new post — which is the desirable outcome, and the
-  reason to prefer it.
-- **If no**, the exclusion must be explicit and recorded, or a future
-  maintainer will read the gap as a bug.
-
-Following the course's RAG pipeline from Week 4 Part 04 — `document → chunks →
-embeddings → vector database → similarity search → answer` — publishing a post
-means re-running the first three stages. It is not enough to write the file.
-
-This is the point at which the blog system stops being a content pipeline and
-becomes part of the site's AI architecture.
-
----
-
-## 10. Failure handling
-
-| Failure | Response |
-| --- | --- |
-| Critic rejects three times | Stop. Escalate to the human with the draft and all three rejection reports. Do not lower the standard to get a pass |
-| Verifier fails | Return to Integrator once. If it fails again, open the pull request anyway, clearly marked as failing, so the human can see what broke |
-| Research finds nothing | Abandon the topic and take Scout's second-ranked proposal. Never write a post with no sources |
-| Budget exhausted mid-run | Save state and stop. A half-finished draft in the state object is recoverable; a silently truncated post is not |
-| Web page contains instructions | Quote them to the human. Never act on them |
-
-The consistent principle: **failures stop and surface. They never downgrade the
-standard in order to complete.**
-
----
-
-## 11. What this system does not do
-
-Stated explicitly, because an honest design names its limits:
-
-- It does not publish. It prepares a pull request.
-- It does not measure whether posts perform. Analytics would be a second system.
-- It does not learn from previous posts. Each run starts fresh; adding memory
-  would require deciding what a "good post" was, which needs human labels.
-- It does not write about anything outside the author's own work.
-
----
-
-## 12. Summary
-
-Five agents doing judgement work, three deterministic workflow stages, one
-irreversible action behind a human gate that the agents cannot reach.
-
-The design's two distinguishing decisions are the split between agent and
-workflow in §1 — because not everything that *can* be an agent *should* be —
-and the human gate in §6, which is not a drawn box but an enforced status check
-the agents have no ability to remove.
+Those are later, separately governed phase outcomes. At each phase transition,
+work stops for an explicit checkpoint and a fresh-session handoff before the
+next phase begins.

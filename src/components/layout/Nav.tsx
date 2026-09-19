@@ -224,7 +224,7 @@ export function Nav() {
               // A route item is active on its own route; a section item is active
               // only while that section is in view on the landing page.
               const isActive = item.href
-                ? pathname === item.href
+                ? pathname === item.href || pathname.startsWith(`${item.href}/`)
                 : activeSection === item.targetId;
               return (
                 <li key={item.targetId}>
@@ -309,18 +309,26 @@ export function Nav() {
           >
             <Container>
               <ul className="flex flex-col gap-1 py-4">
-                {site.nav.map((item, i) => (
-                  <li key={item.targetId}>
-                    <Link
-                      ref={i === 0 ? firstLinkRef : undefined}
-                      href={navHref(item)}
-                      onClick={close}
-                      className="block rounded-md px-3 py-3 text-base font-medium text-ink hover:bg-surface-2"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
+                {site.nav.map((item, i) => {
+                  const isActive = item.href
+                    ? pathname === item.href || pathname.startsWith(`${item.href}/`)
+                    : activeSection === item.targetId;
+                  return (
+                    <li key={item.targetId}>
+                      <Link
+                        ref={i === 0 ? firstLinkRef : undefined}
+                        href={navHref(item)}
+                        onClick={close}
+                        aria-current={
+                          isActive ? (item.href ? "page" : "true") : undefined
+                        }
+                        className="block rounded-md px-3 py-3 text-base font-medium text-ink hover:bg-surface-2"
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
               <div className="flex items-center gap-2 border-t border-line/60 py-4">
                 {site.socials.map((s) => (

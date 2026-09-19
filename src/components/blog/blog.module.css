@@ -1,0 +1,456 @@
+.page {
+  padding: 9rem 0 7rem;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.indexHeader {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1.45fr) minmax(16rem, 0.75fr);
+  gap: 2rem;
+  align-items: start;
+  padding-bottom: 4.5rem;
+}
+
+.indexHeader .eyebrow {
+  padding-top: 0.7rem;
+}
+
+.indexTitle,
+.articleTitle {
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.indexTitle {
+  max-width: 13ch;
+  font-size: clamp(3rem, 6vw, 5.75rem);
+  line-height: 0.94;
+}
+
+.indexIntro {
+  max-width: 39ch;
+  padding-top: 0.55rem;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+
+.indexBody {
+  border-top: 1px solid var(--color-line);
+}
+
+.emptyState {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.65fr) minmax(16rem, 1fr);
+  gap: 2rem;
+  padding: 3rem 0;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+
+.emptyState .emptyLabel {
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.postList > li {
+  border-bottom: 1px solid var(--color-line);
+}
+
+.postCard {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  gap: 2rem;
+  align-items: start;
+  padding: 2.5rem 0;
+}
+
+.postNumber {
+  padding-top: 0.35rem;
+  color: var(--color-accent);
+  font-size: 0.6875rem;
+}
+
+.postMeta,
+.articleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.25rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.postTitle {
+  margin-top: 0.75rem;
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.postTitle a {
+  text-decoration: none;
+}
+
+.postTitle a:hover {
+  color: var(--color-accent);
+}
+
+.postExcerpt {
+  max-width: 62ch;
+  margin-top: 0.9rem;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.readLink,
+.backLink {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-line);
+  text-underline-offset: 0.3rem;
+}
+
+.readLink {
+  align-self: center;
+  white-space: nowrap;
+}
+
+.readLink:hover,
+.backLink:hover {
+  color: var(--color-accent);
+  text-decoration-color: currentColor;
+}
+
+.readLink svg,
+.backLink svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.articleHeader {
+  max-width: 66rem;
+  margin-top: 2.5rem;
+  padding-bottom: 3.5rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.articleTitle {
+  max-width: 15ch;
+  margin-top: 1rem;
+  font-size: clamp(3.25rem, 7vw, 6.5rem);
+  line-height: 0.94;
+}
+
+.articleExcerpt {
+  max-width: 55ch;
+  margin-top: 1.75rem;
+  color: var(--color-muted);
+  font-size: clamp(1.125rem, 2vw, 1.4rem);
+  line-height: 1.65;
+}
+
+.articleMeta {
+  margin-top: 1.5rem;
+}
+
+.articleMeta a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--color-line);
+  text-underline-offset: 0.25rem;
+}
+
+.articleMeta a:hover {
+  color: var(--color-accent);
+}
+
+.disclosure {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 40rem);
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+
+.disclosure > span {
+  color: var(--color-accent);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.articleLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 48rem) minmax(13rem, 18rem);
+  gap: clamp(3rem, 8vw, 8rem);
+  align-items: start;
+  padding-top: 4rem;
+}
+
+.articleBody {
+  min-width: 0;
+}
+
+.headingTwo,
+.headingThree {
+  scroll-margin-top: 7rem;
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.headingTwo {
+  margin: 3.5rem 0 1.25rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--color-line);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.05;
+}
+
+.articleBody > .headingTwo:first-child {
+  margin-top: 0;
+}
+
+.headingThree {
+  margin: 2.25rem 0 0.9rem;
+  font-size: 1.65rem;
+  line-height: 1.15;
+}
+
+.paragraph,
+.orderedList,
+.unorderedList {
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1.9;
+}
+
+.paragraph + .paragraph,
+.paragraph + .orderedList,
+.paragraph + .unorderedList,
+.orderedList + .paragraph,
+.unorderedList + .paragraph {
+  margin-top: 1.25rem;
+}
+
+.orderedList,
+.unorderedList {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  padding-left: 1.4rem;
+}
+
+.orderedList {
+  list-style: decimal;
+}
+
+.unorderedList {
+  list-style: disc;
+}
+
+.orderedList li::marker,
+.unorderedList li::marker {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.callout {
+  margin: 2rem 0;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.calloutWarning {
+  border-left-width: 6px;
+}
+
+.calloutLabel {
+  margin-bottom: 0.5rem;
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.sourcePanel {
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.sourcePanel h2 {
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.sourcePanel > p,
+.sourcePanel ol {
+  margin-top: 1rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+
+.sourcePanel ol {
+  display: grid;
+  gap: 1.25rem;
+  list-style: decimal;
+  padding-left: 1.1rem;
+}
+
+.sourcePanel li::marker {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.sourcePanel a {
+  display: inline;
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-line);
+  text-underline-offset: 0.25rem;
+}
+
+.sourcePanel a:hover {
+  color: var(--color-accent);
+  text-decoration-color: currentColor;
+}
+
+.sourcePanel span {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 64rem) {
+  .indexHeader {
+    grid-template-columns: 6rem minmax(0, 1fr);
+  }
+
+  .indexIntro {
+    grid-column: 2;
+    padding-top: 0;
+  }
+
+  .articleLayout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4rem;
+  }
+
+  .sourcePanel {
+    max-width: 48rem;
+  }
+}
+
+@media (max-width: 47.9375rem) {
+  .page {
+    padding: 7rem 0 5rem;
+  }
+
+  .indexHeader {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding-bottom: 3rem;
+  }
+
+  .indexHeader .eyebrow,
+  .indexIntro {
+    grid-column: auto;
+    padding-top: 0;
+  }
+
+  .indexTitle {
+    font-size: clamp(2.8rem, 14vw, 4.5rem);
+  }
+
+  .emptyState {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding: 2.25rem 0;
+  }
+
+  .postCard {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 2rem 0;
+  }
+
+  .readLink {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .articleHeader {
+    margin-top: 2rem;
+    padding-bottom: 2.75rem;
+  }
+
+  .articleTitle {
+    font-size: clamp(2.8rem, 14vw, 4.6rem);
+  }
+
+  .articleExcerpt {
+    font-size: 1.0625rem;
+  }
+
+  .disclosure {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .articleLayout {
+    padding-top: 3rem;
+  }
+
+  .paragraph,
+  .orderedList,
+  .unorderedList {
+    font-size: 0.9375rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .callout {
+    border: 2px solid CanvasText;
+  }
+}

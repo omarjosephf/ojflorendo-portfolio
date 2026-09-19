@@ -66,6 +66,9 @@ security treated as first-class requirements.
   briefly for abuse monitoring, which `SECURITY.md` sets out in full. The panel
   and the larger portrait load only when a visitor opens it.
 - **Project case studies** — dedicated, data-driven routes with structured data.
+- **Repository-managed blog** — `/blog` and `/blog/[slug]` render only
+  runtime-validated JSON content blocks; posts cannot execute HTML, MDX,
+  JavaScript or React.
 - **Responsive** — from small phones to large monitors, with no horizontal
   overflow.
 - **System, light and dark themes** across the portfolio, E.V and management preview. An explicit display-preference cookie remembers the choice for one year; it contains no identifier or chat content.
@@ -88,8 +91,9 @@ security treated as first-class requirements.
 
 - **Server Components by default**; client components (`"use client"`) only where
   interactivity is required (3D hero, navigation, timeline, contact form).
-- **Content is data, not markup** — all copy lives in typed modules under
-  `src/data`, kept separate from presentation.
+- **Content is data, not executable markup** — portfolio copy lives in typed
+  modules under `src/data`; blog posts live separately under
+  `content/blog/posts` and pass runtime validation before rendering.
 - **OJ Assistant is a client island behind a same-origin route** — the browser
   only ever talks to this origin; the backend URL and shared secret stay
   server-side. A question travels with at most four earlier question/source
@@ -110,6 +114,7 @@ flowchart TD
   A --> CC["Client islands<br/>(3D hero, nav, timeline, form, assistant)"]
   RSC --> D[("Typed content<br/>src/data")]
   A --> CS["Case-study routes<br/>/projects/[slug]"]
+  A --> BLOG["Validated blog routes<br/>/blog/[slug]"]
   CC -->|"POST JSON"| API["/api/contact route"]
   CC -->|"question + bounded source history"| AA["/api/assistant route"]
   AA -->|"server-to-server, shared secret"| RS["Retrieval service"]
@@ -251,8 +256,8 @@ src/
 │   ├── api/contact/route.ts      # contact form POST handler
 │   ├── api/assistant/route.ts    # assistant POST handler (calls the retrieval
 │   │                             #   service server-to-server)
-│   ├── (portfolio)/            # public layout, homepage, /about and
-│   │                             #   projects/[slug]
+│   ├── (portfolio)/              # public layout, homepage, /about,
+│   │                             #   /blog/[slug] and projects/[slug]
 │   ├── manage/page.tsx        # development-only owner preview
 │   ├── layout.tsx  globals.css
 │   ├── robots.ts  sitemap.ts  manifest.ts
@@ -270,10 +275,15 @@ src/
 ├── lib/
 │   ├── assistant/                # wire types, response guard, corpus checksum,
 │   │                             #   and the server-to-server service client
+│   ├── blog/                     # safe blog schema, validation and queries
 │   ├── contact/  email/  turnstile/
 │   └── …                         # rate limit, site URL, structured data, WebGL
 ├── types/                        # shared TypeScript types
 └── proxy.ts                      # per-request nonce Content Security Policy
+
+content/
+├── assistant/                    # reviewed E.V. retrieval corpus
+└── blog/posts/                   # repository-managed, validated blog JSON
 ```
 
 ## Contact-form architecture
@@ -296,6 +306,15 @@ its card links to `/projects/<slug>`, rendered by a single reusable template
 (`src/components/case-study/CaseStudyView.tsx`) with per-page metadata, canonical
 handling and `CreativeWork` structured data. Adding a case study is purely a data
 change.
+
+## Blog routes
+
+The blog index is `/blog`; published posts use `/blog/<slug>`. Content is
+repository-managed JSON rather than MDX or raw HTML. The server-side blog
+module validates every post and permits only the documented block types before
+React renders text. Draft posts are excluded from public queries, metadata and
+the sitemap. Blog content is deliberately outside `content/assistant/`, so this
+foundation does not change E.V.'s corpus or checksum.
 
 ## Deployment
 
