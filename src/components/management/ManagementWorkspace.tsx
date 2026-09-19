@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ThemeSelect } from "@/components/theme/ThemeSelect";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, BookOpen, ChevronRight, FileText, LayoutDashboard, LockKeyhole, MessageSquare, Plus, ShieldCheck, Sparkles, TriangleAlert } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronRight, FileText, LayoutDashboard, LockKeyhole, MessageSquare, Plus, Settings2, ShieldCheck, Sparkles, TriangleAlert } from "lucide-react";
 import { sampleAnchor, sampleConversations } from "@/lib/management/fixtures";
 import { summarize, type QuestionGroup } from "@/lib/management/analytics";
 import type { CorpusSnapshot, Draft, GapStatus, WorkspaceMutation, WorkspaceState } from "@/lib/management/types";
@@ -11,9 +11,10 @@ import { isWorkspaceState } from "@/lib/management/validation";
 import { Overview, Conversations } from "./ConversationViews";
 import { Questions, Knowledge } from "./EditorialViews";
 import { Sources, Quality } from "./SourceViews";
+import { RagConfiguration } from "./RagViews";
 import styles from "./management.module.css";
 
-type View = "overview" | "conversations" | "questions" | "knowledge" | "sources" | "quality";
+type View = "overview" | "conversations" | "questions" | "knowledge" | "sources" | "quality" | "rag";
 const navigation = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "conversations", label: "Conversations", icon: MessageSquare },
@@ -21,6 +22,7 @@ const navigation = [
   { id: "knowledge", label: "Knowledge drafts", icon: FileText },
   { id: "sources", label: "Sources & chunks", icon: BookOpen },
   { id: "quality", label: "Quality & operations", icon: ShieldCheck },
+  { id: "rag", label: "RAG configuration", icon: Settings2 },
 ] as const;
 const descriptions: Record<View, string> = {
   overview: "Understand the conversations. Improve the next answer.",
@@ -29,6 +31,7 @@ const descriptions: Record<View, string> = {
   knowledge: "Give a missing answer a source, then prepare it for review.",
   sources: "Inspect the actual material available to E.V.",
   quality: "See what is verified, what needs attention, and what can ship.",
+  rag: "See how retrieval is configured and what an answer costs.",
 };
 export type SaveMutation = Omit<Extract<WorkspaceMutation, { action: "save_draft" }>, "revision"> | Omit<Extract<WorkspaceMutation, { action: "triage" }>, "revision">;
 export type Report = ReturnType<typeof summarize>;
@@ -113,6 +116,7 @@ export function ManagementWorkspace({ corpus, initialStore, initialError, liveEn
         {view === "knowledge" && <Knowledge store={store} editor={editor} setEditor={(next) => { setEditor(next); setDirty(true); }} dirty={dirty} editDraft={editDraft} saving={saving} saveDraft={async () => { if (editor && await save({ action: "save_draft", draft: editor })) setDirty(false); }} />}
         {view === "sources" && <Sources corpus={corpus} sources={sources} selectedSource={selectedSource} selectSource={setSelectedSource} report={report} days={days} />}
         {view === "quality" && <Quality corpus={corpus} store={store} report={report} />}
+        {view === "rag" && <RagConfiguration corpus={corpus} />}
         <footer className={styles.footer}><span>E.V · Thoughtful answers, traceable knowledge.</span><span><LockKeyhole size={12} aria-hidden="true" /> Local workspace · no production data</span></footer>
       </main>
     </div>
