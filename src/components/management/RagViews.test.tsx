@@ -33,7 +33,7 @@ it("states that the cost figures are stale and computes the figure from the cons
   render(<RagConfiguration corpus={snapshot}/>);
   expect(ragCostInputs.verifiedOn).toBe("2026-08-28");expect(ragCostInputs.model).toBe("claude-haiku-4-5");
   expect(screen.getByRole("note")).toHaveTextContent("Last verified on 28 August 2026 against claude-haiku-4-5, which is no longer the deployed model.");
-  expect(screen.getByRole("note")).toHaveTextContent("This repository holds no Gemini prices");
+  expect(screen.getByRole("note")).toHaveTextContent("has run on gemini-3.5-flash-lite since 13 September 2026");
   expect(metric("Per answered question")).toBe("$0.0045");expect(metric("Input rate")).toBe("$1.00");expect(metric("Output rate")).toBe("$5.00");expect(metric("Retrieved passages")).toBe("4");
   expect(screen.getByText("2500 tokens × $1.00 / 1M = $0.0025")).toBeInTheDocument();expect(screen.getByText("400 tokens × $5.00 / 1M = $0.0020")).toBeInTheDocument();expect(screen.getByText("1024 output tokens")).toBeInTheDocument();
   expect(screen.getByText("docs/assistant-service-costs.md")).toBeInTheDocument();
