@@ -1,6 +1,6 @@
 # Current state
 
-Updated 17 September 2026. This file is what a fresh session should read first.
+Updated 19 September 2026. This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -56,6 +56,19 @@ here unchecked since 11 September while two other documents said the opposite,
 and this file happened to be the one that was right. The objects were read out
 of the catalogs, not just the version rows, and the security advisors agree; the
 [migration runbook](../runbooks/ev-staging-migrations.md) carries the evidence.
+
+**Package 17 merged on 19 September 2026** as `f849648`, adding a seventh,
+read-only RAG configuration section to the panel — chunking, embedding model and
+per-question cost. It changes nothing a visitor can reach: `/manage` is still
+404 in production. It is instructor-set coursework and **not a release gate**;
+packages 13–16 still define public release and none of them moved. `verify` was
+green on head `91e0835`, and `release-approval` passed on the
+`approved-to-deploy` label, applied on the owner's explicit instruction under
+[ADR-0021](../adr/0021-recorded-approval-to-merge-main.md) and recorded in a
+comment on the pull request. **Three costing items stay open** and the merge
+closes none of them: the per-answer figure rests on six calls of one question,
+no invoice has been read into this repository, and the public setup and retainer
+prices await an owner decision.
 
 ## Owner-gated actions: 6 of 9 complete
 
