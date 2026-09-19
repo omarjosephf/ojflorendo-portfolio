@@ -2,13 +2,18 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import corpus from "@/data/management-corpus.generated.json";
 import type { CorpusChunk, CorpusSnapshot } from "@/lib/management/types";
-import { ragCostInputs } from "@/lib/management/rag-cost";
+import { answersAdmittedPerMonth, costIsStale, ragCostInputs, type RagCostInputs } from "@/lib/management/rag-cost";
 import { RagConfiguration } from "./RagViews";
 import { ManagementWorkspace } from "./ManagementWorkspace";
 vi.mock("@/components/theme/ThemeSelect",()=>({ThemeSelect:()=>null}));
 const snapshot=corpus as CorpusSnapshot;
 function metric(label:string){return screen.getByRole("heading",{name:label}).closest("section")?.querySelector("strong")?.textContent;}
 function chunk(index:number,tokens:number):CorpusChunk{return{index,source:"synthetic.md",section:null,page:null,text:"Synthetic chunk text.",tokens,indexedSha256:`synthetic-${index}`};}
+// Dates deliberately unlike the real ones, so a test cannot pass because the
+// literal happens to match today's constants. The stale fixture is verified
+// before its runtime shipped; the current fixture after.
+const stale:RagCostInputs={...ragCostInputs,model:"synthetic-superseded-model",verifiedOn:"2031-01-05",runtimeDeployedOn:"2031-04-09"};
+const current:RagCostInputs={...ragCostInputs,model:"synthetic-live-model",verifiedOn:"2031-04-11",runtimeDeployedOn:"2031-04-09"};
 
 it("renders the committed target, overlap and model values",()=>{
   render(<RagConfiguration corpus={snapshot}/>);
@@ -29,14 +34,33 @@ it("counts and flags chunks over the limit when a snapshot has them",()=>{
   expect(metric("Resulting chunks")).toBe("3");expect(metric("Largest chunk")).toBe("120");expect(screen.getByText("1 chunk exceeds the 100-token limit")).toBeInTheDocument();
   expect(screen.getByText(/Re-chunk with a smaller target/)).toBeInTheDocument();expect(screen.queryByText(/Every chunk here is embedded whole/)).toBeNull();
 });
-it("states that the cost figures are stale and computes the figure from the constants",()=>{
+it("derives staleness and the admitted answer count from the constants",()=>{
+  expect(costIsStale(stale)).toBe(true);expect(costIsStale(current)).toBe(false);
+  expect(costIsStale(ragCostInputs)).toBe(false);expect(ragCostInputs.verifiedOn>=ragCostInputs.runtimeDeployedOn).toBe(true);
+  expect(answersAdmittedPerMonth({...ragCostInputs,monthlyReservationCeilingUsd:2,reservationUsdPerAttempt:0.04,monthlyAttemptCeiling:200})).toBe(50);
+  expect(answersAdmittedPerMonth({...ragCostInputs,monthlyReservationCeilingUsd:100,reservationUsdPerAttempt:0.04,monthlyAttemptCeiling:200})).toBe(200);
+});
+it("warns when the figures predate the deployed runtime",()=>{
+  render(<RagConfiguration corpus={snapshot} cost={stale}/>);
+  expect(screen.getByRole("note")).toHaveTextContent("Last verified on 5 January 2031 against synthetic-superseded-model, before the runtime deployed on 9 April 2031.");
+  expect(screen.getByRole("note")).toHaveTextContent("this is not a current price");
+  expect(screen.getByText("COST FIGURES ARE STALE")).toBeInTheDocument();expect(screen.getByText("Stale")).toBeInTheDocument();
+});
+it("says the figures are current when they were verified after the runtime shipped",()=>{
+  render(<RagConfiguration corpus={snapshot} cost={current}/>);
+  expect(screen.getByRole("note")).toHaveTextContent("Verified on 11 April 2031 against synthetic-live-model, the runtime deployed on 9 April 2031.");
+  expect(screen.getByText("COST FIGURES VERIFIED")).toBeInTheDocument();expect(screen.getByText("Current")).toBeInTheDocument();
+  expect(screen.queryByText("COST FIGURES ARE STALE")).toBeNull();
+});
+it("shows the measured cost, the reservation that bounds it, and the sample it rests on",()=>{
   render(<RagConfiguration corpus={snapshot}/>);
-  expect(ragCostInputs.verifiedOn).toBe("2026-08-28");expect(ragCostInputs.model).toBe("claude-haiku-4-5");
-  expect(screen.getByRole("note")).toHaveTextContent("Last verified on 28 August 2026 against claude-haiku-4-5, which is no longer the deployed model.");
-  expect(screen.getByRole("note")).toHaveTextContent("has run on gemini-3.5-flash-lite since 13 September 2026");
-  expect(metric("Per answered question")).toBe("$0.0045");expect(metric("Input rate")).toBe("$1.00");expect(metric("Output rate")).toBe("$5.00");expect(metric("Retrieved passages")).toBe("4");
-  expect(screen.getByText("2500 tokens × $1.00 / 1M = $0.0025")).toBeInTheDocument();expect(screen.getByText("400 tokens × $5.00 / 1M = $0.0020")).toBeInTheDocument();expect(screen.getByText("1024 output tokens")).toBeInTheDocument();
-  expect(screen.getByText("docs/assistant-service-costs.md")).toBeInTheDocument();
+  expect(ragCostInputs.model).toBe("gemini-3.5-flash-lite");expect(ragCostInputs.source).toBe("docs/assistant-service-costs.md");
+  expect(metric("Per answered question")).toBe("$0.0024");expect(metric("Reserved per attempt")).toBe("$0.04");
+  expect(metric("Answers admitted a month")).toBe("50");expect(metric("Retrieved passages")).toBe("4");
+  expect(screen.getByText("$0.30 per 1M tokens")).toBeInTheDocument();expect(screen.getByText("$2.50 per 1M tokens, thinking included")).toBeInTheDocument();
+  expect(screen.getByText("$0.0021 – $0.0027, typical $0.0024")).toBeInTheDocument();expect(screen.getByText("6 calls over 1 question on 2026-09-12")).toBeInTheDocument();
+  expect(screen.getByText(/The honest limit of this figure is its sample: 6 calls of 1 question/)).toBeInTheDocument();
+  expect(screen.getByText(/stops answering at 50 answers a month/)).toBeInTheDocument();
 });
 it("is the seventh section of the workspace and opens from the navigation",()=>{
   render(<ManagementWorkspace corpus={snapshot} initialStore={null} initialError=""/>);
