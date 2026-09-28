@@ -14,17 +14,18 @@ matching reality, correct the row and its "Checked" cell.
 
 ### Now
 
-- **Current phase: 0.1**, this roadmap, landed together with the re-checked
-  [owner-action inventory](owner-actions.md). Done when that pull request is
-  merged.
-- **Next phase: 13a**, owner sitting one. Free, about thirty minutes, blocked
-  by nothing.
+- **Phase 0.1 is done**: this roadmap and the re-checked
+  [owner-action inventory](owner-actions.md) merged as `d113d31` (#107).
+- **Next phase: 19a**, the online owner-only admin panel. The owner approved its
+  [R2 plan](../roadmaps/admin-panel-package-19.md) and
+  [ADR-0025](../adr/0025-unified-owner-admin-panel.md) on 28 September and
+  moved it, then phase 18.3, ahead of phase 13a.
 - **The only date gate is 1 October 2026 UTC**, and it applies to phase 15a
   alone.
-- **Instructor deadline: Wednesday 30 September 2026**, for package 18 and for
-  a new SaaS tool project the instructor set to start on 28 September. Neither
-  deliverable is recorded here yet, so the order below has not been changed for
-  them. The SaaS project has no row until its scope is known.
+- **Instructor deadline: Wednesday 30 September 2026**, for packages 18 and 19
+  and for a new SaaS tool project the instructor set to start on 28 September.
+  The SaaS project is built outside this repository and has no row until its
+  scope is known.
 - **One phase at a time, in the order below.** A Ready phase that is not first
   waits its turn. A date gate fixes when a phase may start; it is not
   permission to run two phases at once.
@@ -50,18 +51,20 @@ handbook §11's.
 
 | Order | Phase | Delivers | Track / package | Status | Done when | Checked |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | **0.1** Master roadmap | This section; the owner-action inventory re-checked and on `main` | Governance | **Active** | The pull request carrying both is merged | 28 Sep, repository |
-| 2 | **13a** Owner sitting one | Items 1–3: deployed backend event call, assistant smoke check, contact delivery smoke check; plus a read of Vercel's Spend Management setting, unchecked since the team moved to Pro | C / 13 and 16 | Ready | All three results and the Spend Management setting recorded in the inventory | 28 Sep: Fly `/health` ok, corpus `7bddb04dedc7`, `answers_remaining_today` 10; production on `1e6417c` |
-| 3 | **13d** Managed recovery rehearsal | Item 6: clone, lock down, measure, delete, all in one working session; plus, in the same dashboard, turning on leaked-password protection (Pro only) and confirming the Spend Cap is on and Point-in-Time Recovery off | C / 13 | Ready. **Moved before the captures by owner decision on 28 September**, because Supabase Pro is now being paid for | ADR-0022 and ADR-0023 Verification blocks complete; the organization lists one project again; the leaked-password advisor finding is gone | 28 Sep: organization plan `pro`; one project; six extensions installed, `pg_cron` the only external-operation one |
-| 4 | **15-prep** Capture preparation | Restage `deploy/oj-assistant` from the pin, run the pin gate, diff the staged corpus and system prompt against the pinned revision, and re-check the capture script's paths after the 28 September folder move | C / 15 | Ready. Must finish before phase 5, and needs no owner | Every check passes and is recorded | Not yet checked |
-| 5 | **15a** Answer captures | Items 7 then 8, one October sitting, never the same session as phase 3 | C / 15 | **Blocked by date: 1 October 2026 UTC** | Both captures complete and the release manifest validates | 28 Sep: `allowance-225` reads 225 attempts with 0 reservations; service ledger holds 36 reservations, all September; `integrity_check` ok on all three ledgers |
-| 6 | **15b** Independent labelling | Item 9 | C / 15 | Blocked by phase 5. Recruiting labellers can start now | Labels scored with `review --review` | — |
-| 7 | **13b** CAPTCHA enforcement | Item 4 | C / 13 | Ready | Enforcement on, and owner sign-in confirmed working afterwards | — |
-| 8 | **13c** Off-site encrypted backups | Item 5 | C / 13 | Ready. The `ev-backups` GitHub environment does not exist yet, and the R2 bucket is unconfirmed | Synthetic backup verified, then `EV_BACKUP_ENABLED=true` | 28 Sep: no repository variables; environments `Preview` and `Production` only; last three scheduled runs `skipped`; the Cloudflare connector lists zero R2 buckets, from an account not confirmed to be the right one |
-| 9 | **16** Public release | Items 10–12 | C / 16 | Blocked by phases 2–8 | `release-approval` passed on the release pull request and one smoke pass covers everything | — |
-| 10 | **0.2** Workspace fold-in | The archived workspace documents folded into the repository or discarded; the history below moved out of this file so it is short again | Governance | Not started. Agreed on 16 September to wait until both captures are saved | Nothing outside Git can be mistaken for current state | — |
-| 11 | **18.3** Blog provider bake-off | A plan for the two design defects found on 27 September, then the paid comparison | D / 18 | Blocked: the R2 plan awaits owner approval, then a fresh R3 decision. **Instructor deadline: Wednesday 30 September 2026.** Whether it moves ahead of phase 13a is not yet decided; see Now | The comparison has run and its result is recorded | 28 Sep: Phase 18.1's commit `44313f8` exists only locally and is on no GitHub branch; Phases 18.2 and 18.3 are uncommitted in the blog worktree |
-| 12 | **18.4–18.5** Blog calibration and publication | — | D / 18 | Not started | — | — |
+| 1 | **0.1** Master roadmap | This section; the owner-action inventory re-checked and on `main` | Governance | **Done** | The pull request carrying both is merged | 28 Sep: #107 merged as `d113d31` on `origin/main` |
+| 2 | **19a** Online owner-only admin panel | The admin switch separated from visitor chat storage; a new production Supabase project with owner sign-in, CAPTCHA and MFA; the E.V section (live views and read-only RAG configuration) and a static read-only Blog section, deployed | 19 (instructor-set; not a release gate) | Ready. R2 plan and ADR-0025 approved 28 September; creating the project, migrating it, enrolling the owner and deploying are separate R3 owner steps. **Instructor deadline: Wednesday 30 September 2026** | The plan's six acceptance criteria are met from a second device and ADR-0025's Verification block is filled | 28 Sep: Supabase organization holds one project; `/manage` 404 in production |
+| 3 | **18.3** Blog provider bake-off | A plan for the two design defects found on 27 September, then the paid comparison | D / 18 | Blocked: the R2 plan awaits owner approval, then a fresh R3 decision. **Instructor deadline: Wednesday 30 September 2026.** Placed after 19a by owner decision on 28 September | The comparison has run and its result is recorded | 28 Sep: Phase 18.1's commit `44313f8` exists only locally and is on no GitHub branch; Phases 18.2 and 18.3 are uncommitted in the blog worktree |
+| 4 | **13a** Owner sitting one | Items 1–3: deployed backend event call, assistant smoke check, contact delivery smoke check; plus a read of Vercel's Spend Management setting, unchecked since the team moved to Pro | C / 13 and 16 | Ready | All three results and the Spend Management setting recorded in the inventory | 28 Sep: Fly `/health` ok, corpus `7bddb04dedc7`, `answers_remaining_today` 10; production on `1e6417c` |
+| 5 | **13d** Managed recovery rehearsal | Item 6: clone, lock down, measure, delete, all in one working session; plus, in the same dashboard, turning on leaked-password protection (Pro only) and confirming the Spend Cap is on and Point-in-Time Recovery off | C / 13 | Ready. **Moved before the captures by owner decision on 28 September**, because Supabase Pro is now being paid for | ADR-0022 and ADR-0023 Verification blocks complete; the organization lists its permanent projects again (staging, plus production once 19a has created it, per ADR-0025); the leaked-password advisor finding is gone | 28 Sep: organization plan `pro`; one project; six extensions installed, `pg_cron` the only external-operation one |
+| 6 | **15-prep** Capture preparation | Restage `deploy/oj-assistant` from the pin, run the pin gate, diff the staged corpus and system prompt against the pinned revision, and re-check the capture script's paths after the 28 September folder move | C / 15 | Ready. Must finish before phase 15a, and needs no owner | Every check passes and is recorded | Not yet checked |
+| 7 | **15a** Answer captures | Items 7 then 8, one October sitting, never the same session as phase 13d | C / 15 | **Blocked by date: 1 October 2026 UTC** | Both captures complete and the release manifest validates | 28 Sep: `allowance-225` reads 225 attempts with 0 reservations; service ledger holds 36 reservations, all September; `integrity_check` ok on all three ledgers |
+| 8 | **15b** Independent labelling | Item 9 | C / 15 | Blocked by phase 15a. Recruiting labellers can start now | Labels scored with `review --review` | — |
+| 9 | **13b** CAPTCHA enforcement | Item 4 | C / 13 | Ready | Enforcement on, and owner sign-in confirmed working afterwards | — |
+| 10 | **13c** Off-site encrypted backups | Item 5 | C / 13 | Ready. The `ev-backups` GitHub environment does not exist yet, and the R2 bucket is unconfirmed | Synthetic backup verified, then `EV_BACKUP_ENABLED=true` | 28 Sep: no repository variables; environments `Preview` and `Production` only; last three scheduled runs `skipped`; the Cloudflare connector lists zero R2 buckets, from an account not confirmed to be the right one |
+| 11 | **16** Public release | Items 10–12 | C / 16 | Blocked by the phases ordered 4–10 | `release-approval` passed on the release pull request and one smoke pass covers everything | — |
+| 12 | **0.2** Workspace fold-in | The archived workspace documents folded into the repository or discarded; the history below moved out of this file so it is short again | Governance | Not started. Agreed on 16 September to wait until both captures are saved | Nothing outside Git can be mistaken for current state | — |
+| 13 | **18.4–18.5** Blog calibration and publication | — | D / 18 | Not started | — | — |
+| 14 | **19b–19c** Blog decisions and live runs in the admin panel | Recorded owner decisions tied to a review-bundle digest, an audit log and a pause switch (19b); live runs once phase 18.3 has run (19c) | 19 | Not started. Order after 19a not yet decided | — | — |
 
 ### Done
 
