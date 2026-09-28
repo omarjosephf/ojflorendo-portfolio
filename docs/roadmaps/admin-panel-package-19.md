@@ -72,15 +72,17 @@ Only 19a is planned in detail. 19b and 19c get their own plans when 19a is done.
    staging.
 7. Apply the ten migrations with the CLI, then check them object by object, as
    was done for staging.
-8. Configure Auth: anonymous sign-ins off; CAPTCHA provider and secret on;
-   leaked-password protection on; site URL set to the production origin.
+8. Configure Auth: anonymous sign-ins off; leaked-password protection on;
+   site URL set to the production origin. CAPTCHA is armed only after step 9.
 9. Enroll the owner: create the user, add the role row, set the password, and
-   enrol TOTP. **Open design point:** the password bootstrap is deliberately
-   local-only. The safe route is probably to run it from loopback against the
-   production project with a one-time setup file. This must be confirmed in
-   code before step 9, not assumed.
+   enrol TOTP. **Settled in code on 28 September:** the loopback bootstrap works
+   against any project `SUPABASE_URL` names, and it is closed while CAPTCHA is
+   armed. So enrolment happens from loopback *before* CAPTCHA enforcement, which
+   follows it: the Turnstile secret goes into Supabase Auth only, then
+   enforcement is switched on. The exact order is in the
+   [admin panel runbook](../runbooks/admin-panel.md#enable-in-order).
 10. Set the Vercel production environment variables (`EV_ADMIN_MODE=live`,
-    `EV_MANAGEMENT_ORIGIN`, the production Supabase URL and keys, the CAPTCHA
+    `EV_MANAGEMENT_ORIGIN`, the production Supabase URL and publishable key, the CAPTCHA
     site key). Leave `EV_CONVERSATION_STORAGE` unset.
 11. Add the `approved-to-deploy` label on OJ's instruction, merge, and let
     production deploy.

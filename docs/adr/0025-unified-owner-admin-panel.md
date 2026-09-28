@@ -66,7 +66,9 @@ Verified in the code at `origin/main` `d113d31` on 28 September:
 2. **Separate the admin switch from visitor storage.** Replace the single gate
    with two:
    - `adminAllowed`, which opens the owner routes when `EV_ADMIN_MODE=live`
-     and the existing production and exact-origin conditions hold;
+     and the existing production and exact-origin conditions hold (it
+     replaces the old `EV_MANAGEMENT_MODE=live` selector, which is retired so
+     that no earlier configuration can open anything);
    - `visitorStorageAllowed`, which is `adminAllowed` *and*
      `EV_CONVERSATION_STORAGE=production`.
 
@@ -144,7 +146,17 @@ Verified in the code at `origin/main` `d113d31` on 28 September:
 
 ## Verification
 
-Empty until performed. Required: unit tests for both gates across every
+**Code, 28 September 2026 (branch `feat/admin-panel-19a`, local):** both gates
+implemented and every call site moved; 18 production-access tests, including
+admin-only-mode route tests that return 404 from every visitor-storage route
+(a deliberate mutation pointing one visitor route at the admin gate makes them
+fail); the RAG view served only to an MFA-verified owner, without chunk text;
+component tests for the E.V and Blog sections; the Playwright management suite
+with axe audits at 1280 and 390 pixels in both themes. Route-handler tests stand
+in for "e2e" in criterion 3, because a production-mode Vercel environment cannot
+be reproduced locally; the deployed smoke test covers it for real.
+
+**Deployment: empty until performed.** Required: unit tests for both gates across every
 switch combination; e2e tests that the admin switch leaves visitor storage
 denied; a deployed smoke test of sign-in, MFA, sign-out and revocation from a
 second device; the CAPTCHA positive and negative checks on production; the

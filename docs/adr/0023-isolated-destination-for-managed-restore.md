@@ -286,8 +286,9 @@ the rehearsal is next, record the result here rather than assuming it:
 - Carried `auth.*` rows dropped: _pending_
 - Restore duration and data-loss window measured: _pending_
 - Clone deleted **in the same working session as its creation**: _pending_
-- Deletion confirmed independently — the organization lists one project again:
-  _pending_
+- Deletion confirmed independently — the organization lists its permanent
+  projects again (one before package 19's production project exists, two
+  after; see the amendment below): _pending_
 
 The last two lines are the control that distinguishes this decision from rider
 3's second project, and they are not a formality. A clone's mirrored compute is
@@ -304,3 +305,13 @@ which is also its normal final step. Reversing the decision means returning to
 the position recorded in PR #101: the collision unresolved and the rehearsal
 blocked. If the decision is reversed on cost grounds specifically, the CLI
 logical restore alternative above is the path that needs no second project.
+
+## Amendment, 28 September 2026: a permanent production project
+
+[ADR-0025](0025-unified-owner-admin-panel.md) takes rider 3's separate decision:
+the organization gains a permanent production project for the owner admin
+panel. The rehearsal is unchanged. It still clones `ev-management-staging`,
+still deletes the clone in the same session, and still counts projects
+independently. Only the expected count changes, from one to the permanent
+projects (staging and, once created, production). Rehearsing recovery of the
+production project's data is a separate follow-up and is not claimed here.
