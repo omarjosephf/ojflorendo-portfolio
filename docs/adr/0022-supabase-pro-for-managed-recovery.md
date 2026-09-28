@@ -244,15 +244,20 @@ charge has been incurred.** When the trigger in "When to buy it" is met, this is
 an owner action, R3, in the Supabase dashboard. Record the result here
 afterwards rather than assuming the upgrade took effect:
 
-- Upgraded on: _pending_
-- Organization checked: `Project Zero` (`rvscomcgubjbgzxcggoc`) — expect plan
-  `pro`
+**Partly performed.** The owner bought Pro by 28 September 2026, ahead of the
+rehearsal trigger in "When to buy it"; the rehearsal is not yet performed.
+
+- Upgraded on: by 28 September 2026, owner-reported; the exact date is on the
+  Supabase invoice, which has not been read into this repository
+- Organization checked: `Project Zero` (`rvscomcgubjbgzxcggoc`) — plan read as
+  **`pro`** on 28 September 2026 through the Supabase connector
 - Spend Cap: _pending_ — expect enabled
 - Point-in-Time Recovery: _pending_ — expect **not enabled**
 - Daily backups visible under Database → Backups: _pending_
 - Leaked-password protection enabled in Auth settings: _pending_ — a separate
   action, and the advisor finding stays open until it is taken
-- Advisors re-read after the change: _pending_
+- Advisors re-read after the change: **28 September 2026, unchanged** — the
+  leaked-password finding is still open because the setting is still off
 
 ## Rollback or migration
 

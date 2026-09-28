@@ -277,7 +277,8 @@ the rehearsal is next, record the result here rather than assuming it:
 - Accepted on: **18 September 2026**, owner decision, this record only. No
   purchase, clone or rehearsal is authorised by the acceptance itself; each
   remains its own R3 owner action taken with confirmation immediately before it
-- Pro purchased per ADR-0022: _pending_
+- Pro purchased per ADR-0022: **yes** — plan read as `pro` on 28 September
+  2026; no clone exists and no rehearsal has run
 - Clone created from `ev-management-staging`, creation time recorded: _pending_
 - `ev-retention` and `ev-cron-history` unscheduled; `pg_cron` and every other
   external-operation extension disabled in the clone: _pending_
