@@ -44,7 +44,9 @@ export async function POST(r:Request){
     if(data.action==="initialize"&&"password"in data&&typeof data.password==="string"){
       if(!previewAllowed(r.headers.get("host")))return reply(r,{error:"Not found"},404);
       if(ownerCaptchaConfiguration().required)return reply(r,{error:"Owner setup must be completed before enabling signup protection. Use your existing owner sign-in."},409);
-      const result=await initializeOwner({projectUrl:process.env.SUPABASE_URL??"",publishableKey:process.env.SUPABASE_PUBLISHABLE_KEY??""},process.env.SUPABASE_SECRET_KEY??"",data.password,AbortSignal.any([r.signal,AbortSignal.timeout(6000)]));
+      let result;
+      try{result=await initializeOwner({projectUrl:process.env.SUPABASE_URL??"",publishableKey:process.env.SUPABASE_PUBLISHABLE_KEY??""},process.env.SUPABASE_SECRET_KEY??"",data.password,AbortSignal.any([r.signal,AbortSignal.timeout(6000)]));}
+      catch(error){if(error instanceof ConversationStorageError&&error.kind==="invalid")return reply(r,{error:"That password was not accepted. Use at least 14 characters with upper- and lower-case letters, a digit and a symbol."},400);throw error;}
       return reply(r,{status:result.state.assured?"ready":"mfa_required",factorId:result.state.factorId},200,result.session);
     }
     const auth=service(r);
@@ -58,7 +60,10 @@ export async function POST(r:Request){
     const current=await auth.existing(r);
     if(data.action==="sign_out"){await auth.disconnect(current.token);return reply(r,{status:"signed_out"},200,null);}
     if(data.action==="enroll")return reply(r,{status:"mfa_required",...await auth.enroll(current.token)},200,current.session);
-    if(data.action==="verify"&&"factorId"in data&&"code"in data&&typeof data.factorId==="string"&&typeof data.code==="string")return reply(r,{status:"ready"},200,await auth.verify(current.token,data.factorId,data.code));
+    if(data.action==="verify"&&"factorId"in data&&"code"in data&&typeof data.factorId==="string"&&typeof data.code==="string"){
+      try{return reply(r,{status:"ready"},200,await auth.verify(current.token,data.factorId,data.code));}
+      catch(error){if(error instanceof ConversationStorageError&&error.kind==="invalid")return reply(r,{error:"That code did not match. Use the entry you added for this setup key, wait for its next code and try again. The setup key has not changed."},400,current.session);throw error;}
+    }
     return reply(r,{error:"Invalid owner action"},400);
   }catch(error){return failure(r,error);}
 }

@@ -28,3 +28,11 @@ it("blocks the one-time password bootstrap before mutation when CAPTCHA is armed
   const f=vi.fn();vi.stubGlobal("fetch",f);vi.stubEnv("EV_AUTH_TURNSTILE_SITE_KEY","0xTEST_AUTH_KEY");
   expect((await POST(req({action:"initialize",password:"synthetic-long-password"}))).status).toBe(409);expect(f).not.toHaveBeenCalled();
 });
+it("keeps the owner on the authenticator step when a code is rejected",async()=>{
+  const id="10000000-0000-4000-8000-000000000001",user={id,is_anonymous:false},pending={owner:true,assured:false};
+  const f=vi.fn();for(const value of [user,pending,user,pending,{id}])f.mockResolvedValueOnce(Response.json(value));
+  f.mockResolvedValueOnce(Response.json({error_code:"mfa_verification_failed"},{status:422}));vi.stubGlobal("fetch",f);
+  const result=await POST(req({action:"verify",factorId:id,code:"123456"},"http://localhost:3215","ev-owner-access=synthetic-owner-token"));
+  expect(result.status).toBe(400);expect((await result.json()).error).toMatch(/setup key has not changed/);
+  expect(result.headers.getSetCookie().some(c=>/Max-Age=0/.test(c))).toBe(false);expect(f).toHaveBeenCalledTimes(6);
+});
