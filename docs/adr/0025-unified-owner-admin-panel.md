@@ -1,8 +1,8 @@
 # ADR-0025: One online owner-only admin panel, separate from visitor storage
 
-- Status: **Accepted — owner decisions 28 September 2026**: the production
-  database (option A) and the R2 plan. Accepted means the decision is settled.
-  Nothing has been built, bought, created, configured or deployed
+- Status: **Accepted and deployed, 28 September 2026.** Owner decisions: the
+  production database (option A) and the R2 plan. Merged as `97ecb23` (#108)
+  and live on `https://ojfr.me/manage`; see Verification
 - Date: 2026-09-28
 - Owner: OJ Florendo
 - Risk: **R2** for this record and the code change it describes (architecture,
@@ -156,8 +156,45 @@ with axe audits at 1280 and 390 pixels in both themes. Route-handler tests stand
 in for "e2e" in criterion 3, because a production-mode Vercel environment cannot
 be reproduced locally; the deployed smoke test covers it for real.
 
-**Deployment: empty until performed.** Required: unit tests for both gates across every
-switch combination; e2e tests that the admin switch leaves visitor storage
-denied; a deployed smoke test of sign-in, MFA, sign-out and revocation from a
-second device; the CAPTCHA positive and negative checks on production; the
-security advisors clean on the production project; and the full quality gate.
+**Deployment, 28 September 2026.** Every R3 step was confirmed by the owner
+immediately before it was done.
+
+- **Project:** `ev-management-production` (`ksgrzepzowgisprcxpwv`), Micro,
+  `eu-west-1`, PostgreSQL 17.6.1.166, created 14:31 UTC. Default privileges were
+  compared with staging before any migration and matched exactly.
+- **Migrations:** the ten reviewed versions, applied with `supabase db push`
+  after a dry run. Fingerprints of tables and RLS, policies, table grants,
+  column grants and event triggers match staging exactly. The 23 functions match
+  once carriage returns are ignored: this worktree had migrations 003, 004, 007
+  and 008 checked out with CRLF endings, so eight production functions carry
+  carriage-return characters in their source (staging has them for 003 and
+  004). Behaviour is unaffected, and the backup reader checks only the version list.
+- **Auth:** sign-ups, anonymous sign-ins and manual linking off; site URL
+  `https://ojfr.me`; leaked-password protection, secure password change and
+  current-password-on-update on; minimum length 14 with all four character
+  classes. One user, one owner row, one verified TOTP factor.
+- **CAPTCHA:** a dedicated Turnstile widget for `ojfr.me`; enforcement proven by
+  a no-token password request refused with `captcha_failed`.
+- **Vercel:** five Production-only variables; `EV_CONVERSATION_STORAGE` and any
+  secret key absent.
+- **Enrolment defect found and fixed** (`bbab610`): a rejected TOTP code signed
+  the owner out and discarded the setup key, so every retry enrolled a new
+  factor; a password Auth refused left the setup lock in place. Both now keep
+  the owner on the step with a plain message. Covered by tests.
+- **Release:** `verify` green on `bbab610`; `approved-to-deploy` applied on the
+  owner's instruction and recorded on the pull request; merged pinned to that
+  head as `97ecb23`; Vercel deployment `dpl_BrguodXNEzrY9vJXyXpUGMGZ8DGT` READY.
+- **Smoke test, automated:** `/manage` 307 to `/manage/live` 200; owner API
+  `signed_out` with CAPTCHA required; gaps and reports 401; the RAG view returns
+  no data signed out; `/api/conversations` and `/api/conversation-session` 404;
+  sample API 404; the `vercel.app` alias 404; `www` 308 to the apex;
+  `private, no-store` and `noindex`; writes with no or a foreign `Origin` 403;
+  production bootstrap 404.
+- **Smoke test, owner's iPhone:** password sign-in with CAPTCHA at 17:24:47 UTC
+  and TOTP verification at 17:25:08, both in the production project's Auth log
+  (staging logged no Auth request after 17:00); both sections shown; RAG
+  configuration loaded; Blog "Not running"; sign-out (`/logout` 204 at
+  17:26:32) returned the page to sign-in.
+- **Security advisors:** the same intentional findings as staging (eight
+  deny-all private tables, seven owner-checked definer functions) and no
+  leaked-password finding.

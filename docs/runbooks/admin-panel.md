@@ -1,6 +1,6 @@
 # Owner admin panel runbook
 
-Status: phase 19a code, not deployed. Decision:
+Status: **deployed 28 September 2026** (`97ecb23`). Decision:
 [ADR-0025](../adr/0025-unified-owner-admin-panel.md). Plan:
 [package 19](../roadmaps/admin-panel-package-19.md). Threats:
 [admin panel threat model](../threat-models/admin-panel.md).
@@ -39,9 +39,12 @@ contact form (ADR-0005); the sign-in CAPTCHA uses its own widget and
    [the staging migration runbook](ev-staging-migrations.md). Then verify each
    object in the catalogs, not only the version rows, and run the security
    advisors.
-3. **Configure Auth**: anonymous sign-ins off; public sign-ups off; site URL set
-   to the production origin; leaked-password protection on. Do **not** enable
-   CAPTCHA yet, because password bootstrap is closed while it is armed.
+3. **Configure Auth**: anonymous sign-ins and public sign-ups off; site URL set
+   to the production origin. In the **Email** provider panel (where Supabase now
+   keeps them): leaked-password protection, secure password change and
+   current-password-on-update on; minimum length 14; all four character classes
+   required. Do **not** enable CAPTCHA yet, because password bootstrap is closed
+   while it is armed.
 4. **Provision the owner.** In the Supabase dashboard, create the owner's user
    by email. As the database operator, insert that user's ID into
    `ev_private.owners`. No form can grant this role.
@@ -52,9 +55,16 @@ contact form (ADR-0005); the sign-in CAPTCHA uses its own widget and
    `EV_AUTH_TURNSTILE_SITE_KEY`. Arm `.ev-preview/owner-setup.json` as the
    [E.V management runbook](ev-management.md#owner-staging-preview) describes.
    Run `npm run preview:management`, open `http://127.0.0.1:3215/manage/live`,
-   choose the password, and enrol the authenticator (name the account
-   **E.V Management**). The setup file is consumed on success. Then remove
-   the secret key from the local file.
+   choose the password, and enrol the authenticator. Give the phone entry a
+   **name you have never used**, because a phone that also holds staging's
+   "E.V Management" entry produces codes production rejects. The setup file is
+   consumed on success. Then delete the local environment file.
+   - **Password:** Chrome's suggested passwords can lack a symbol and are then
+     refused (`weak_password`). Check the saved password has all four classes
+     before submitting.
+   - **Code rejected:** the page keeps the same setup key (since `bbab610`).
+     Wait for the next code; if two fresh codes fail, re-add the key on the
+     phone. It uses only A–Z and 2–7.
 6. **Arm CAPTCHA**: create the Turnstile widget for the exact production
    hostname, put its secret only in Supabase Auth's CAPTCHA setting, and enable
    enforcement. See [the CAPTCHA qualification](../reviews/ev-auth-captcha-qualification.md#activation-and-recovery-sequence).
