@@ -25,8 +25,16 @@ still read, for the loopback preview.
 
 ## Enable, in order
 
+**Checked read-only on 28 September 2026:** the Supabase organization holds one
+project, `ev-management-staging`, in `eu-west-1`. The Vercel project
+`ojflorendo-portfolio` has no `EV_*` or `SUPABASE_*` variable in any
+environment, so nothing can open the panel early. Its existing
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` belong to the
+contact form (ADR-0005); the sign-in CAPTCHA uses its own widget and
+`EV_AUTH_TURNSTILE_SITE_KEY`.
+
 1. **Create the production project** in the `Project Zero` organization: Micro
-   compute, same region as staging. About US$10/month (ADR-0025).
+   compute, same region as staging (`eu-west-1`). About US$10/month (ADR-0025).
 2. **Apply the ten reviewed migrations** with the Supabase CLI, following
    [the staging migration runbook](ev-staging-migrations.md). Then verify each
    object in the catalogs, not only the version rows, and run the security
