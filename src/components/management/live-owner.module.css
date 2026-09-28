@@ -38,3 +38,26 @@
 .form a { text-decoration:underline; text-underline-offset:3px; }
 .authenticatorSteps { padding-left:24px; }
 .authenticatorSteps li { margin:14px 0; line-height:1.65; }
+
+/* Package 19a: one owner admin panel with E.V and Blog sections (ADR-0025). */
+.sectionNav { display:flex; gap:8px; flex-wrap:wrap; margin:24px 0 8px; border-bottom:1px solid var(--m-line); }
+.sectionNav button { min-height:44px; padding:10px 18px; border-bottom:3px solid transparent; font-weight:600; }
+.sectionNav button[aria-current="true"] { border-bottom-color:currentColor; }
+.sectionStack { display:grid; gap:24px; margin-top:24px; }
+.panel { padding:24px; }
+.panel h2 { font-size:20px; margin:0 0 8px; }
+.panel ul { padding-left:24px; }
+.panel li { margin:10px 0; line-height:1.6; }
+.panelHeading { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.muted { color:var(--m-muted); }
+.stages { list-style:none; padding:0; margin:16px 0 0; }
+.stages li { border-top:1px solid var(--m-line); padding:14px 0; margin:0; }
+.stages li > div { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.stages li p { margin:8px 0 0; }
+.stageTags { display:inline-flex; gap:8px; }
+.twoPanels { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; }
+.definitions > div { border-top:1px solid var(--m-line); padding:12px 0; }
+.definitions dt { font-weight:650; }
+.definitions dd { margin:6px 0 0; line-height:1.6; }
+.ragSection { margin-top:32px; }
+@media(max-width:700px){ .twoPanels{grid-template-columns:minmax(0,1fr);} .panel{padding:20px 16px;} }

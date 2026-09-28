@@ -1,4 +1,4 @@
-import { storageRequestAllowed, storageWriteAllowed } from "@/lib/management/access";
+import { visitorStorageRequestAllowed, visitorStorageWriteAllowed } from "@/lib/management/access";
 import { ConversationStorageError, createGuestConversationRepository, isConversationId } from "@/lib/management/conversation-repository";
 import { GUEST_ACCESS_COOKIE, readGuestCookie } from "@/lib/management/guest-session";
 import { BoundedJsonError, readBoundedJson } from "@/lib/management/bounded-json";
@@ -6,7 +6,7 @@ export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const headers={"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow"};
 function json(value:unknown,status=200) { return Response.json(value,{status,headers}); }
-function enabled(request:Request) { return storageRequestAllowed(request); }
+function enabled(request:Request) { return visitorStorageRequestAllowed(request); }
 async function repository(request:Request) {
   const token=request.headers.get("authorization")?.match(/^Bearer ([a-zA-Z0-9._-]{1,16000})$/)?.[1] ?? readGuestCookie(request,GUEST_ACCESS_COOKIE);
   if(!token) throw new ConversationStorageError("unauthorized");
@@ -25,7 +25,7 @@ export async function GET(request:Request) {
 }
 export async function POST(request:Request) {
   if(!enabled(request)) return json({error:"Not found"},404);
-  if(!storageWriteAllowed(request)) return json({error:"Same-origin JSON request required"},403);
+  if(!visitorStorageWriteAllowed(request)) return json({error:"Same-origin JSON request required"},403);
   try {
     const value=await readBoundedJson(request,100000,AbortSignal.any([request.signal,AbortSignal.timeout(2000)]));
     if(!value||typeof value!=="object"||Array.isArray(value)) return json({error:"Invalid conversation action"},400);

@@ -1,4 +1,4 @@
-import {storageRequestAllowed,storageWriteAllowed} from "@/lib/management/access";
+import {adminRequestAllowed,adminWriteAllowed} from "@/lib/management/access";
 import {ownerAuth,ownerCookieHeaders,type OwnerSession} from "@/lib/management/owner-session";
 import {ConversationStorageError} from "@/lib/management/conversation-repository";
 import {readBoundedJson,BoundedJsonError} from "@/lib/management/bounded-json";
@@ -6,7 +6,7 @@ import {createRateLimiter} from "@/lib/rate-limit";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const writes=createRateLimiter({limit:20,windowMs:60000});
-function enabled(r:Request){return storageRequestAllowed(r);}
+function enabled(r:Request){return adminRequestAllowed(r);}
 function reply(r:Request,data:unknown,status=200,session?:OwnerSession){
  const res=Response.json(data,{status,headers:{"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow",Vary:"Cookie"}});
  if(session)for(const c of ownerCookieHeaders(session,new URL(r.url).protocol==="https:"))res.headers.append("Set-Cookie",c);return res;
@@ -23,7 +23,7 @@ export async function GET(r:Request){
 }
 export async function POST(r:Request){
  if(!enabled(r))return reply(r,{error:"Not found"},404);
- if(!storageWriteAllowed(r))return reply(r,{error:"Same-origin JSON required"},403);
+ if(!adminWriteAllowed(r))return reply(r,{error:"Same-origin JSON required"},403);
  let session:OwnerSession|undefined;
  try{
   const input=await readBoundedJson(r,8192,AbortSignal.any([r.signal,AbortSignal.timeout(2000)]));

@@ -1,14 +1,17 @@
 import { ownerCaptchaConfiguration, validAuthCaptchaToken } from "@/lib/management/auth-captcha";
-import { previewAllowed, storageRequestAllowed, storageWriteAllowed } from "@/lib/management/access";
+import { previewAllowed, adminRequestAllowed, adminWriteAllowed } from "@/lib/management/access";
 import { ownerAuth, ownerCookies, ownerCookieHeaders, type OwnerSession } from "@/lib/management/owner-session";
 import { ConversationStorageError } from "@/lib/management/conversation-repository";
 import { readBoundedJson, BoundedJsonError } from "@/lib/management/bounded-json";
 import { ownerSetup, initializeOwner } from "@/lib/management/owner-bootstrap";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { ragSnapshot } from "@/lib/management/rag-snapshot";
+import corpus from "@/data/management-corpus.generated.json";
+import type { CorpusSnapshot } from "@/lib/management/types";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const attempts=createRateLimiter({limit:8,windowMs:60000});
-function enabled(r:Request){return storageRequestAllowed(r);}
+function enabled(r:Request){return adminRequestAllowed(r);}
 function reply(r:Request,data:unknown,status=200,session?:OwnerSession|null){
   const body=data&&typeof data==="object"&&("error" in data||("status" in data&&["signed_out","setup_required"].includes(String(data.status))))?{...data,authCaptcha:ownerCaptchaConfiguration()}:data;
   const res=Response.json(body,{status,headers:{"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow",Vary:"Cookie"}});
@@ -26,13 +29,14 @@ export async function GET(r:Request){
   if(!ownerCookies(r).access&&!ownerCookies(r).refresh){const setup=previewAllowed(r.headers.get("host"))?await ownerSetup():null;return reply(r,setup?{status:"setup_required",email:setup.email}:{status:"signed_out"});}
   try{
     const auth=service(r),current=await auth.existing(r);
+    if(params.get("view")==="rag"){if(!current.state.assured)throw new ConversationStorageError("unauthorized");return reply(r,{rag:ragSnapshot(corpus as CorpusSnapshot)},200,current.session);}
     const data=params.has("conversation")?{messages:await auth.messages(current.token,params.get("conversation")!)}:params.get("view")==="conversations"?await auth.conversations(current.token,params.get("after")??undefined):{status:current.state.assured?"ready":"mfa_required",factorId:current.state.factorId};
     return reply(r,data,200,current.session);
   }catch(error){return failure(r,error);}
 }
 export async function POST(r:Request){
   if(!enabled(r))return reply(r,{error:"Not found"},404);
-  if(!storageWriteAllowed(r))return reply(r,{error:"Same-origin JSON required"},403);
+  if(!adminWriteAllowed(r))return reply(r,{error:"Same-origin JSON required"},403);
   try{
     const data=await readBoundedJson(r,4096,AbortSignal.any([r.signal,AbortSignal.timeout(2000)]));
     if(!data||typeof data!=="object"||!("action"in data))return reply(r,{error:"Invalid owner action"},400);

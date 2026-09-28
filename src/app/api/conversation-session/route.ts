@@ -1,5 +1,5 @@
 import { authCaptchaSiteKey, validAuthCaptchaToken } from "@/lib/management/auth-captcha";
-import { storageRequestAllowed, storageWriteAllowed } from "@/lib/management/access";
+import { visitorStorageRequestAllowed, visitorStorageWriteAllowed } from "@/lib/management/access";
 import { ConversationStorageError } from "@/lib/management/conversation-repository";
 import { BoundedJsonError, readBoundedJson } from "@/lib/management/bounded-json";
 import { GUEST_ACCESS_COOKIE, GUEST_REFRESH_COOKIE, GUEST_CONSENT_VERSION, guestAuth, guestCookieHeaders, readGuestCookie } from "@/lib/management/guest-session";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // Courtesy limit only. Managed Auth's signup protection remains required for public activation.
 const connections = createRateLimiter({ limit: 4, windowMs: 60000 });
 const headers = { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow", Vary: "Cookie" };
-function enabled(request: Request) { return storageRequestAllowed(request); }
+function enabled(request: Request) { return visitorStorageRequestAllowed(request); }
 function response(value: unknown, request: Request, status = 200, session?: Session | null) {
   const body = value && typeof value === "object" && "status" in value && value.status === "disconnected" ? { ...value, captchaSiteKey: authCaptchaSiteKey() } : value;
   const result = Response.json(body, { status, headers });
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   if (!enabled(request)) return response({ error: "Not found" }, request, 404);
-  if (!storageWriteAllowed(request)) return response({ error: "Same-origin JSON request required" }, request, 403);
+  if (!visitorStorageWriteAllowed(request)) return response({ error: "Same-origin JSON request required" }, request, 403);
   const signal = AbortSignal.any([request.signal, AbortSignal.timeout(5000)]);
   try {
     const data = await readBoundedJson(request, 4096, signal);

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { ManagementWorkspace } from "@/components/management/ManagementWorkspace";
-import { previewAllowed, storageAllowed } from "@/lib/management/access";
+import { previewAllowed, adminAllowed } from "@/lib/management/access";
 import corpus from "@/data/management-corpus.generated.json";
 import { LocalWorkspaceStore } from "@/lib/management/local-store";
 import type { WorkspaceState, CorpusSnapshot } from "@/lib/management/types";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 export default async function ManagementPage() {
   const host=(await headers()).get("host");
-  if(!previewAllowed(host)&&storageAllowed(host))redirect("/manage/live");
+  if(!previewAllowed(host)&&adminAllowed(host))redirect("/manage/live");
   if (!previewAllowed(host)) notFound();
   let initialStore: WorkspaceState | null = null;
   let initialError = "";
