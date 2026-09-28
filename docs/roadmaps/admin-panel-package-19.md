@@ -1,8 +1,8 @@
 # Package 19 plan: one online owner-only admin panel
 
-- Status: **R2 plan approved by the owner, 28 September 2026.** No code has
-  been written. Each R3 step below still needs its own confirmation immediately
-  before it is done
+- Status: **19a executed and deployed, 28 September 2026** (`97ecb23`). Evidence:
+  [ADR-0025 Verification](../adr/0025-unified-owner-admin-panel.md#verification).
+  19b and 19c are not started
 - Owner: OJ Florendo
 - Deadline: Wednesday 30 September 2026 (instructor-set)
 - Decision record: [ADR-0025](../adr/0025-unified-owner-admin-panel.md), accepted.

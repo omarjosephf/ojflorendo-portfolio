@@ -1,6 +1,6 @@
 # Owner admin panel threat model
 
-Status: phase 19a code, not deployed. Supplements
+Status: deployed 28 September 2026 (`97ecb23`). Supplements
 [ADR-0025](../adr/0025-unified-owner-admin-panel.md) and the
 [E.V management threat model](ev-management.md), whose controls all still apply.
 What is new is a sign-in page on the public production origin, a separate
@@ -18,6 +18,7 @@ production Supabase project, and a Blog section.
 | Production project | Test accounts or synthetic data reach production | A separate project with one account (the owner), anonymous sign-ins off, and migrations checked object by object |
 | Owner enrollment | Bootstrap is exposed online | Password bootstrap runs only on loopback in development and needs an ignored, expiring local setup file. It is closed whenever CAPTCHA is armed. The production owner route returns 404 for `initialize` |
 | Wrong configuration | Vercel points at staging, or at no project | The smoke test confirms the sign-in lands in the production project's Auth logs; a missing origin or switch closes every route |
+| Enrolment retries | A rejected code or password forces a restart that can never succeed | Fixed in `bbab610`: a rejected TOTP code keeps the same factor and setup key on screen; a password Auth refuses outright releases the setup lock. Uncertain failures still keep the lock |
 | Lockout | CAPTCHA or MFA leaves the owner unable to sign in | Enrol before arming CAPTCHA; keep the dashboard recovery path; rollback is unsetting `EV_ADMIN_MODE`. MFA is never silently removed |
 
 ## Residual risks, accepted for 19a
