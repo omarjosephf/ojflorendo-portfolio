@@ -1,8 +1,127 @@
 # Current state
 
-Updated 19 September 2026. This file is what a fresh session should read first.
+Updated 28 September 2026. This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
+
+## Roadmap
+
+**This is the only place project status and order are written.** Other
+documents link here and do not restate either. Checked on 28 September 2026
+against `origin/main` at `1e6417c` and the live systems listed under
+[how the roadmap was checked](#how-the-roadmap-was-checked). When a row stops
+matching reality, correct the row and its "Checked" cell.
+
+### Now
+
+- **Current phase: 0.1**, this roadmap, landed together with the re-checked
+  [owner-action inventory](owner-actions.md). Done when that pull request is
+  merged.
+- **Next phase: 13a**, owner sitting one. Free, about thirty minutes, blocked
+  by nothing.
+- **The only date gate is 1 October 2026 UTC**, and it applies to phase 15a
+  alone.
+- **Instructor deadline: Wednesday 30 September 2026**, for package 18 and for
+  a new SaaS tool project the instructor set to start on 28 September. Neither
+  deliverable is recorded here yet, so the order below has not been changed for
+  them. The SaaS project has no row until its scope is known.
+- **One phase at a time, in the order below.** A Ready phase that is not first
+  waits its turn. A date gate fixes when a phase may start; it is not
+  permission to run two phases at once.
+
+### How to read the table
+
+**Status words, and only these.** **Done** means merged to `main` or verified
+live, never "complete locally". **Active** is the one phase in progress.
+**Ready** means nothing blocks it but its turn. **Blocked** names the blocker.
+**Not started**, **Deferred** (by decision, with what would reopen it) and
+**Dropped** complete the set.
+
+**Item numbers** ("items 1–3") identify entries in
+[the owner-action inventory](owner-actions.md), which says *how* to do each
+owner step: tier, reversibility, cost and procedure. They are identifiers, not
+an order; the order is this table. **Package numbers** are those of
+[the 18-package tracker](../roadmaps/ev-management-progress.md), which keeps
+each package's acceptance evidence; its status column stopped being maintained
+on 28 September 2026. **Tracks** are handbook §48's. **R-tiers** are
+handbook §11's.
+
+### Phase sequence
+
+| Order | Phase | Delivers | Track / package | Status | Done when | Checked |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | **0.1** Master roadmap | This section; the owner-action inventory re-checked and on `main` | Governance | **Active** | The pull request carrying both is merged | 28 Sep, repository |
+| 2 | **13a** Owner sitting one | Items 1–3: deployed backend event call, assistant smoke check, contact delivery smoke check; plus a read of Vercel's Spend Management setting, unchecked since the team moved to Pro | C / 13 and 16 | Ready | All three results and the Spend Management setting recorded in the inventory | 28 Sep: Fly `/health` ok, corpus `7bddb04dedc7`, `answers_remaining_today` 10; production on `1e6417c` |
+| 3 | **13d** Managed recovery rehearsal | Item 6: clone, lock down, measure, delete, all in one working session; plus, in the same dashboard, turning on leaked-password protection (Pro only) and confirming the Spend Cap is on and Point-in-Time Recovery off | C / 13 | Ready. **Moved before the captures by owner decision on 28 September**, because Supabase Pro is now being paid for | ADR-0022 and ADR-0023 Verification blocks complete; the organization lists one project again; the leaked-password advisor finding is gone | 28 Sep: organization plan `pro`; one project; six extensions installed, `pg_cron` the only external-operation one |
+| 4 | **15-prep** Capture preparation | Restage `deploy/oj-assistant` from the pin, run the pin gate, diff the staged corpus and system prompt against the pinned revision, and re-check the capture script's paths after the 28 September folder move | C / 15 | Ready. Must finish before phase 5, and needs no owner | Every check passes and is recorded | Not yet checked |
+| 5 | **15a** Answer captures | Items 7 then 8, one October sitting, never the same session as phase 3 | C / 15 | **Blocked by date: 1 October 2026 UTC** | Both captures complete and the release manifest validates | 28 Sep: `allowance-225` reads 225 attempts with 0 reservations; service ledger holds 36 reservations, all September; `integrity_check` ok on all three ledgers |
+| 6 | **15b** Independent labelling | Item 9 | C / 15 | Blocked by phase 5. Recruiting labellers can start now | Labels scored with `review --review` | — |
+| 7 | **13b** CAPTCHA enforcement | Item 4 | C / 13 | Ready | Enforcement on, and owner sign-in confirmed working afterwards | — |
+| 8 | **13c** Off-site encrypted backups | Item 5 | C / 13 | Ready. The `ev-backups` GitHub environment does not exist yet, and the R2 bucket is unconfirmed | Synthetic backup verified, then `EV_BACKUP_ENABLED=true` | 28 Sep: no repository variables; environments `Preview` and `Production` only; last three scheduled runs `skipped`; the Cloudflare connector lists zero R2 buckets, from an account not confirmed to be the right one |
+| 9 | **16** Public release | Items 10–12 | C / 16 | Blocked by phases 2–8 | `release-approval` passed on the release pull request and one smoke pass covers everything | — |
+| 10 | **0.2** Workspace fold-in | The archived workspace documents folded into the repository or discarded; the history below moved out of this file so it is short again | Governance | Not started. Agreed on 16 September to wait until both captures are saved | Nothing outside Git can be mistaken for current state | — |
+| 11 | **18.3** Blog provider bake-off | A plan for the two design defects found on 27 September, then the paid comparison | D / 18 | Blocked: the R2 plan awaits owner approval, then a fresh R3 decision. **Instructor deadline: Wednesday 30 September 2026.** Whether it moves ahead of phase 13a is not yet decided; see Now | The comparison has run and its result is recorded | 28 Sep: Phase 18.1's commit `44313f8` exists only locally and is on no GitHub branch; Phases 18.2 and 18.3 are uncommitted in the blog worktree |
+| 12 | **18.4–18.5** Blog calibration and publication | — | D / 18 | Not started | — | — |
+
+### Done
+
+- **Supabase Pro and Vercel Pro bought**, by 28 September 2026. Supabase's
+  `Project Zero` organization reads plan `pro`. Vercel's single team, "OJ's
+  personal projects", which holds both Vercel projects, shows Pro and Active on
+  the owner's billing page; the connector does not expose the plan field.
+  Vercel Pro also settles the non-commercial restriction on Hobby that
+  [the hosting review](../reviews/ev-hosting-and-cost-review.md) recorded.
+- **Package 17** merged as `f849648` on 19 September. Production has served
+  `1e6417c`, the record of that merge, since 02:20:32 UTC that day.
+- **E.V** deployed and verified on 13 September; **the portfolio** released on
+  10 September.
+- **Packages 1–12** and **owner-gated Actions 1–6**: see the tracker and
+  [the table below](#owner-gated-actions-6-of-9-complete).
+
+### Parked, deferred or declined
+
+- **Package 14**, single-host consolidation: deferred by decision. It reopens
+  only if hosting both Python workloads together becomes wanted. Its probe,
+  the Vercel project `ev-cited-runtime-probe-20260909`, still exists; keeping
+  or deleting it is an owner decision, and deleting it is R3. **Vercel Pro
+  removes one of its blockers, not all of them**: the
+  [Python hosting probe](../reviews/ev-python-hosting-probe.md) listed Hobby's
+  non-commercial restriction among them, and that is gone, but full application
+  startup, durable transactional admission, generation and fallback latency,
+  storage integration, operational recovery and the release gate remain. Moving
+  E.V off Fly before phase 15a would also break the pinned corpus the captures
+  check.
+- **Further embedding comparison** (package 15): deferred.
+- **Dependabot pull request #106**: unscheduled. It is a dependency change,
+  so R2, and touches no file the captures pin.
+- **Obsidian**: declined for now; reconsidered at phase 0.2. **Jev**: watched,
+  not adopted. Both are recorded in the inventory.
+- **ADR-0007's cost-table arithmetic**: an owner decision, recorded in the
+  inventory.
+- **Tracks E (newsletter) and G (CMS)**: not started, as handbook §48 intends.
+
+### Outside this repository
+
+- **`omarjosephf/cited`**, the E.V back end. It has no roadmap of its own; its
+  work is phases 15-prep and 15a above.
+- **Verifier**, the owner's first agent project. Deliberately outside Project
+  Zero and not tracked here.
+- **The archived workspace documents**, outside Git until phase 0.2.
+
+### How the roadmap was checked
+
+On 28 September 2026, from a session on the owner's machine, all read-only:
+`git fetch` (`origin/main` at `1e6417c`; one open pull request, #106); the
+production paths (apex 200, `www` 308, `/manage`, `/manage/live`,
+`/api/management/owner` and `/api/conversations` all 404); GitHub's Deployments
+API (production `1e6417c`, deployment `6536105171`); Vercel through its
+connector (team, both projects, production deployment `READY` on `1e6417c`); Fly
+`/health`; Supabase through its connector (plan, project list, all ten
+migrations, installed extensions, security advisors unchanged from 19
+September); GitHub repository variables, environments and backup workflow runs;
+Cloudflare R2 through its connector; and the three ledger files, opened
+read-only. What each check found is in the inventory's
+[28 September verification log](owner-actions.md#verification-log-28-september-2026).
 
 ## Why this file exists
 
@@ -80,9 +199,22 @@ prices await an owner decision.
 | 4 | Decide the remaining retrieval miss | Done — fixed 12 Sep, live since the 13 Sep deploy; passes at rank 4 of 4 |
 | 5 | Approve and provision the Fly volume | Done — `vol_r1j28g1m15o9j3pr`, ledger initialised 12 Sep |
 | 6 | Verify the per-attempt price bound | Done — measured 12 Sep, $0.0024 against $0.04 |
-| 7 | Approve funded answer captures | **Step 5 ran on 15 Sep and failed at question 37 of 75.** Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. **The replacement allowance ledger was created on 17 Sep** as `allowance-225.sqlite3`, ceiling `10440000` carrying `1440000`, 0 reservations, `integrity_check` `ok`, reading **225 attempts**; the retired `allowance.sqlite3` is kept unspent-from at 114 under runbook item 5. The **service** ledger still holds its 36 September reservations and reads 114 until the month turns. So the remaining blocker is the calendar: **the earliest capture is 1 Oct 2026 UTC**. **No complete capture exists.** |
-| 8 | Managed qualification | **Checked against the code 17 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` ran here on 17 Sep, 46 isolated checks passed, with a recovery contract and evidence review behind it. "Recovery" is two things: application-data recovery is those 46 checks; **managed Supabase recovery and off-site backups are not started** (package 13). **CAPTCHA is code-complete, wired into the owner sign-in and locally qualified**; what remains is a Turnstile site key in `EV_AUTH_TURNSTILE_SITE_KEY` and the enforcement setting inside Supabase Auth — console actions, not code. **Package 15 is blocked on Action 7's answer captures** and on independent human labels. **Re-checked 17 Sep against the live staging database**, which had never been done: all ten migrations are applied and their objects exist, so package 13's *event staging* is complete and only the deployed backend call, managed recovery and CAPTCHA remain on it. |
-| 9 | Final publication approval and smoke checks | Open, but advanced on 17 Sep. **The smoke-check runbook now exists** — [`docs/runbooks/deployment.md`](../runbooks/deployment.md), the file handbook §38 required and §34 assumed, absent until now. Its free read-only checks were executed against `https://ojfr.me` the same day, so **the production denial is verified against the live deployment** for the first time: `/manage`, `/manage/live`, `/api/management/owner` and `/api/conversations` all return 404 on the real Vercel instance, not merely on a local build. **The free checks have now run three times**, the second after a deployment and the third over a genuinely changed build, passing identically each time — so the denial holds across a deploy and across a dependency upgrade, not merely at one moment. **The browser checks were run for the first time on 17 Sep, and all four items now pass**: navigation and interactions, console and network errors, responsive, and `prefers-reduced-motion` — the last run with Playwright against production, with a no-preference control proving the preference takes effect rather than the page having nothing to animate. **The deployed SHA is no longer outstanding.** A fourth free run on 17 Sep, after #94 merged as `4231867`, is the first to name the deployment it tested: GitHub's Deployments API records that commit's production deployment as `success`, and the checks ran after it. §34 step 6 is answered, and it needed no Vercel console. What remains: contact delivery, the assistant check — both owner-operated, both with side effects — and the owner's publication approval. **None of this is a release smoke pass**, and no single run has covered everything: the browser items straddle the `4231867` deploy, three before it and one after. |
+| 7 | Approve funded answer captures | **Open, and blocked only by the calendar.** The single remaining blocker is that the service ledger counts reservations by calendar month, so **the earliest capture is 1 Oct 2026 UTC**. Every code blocker is closed and merged, the seventh (`omarjosephf/cited#18`, a refused `os.replace`) as `360e8fa`, CI green. Step 5 ran on 15 Sep and failed at question 37 of 75, spending 36 of the then-150 allowance; **no complete capture exists**. The replacement allowance ledger `allowance-225.sqlite3` was created 17 Sep and re-read on 19 Sep: ceiling `10440000`, carried `1440000`, 0 reservations, **225 attempts**. The retired `allowance.sqlite3` is kept unspent-from at 114. **Status and order are in [the roadmap](#roadmap); cost and the October procedure are in [the owner-action inventory](owner-actions.md#7-portfolio-answer-capture)**. The sections below this table are the history and the procedure, not the status. |
+| 8 | Managed qualification | **Open. Checked against the code and the live staging database 17 Sep, and re-checked 19 Sep.** Packages 1–12 of [the 16-package tracker](../roadmaps/ev-management-progress.md) are complete; 13–16 are not. **Restore is done, not outstanding** — `test:management:restore` passes 46 isolated checks. All ten staging migrations are applied and their objects exist, so package 13's *event staging* is complete. **Package 14 is deferred by decision and needs no owner action.** What remains is four console items and package 15, ordered in [the roadmap](#roadmap), each with its tier, cost and dependencies in **[the owner-action inventory](owner-actions.md#the-inventory)**. |
+| 9 | Final publication approval and smoke checks | **Open, and advanced.** [`docs/runbooks/deployment.md`](../runbooks/deployment.md) exists and its free read-only checks pass consistently. **Its evidence log records four runs, all 17 Sep, and is behind reality**: further free passes were executed on 19 Sep against both `f849648` and `1e6417c`, by more than one session, and none is written up. The denial was re-verified here against `1e6417c` (deployment `6536105171`, `success` 02:20:32Z) — all four paths 404, apex 200, www 308. Treat the log as the record and the count as unknown until it is brought up to date. All four browser items passed on 17 Sep but across two runs, not one — `prefers-reduced-motion` was run separately, later the same day, with a no-preference control — and deploys have landed since. **The deployed SHA is not outstanding**: Vercel writes every production deployment to GitHub's Deployments API, readable with `gh`, so §34 step 6 needs no Vercel console. **No response identifies the build** — `/_next/static/immutable/` carries no per-build identifier and `X-Vercel-Id` is a request trace — so exposing a fingerprint remains worth doing and remains R2. What remains is contact delivery, the assistant check, a single release smoke pass covering everything, and the owner's approval, ordered in [the roadmap](#roadmap) and described in **[the owner-action inventory](owner-actions.md#release)**. |
+
+**Rows 1–6 are this file's record; rows 7–9 are open.** Their status and order
+live in [the roadmap](#roadmap) at the top of this file, and nowhere else.
+[`owner-actions.md`](owner-actions.md) is the inventory of every remaining
+owner-gated action — the three open Actions here, plus the package 13–16 console
+work these nine numbered rows never covered — with each item's R-tier,
+reversibility, cost, dependencies and procedure. Deliberately one copy of each:
+this file records seven occasions when a value written in two places drifted
+apart. Status goes in the roadmap; how-to goes in the inventory.
+
+**The headline it carries: only one chain is blocked.** The 1 October 2026 UTC
+floor applies to the capture chain alone. Six owner actions depend on no date at
+all, and three of those cost nothing.
 
 **Rows 8 and 9 were both checked against the code on 17 September**, row 9 later
 the same day and against the live deployment as well as the tree. What this
@@ -952,14 +1084,16 @@ a real failure still fails. Treat the packet's section 6 as historical from here
   real where it was found, but on 12 September both browser suites ran clean
   here: 89 production and 46 management checks. Try them before assuming CI is
   the only route to browser evidence.
-- **Supabase is on the Free plan.** Leaked-password protection is Pro-only, so
-  that advisor finding cannot be closed and is not neglect. There is exactly one
-  account, so a strong unique password gives the same protection.
-  [ADR-0022](../adr/0022-supabase-pro-for-managed-recovery.md) accepts buying Pro
-  for managed recovery, but **the subscription has not been purchased** and its
-  trigger is the restore rehearsal, not a date. As with ADR-0020, **no repo field
-  carries the plan**: check the `Project Zero` organisation before assuming Pro
-  is in force. That ADR's Verification block is the record, and it is empty.
+- **Supabase is on the Pro plan, read as `pro` on 28 September 2026.** The
+  owner bought it ahead of the restore rehearsal that
+  [ADR-0022](../adr/0022-supabase-pro-for-managed-recovery.md) named as its
+  trigger, so the US$25/month runs whether or not the rehearsal happens. That is
+  why the rehearsal moved up [the roadmap](#roadmap). Leaked-password protection
+  can now be enabled, but it is a **separate Auth setting** the purchase did not
+  turn on; the advisor still reports it disabled. As with ADR-0020, **no repo
+  field carries the plan**: check the `Project Zero` organisation rather than
+  assuming. Spend Cap and Point-in-Time Recovery state were not readable through
+  the connector and still need reading in the dashboard.
   **The trigger is itself blocked, and not by money.** The rehearsal has to
   restore into an isolated destination, which ADR-0016, the encrypted backup
   qualification and the restore runbook all forbid being the staging project.

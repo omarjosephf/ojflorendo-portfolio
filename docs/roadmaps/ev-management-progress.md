@@ -16,6 +16,12 @@ staging project, the repository and the suites actually run on that date; the
 older checkpoint sections are retained as the record of what was true when they
 were written, not as current status.
 
+**Status now lives in [the roadmap](../state/CURRENT.md#roadmap).** From 28
+September 2026 the Status column below is no longer maintained, and neither is
+the checkpoint count under the table: both record what was true when last
+written. This file keeps each package's acceptance evidence. Record status and
+order in the roadmap, not here.
+
 | # | Work package | Status | Acceptance evidence |
 | --- | --- | --- | --- |
 | 1 | Roadmap, storage architecture and hosting cost research | Complete | Owner-approved roadmap and hosting review |
@@ -39,7 +45,7 @@ were written, not as current status.
 
 Current checkpoint: **13 complete locally/staging, 5 unfinished** (packages 13–16 and 18). This table will be updated from
 executed checks, not from the existence of a plan. Public release is not implied
-by a locally complete package. No subscriptions have been purchased. Packages 17
+by a locally complete package. No subscriptions had been purchased when this was written; Supabase Pro and Vercel Pro were bought by 28 September 2026. Packages 17
 and 18 are instructor-set coursework and are not release gates: public release
 remains defined by packages 13–16 alone.
 
