@@ -26,6 +26,8 @@ export async function initializeOwner(config:StorageConfig,serviceKey:string,pas
   // After dispatch, uncertainty leaves the lock in place. Never reset another
   // password automatically. The owner can try normal sign-in with their password.
   const res=await fetcher(`${new URL(config.projectUrl).origin}/auth/v1/admin/users/${setup.userId}`,{method:"PUT",headers:{apikey:serviceKey,Authorization:`Bearer ${serviceKey}`,"Content-Type":"application/json"},body:JSON.stringify({password}),cache:"no-store",redirect:"error",signal});
+  // 422 is Auth refusing the password itself (for example weak_password): nothing changed, so a retry is safe.
+  if(res.status===422){await rmdir(lock);throw new ConversationStorageError("invalid");}
   if(!res.ok)throw new ConversationStorageError("unavailable");
   const data=await readBoundedJson(res,200000,signal);
   if(!data||typeof data!=="object"||!("id"in data)||data.id!==setup.userId)throw new ConversationStorageError("unavailable");

@@ -1,5 +1,5 @@
 import { Activity, CheckCircle2, Coins, FileText, Layers, Ruler, ShieldCheck, TriangleAlert } from "lucide-react";
-import type { CorpusSnapshot } from "@/lib/management/types";
+import type { RagSnapshot } from "@/lib/management/rag-snapshot";
 import { answersAdmittedPerMonth, costIsStale, ragCostInputs, type RagCostInputs } from "@/lib/management/rag-cost";
 import { Metric, Tag } from "./shared";
 import styles from "./management.module.css";
@@ -8,7 +8,7 @@ const usd = (value: number, digits = 4) => new Intl.NumberFormat("en-US", { styl
 const day = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(value));
 const stamp = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }).format(new Date(value));
 
-export function RagConfiguration({ corpus, cost = ragCostInputs }: { corpus: CorpusSnapshot; cost?: RagCostInputs }) {
+export function RagConfiguration({ corpus, cost = ragCostInputs }: { corpus: RagSnapshot; cost?: RagCostInputs }) {
   const tokens = corpus.chunks.map((c) => c.tokens);
   const largest = Math.max(...tokens);
   const mean = Math.round(tokens.reduce((sum, t) => sum + t, 0) / tokens.length);

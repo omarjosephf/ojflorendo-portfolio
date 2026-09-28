@@ -57,6 +57,11 @@ describe("owner managed session and live reads",()=>{
     const f=mock(user,{owner:true,assured:false},{id},session,user,{owner:true,assured:false});
     await expect(ownerAuth(config,AbortSignal.timeout(5000),f).verify("token",factor,"123456")).rejects.toMatchObject({kind:"unauthorized"});
   });
+  it("reports a rejected authenticator code as invalid input so the pending setup key survives",async()=>{
+    const reject=(status:number)=>vi.fn().mockResolvedValueOnce(Response.json(user)).mockResolvedValueOnce(Response.json({owner:true,assured:false})).mockResolvedValueOnce(Response.json({id})).mockResolvedValueOnce(Response.json({error_code:"mfa_verification_failed"},{status}));
+    await expect(ownerAuth(config,AbortSignal.timeout(5000),reject(422)).verify("token",factor,"123456")).rejects.toMatchObject({kind:"invalid"});
+    await expect(ownerAuth(config,AbortSignal.timeout(5000),reject(401)).verify("token",factor,"123456")).rejects.toMatchObject({kind:"unauthorized"});
+  });
   it("accepts the measured large enrollment envelope but returns only the setup key and factor ID",async()=>{
     const pending={...user,factors:[{id:factor,factor_type:"totp",status:"unverified",friendly_name:"E.V owner"}]};
     const f=mock(pending,{owner:true,assured:false},pending,{}, {id:factor,totp:{secret:"A".repeat(32),qr_code:"x".repeat(520000)}});

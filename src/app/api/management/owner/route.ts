@@ -1,14 +1,17 @@
 import { ownerCaptchaConfiguration, validAuthCaptchaToken } from "@/lib/management/auth-captcha";
-import { previewAllowed, storageRequestAllowed, storageWriteAllowed } from "@/lib/management/access";
+import { previewAllowed, adminRequestAllowed, adminWriteAllowed } from "@/lib/management/access";
 import { ownerAuth, ownerCookies, ownerCookieHeaders, type OwnerSession } from "@/lib/management/owner-session";
 import { ConversationStorageError } from "@/lib/management/conversation-repository";
 import { readBoundedJson, BoundedJsonError } from "@/lib/management/bounded-json";
 import { ownerSetup, initializeOwner } from "@/lib/management/owner-bootstrap";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { ragSnapshot } from "@/lib/management/rag-snapshot";
+import corpus from "@/data/management-corpus.generated.json";
+import type { CorpusSnapshot } from "@/lib/management/types";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 const attempts=createRateLimiter({limit:8,windowMs:60000});
-function enabled(r:Request){return storageRequestAllowed(r);}
+function enabled(r:Request){return adminRequestAllowed(r);}
 function reply(r:Request,data:unknown,status=200,session?:OwnerSession|null){
   const body=data&&typeof data==="object"&&("error" in data||("status" in data&&["signed_out","setup_required"].includes(String(data.status))))?{...data,authCaptcha:ownerCaptchaConfiguration()}:data;
   const res=Response.json(body,{status,headers:{"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow",Vary:"Cookie"}});
@@ -26,13 +29,14 @@ export async function GET(r:Request){
   if(!ownerCookies(r).access&&!ownerCookies(r).refresh){const setup=previewAllowed(r.headers.get("host"))?await ownerSetup():null;return reply(r,setup?{status:"setup_required",email:setup.email}:{status:"signed_out"});}
   try{
     const auth=service(r),current=await auth.existing(r);
+    if(params.get("view")==="rag"){if(!current.state.assured)throw new ConversationStorageError("unauthorized");return reply(r,{rag:ragSnapshot(corpus as CorpusSnapshot)},200,current.session);}
     const data=params.has("conversation")?{messages:await auth.messages(current.token,params.get("conversation")!)}:params.get("view")==="conversations"?await auth.conversations(current.token,params.get("after")??undefined):{status:current.state.assured?"ready":"mfa_required",factorId:current.state.factorId};
     return reply(r,data,200,current.session);
   }catch(error){return failure(r,error);}
 }
 export async function POST(r:Request){
   if(!enabled(r))return reply(r,{error:"Not found"},404);
-  if(!storageWriteAllowed(r))return reply(r,{error:"Same-origin JSON required"},403);
+  if(!adminWriteAllowed(r))return reply(r,{error:"Same-origin JSON required"},403);
   try{
     const data=await readBoundedJson(r,4096,AbortSignal.any([r.signal,AbortSignal.timeout(2000)]));
     if(!data||typeof data!=="object"||!("action"in data))return reply(r,{error:"Invalid owner action"},400);
@@ -40,7 +44,9 @@ export async function POST(r:Request){
     if(data.action==="initialize"&&"password"in data&&typeof data.password==="string"){
       if(!previewAllowed(r.headers.get("host")))return reply(r,{error:"Not found"},404);
       if(ownerCaptchaConfiguration().required)return reply(r,{error:"Owner setup must be completed before enabling signup protection. Use your existing owner sign-in."},409);
-      const result=await initializeOwner({projectUrl:process.env.SUPABASE_URL??"",publishableKey:process.env.SUPABASE_PUBLISHABLE_KEY??""},process.env.SUPABASE_SECRET_KEY??"",data.password,AbortSignal.any([r.signal,AbortSignal.timeout(6000)]));
+      let result;
+      try{result=await initializeOwner({projectUrl:process.env.SUPABASE_URL??"",publishableKey:process.env.SUPABASE_PUBLISHABLE_KEY??""},process.env.SUPABASE_SECRET_KEY??"",data.password,AbortSignal.any([r.signal,AbortSignal.timeout(6000)]));}
+      catch(error){if(error instanceof ConversationStorageError&&error.kind==="invalid")return reply(r,{error:"That password was not accepted. Use at least 14 characters with upper- and lower-case letters, a digit and a symbol."},400);throw error;}
       return reply(r,{status:result.state.assured?"ready":"mfa_required",factorId:result.state.factorId},200,result.session);
     }
     const auth=service(r);
@@ -54,7 +60,10 @@ export async function POST(r:Request){
     const current=await auth.existing(r);
     if(data.action==="sign_out"){await auth.disconnect(current.token);return reply(r,{status:"signed_out"},200,null);}
     if(data.action==="enroll")return reply(r,{status:"mfa_required",...await auth.enroll(current.token)},200,current.session);
-    if(data.action==="verify"&&"factorId"in data&&"code"in data&&typeof data.factorId==="string"&&typeof data.code==="string")return reply(r,{status:"ready"},200,await auth.verify(current.token,data.factorId,data.code));
+    if(data.action==="verify"&&"factorId"in data&&"code"in data&&typeof data.factorId==="string"&&typeof data.code==="string"){
+      try{return reply(r,{status:"ready"},200,await auth.verify(current.token,data.factorId,data.code));}
+      catch(error){if(error instanceof ConversationStorageError&&error.kind==="invalid")return reply(r,{error:"That code did not match. Use the entry you added for this setup key, wait for its next code and try again. The setup key has not changed."},400,current.session);throw error;}
+    }
     return reply(r,{error:"Invalid owner action"},400);
   }catch(error){return failure(r,error);}
 }

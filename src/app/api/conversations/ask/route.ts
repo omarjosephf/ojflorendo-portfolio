@@ -1,6 +1,6 @@
 import type { AnswerEvent } from "@/lib/assistant/answer-event";
 import { createHash } from "node:crypto";
-import { storageRequestAllowed, storageWriteAllowed } from "@/lib/management/access";
+import { visitorStorageRequestAllowed, visitorStorageWriteAllowed } from "@/lib/management/access";
 import { ConversationStorageError, createGenerationRepository, createGuestConversationRepository, isConversationId } from "@/lib/management/conversation-repository";
 import { answerReceipts } from "@/lib/management/answer-receipt";
 import { GUEST_ACCESS_COOKIE, readGuestCookie } from "@/lib/management/guest-session";
@@ -14,8 +14,8 @@ export const dynamic="force-dynamic";
 const limiter=createRateLimiter({limit:8,windowMs:60000});
 function json(value:unknown,status=200){return Response.json(value,{status,headers:{"Cache-Control":"private, no-store","X-Robots-Tag":"noindex, nofollow",Vary:"Cookie"}});}
 export async function POST(request:Request){
-  if(!storageRequestAllowed(request))return json({error:"Not found"},404);
-  if(!storageWriteAllowed(request))return json({error:"Same-origin JSON request required"},403);
+  if(!visitorStorageRequestAllowed(request))return json({error:"Not found"},404);
+  if(!visitorStorageWriteAllowed(request))return json({error:"Same-origin JSON request required"},403);
   const offered=request.headers.get("x-ev-deadline-ms");
   const requestBudget=offered&&/^\d{1,5}$/.test(offered)?Math.max(1,Math.min(9000,Number(offered))):9000;
   const started=performance.now(),signal=AbortSignal.any([request.signal,AbortSignal.timeout(requestBudget)]);

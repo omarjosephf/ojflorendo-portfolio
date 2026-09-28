@@ -1,6 +1,10 @@
 import {test,expect,type Page} from "@playwright/test";
 import { captchaSiteKey, mockAuthCaptcha } from "./auth-captcha-fixture";
 import AxeBuilder from "@axe-core/playwright";
+import corpus from "../src/data/management-corpus.generated.json";
+import { ragSnapshot } from "../src/lib/management/rag-snapshot";
+import type { CorpusSnapshot } from "../src/lib/management/types";
+const rag=ragSnapshot(corpus as CorpusSnapshot);
 test.beforeEach(async({page})=>{await page.route("**/api/**",route=>route.abort());});
 const id="10000000-0000-4000-8000-000000000001";
 async function fixture(page:Page){
@@ -12,6 +16,7 @@ async function fixture(page:Page){
   if(body.action==="sign_in"){expect(body.captchaToken).toMatch(/^synthetic-token-/);status="mfa_required";}
   if(body.action==="verify")status="ready";
   if(body.action==="sign_out")status="signed_out";
+  if(url.searchParams.get("view")==="rag"){reads++;await route.fulfill({json:{rag}});return;}
   if(url.searchParams.get("view")==="conversations"){reads++;await route.fulfill({json:{conversations:[{id,user_id:id,app:"ev",created_at:"2026-09-09T00:00:00Z",expires_at:"2026-10-09T00:00:00Z"}],next:null}});return;}
   if(url.searchParams.has("conversation")){reads++;await route.fulfill({json:{messages:[{id,conversation_id:id,request_id:id,sequence:1,role:"user",body:"Synthetic staging question for owner review.",created_at:"2026-09-09T00:00:00Z"},{id:"20000000-0000-4000-8000-000000000002",conversation_id:id,request_id:id,sequence:2,role:"assistant",body:"Synthetic unsupported reply.",created_at:"2026-09-09T00:00:01Z",event:{version:1,outcome:"not_covered",route:"primary",model:"synthetic-model",retrieved:["project-cited.md"],cited:[],latencyMs:123,corpusSha256:"a".repeat(64),promptSha256:"b".repeat(64)}}]}});return;}
   await route.fulfill({json:{status,authCaptcha:{required:true,siteKey:captchaSiteKey},factorId:status==="mfa_required"?id:null}});
@@ -37,4 +42,15 @@ for(const theme of ["light","dark"] as const)for(const width of [1280,390])test(
  await page.goto("/manage/live");await expect(page.getByRole("heading",{name:"Set your owner password"})).toBeVisible();await page.getByLabel("Workspace color theme").selectOption(theme);await audit(page);
  await page.getByLabel("New password",{exact:true}).fill("a-long-synthetic-password");await page.getByLabel("Confirm password",{exact:true}).fill("a-different-long-password");await page.getByRole("button",{name:"Set password and continue"}).click();await expect(page.getByRole("main").getByRole("alert")).toHaveText("The passwords do not match.");expect(submissions).toBe(0);
  await page.getByLabel("Confirm password",{exact:true}).fill("a-long-synthetic-password");await page.getByRole("button",{name:"Set password and continue"}).click();await expect(page.getByRole("heading",{name:"Verify your authenticator"})).toBeVisible();expect(submissions).toBe(1);
+});
+
+for(const theme of ["light","dark"] as const)for(const width of [1280,390])test(`admin panel E.V and Blog sections fit ${width}px in ${theme}`,async({page})=>{
+ await page.setViewportSize({width,height:900});await fixture(page);await page.goto("/manage/live");await page.getByLabel("Workspace color theme").selectOption(theme);await signIn(page);await verify(page);
+ const sections=page.getByRole("navigation",{name:"Admin sections"});
+ await sections.getByRole("button",{name:"Blog agents"}).click();await expect(page.getByRole("heading",{level:1,name:"Blog agents"})).toBeVisible();
+ await expect(page.getByText("Not running",{exact:true})).toBeVisible();await expect(page.getByRole("button",{name:"Refresh conversations"})).toHaveCount(0);await audit(page);
+ await page.screenshot({path:`.ev-preview/admin-blog-${theme}-${width}.png`,fullPage:true});
+ await sections.getByRole("button",{name:"E.V assistant"}).click();await page.getByRole("button",{name:"Show RAG configuration"}).click();
+ await expect(page.getByRole("heading",{name:"Target words per chunk"})).toBeVisible();await audit(page);
+ await page.getByRole("button",{name:"Sign out",exact:true}).click();await expect(page.getByRole("heading",{name:"Owner sign-in"})).toBeVisible();await expect(page.getByRole("heading",{name:"Target words per chunk"})).toHaveCount(0);
 });

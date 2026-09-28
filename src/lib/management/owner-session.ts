@@ -27,6 +27,9 @@ export function ownerAuth(config: StorageConfig, signal: AbortSignal, fetcher: t
     let res: Response;
     try { res=await fetcher(url.origin+path,{method:method ?? (body===undefined?"GET":"POST"),headers:{apikey:config.publishableKey,...(token?{Authorization:`Bearer ${token}`} : {}),"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body),signal,cache:"no-store",redirect:"error"}); }
     catch { throw new ConversationStorageError("unavailable"); }
+    // A rejected authenticator code is the owner's typing, not a lost session: report it as invalid so the
+    // pending factor and its setup key stay on screen instead of forcing a new enrollment.
+    if(!res.ok&&res.status===422&&/^\/auth\/v1\/factors\/[^/]+\/verify$/.test(path)) throw new ConversationStorageError("invalid");
     if(!res.ok) throw new ConversationStorageError([400,401,403,422].includes(res.status)?"unauthorized":res.status===409?"conflict":res.status===429?"limit":"unavailable");
     if(res.status===204) return null;
     // Supabase enrollment includes a large SVG QR payload (518475 bytes measured).

@@ -44,3 +44,14 @@ it does not delete records, reset allowances, remove MFA or restore deleted chat
 Keep retained records, deletion evidence and latest paid reservations through the
 compatible frontend/backend rollback. Public tab chat remains the ordinary path
 when saved storage is disabled.
+
+## Amendment, 28 September 2026: the admin switch is separate
+
+[ADR-0025](../adr/0025-unified-owner-admin-panel.md) splits the single gate
+above. `EV_ADMIN_MODE=live`, with the same production and exact-origin
+conditions, opens the owner routes only. Visitor saved chats, and the public
+assistant's storage option, additionally require
+`EV_CONVERSATION_STORAGE=production`. `EV_MANAGEMENT_MODE=live` no longer
+selects production. Every pre-activation gate above still applies to visitor
+storage; the owner panel's own gates are in the
+[admin panel runbook](../runbooks/admin-panel.md).

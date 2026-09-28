@@ -2,6 +2,9 @@
 import Link from "next/link";
 import { TurnstileWidget } from "@/components/sections/TurnstileWidget";
 import { LiveOwnerOperations } from "./LiveOwnerOperations";
+import { BlogAdminOverview } from "./BlogAdminOverview";
+import { RagConfiguration } from "./RagViews";
+import { isRagSnapshot, type RagSnapshot } from "@/lib/management/rag-snapshot";
 import { useEffect, useRef, useState } from "react";
 import { ThemeSelect } from "@/components/theme/ThemeSelect";
 import type { OwnerConversation } from "@/lib/management/owner-session";
@@ -10,6 +13,7 @@ import styles from "./management.module.css";
 import live from "./live-owner.module.css";
 
 type Status="checking"|"setup_required"|"signed_out"|"mfa_required"|"ready";
+type Section="ev"|"blog";
 export function LiveOwnerWorkspace({nonce,preview=true}:{nonce?:string;preview?:boolean}={}){
   const [captcha,setCaptcha]=useState<{required:boolean;siteKey:string|null}>({required:false,siteKey:null});
   const [captchaToken,setCaptchaToken]=useState(""),[captchaReset,setCaptchaReset]=useState(0);
@@ -21,17 +25,18 @@ export function LiveOwnerWorkspace({nonce,preview=true}:{nonce?:string;preview?:
   const [factor,setFactor]=useState<string|null>(null),[secret,setSecret]=useState("");
   const [conversations,setConversations]=useState<OwnerConversation[]>([]),[next,setNext]=useState<string|null>(null);
   const [messages,setMessages]=useState<OwnerMessage[]>([]),[selected,setSelected]=useState<string|null>(null);
+  const [section,setSection]=useState<Section>("ev"),[rag,setRag]=useState<RagSnapshot|null>(null),[ragNotice,setRagNotice]=useState("");
   const active=useRef(false);
   async function request(query="",body?:unknown){
     const response=await fetch(`/api/management/owner${query}`,{method:body===undefined?"GET":"POST",headers:body===undefined?undefined:{"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body),cache:"no-store",signal:AbortSignal.timeout(10000)});
     const data=await response.json();captchaConfiguration(data);
-    if(!response.ok){if(response.status===401){setStatus("signed_out");setMessages([]);setConversations([]);setSelected(null);setSecret("");}throw new Error(data.error??"Owner workspace is unavailable.");}
+    if(!response.ok){if(response.status===401){setStatus("signed_out");setMessages([]);setConversations([]);setSelected(null);setSecret("");setRag(null);setRagNotice("");}throw new Error(data.error??"Owner workspace is unavailable.");}
     return data;
   }
   function session(data:{status:Status;factorId?:string|null;secret?:string;email?:string}){
     if(data.email)setEmail(data.email);
     setStatus(data.status);setFactor(data.factorId??null);setSecret(data.secret??"");
-    if(data.status!=="ready"){setConversations([]);setMessages([]);setSelected(null);}
+    if(data.status!=="ready"){setConversations([]);setMessages([]);setSelected(null);setRag(null);setRagNotice("");setSection("ev");}
   }
   async function run(action:()=>Promise<void>){
     if(active.current)return;active.current=true;setBusy(true);setError("");
@@ -44,23 +49,29 @@ export function LiveOwnerWorkspace({nonce,preview=true}:{nonce?:string;preview?:
     if(!Array.isArray(data.conversations)||!(data.next===null||typeof data.next==="string"))throw new Error("The conversation list could not be verified.");
     setConversations(old=>after?[...new Map([...old,...data.conversations].map(c=>[c.id,c])).values()]:data.conversations);setNext(data.next);
   }
+  async function loadRag(){
+    setRagNotice("");const data=await request("?view=rag");
+    if(data.status==="signed_out"){session(data);return;}
+    if(!isRagSnapshot(data.rag)){setRag(null);setRagNotice("The RAG configuration could not be verified. Nothing is shown rather than unverified figures.");return;}
+    setRag(data.rag);
+  }
   useEffect(()=>{
     let disposed=false;
     void fetch("/api/management/owner",{cache:"no-store",signal:AbortSignal.timeout(10000)}).then(async res=>{const data=await res.json();if(!disposed){captchaConfiguration(data);if(res.ok&&["ready","signed_out","mfa_required","setup_required"].includes(data.status))session(data);else{setStatus("signed_out");setError(data.error??"Owner access is unavailable.");}}}).catch(()=>{if(!disposed){setStatus("signed_out");setError("Owner access could not be checked.");}});
     return()=>{disposed=true;};
   },[]);
   return <div className={`${styles.workspace} ${live.shell}`}>
-    <header className={live.header}><Link href="/manage">E.V Management</Link><div>{preview&&<Link href="/manage">Sample workspace</Link>}<ThemeSelect label="Workspace color theme" /></div></header>
+    <header className={live.header}><Link href="/manage">Owner admin</Link><div>{preview&&<Link href="/manage">Sample workspace</Link>}<ThemeSelect label="Workspace color theme" /></div></header>
     <main className={live.main}>
-      <p className={styles.eyebrow}>{preview?"PRIVATE STAGING":"PRIVATE WORKSPACE"}</p><h1>Saved conversations</h1>
-      <p>Read retained chats. Owner access requires an authenticator.</p>
+      <p className={styles.eyebrow}>{preview?"PRIVATE STAGING":"PRIVATE WORKSPACE"}</p><h1>{status!=="ready"?"Owner admin":section==="ev"?"E.V assistant":"Blog agents"}</h1>
+      <p>{status!=="ready"?"One private panel for the E.V assistant and the blog agents. Owner access requires a password and an authenticator.":section==="ev"?"Read retained chats, review answer gaps and check the retrieval configuration.":"What the blog agents are designed to do and what they may never do. Read-only."}</p>
       {error&&<p className={styles.errorNotice} role="alert">{error}</p>}
       {status==="checking"&&<p role="status">Checking owner access…</p>}
       {status==="setup_required"&&<form className={`${styles.card} ${live.form}`} onSubmit={e=>{e.preventDefault();if(password!==confirmPassword){setError("The passwords do not match.");return;}const value=password;setPassword("");setConfirmPassword("");void run(async()=>session(await request("",{action:"initialize",password:value})));}}>
         <h2>Set your owner password</h2><p>Your account is prepared for {email}. Choose a password, then connect your authenticator.</p>
         <label>New password<input type="password" autoComplete="new-password" minLength={14} maxLength={128} required value={password} onChange={e=>setPassword(e.target.value)} disabled={busy}/></label>
         <label>Confirm password<input type="password" autoComplete="new-password" minLength={14} maxLength={128} required value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} disabled={busy}/></label>
-        <p>Use at least 14 characters. A password manager can create and save it for you.</p><button className={styles.primaryButton} type="submit" disabled={busy}>Set password and continue</button>
+        <p>Use at least 14 characters, with upper- and lower-case letters, a digit and a symbol. A password manager can create and save it for you.</p><button className={styles.primaryButton} type="submit" disabled={busy}>Set password and continue</button>
         <p>This one-time setup is available only in your local preview.</p><button type="button" className={styles.textButton} disabled={busy} onClick={()=>setStatus("signed_out")}>Already set? Sign in</button>
       </form>}
       {status==="signed_out"&&<form className={`${styles.card} ${live.form}`} onSubmit={e=>{e.preventDefault();if(active.current||(captcha.required&&!captchaToken))return;const credential=password,token=captchaToken;setPassword("");setCaptchaToken("");void run(async()=>{try{session(await request("",{action:"sign_in",email,password:credential,...(token?{captchaToken:token}:{})}));}finally{setCaptchaToken("");setCaptchaReset(value=>value+1);}});}}>
@@ -89,7 +100,12 @@ export function LiveOwnerWorkspace({nonce,preview=true}:{nonce?:string;preview?:
         <button className={styles.textButton} disabled={busy} onClick={()=>void run(async()=>session(await request("",{action:"sign_out"})))}>Sign out</button>
       </section>}
       {status==="ready"&&<>
-        <div className={live.actions}><p>Owner verified · Authenticator required</p><button className={styles.primaryButton} disabled={busy} onClick={()=>void run(()=>load())}>Refresh conversations</button><button className={styles.textButton} disabled={busy} onClick={()=>void run(async()=>session(await request("",{action:"sign_out"})))}>Sign out</button></div>
+        <div className={live.actions}><p>Owner verified · Authenticator required</p><button className={styles.textButton} disabled={busy} onClick={()=>void run(async()=>session(await request("",{action:"sign_out"})))}>Sign out</button></div>
+        <nav aria-label="Admin sections" className={live.sectionNav}>{([["ev","E.V assistant"],["blog","Blog agents"]] as const).map(([id,label])=><button key={id} type="button" aria-current={section===id?"true":undefined} onClick={()=>setSection(id)}>{label}</button>)}</nav>
+        {section==="blog"&&<BlogAdminOverview/>}
+        {/* Hidden, not unmounted, so unsaved draft or gap-review text survives a section switch. */}
+        <div hidden={section!=="ev"}>
+        <div className={live.actions}><h2>Saved conversations</h2><button className={styles.primaryButton} disabled={busy} onClick={()=>void run(()=>load())}>Refresh conversations</button></div>
         <p>Newest first, 25 per page. Refresh to load current records. Deleted and expired chats are excluded.</p>
         <div className={`${styles.card} ${live.inbox}`}>
           <section aria-label="Saved conversation list" className={live.list}>
@@ -104,6 +120,13 @@ export function LiveOwnerWorkspace({nonce,preview=true}:{nonce?:string;preview?:
           </section>
         </div><p>Questions and replies are stored facts. Retrieval diagnostics and interest reports are not inferred from missing telemetry.</p>
         <LiveOwnerOperations preview={preview} onUnauthorized={()=>session({status:"signed_out"})}/>
+        <section className={live.ragSection} aria-labelledby="rag-configuration">
+          <div className={live.actions}><h2 id="rag-configuration">RAG configuration</h2><button className={styles.textButton} disabled={busy} onClick={()=>void run(loadRag)}>{rag?"Reload RAG configuration":"Show RAG configuration"}</button></div>
+          <p>Read-only. Chunking, the embedding model and the cost per answer, from the committed corpus snapshot.</p>
+          {ragNotice&&<p role="status">{ragNotice}</p>}
+          {rag&&<RagConfiguration corpus={rag}/>}
+        </section>
+        </div>
       </>}
       <footer className={styles.footer}>{preview?"Private staging · No public release":"Private workspace · Owner access only"}</footer>
     </main>
