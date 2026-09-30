@@ -64,7 +64,7 @@ export function LiveOwnerWorkspace({nonce,preview=true}:{nonce?:string;preview?:
     <header className={live.header}><Link href="/manage">Owner admin</Link><div>{preview&&<Link href="/manage">Sample workspace</Link>}<ThemeSelect label="Workspace color theme" /></div></header>
     <main className={live.main}>
       <p className={styles.eyebrow}>{preview?"PRIVATE STAGING":"PRIVATE WORKSPACE"}</p><h1>{status!=="ready"?"Owner admin":section==="ev"?"E.V assistant":"Blog agents"}</h1>
-      <p>{status!=="ready"?"One private panel for the E.V assistant and the blog agents. Owner access requires a password and an authenticator.":section==="ev"?"Read retained chats, review answer gaps and check the retrieval configuration.":"What the blog agents are designed to do and what they may never do. Read-only."}</p>
+      <p>{status!=="ready"?"One private panel for the E.V assistant and the blog agents. Owner access requires a password and an authenticator.":section==="ev"?"Read retained chats, review answer gaps and check the retrieval configuration.":"The blog agents' models, recorded runs and limits. Read-only."}</p>
       {error&&<p className={styles.errorNotice} role="alert">{error}</p>}
       {status==="checking"&&<p role="status">Checking owner access…</p>}
       {status==="setup_required"&&<form className={`${styles.card} ${live.form}`} onSubmit={e=>{e.preventDefault();if(password!==confirmPassword){setError("The passwords do not match.");return;}const value=password;setPassword("");setConfirmPassword("");void run(async()=>session(await request("",{action:"initialize",password:value})));}}>

@@ -98,6 +98,17 @@ ${citations ? `<h2>Web pages the search used</h2><ul>${citations}</ul>` : ""}
 `;
 }
 
+/** Adds or replaces one run in the committed panel data, newest first. */
+function recordRunSummary(repoRoot: string, bundle: LiveRunBundle, postSlug: string | null) {
+  const file = join(repoRoot, "src", "data", "blog-runs.json");
+  const existing = existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as ReturnType<typeof summarizeRun>[]) : [];
+  const next = [summarizeRun(bundle, postSlug), ...existing.filter((run) => run.runId !== bundle.runId)].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt),
+  );
+  writeFileSync(file, `${JSON.stringify(next, null, 2)}
+`);
+}
+
 /** A plain-text reading copy of a run for the owner. */
 export function renderRunForOwner(bundle: LiveRunBundle) {
   const lines: string[] = [];
@@ -231,10 +242,8 @@ export async function main(args: readonly string[], env: NodeJS.ProcessEnv, repo
       const post = promoteRun(bundle, date);
       const postPath = join(repoRoot, "content", "blog", "posts", `${post.slug}.json`);
       if (existsSync(postPath)) throw new PromotionRefused(`A post with slug ${post.slug} already exists.`);
-      const summaryDir = join(repoRoot, "content", "blog", "runs");
-      if (!existsSync(summaryDir)) mkdirSync(summaryDir, { recursive: true });
       writeFileSync(postPath, `${JSON.stringify(post, null, 2)}\n`);
-      writeFileSync(join(summaryDir, `${bundle.runId}.json`), `${JSON.stringify(summarizeRun(bundle, post.slug), null, 2)}\n`);
+      recordRunSummary(repoRoot, bundle, post.slug);
       out(`Wrote ${relative(repoRoot, postPath)} and its run summary. Nothing was committed.`);
       return 0;
     } catch (error) {
@@ -247,9 +256,7 @@ export async function main(args: readonly string[], env: NodeJS.ProcessEnv, repo
     // Records a held or failed run for the Blog panel without publishing anything.
     const runId = requireId(option(args, "run"), "run");
     const bundle = JSON.parse(readFileSync(join(dirs.runs, `${runId}.json`), "utf8")) as LiveRunBundle;
-    const summaryDir = join(repoRoot, "content", "blog", "runs");
-    if (!existsSync(summaryDir)) mkdirSync(summaryDir, { recursive: true });
-    writeFileSync(join(summaryDir, `${bundle.runId}.json`), `${JSON.stringify(summarizeRun(bundle, null), null, 2)}\n`);
+    recordRunSummary(repoRoot, bundle, null);
     out(`Wrote the run summary for ${bundle.runId}. Nothing was committed.`);
     return 0;
   }
