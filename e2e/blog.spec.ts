@@ -17,7 +17,10 @@ test.describe("Blog foundation", () => {
       }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: /Why Automated Evaluation of RAG Needs Refusal Tests/ }),
+      page.getByRole("link", {
+        name: "Why Automated Evaluation of RAG Needs Refusal Tests, Not Just Accurate Answers",
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(
       page.locator("header nav").getByRole("link", { name: "Blog", exact: true }),
