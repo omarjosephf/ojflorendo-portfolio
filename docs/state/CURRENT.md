@@ -1,6 +1,6 @@
 # Current state
 
-Updated 30 September 2026 (phase 18.4 done). This file is what a fresh session should read first.
+Updated 30 September 2026 (phase 18.4 done; mobile-menu test fix deployed). This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -77,14 +77,24 @@ handbook §11's.
 
 ### Done
 
+- **Flaky mobile-menu test fixed and deployed**, 30 September 2026. The e2e
+  test "the mobile menu opens and closes with Escape" could run its axe scan
+  while the menu was still fading in, and failed once in CI (run `36705898877`
+  on `48f980d`). It now waits for full opacity first; the accessibility
+  assertion is unchanged. Test only, no runtime change, and not a roadmap
+  phase. #113 merged as `f37bafc` at 12:58Z on the owner's authorisation;
+  `verify` passed first time on the head `d3c716b` and on `main`; production
+  deployment `6759957832` success; `https://ojfr.me/` and `/blog` return 200
+  and serve that deployment.
 - **Supabase Pro and Vercel Pro bought**, by 28 September 2026. Supabase's
   `Project Zero` organization reads plan `pro`. Vercel's single team, "OJ's
   personal projects", which holds both Vercel projects, shows Pro and Active on
   the owner's billing page; the connector does not expose the plan field.
   Vercel Pro also settles the non-commercial restriction on Hobby that
   [the hosting review](../reviews/ev-hosting-and-cost-review.md) recorded.
-- **Package 17** merged as `f849648` on 19 September. Production has served
-  `1e6417c`, the record of that merge, since 02:20:32 UTC that day.
+- **Package 17** merged as `f849648` on 19 September. Production served
+  `1e6417c`, the record of that merge, from 02:20:32 UTC that day until
+  `d113d31` (#107) deployed at 03:09:36 UTC on 28 September.
 - **E.V** deployed and verified on 13 September; **the portfolio** released on
   10 September.
 - **Packages 1–12** and **owner-gated Actions 1–6**: see the tracker and
