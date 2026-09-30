@@ -127,9 +127,9 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v1": research,
-        "blog-writer-live-v1": writer,
+        "blog-writer-live-v2": writer,
         "blog-seo-live-v1": seo,
-        "blog-reviewer-live-v1": approvingReviewer(),
+        "blog-reviewer-live-v2": approvingReviewer(),
         "blog-critique-live-v1": critique,
       },
       seen,
@@ -139,9 +139,9 @@ describe("runLiveBlogWorkflow", () => {
     expect(bundle.status).toBe("owner-review");
     expect(seen).toEqual([
       "blog-researcher-live-v1",
-      "blog-writer-live-v1",
+      "blog-writer-live-v2",
       "blog-seo-live-v1",
-      "blog-reviewer-live-v1",
+      "blog-reviewer-live-v2",
       "blog-critique-live-v1",
     ]);
     expect(bundle.calls.map((call) => call.model)).toEqual([
@@ -174,9 +174,9 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v1": research,
-        "blog-writer-live-v1": writer,
+        "blog-writer-live-v2": writer,
         "blog-seo-live-v1": seo,
-        "blog-reviewer-live-v1": approvingReviewer(75),
+        "blog-reviewer-live-v2": approvingReviewer(75),
         "blog-critique-live-v1": critique,
       },
       [],
@@ -198,7 +198,7 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v1": research,
-        "blog-writer-live-v1": paraphrasingWriter,
+        "blog-writer-live-v2": paraphrasingWriter,
         "blog-critique-live-v1": critique,
       },
       [],

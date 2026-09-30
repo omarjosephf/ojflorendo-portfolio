@@ -61,7 +61,7 @@ function respond(body: Record<string, unknown>): unknown {
         },
       });
     }
-    case "blog-writer-live-v1": {
+    case "blog-writer-live-v2": {
       const claims = (payload.evidence as { claims: { id: string; text: string }[] }).claims;
       return interaction(model, {
         schemaVersion: 1,
@@ -85,7 +85,7 @@ function respond(body: Record<string, unknown>): unknown {
         suggestedDescription: "A grounded assistant, explained by its builder.",
         findings: [],
       });
-    case "blog-reviewer-live-v1": {
+    case "blog-reviewer-live-v2": {
       const draft = payload.draft as { citations: { id: string }[] };
       return interaction(model, {
         schemaVersion: 1,

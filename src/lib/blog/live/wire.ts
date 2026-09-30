@@ -563,7 +563,14 @@ export function parseCritique(value: unknown, participants: ReadonlySet<LiveAgen
     const entry = byAgent.get(agent);
     return entry
       ? { agent, participated: true, ...entry }
-      : { agent, participated: false, lesson: "Did not run in this attempt.", evidence: "No run evidence exists for this agent." };
+      : agent === "idea-scout"
+        ? {
+            agent,
+            participated: false,
+            lesson: "Ran in its own step before this run; not critiqued, because Google's grounding terms bar analysing grounded results.",
+            evidence: "The idea slate is kept in the private record only.",
+          }
+        : { agent, participated: false, lesson: "Did not run in this attempt.", evidence: "No run evidence exists for this agent." };
   });
   if (containsDisallowedPrivateMaterialInValue(lessons)) issues.push("the critique contains private or credential-like material");
   fail(issues, "critique");
