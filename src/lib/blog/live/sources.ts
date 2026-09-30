@@ -7,7 +7,9 @@ import type { ApprovedEvidenceSpan, OfflineSourceDocument } from "../pipeline/ty
  * Owner-approved source allowlist for Phase 18.4 (approved 30 September 2026).
  * Every file is already public in the GitHub repository and on the site, and
  * was written by or for OJ. Drafting agents see only exact sentences from
- * these files; nothing is fetched from the web.
+ * these files; nothing is fetched from the web. The contact page, the corpus
+ * runbook and the README were left out on 30 September 2026 because the 18.2
+ * input scan flags them for an address, path or credential-shaped name.
  */
 export const LIVE_SOURCE_REPOSITORY_URL = "https://github.com/omarjosephf/ojflorendo-portfolio/blob/main/";
 
@@ -20,14 +22,11 @@ export const LIVE_SOURCE_ALLOWLIST: readonly { path: string; title: string }[] =
   { path: "content/assistant/education-and-credentials.md", title: "Education and credentials" },
   { path: "content/assistant/project-cited.md", title: "Project: Cited" },
   { path: "content/assistant/project-portfolio-platform.md", title: "Project: the portfolio platform" },
-  { path: "content/assistant/contact-and-this-assistant.md", title: "Contact and the E.V. assistant" },
   { path: "docs/adr/0004-curated-portfolio-assistant.md", title: "ADR-0004: curated portfolio assistant" },
   { path: "docs/adr/0006-retrieval-grounded-portfolio-assistant.md", title: "ADR-0006: retrieval-grounded portfolio assistant" },
   { path: "docs/adr/0014-luna-gemini-fallback.md", title: "ADR-0014: Gemini fallback for the assistant" },
   { path: "docs/adr/0020-gemini-paid-tier-for-visitor-input.md", title: "ADR-0020: Gemini paid tier for visitor input" },
   { path: "docs/reviews/ev-embedding-comparison.md", title: "E.V. embedding comparison" },
-  { path: "docs/runbooks/assistant-corpus.md", title: "E.V. assistant corpus runbook" },
-  { path: "README.md", title: "Portfolio repository README" },
 ]);
 
 export const LIVE_ALLOWED_DOMAINS = Object.freeze(["github.com"]);
