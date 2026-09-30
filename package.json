@@ -56,7 +56,7 @@
     "@supabase/supabase-js": "2.116.0",
     "framer-motion": "^13.3.0",
     "lucide-react": "^1.46.0",
-    "next": "16.3.5",
+    "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "three": "^0.186.0"
@@ -75,7 +75,7 @@
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.3.5",
+    "eslint-config-next": "16.3.8",
     "jsdom": "^30.0.1",
     "pg": "8.23.0",
     "tailwindcss": "^4",
