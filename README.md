@@ -69,6 +69,11 @@ security treated as first-class requirements.
 - **Repository-managed blog** — `/blog` and `/blog/[slug]` render only
   runtime-validated JSON content blocks; posts cannot execute HTML, MDX,
   JavaScript or React.
+- **Offline blog workflow** — saved fixtures exercise a bounded Researcher →
+  Writer → independent Reviewer pipeline with publication denied. The owner
+  cancelled the Phase 18.3 provider comparison before any run;
+  [ADR-0026](docs/adr/0026-gemini-first-blog-agent-models.md) selects Gemini
+  models per agent with OpenAI and Anthropic fallbacks.
 - **Responsive** — from small phones to large monitors, with no horizontal
   overflow.
 - **System, light and dark themes** across the portfolio, E.V and management preview. An explicit display-preference cookie remembers the choice for one year; it contains no identifier or chat content.
@@ -94,6 +99,26 @@ security treated as first-class requirements.
 - **Content is data, not executable markup** — portfolio copy lives in typed
   modules under `src/data`; blog posts live separately under
   `content/blog/posts` and pass runtime validation before rendering.
+- **Generated blog drafts remain review artefacts** — the Phase 18.2 pipeline
+  accepts owner-approved saved source spans, gives the Writer only validated
+  evidence, reserves synthetic fixture cost before each of at most five calls,
+  returns only allowlisted deterministic review signals for the one revision,
+  and always returns an unpublished draft/review bundle.
+- **The Phase 18.3 boundary was owner-gated and is now historical** — the
+  comparison was cancelled before any run (ADR-0026). Safe preparation fixed
+  `gemini-3.8-flash`, `gpt-5.6-terra` and `claude-sonnet-5`, at most 33
+  count-only plus 33 generation requests with no retries, a US$1.87 maximum
+  generation reservation, Google and OpenAI count contingencies of US$0.33 and
+  US$0.825, and documented-zero Anthropic counting. The combined local authority
+  is US$3.025 under one hard US$3.25 ceiling, with separate private/blind
+  evidence roots and score lock before provider reveal. Each dynamic request is
+  counted only after its durable reservation/checkpoint and immediately before
+  generation. Neither the ledger nor the contingencies are a provider-account
+  cap or billing guarantee. Scoring uses modeled generation tariff cost only,
+  not a total provider invoice. Google and OpenAI require bounded-contingency
+  evidence rather than zero-price confirmation; fresh private account, quota,
+  billing, key and path verification plus immediate R3 approval still gate every
+  provider request.
 - **OJ Assistant is a client island behind a same-origin route** — the browser
   only ever talks to this origin; the backend URL and shared secret stay
   server-side. A question travels with at most four earlier question/source
@@ -276,6 +301,7 @@ src/
 │   ├── assistant/                # wire types, response guard, corpus checksum,
 │   │                             #   and the server-to-server service client
 │   ├── blog/                     # safe blog schema, validation and queries
+│   │   └── pipeline/             # offline three-role fixtures and orchestration
 │   ├── contact/  email/  turnstile/
 │   └── …                         # rate limit, site URL, structured data, WebGL
 ├── types/                        # shared TypeScript types
@@ -315,6 +341,21 @@ module validates every post and permits only the documented block types before
 React renders text. Draft posts are excluded from public queries, metadata and
 the sitemap. Blog content is deliberately outside `content/assistant/`, so this
 foundation does not change E.V.'s corpus or checksum.
+
+`src/lib/blog/pipeline` is an isolated Phase 18.2 test harness. It constructs a
+saved-fixture adapter from plain data, validates exact evidence and citations,
+keeps quarantined material away from the Writer, permits at most one revision,
+and returns a frozen bundle with publication denied. It has no live provider,
+network, credential, repository-write or publishing path and is not re-exported
+by the public blog module.
+
+The Phase 18.3 provider bake-off harness described in
+[ADR-0024](docs/adr/0024-blog-provider-bakeoff.md) is not part of this branch.
+On 29 September 2026 the owner cancelled the comparison before any run: no
+credential was accessed, no provider request was sent and nothing was spent.
+The harness is kept outside `main` as history, and its runbook must not be
+executed. [ADR-0026](docs/adr/0026-gemini-first-blog-agent-models.md) records
+the selected Gemini models per agent with OpenAI and Anthropic fallbacks.
 
 ## Deployment
 

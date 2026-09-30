@@ -49,6 +49,51 @@ by a locally complete package. No subscriptions had been purchased when this was
 and 18 are instructor-set coursework and are not release gates: public release
 remains defined by packages 13–16 alone.
 
+## Package 18 notes carried from the blog worktree, 30 September 2026
+
+The row above predates the blog work and its Status column is no longer
+maintained; status is in [the roadmap](../state/CURRENT.md#roadmap). Phase
+18.1 (static `/blog`) and Phase 18.2 (offline three-role pipeline) are carried
+onto `main` by branch `feat/blog-18-4-first-post`. The dated notes below were
+written in the blog worktree and are carried unchanged except for the ADR
+number: the model decision is ADR-0026, because ADR-0025 on `main` is the
+admin panel.
+
+## Package 18 provider and model decision, 29 September 2026
+
+OJ cancelled the Phase 18.3 blinded comparison before any run: no permanent
+ledger or artifact root, credential access, provider request or spend
+occurred. Two of its three frozen candidates had been superseded by newer
+OpenAI and Anthropic models, and OJ, following the instructor's direction, had
+already chosen Google Gemini. [ADR-0026](../adr/0026-gemini-first-blog-agent-models.md)
+records the Gemini model and thinking level for each of the six agents, OpenAI
+then Anthropic fallbacks, a recommend-test-approve Model Scout, and a launch
+with auto-publish off plus a pick-ahead idea queue. This replaces the
+26 September note below that OpenAI and Anthropic had no backup order.
+
+## Package 18 future-design approval, 21 September 2026
+
+OJ approved the [Idea Scout and guarded publication design](../reviews/blog-multi-agent-system-design.md#owner-approved-future-product-direction--21-september-2026):
+suggested ideas with owner selection/editing and a fully manual brief option;
+eventual automatic publication only above the provisional score of 75, with
+all mandatory checks passing and content within approved scope. Exactly 75
+goes to review; critical failures hold at any score. This records future
+Phase 18.5 product direction, not implementation or activation. Phase 18.3's
+frozen experiment, Phase 18.4's manual calibration/publication, package counts
+and all spending/release gates remain unchanged.
+
+The 26 September owner/instructor clarification requires the eventual complete
+system to offer three to five trusted-source, evidence-backed Idea Scout topics
+(fewer when evidence is weak) for OJ to choose or edit before drafting. A
+dedicated SEO Agent must review the draft for search usefulness without
+compromising readers or facts. After every attempt, a Critique Agent must give
+each participating agent a concrete, evidence-backed lesson for OJ to review;
+it cannot silently rewrite hard gates or prompts. OJ prefers Gemini as the
+eventual primary, while OpenAI and Anthropic remain candidate backups with no
+measured winner or backup order. These future roles require separate contracts,
+evaluation, call/cost limits and phase approval. They do not change the frozen
+Phase 18.3 comparison or start Phase 18.4.
+
 ## Verified checkpoint
 
 The complete `npm run test:ci` gate passed on 9 September 2026: 537 frontend
