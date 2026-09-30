@@ -14,7 +14,6 @@ let data: string;
 function interaction(model: string, output: unknown, extraSteps: unknown[] = []) {
   return {
     object: "interaction",
-    id: "int-1",
     status: "completed",
     model,
     steps: [...extraSteps, { type: "model_output", content: [{ type: "text", text: JSON.stringify(output) }] }],

@@ -33,7 +33,7 @@ export interface GroundingCitation {
 export interface GeminiCallResult {
   output: unknown;
   model: string;
-  responseId: string;
+  responseId: string | null;
   inputTokens: number;
   outputTokens: number;
   thoughtTokens: number;
@@ -140,8 +140,14 @@ export function parseGeminiInteraction(
     outputTokens: outputTokens + thoughtTokens,
     searchQueries: chargedQueries,
   });
+  // The response outline (field names and step types, never content) makes a
+  // contract failure diagnosable without paying for another call.
+  const outline = ` [response fields: ${Object.keys(raw).sort().join(",").slice(0, 300)}; steps: ${steps
+    .map((step) => (isRecord(step) ? String(step.type).slice(0, 30) : typeof step))
+    .join(",")
+    .slice(0, 300)}]`;
   const fail = (code: GeminiCallError["code"], message: string): never => {
-    throw new GeminiCallError(code, message, cost);
+    throw new GeminiCallError(code, `${message}${outline}`, cost);
   };
 
   if (!usage) fail("invalid-response", "Gemini returned no usage record.");
@@ -149,9 +155,8 @@ export function parseGeminiInteraction(
     fail("incomplete", `Gemini did not complete the interaction (status ${String(raw.status).slice(0, 40)}).`);
   }
   if (raw.model !== config.model) fail("invalid-response", "Gemini answered with a different model.");
-  if (typeof raw.id !== "string" || raw.id.length === 0 || raw.id.length > 200) {
-    fail("invalid-response", "Gemini returned no interaction id.");
-  }
+  // With store:false Google may omit the interaction id; it is recorded when present.
+  const responseId = typeof raw.id === "string" && raw.id.length > 0 ? raw.id.slice(0, 200) : null;
   for (const step of steps) {
     if (!isRecord(step) || typeof step.type !== "string" || !ALLOWED_STEPS.has(step.type)) {
       fail("unexpected-tool-use", "Gemini returned a step type this role does not allow.");
@@ -198,7 +203,7 @@ export function parseGeminiInteraction(
   return {
     output,
     model: raw.model as string,
-    responseId: raw.id as string,
+    responseId,
     inputTokens,
     outputTokens,
     thoughtTokens,

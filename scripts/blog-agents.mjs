@@ -58,4 +58,6 @@ try {
 } finally {
   rmSync(buildRoot, { recursive: true, force: true });
 }
-process.exit(exitCode);
+// Setting exitCode instead of calling process.exit lets open sockets close
+// cleanly; process.exit tripped a libuv assertion on Windows.
+process.exitCode = exitCode;
