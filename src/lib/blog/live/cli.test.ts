@@ -6,7 +6,7 @@ import { parseBlogPost } from "../schema";
 import { main } from "./cli";
 import { LIVE_SOURCE_ALLOWLIST } from "./sources";
 
-const KEY = "test-key-000000000000000000000";
+const KEY = "AQ.test-key-0000000000000000000";
 let root: string;
 let repo: string;
 let data: string;

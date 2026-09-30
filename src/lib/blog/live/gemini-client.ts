@@ -216,7 +216,7 @@ export async function callGemini(
   fetchImpl: FetchLike = fetch as unknown as FetchLike,
   now: () => number = Date.now,
 ): Promise<GeminiCallResult> {
-  if (!/^[A-Za-z0-9_-]{20,200}$/u.test(apiKey)) {
+  if (!/^[A-Za-z0-9._-]{20,200}$/u.test(apiKey)) {
     throw new GeminiCallError("http-error", "The Gemini API key is missing or malformed.");
   }
   const body = JSON.stringify(buildGeminiRequestBody(input));

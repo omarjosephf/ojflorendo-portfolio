@@ -158,7 +158,7 @@ export async function main(args: readonly string[], env: Readonly<Record<string,
   const dirs = paths(repoRoot, dataDir);
   const ledger = new SpendLedger(dirs.ledger);
   const apiKey = env.BLOG_GEMINI_API_KEY ?? "";
-  if ((command === "ideas" || command === "run") && !/^[A-Za-z0-9_-]{20,200}$/u.test(apiKey)) {
+  if ((command === "ideas" || command === "run") && !/^[A-Za-z0-9._-]{20,200}$/u.test(apiKey)) {
     // Checked before any reservation, so a missing key never consumes ledger room.
     throw new Error("BLOG_GEMINI_API_KEY is missing or malformed; pass the key file with --env-file.");
   }
