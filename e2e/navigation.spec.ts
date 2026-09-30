@@ -59,6 +59,11 @@ test.describe("Navigation", () => {
     await page.getByRole("button", { name: /menu/i }).click();
     const menu = page.locator("#mobile-menu");
     await expect(menu).toBeVisible();
+    // The menu fades in from opacity 0, and Playwright counts it visible from
+    // the first frame. Axe measures contrast against the blended colours, so a
+    // mid-fade scan reports low contrast that no settled menu has (CI flake on
+    // 48f980d, 30 September 2026). Wait for the open state before scanning.
+    await expect(menu).toHaveCSS("opacity", "1");
 
     // The opened menu must itself be accessible.
     const results = await new AxeBuilder({ page }).analyze();
