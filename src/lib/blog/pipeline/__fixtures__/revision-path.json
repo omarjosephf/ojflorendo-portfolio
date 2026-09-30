@@ -1,0 +1,186 @@
+{
+  "initialReview": {
+    "stage": "review",
+    "reservationMicroUsd": 500,
+    "response": {
+      "identity": {
+        "provider": "saved-fixture",
+        "model": "reviewer-fixture",
+        "version": "fixture-2026-09-19"
+      },
+      "usage": {
+        "inputTokens": 500,
+        "outputTokens": 190,
+        "latencyMs": 12,
+        "costMicroUsd": 115
+      },
+      "finishReason": "stop",
+      "output": {
+        "schemaVersion": 1,
+        "recommendation": "revise",
+        "claimReviews": [
+          {
+            "citationId": "plain-text-citation",
+            "assessment": "supported",
+            "note": "The quoted statement matches the exact saved evidence span."
+          },
+          {
+            "citationId": "owner-review-citation",
+            "assessment": "supported",
+            "note": "The owner-review statement matches the exact saved evidence span."
+          }
+        ],
+        "unmappedFactualClaims": [],
+        "issues": [
+          {
+            "code": "heading-too-generic",
+            "category": "writing-quality",
+            "severity": "medium",
+            "message": "Make the opening heading name both evidence and human review."
+          }
+        ],
+        "requiredCorrections": [
+          "Rename the opening heading so it identifies evidence validation and human review."
+        ],
+        "scores": {
+          "groundedness": 100,
+          "citationQuality": 100,
+          "writingAndVoice": 70,
+          "securityAndRobustness": 100
+        }
+      }
+    }
+  },
+  "writerRevision": {
+    "stage": "revision",
+    "reservationMicroUsd": 500,
+    "response": {
+      "identity": {
+        "provider": "saved-fixture",
+        "model": "writer-fixture",
+        "version": "fixture-2026-09-19"
+      },
+      "usage": {
+        "inputTokens": 560,
+        "outputTokens": 245,
+        "latencyMs": 15,
+        "costMicroUsd": 125
+      },
+      "finishReason": "stop",
+      "output": {
+        "schemaVersion": 1,
+        "post": {
+          "schemaVersion": 1,
+          "status": "draft",
+          "slug": "safe-offline-blog-pipeline",
+          "title": "A safe offline blog pipeline",
+          "excerpt": "A concise demonstration of a bounded, evidence-led drafting workflow.",
+          "publishedAt": null,
+          "updatedAt": null,
+          "author": {
+            "name": "OJ Florendo",
+            "url": "/about"
+          },
+          "disclosure": "AI assisted with research and drafting. OJ Florendo's evidence review is required before publication, and he remains responsible for any published article.",
+          "blocks": [
+            {
+              "type": "heading",
+              "id": "bounded-workflow",
+              "level": 2,
+              "text": "Evidence first, human review last"
+            },
+            {
+              "type": "paragraph",
+              "text": "Project Zero stores blog articles as validated plain-text JSON blocks."
+            },
+            {
+              "type": "paragraph",
+              "text": "A human owner must review every draft before publication."
+            }
+          ],
+          "sources": [
+            {
+              "id": "design-record",
+              "title": "Saved blog design evidence",
+              "url": "https://evidence.example/blog-design",
+              "publisher": "Evidence Fixture",
+              "accessedAt": "2026-09-19"
+            }
+          ],
+          "seo": {
+            "title": "A safe offline blog pipeline",
+            "description": "An evidence-led look at validated blog content and owner review before publication.",
+            "keywords": ["blog workflow", "evidence", "human review"]
+          }
+        },
+        "citations": [
+          {
+            "id": "plain-text-citation",
+            "claimId": "claim-1",
+            "evidenceIds": ["evidence-1"],
+            "location": {
+              "scope": "block",
+              "blockIndex": 1,
+              "field": "text"
+            },
+            "quotedText": "Project Zero stores blog articles as validated plain-text JSON blocks."
+          },
+          {
+            "id": "owner-review-citation",
+            "claimId": "claim-2",
+            "evidenceIds": ["evidence-2"],
+            "location": {
+              "scope": "block",
+              "blockIndex": 2,
+              "field": "text"
+            },
+            "quotedText": "A human owner must review every draft before publication."
+          }
+        ]
+      }
+    }
+  },
+  "finalReview": {
+    "stage": "final-review",
+    "reservationMicroUsd": 500,
+    "response": {
+      "identity": {
+        "provider": "saved-fixture",
+        "model": "reviewer-fixture",
+        "version": "fixture-2026-09-19"
+      },
+      "usage": {
+        "inputTokens": 520,
+        "outputTokens": 165,
+        "latencyMs": 11,
+        "costMicroUsd": 108
+      },
+      "finishReason": "stop",
+      "output": {
+        "schemaVersion": 1,
+        "recommendation": "approve",
+        "claimReviews": [
+          {
+            "citationId": "plain-text-citation",
+            "assessment": "supported",
+            "note": "The quoted statement matches the exact saved evidence span."
+          },
+          {
+            "citationId": "owner-review-citation",
+            "assessment": "supported",
+            "note": "The owner-review statement matches the exact saved evidence span."
+          }
+        ],
+        "unmappedFactualClaims": [],
+        "issues": [],
+        "requiredCorrections": [],
+        "scores": {
+          "groundedness": 100,
+          "citationQuality": 100,
+          "writingAndVoice": 92,
+          "securityAndRobustness": 100
+        }
+      }
+    }
+  }
+}
