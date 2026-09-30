@@ -1,6 +1,6 @@
 # Current state
 
-Updated 30 September 2026 (phase 18.4 done; mobile-menu test fix deployed). This file is what a fresh session should read first.
+Updated 30 September 2026 (phase 18.4 done; mobile-menu test fix deployed; phases 18.6 and 18.7 added). This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -27,6 +27,11 @@ matching reality, correct the row and its "Checked" cell.
   at `https://ojfr.me/blog` and the read-only Blog panel in `/manage` shows its
   run. Merged as `5351e73` (#110) and deployed on 30 September; evidence in
   [ADR-0026](../adr/0026-gemini-first-blog-agent-models.md#verification--phase-184-30-september-2026).
+- **Phases 18.6 and 18.7 were added** on 30 September by owner decision: the
+  owner-approved journal design for the blog, then the writing agents filling
+  in charts and step-through diagrams. They come straight after phase 15a;
+  scope, criteria and the owner's decisions are in
+  [the phase plan](../roadmaps/blog-journal-and-figures.md).
 - **Next phase: 13a**, the first Ready row below.
 - **The only date gate is 1 October 2026 UTC**, and it applies to phase 15a
   alone.
@@ -67,13 +72,15 @@ handbook §11's.
 | 6 | **13d** Managed recovery rehearsal | Item 6: clone, lock down, measure, delete, all in one working session; plus, in the same dashboard, turning on leaked-password protection (Pro only) and confirming the Spend Cap is on and Point-in-Time Recovery off | C / 13 | Ready. **Moved before the captures by owner decision on 28 September**, because Supabase Pro is now being paid for | ADR-0022 and ADR-0023 Verification blocks complete; the organization lists its two permanent projects again (staging and `ev-management-production`, per ADR-0025); the leaked-password advisor finding is gone | 28 Sep: organization plan `pro`; one project; six extensions installed, `pg_cron` the only external-operation one |
 | 7 | **15-prep** Capture preparation | Restage `deploy/oj-assistant` from the pin, run the pin gate, diff the staged corpus and system prompt against the pinned revision, and re-check the capture script's paths after the 28 September folder move | C / 15 | Ready. Must finish before phase 15a, and needs no owner | Every check passes and is recorded | Not yet checked |
 | 8 | **15a** Answer captures | Items 7 then 8, one October sitting, never the same session as phase 13d | C / 15 | **Blocked by date: 1 October 2026 UTC** | Both captures complete and the release manifest validates | 28 Sep: `allowance-225` reads 225 attempts with 0 reservations; service ledger holds 36 reservations, all September; `integrity_check` ok on all three ledgers |
-| 9 | **15b** Independent labelling | Item 9 | C / 15 | Blocked by phase 15a. Recruiting labellers can start now | Labels scored with `review --review` | — |
-| 10 | **13b** CAPTCHA enforcement | Item 4 | C / 13 | Ready | Enforcement on, and owner sign-in confirmed working afterwards | — |
-| 11 | **13c** Off-site encrypted backups | Item 5 | C / 13 | Ready. The `ev-backups` GitHub environment does not exist yet, and the R2 bucket is unconfirmed | Synthetic backup verified, then `EV_BACKUP_ENABLED=true` | 28 Sep: no repository variables; environments `Preview` and `Production` only; last three scheduled runs `skipped`; the Cloudflare connector lists zero R2 buckets, from an account not confirmed to be the right one |
-| 12 | **16** Public release | Items 10–12 | C / 16 | Blocked by the phases ordered 5–11 | `release-approval` passed on the release pull request and one smoke pass covers everything | — |
-| 13 | **0.2** Workspace fold-in | The archived workspace documents folded into the repository or discarded; the history below moved out of this file so it is short again | Governance | Not started. Agreed on 16 September to wait until both captures are saved | Nothing outside Git can be mistaken for current state | — |
-| 14 | **18.5** Scheduled operation and governed content-only automation | — | D / 18 | Not started | — | — |
-| 15 | **19b–19c** Blog decisions and live runs in the admin panel | Recorded owner decisions tied to a review-bundle digest, an audit log and a pause switch (19b); live runs once phase 18.3 has run (19c) | 19 | Not started. Order after 19a not yet decided | — | — |
+| 9 | **18.6** Blog journal design and figure components | The owner-approved journal layout on `/blog`; post format version 2 with a post type, "In short", sidenotes, takeaways, a bar chart and a step-through diagram, all data only; version 1 posts unchanged; the agents unchanged; ADR-0027 | D / 18 | Ready. Plan approved by the owner on 30 September 2026 ([phase plan](../roadmaps/blog-journal-and-figures.md)); placed after phase 15a so the live site does not change during the captures | The live post renders in the new layout in production, and a test post using every new block passes the full gate, including accessibility, reduced motion and Lighthouse mobile 90+ | — |
+| 10 | **18.7** Agent-filled figures | The Writer, Reviewer and SEO Agent extended to the version 2 blocks; code checks that every chart number appears in its cited claim; first person only as exact quotes from owner-written first-person notes; capped live runs | D / 18 | Blocked by phase 18.6. The owner's first-person notes can be written now | One agent-written post with at least one verified figure is approved by the owner and live on `/blog`, and ADR-0027's Verification block is filled | — |
+| 11 | **15b** Independent labelling | Item 9 | C / 15 | Blocked by phase 15a. Recruiting labellers can start now | Labels scored with `review --review` | — |
+| 12 | **13b** CAPTCHA enforcement | Item 4 | C / 13 | Ready | Enforcement on, and owner sign-in confirmed working afterwards | — |
+| 13 | **13c** Off-site encrypted backups | Item 5 | C / 13 | Ready. The `ev-backups` GitHub environment does not exist yet, and the R2 bucket is unconfirmed | Synthetic backup verified, then `EV_BACKUP_ENABLED=true` | 28 Sep: no repository variables; environments `Preview` and `Production` only; last three scheduled runs `skipped`; the Cloudflare connector lists zero R2 buckets, from an account not confirmed to be the right one |
+| 14 | **16** Public release | Items 10–12 | C / 16 | Blocked by phases 13a–13d, 15-prep, 15a and 15b | `release-approval` passed on the release pull request and one smoke pass covers everything | — |
+| 15 | **0.2** Workspace fold-in | The archived workspace documents folded into the repository or discarded; the history below moved out of this file so it is short again | Governance | Not started. Agreed on 16 September to wait until both captures are saved | Nothing outside Git can be mistaken for current state | — |
+| 16 | **18.5** Scheduled operation and governed content-only automation | — | D / 18 | Not started | — | — |
+| 17 | **19b–19c** Blog decisions and live runs in the admin panel | Recorded owner decisions tied to a review-bundle digest, an audit log and a pause switch (19b); live runs once phase 18.3 has run (19c) | 19 | Not started. Order after 19a not yet decided | — | — |
 
 ### Done
 
