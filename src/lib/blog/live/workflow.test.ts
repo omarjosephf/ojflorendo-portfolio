@@ -126,8 +126,8 @@ describe("runLiveBlogWorkflow", () => {
     const seen: string[] = [];
     const fetchImpl = fakeFetch(
       {
-        "blog-researcher-live-v1": research,
-        "blog-writer-live-v2": writer,
+        "blog-researcher-live-v2": research,
+        "blog-writer-live-v3": writer,
         "blog-seo-live-v1": seo,
         "blog-reviewer-live-v2": approvingReviewer(),
         "blog-critique-live-v1": critique,
@@ -138,8 +138,8 @@ describe("runLiveBlogWorkflow", () => {
     expect(bundle.failure).toBeUndefined();
     expect(bundle.status).toBe("owner-review");
     expect(seen).toEqual([
-      "blog-researcher-live-v1",
-      "blog-writer-live-v2",
+      "blog-researcher-live-v2",
+      "blog-writer-live-v3",
       "blog-seo-live-v1",
       "blog-reviewer-live-v2",
       "blog-critique-live-v1",
@@ -173,8 +173,8 @@ describe("runLiveBlogWorkflow", () => {
   it("holds a post whose editorial score is exactly 75 and refuses to promote it", async () => {
     const fetchImpl = fakeFetch(
       {
-        "blog-researcher-live-v1": research,
-        "blog-writer-live-v2": writer,
+        "blog-researcher-live-v2": research,
+        "blog-writer-live-v3": writer,
         "blog-seo-live-v1": seo,
         "blog-reviewer-live-v2": approvingReviewer(75),
         "blog-critique-live-v1": critique,
@@ -197,8 +197,8 @@ describe("runLiveBlogWorkflow", () => {
     };
     const fetchImpl = fakeFetch(
       {
-        "blog-researcher-live-v1": research,
-        "blog-writer-live-v2": paraphrasingWriter,
+        "blog-researcher-live-v2": research,
+        "blog-writer-live-v3": paraphrasingWriter,
         "blog-critique-live-v1": critique,
       },
       [],

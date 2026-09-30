@@ -49,7 +49,7 @@ function respond(body: Record<string, unknown>): unknown {
           { type: "google_search_result", call_id: "search_001", result: [{ search_suggestions: '<div class="gs-chip">portfolio chatbot citations</div>' }] },
         ],
       );
-    case "blog-researcher-live-v1": {
+    case "blog-researcher-live-v2": {
       const spans = (payload.spans as { spanId: string }[]).slice(0, 3);
       return interaction(model, {
         schemaVersion: 1,
@@ -61,7 +61,7 @@ function respond(body: Record<string, unknown>): unknown {
         },
       });
     }
-    case "blog-writer-live-v2": {
+    case "blog-writer-live-v3": {
       const claims = (payload.evidence as { claims: { id: string; text: string }[] }).claims;
       return interaction(model, {
         schemaVersion: 1,
