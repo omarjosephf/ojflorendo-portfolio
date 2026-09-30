@@ -1,6 +1,6 @@
 # Current state
 
-Updated 30 September 2026 (phase 18.3 dropped, 18.4 active). This file is what a fresh session should read first.
+Updated 30 September 2026 (phase 18.4 done). This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -23,11 +23,11 @@ matching reality, correct the row and its "Checked" cell.
 - **Phase 18.3 was dropped** on 29 September: the owner cancelled the provider
   comparison before any run and chose Gemini per agent
   ([ADR-0026](../adr/0026-gemini-first-blog-agent-models.md)).
-- **Active phase: 18.4**, moved ahead of 13a by owner decision on
-  30 September for the instructor deadline. Its Wednesday scope is one
-  owner-run, owner-approved post from the six-agent pipeline plus a read-only
-  Blog panel in `/manage`; choosing ideas or starting runs from the panel is
-  not in it.
+- **Phase 18.4 is done**: the first agent-written, owner-approved post is live
+  at `https://ojfr.me/blog` and the read-only Blog panel in `/manage` shows its
+  run. Merged as `5351e73` (#110) and deployed on 30 September; evidence in
+  [ADR-0026](../adr/0026-gemini-first-blog-agent-models.md#verification--phase-184-30-september-2026).
+- **Next phase: 13a**, the first Ready row below.
 - **The only date gate is 1 October 2026 UTC**, and it applies to phase 15a
   alone.
 - **Instructor deadline: Wednesday 30 September 2026**, for packages 18 and 19
@@ -62,7 +62,7 @@ handbook §11's.
 | 1 | **0.1** Master roadmap | This section; the owner-action inventory re-checked and on `main` | Governance | **Done** | The pull request carrying both is merged | 28 Sep: #107 merged as `d113d31` on `origin/main` |
 | 2 | **19a** Online owner-only admin panel | The admin switch separated from visitor chat storage; a new production Supabase project with owner sign-in, CAPTCHA and MFA; the E.V section (live views and read-only RAG configuration) and a static read-only Blog section, deployed | 19 (instructor-set; not a release gate) | **Done** | The plan's six acceptance criteria are met from a second device and ADR-0025's Verification block is filled | 28 Sep: merged `97ecb23` (#108); production deployment READY; owner sign-in, CAPTCHA, TOTP and sign-out verified from a phone against `ev-management-production`; visitor routes and alias 404 |
 | 3 | **18.3** Blog provider bake-off | Cancelled before any run | D / 18 | **Dropped** by owner decision on 29 September 2026: two of the three frozen candidates were superseded and the owner chose Gemini, recorded in [ADR-0026](../adr/0026-gemini-first-blog-agent-models.md). Reopens only with a new ADR | — | 30 Sep: no ledger, credential access, provider request or spend ever occurred; the harness stays outside `main` |
-| 4 | **18.4** First generated blog post and read-only Blog panel | Phases 18.1 and 18.2 on `main`; a live Gemini runner for the six ADR-0026 agents, run by the owner; one post published only after owner approval; a read-only Blog panel in `/manage` showing the agents, ideas, checks, cost and lessons of real runs | D / 18 and 19 | **Active**, by owner decision on 30 September 2026 for the instructor deadline | One owner-approved post is live on `/blog` and the Blog panel shows its run | 30 Sep: branch `feat/blog-18-4-first-post` from `adcf3d4` carries 18.1, 18.2, the live runner and the owner-approved post `evaluating-retrieval-systems-refusal-testing-and-quote-integrity` (run `run-20260930-015400`); US$0.67 of US$5 spent; not yet merged or deployed |
+| 4 | **18.4** First generated blog post and read-only Blog panel | Phases 18.1 and 18.2 on `main`; a live Gemini runner for the six ADR-0026 agents, run by the owner; one post published only after owner approval; a read-only Blog panel in `/manage` showing the agents, ideas, checks, cost and lessons of real runs | D / 18 and 19 | **Done** | One owner-approved post is live on `/blog` and the Blog panel shows its run | 30 Sep: #110 merged as `5351e73` at 12:09Z; production deployment `6758982335` success; live `/blog` and the article return 200 with the disclosure, `/blog/inside-ev-rag` 404, sitemap lists the post, `/manage` redirects to sign-in. The Blog section behind sign-in was checked by CI management e2e, not yet live by the owner. Spend US$0.67 of US$5 |
 | 5 | **13a** Owner sitting one | Items 1–3: deployed backend event call, assistant smoke check, contact delivery smoke check; plus a read of Vercel's Spend Management setting, unchecked since the team moved to Pro | C / 13 and 16 | Ready | All three results and the Spend Management setting recorded in the inventory | 28 Sep: Fly `/health` ok, corpus `7bddb04dedc7`, `answers_remaining_today` 10; production on `1e6417c` |
 | 6 | **13d** Managed recovery rehearsal | Item 6: clone, lock down, measure, delete, all in one working session; plus, in the same dashboard, turning on leaked-password protection (Pro only) and confirming the Spend Cap is on and Point-in-Time Recovery off | C / 13 | Ready. **Moved before the captures by owner decision on 28 September**, because Supabase Pro is now being paid for | ADR-0022 and ADR-0023 Verification blocks complete; the organization lists its two permanent projects again (staging and `ev-management-production`, per ADR-0025); the leaked-password advisor finding is gone | 28 Sep: organization plan `pro`; one project; six extensions installed, `pg_cron` the only external-operation one |
 | 7 | **15-prep** Capture preparation | Restage `deploy/oj-assistant` from the pin, run the pin gate, diff the staged corpus and system prompt against the pinned revision, and re-check the capture script's paths after the 28 September folder move | C / 15 | Ready. Must finish before phase 15a, and needs no owner | Every check passes and is recorded | Not yet checked |
