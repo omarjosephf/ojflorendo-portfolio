@@ -1,1 +1,601 @@
-[]
+[
+  {
+    "kind": "blog-run-summary",
+    "runId": "run-20260930-015400",
+    "createdAt": "2026-09-30T01:54:00.294Z",
+    "title": "Why Automated Evaluation of RAG Needs Refusal Tests, Not Just Accurate Answers",
+    "status": "owner-review",
+    "holdReasons": [],
+    "postSlug": "evaluating-retrieval-systems-refusal-testing-and-quote-integrity",
+    "editorialScore": 100,
+    "hardGates": [
+      {
+        "id": "claim-coverage",
+        "passed": true
+      },
+      {
+        "id": "claim-support",
+        "passed": true
+      },
+      {
+        "id": "citation-integrity",
+        "passed": true
+      },
+      {
+        "id": "contradiction-handling",
+        "passed": true
+      },
+      {
+        "id": "prompt-injection",
+        "passed": true
+      },
+      {
+        "id": "privacy",
+        "passed": true
+      },
+      {
+        "id": "safe-content",
+        "passed": true
+      }
+    ],
+    "scores": {
+      "groundedness": 100,
+      "citationQuality": 100,
+      "writingAndVoice": 100,
+      "securityAndRobustness": 100
+    },
+    "reviewDecisions": [
+      "approve"
+    ],
+    "seo": {
+      "score": 88,
+      "findings": [
+        {
+          "area": "links",
+          "severity": "medium",
+          "advice": "Add an internal link to OJ's portfolio or projects page (e.g., /projects) where the mentioned document-assistant demo or Cited project is showcased."
+        },
+        {
+          "area": "readability",
+          "severity": "low",
+          "advice": "The flow is logical and targeted to the developer audience, but ensure code or conceptual snippets are broken up with bullet points if additional technical details are introduced in future revisions."
+        },
+        {
+          "area": "keywords",
+          "severity": "low",
+          "advice": "Primary keywords like 'retrieval-augmented generation', 'automated evaluation', and 'refusal testing' are naturally integrated into the text."
+        }
+      ]
+    },
+    "critique": [
+      {
+        "agent": "idea-scout",
+        "participated": false,
+        "lesson": "Ran in its own step before this run; not critiqued, because Google's grounding terms bar analysing grounded results."
+      },
+      {
+        "agent": "planner-researcher",
+        "participated": true,
+        "lesson": "Maintain the thorough claim-backing approach during research, as perfectly supported claims ensure smooth downstream verification."
+      },
+      {
+        "agent": "writer",
+        "participated": true,
+        "lesson": "Improve in-text linking and readability pacing during drafting to satisfy search engine optimization requirements without compromising editorial quality."
+      },
+      {
+        "agent": "seo",
+        "participated": true,
+        "lesson": "Continue delivering granular multi-area evaluations spanning links, keywords, and readability to guide future revisions."
+      },
+      {
+        "agent": "reviewer-verifier",
+        "participated": true,
+        "lesson": "Continue verifying every mapped draft claim against research sources to maintain zero unmapped factual claims."
+      },
+      {
+        "agent": "critique",
+        "participated": false,
+        "lesson": "Did not run in this attempt."
+      }
+    ],
+    "calls": [
+      {
+        "role": "planner-researcher",
+        "stage": "research",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 2829,
+        "outputTokens": 611,
+        "thoughtTokens": 5751,
+        "costMicroUsd": 25980,
+        "latencyMs": 18222
+      },
+      {
+        "role": "writer",
+        "stage": "draft",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 6618,
+        "outputTokens": 1552,
+        "thoughtTokens": 1163,
+        "costMicroUsd": 15145,
+        "latencyMs": 11114
+      },
+      {
+        "role": "seo",
+        "stage": "seo",
+        "model": "gemini-3.5-flash-lite",
+        "thinkingLevel": "low",
+        "outcome": "accepted",
+        "inputTokens": 983,
+        "outputTokens": 301,
+        "thoughtTokens": 0,
+        "costMicroUsd": 1048,
+        "latencyMs": 1575
+      },
+      {
+        "role": "reviewer-verifier",
+        "stage": "review",
+        "model": "gemini-3.1-pro-preview",
+        "thinkingLevel": "high",
+        "outcome": "accepted",
+        "inputTokens": 7999,
+        "outputTokens": 454,
+        "thoughtTokens": 2495,
+        "costMicroUsd": 51386,
+        "latencyMs": 21432
+      },
+      {
+        "role": "critique",
+        "stage": "critique",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 553,
+        "outputTokens": 316,
+        "thoughtTokens": 523,
+        "costMicroUsd": 3561,
+        "latencyMs": 4409
+      }
+    ],
+    "totalCostMicroUsd": 97120,
+    "recordSha256": "93ad917d3e3feb4d15c1c3434f98caa5c8064d36bf49aff7ffd8f0dbfd7bba63"
+  },
+  {
+    "kind": "blog-run-summary",
+    "runId": "run-20260930-015308",
+    "createdAt": "2026-09-30T01:53:08.035Z",
+    "title": null,
+    "status": "no-draft",
+    "holdReasons": [
+      "The Planner–Researcher found no supported evidence for this brief in the chosen sources."
+    ],
+    "postSlug": null,
+    "editorialScore": null,
+    "hardGates": [],
+    "scores": null,
+    "reviewDecisions": [],
+    "seo": null,
+    "critique": [
+      {
+        "agent": "idea-scout",
+        "participated": false,
+        "lesson": "Ran in its own step before this run; not critiqued, because Google's grounding terms bar analysing grounded results."
+      },
+      {
+        "agent": "planner-researcher",
+        "participated": true,
+        "lesson": "Produce a complete research brief and plan during the research stage to ensure the pipeline can progress to drafting, rather than returning an abbreviated output."
+      },
+      {
+        "agent": "writer",
+        "participated": false,
+        "lesson": "Did not run in this attempt."
+      },
+      {
+        "agent": "seo",
+        "participated": false,
+        "lesson": "Did not run in this attempt."
+      },
+      {
+        "agent": "reviewer-verifier",
+        "participated": false,
+        "lesson": "Did not run in this attempt."
+      },
+      {
+        "agent": "critique",
+        "participated": false,
+        "lesson": "Did not run in this attempt."
+      }
+    ],
+    "calls": [
+      {
+        "role": "planner-researcher",
+        "stage": "research",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 2828,
+        "outputTokens": 44,
+        "thoughtTokens": 5930,
+        "costMicroUsd": 24524,
+        "latencyMs": 17352
+      },
+      {
+        "role": "critique",
+        "stage": "critique",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 239,
+        "outputTokens": 107,
+        "thoughtTokens": 443,
+        "costMicroUsd": 2242,
+        "latencyMs": 2815
+      }
+    ],
+    "totalCostMicroUsd": 26766,
+    "recordSha256": "34b39a5b0e9c10ef78c293f437228144e233d175930905255a9991c23ad88d49"
+  },
+  {
+    "kind": "blog-run-summary",
+    "runId": "run-20260930-015026",
+    "createdAt": "2026-09-30T01:50:26.642Z",
+    "title": "Why Automated Evaluation of RAG Needs Refusal Tests",
+    "status": "held",
+    "holdReasons": [
+      "Hard gates failed: claim-coverage.",
+      "The Reviewer–Verifier's final decision was reject."
+    ],
+    "postSlug": null,
+    "editorialScore": 93,
+    "hardGates": [
+      {
+        "id": "claim-coverage",
+        "passed": false
+      },
+      {
+        "id": "claim-support",
+        "passed": true
+      },
+      {
+        "id": "citation-integrity",
+        "passed": true
+      },
+      {
+        "id": "contradiction-handling",
+        "passed": true
+      },
+      {
+        "id": "prompt-injection",
+        "passed": true
+      },
+      {
+        "id": "privacy",
+        "passed": true
+      },
+      {
+        "id": "safe-content",
+        "passed": true
+      }
+    ],
+    "scores": {
+      "groundedness": 90,
+      "citationQuality": 100,
+      "writingAndVoice": 85,
+      "securityAndRobustness": 100
+    },
+    "reviewDecisions": [
+      "reject"
+    ],
+    "seo": {
+      "score": 88,
+      "findings": [
+        {
+          "area": "links",
+          "severity": "medium",
+          "advice": "Add internal links to OJ's portfolio projects (e.g., the Cited project demo) using relevant anchor text where the draft mentions the demo."
+        },
+        {
+          "area": "readability",
+          "severity": "low",
+          "advice": "Break down some of the longer paragraphs in the middle sections into shorter blocks to improve scanability for engineers."
+        },
+        {
+          "area": "keywords",
+          "severity": "low",
+          "advice": "Ensure natural variation of core terms like 'RAG evaluation', 'refusal testing', and 'automated evaluation' across headings where appropriate."
+        }
+      ]
+    },
+    "critique": [
+      {
+        "agent": "idea-scout",
+        "participated": false,
+        "lesson": "Ran in its own step before this run; not critiqued, because Google's grounding terms bar analysing grounded results."
+      },
+      {
+        "agent": "planner-researcher",
+        "participated": true,
+        "lesson": "Continue providing thoroughly supported research briefs, as all generated claims were fully backed."
+      },
+      {
+        "agent": "writer",
+        "participated": true,
+        "lesson": "Ensure every factual statement is grounded in the provided research claims to avoid unmapped claims and gate failures, while refining tone to meet voice guidelines."
+      },
+      {
+        "agent": "seo",
+        "participated": true,
+        "lesson": "Address link structure and placement recommendations to resolve medium-severity linking deficits and improve the overall SEO score."
+      },
+      {
+        "agent": "reviewer-verifier",
+        "participated": true,
+        "lesson": "Maintain strict enforcement of claim-coverage gates and verification of unmapped claims during review rounds."
+      },
+      {
+        "agent": "critique",
+        "participated": false,
+        "lesson": "Did not run in this attempt."
+      }
+    ],
+    "calls": [
+      {
+        "role": "planner-researcher",
+        "stage": "research",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 2785,
+        "outputTokens": 601,
+        "thoughtTokens": 6037,
+        "costMicroUsd": 26982,
+        "latencyMs": 20547
+      },
+      {
+        "role": "writer",
+        "stage": "draft",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 6613,
+        "outputTokens": 1711,
+        "thoughtTokens": 7982,
+        "costMicroUsd": 41309,
+        "latencyMs": 33903
+      },
+      {
+        "role": "seo",
+        "stage": "seo",
+        "model": "gemini-3.5-flash-lite",
+        "thinkingLevel": "low",
+        "outcome": "accepted",
+        "inputTokens": 1213,
+        "outputTokens": 283,
+        "thoughtTokens": 0,
+        "costMicroUsd": 1072,
+        "latencyMs": 1990
+      },
+      {
+        "role": "reviewer-verifier",
+        "stage": "review",
+        "model": "gemini-3.1-pro-preview",
+        "thinkingLevel": "high",
+        "outcome": "accepted",
+        "inputTokens": 8223,
+        "outputTokens": 698,
+        "thoughtTokens": 6309,
+        "costMicroUsd": 100530,
+        "latencyMs": 50592
+      },
+      {
+        "role": "critique",
+        "stage": "critique",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 553,
+        "outputTokens": 335,
+        "thoughtTokens": 587,
+        "costMicroUsd": 3873,
+        "latencyMs": 4299
+      }
+    ],
+    "totalCostMicroUsd": 173766,
+    "recordSha256": "bafe60b6151a18bb4d00e566cd77b34ccb0d97c367b7ac1c20cd221cd7136ceb"
+  },
+  {
+    "kind": "blog-run-summary",
+    "runId": "run-20260930-014625",
+    "createdAt": "2026-09-30T01:46:25.303Z",
+    "title": "Why Automated Evaluation of RAG Needs Refusal Tests, Not Just Accurate Answers",
+    "status": "owner-review",
+    "holdReasons": [],
+    "postSlug": null,
+    "editorialScore": 100,
+    "hardGates": [
+      {
+        "id": "claim-coverage",
+        "passed": true
+      },
+      {
+        "id": "claim-support",
+        "passed": true
+      },
+      {
+        "id": "citation-integrity",
+        "passed": true
+      },
+      {
+        "id": "contradiction-handling",
+        "passed": true
+      },
+      {
+        "id": "prompt-injection",
+        "passed": true
+      },
+      {
+        "id": "privacy",
+        "passed": true
+      },
+      {
+        "id": "safe-content",
+        "passed": true
+      }
+    ],
+    "scores": {
+      "groundedness": 100,
+      "citationQuality": 100,
+      "writingAndVoice": 100,
+      "securityAndRobustness": 100
+    },
+    "reviewDecisions": [
+      "revise",
+      "approve"
+    ],
+    "seo": {
+      "score": 88,
+      "findings": [
+        {
+          "area": "links",
+          "severity": "medium",
+          "advice": "Add internal links to OJ's portfolio projects or blog page (e.g., linking to /projects or /blog where the Cited demo is discussed) to improve site navigation."
+        },
+        {
+          "area": "readability",
+          "severity": "low",
+          "advice": "Break down some of the longer paragraphs to improve scanning for busy software engineers."
+        },
+        {
+          "area": "keywords",
+          "severity": "low",
+          "advice": "Ensure key terms like 'refusal testing', 'quote matching', and 'RAG evaluation' appear naturally in subheadings where applicable."
+        }
+      ]
+    },
+    "critique": [
+      {
+        "agent": "idea-scout",
+        "participated": false,
+        "lesson": "Did not run in this attempt."
+      },
+      {
+        "agent": "planner-researcher",
+        "participated": true,
+        "lesson": "Continue structuring research plans with clear, verifiable claims and section breakdowns, as this provided a strong foundation for full factual verification."
+      },
+      {
+        "agent": "writer",
+        "participated": true,
+        "lesson": "Refine voice and stylistic polish on the initial draft to resolve minor prose quality issues before the review stage."
+      },
+      {
+        "agent": "seo",
+        "participated": true,
+        "lesson": "Focus on strengthening link strategy recommendations to resolve recurring gaps in link coverage."
+      },
+      {
+        "agent": "reviewer-verifier",
+        "participated": true,
+        "lesson": "Maintain rigorous checks on writing style and clarity alongside factual verification to ensure drafts reach publication standards."
+      },
+      {
+        "agent": "critique",
+        "participated": false,
+        "lesson": "Did not run in this attempt."
+      }
+    ],
+    "calls": [
+      {
+        "role": "planner-researcher",
+        "stage": "research",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 2785,
+        "outputTokens": 633,
+        "thoughtTokens": 10044,
+        "costMicroUsd": 42128,
+        "latencyMs": 29462
+      },
+      {
+        "role": "writer",
+        "stage": "draft",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 6524,
+        "outputTokens": 1924,
+        "thoughtTokens": 8108,
+        "costMicroUsd": 42513,
+        "latencyMs": 31194
+      },
+      {
+        "role": "seo",
+        "stage": "seo",
+        "model": "gemini-3.5-flash-lite",
+        "thinkingLevel": "low",
+        "outcome": "accepted",
+        "inputTokens": 1346,
+        "outputTokens": 277,
+        "thoughtTokens": 0,
+        "costMicroUsd": 1097,
+        "latencyMs": 1640
+      },
+      {
+        "role": "reviewer-verifier",
+        "stage": "review",
+        "model": "gemini-3.1-pro-preview",
+        "thinkingLevel": "high",
+        "outcome": "accepted",
+        "inputTokens": 8361,
+        "outputTokens": 673,
+        "thoughtTokens": 5197,
+        "costMicroUsd": 87162,
+        "latencyMs": 36327
+      },
+      {
+        "role": "writer",
+        "stage": "revision",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 8592,
+        "outputTokens": 1947,
+        "thoughtTokens": 4955,
+        "costMicroUsd": 32327,
+        "latencyMs": 20381
+      },
+      {
+        "role": "reviewer-verifier",
+        "stage": "final-review",
+        "model": "gemini-3.1-pro-preview",
+        "thinkingLevel": "high",
+        "outcome": "accepted",
+        "inputTokens": 8384,
+        "outputTokens": 502,
+        "thoughtTokens": 2959,
+        "costMicroUsd": 58300,
+        "latencyMs": 24675
+      },
+      {
+        "role": "critique",
+        "stage": "critique",
+        "model": "gemini-3.8-flash",
+        "thinkingLevel": "medium",
+        "outcome": "accepted",
+        "inputTokens": 784,
+        "outputTokens": 346,
+        "thoughtTokens": 638,
+        "costMicroUsd": 4278,
+        "latencyMs": 4756
+      }
+    ],
+    "totalCostMicroUsd": 267805,
+    "recordSha256": "b58ec9d20826fd571436ebf2833ef2a6a3926eeaed3d9b70e96df61fc7f802bd"
+  }
+]

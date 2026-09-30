@@ -88,9 +88,11 @@ describe("blog repository", () => {
     expect(() => loadBlogPostsFromDirectory(directory)).toThrow(/slug must match its file name/);
   });
 
-  it("keeps Phase 18.1 public queries empty until an owner-reviewed post exists", () => {
-    expect(getPublishedPosts()).toEqual([]);
-    expect(getPostSlugs()).toEqual([]);
+  it("exposes only the owner-approved published post and no unknown slug", () => {
+    const slug = "evaluating-retrieval-systems-refusal-testing-and-quote-integrity";
+    expect(getPublishedPosts().map((post) => post.slug)).toEqual([slug]);
+    expect(getPostSlugs()).toEqual([slug]);
+    expect(getPostBySlug(slug)?.status).toBe("published");
     expect(getPostBySlug("inside-ev-rag")).toBeUndefined();
   });
 });

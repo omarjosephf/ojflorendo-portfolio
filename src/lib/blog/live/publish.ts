@@ -10,7 +10,7 @@ import type { LiveRunBundle } from "./workflow";
  */
 
 export const PUBLISHED_DISCLOSURE =
-  "AI assisted with research and drafting. OJ Florendo checked every claim against its source, approved this article and is responsible for it.";
+  "AI agents researched and drafted this article from OJ Florendo's own project notes, quoting them word for word; an independent AI reviewer and automated checks verified every citation. OJ Florendo reviewed and approved it and is responsible for it.";
 
 export class PromotionRefused extends Error {
   constructor(message: string) {

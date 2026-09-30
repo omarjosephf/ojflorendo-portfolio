@@ -29,7 +29,11 @@ const STATUS_LABEL: Record<PublicRunSummary["status"], { text: string; tone: "gr
 };
 
 function RunCard({ run }: { run: PublicRunSummary }) {
-  const status = STATUS_LABEL[run.status];
+  const status = run.status === "owner-review" && !run.postSlug
+    ? { text: "Passed; not published", tone: "neutral" as const }
+    : run.status === "owner-review"
+      ? { text: "Passed; published", tone: "green" as const }
+      : STATUS_LABEL[run.status];
   const headingId = `blog-run-${run.runId}`;
   return <section className={`${styles.card} ${live.panel}`} aria-labelledby={headingId}>
     <div className={live.panelHeading}>

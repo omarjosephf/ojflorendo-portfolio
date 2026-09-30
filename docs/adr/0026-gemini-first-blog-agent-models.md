@@ -236,6 +236,56 @@ the approved provider set follows the Model Scout's test-and-approve path. A
 future cross-provider comparison can reuse the ADR-0024 machinery with fresh
 candidates, prices and approvals.
 
+## Verification — Phase 18.4, 30 September 2026
+
+The first live runs used a new, dedicated Google project ("Project Zero Blog",
+Tier 1 Prepay on the owner's existing billing account, linked on the owner's
+explicit approval) and a new key the owner saved outside the repository. The
+bake-off and E.V. keys were not used. Spend is recorded in the durable ledger
+of `src/lib/blog/live`: **US$0.6699 of the approved US$5.00**, with no run
+above the US$1.00 per-run ceiling.
+
+- **Idea Scout** (`gemini-3.8-flash`, Google Search). Two early calls cost
+  US$0.03 each but could not be used. Google's current keys contain a full
+  stop, and store-less responses omit the interaction id. The search steps also
+  nest their queries and Search Suggestions one level deeper than first
+  assumed. All three issues were fixed with tests. The third call returned five
+  ideas with Search Suggestions, shown to the owner as the grounding terms
+  require. The owner chose idea 1.
+- **Four drafting attempts on that idea:**
+  1. `run-20260930-014625` passed every gate after one revision, but review
+     found it flawed and the owner did not choose it: it mixed first and third person, left a quoted
+     reference dangling and made an uncited first-person claim.
+  2. `run-20260930-015026` was held. The stricter Reviewer v2 found an uncited
+     sentence (claim coverage).
+  3. `run-20260930-015308` returned no draft. Researcher v2 over-restricted
+     sentences that name OJ.
+  4. `run-20260930-015400` passed every gate on the first review. The owner
+     approved it for publication (record digest
+     `93ad917d3e3feb4d15c1c3434f98caa5c8064d36bf49aff7ffd8f0dbfd7bba63`).
+- **Approved run: calls and cost.** Its five calls cost US$0.0971 in total.
+  The largest output was the Researcher's: 611 visible and 5,751 thinking
+  tokens.
+
+  | Call | Model | Cost | Time |
+  | --- | --- | ---: | ---: |
+  | Research | `gemini-3.8-flash` | US$0.0260 | 18 s |
+  | Draft | `gemini-3.8-flash` | US$0.0151 | 11 s |
+  | SEO | `gemini-3.5-flash-lite` | US$0.0010 | 2 s |
+  | Review | `gemini-3.1-pro-preview` | US$0.0514 | 21 s |
+  | Critique | `gemini-3.8-flash` | US$0.0036 | 4 s |
+
+  Every call stayed far below its output cap (16,384 or 24,576 tokens,
+  thinking included). The 2,048-token cap would not have been enough.
+- **Reviewer choice.** Kept on `gemini-3.1-pro-preview` for independence from
+  the Writer. It is not yet validated. The Reviewer scored both passing drafts
+  100 on every measure, including the flawed draft the owner did not choose, so its
+  scores are not calibrated to the owner's judgement. Auto-publish stays off
+  until the calibration set exists.
+- **Not done in Phase 18.4:** the OpenAI and Anthropic fallbacks, the Model
+  Scout, OpenRouter (raised by the owner for testing; a candidate for the
+  fallback phase) and the nine-example calibration set.
+
 ## Related decisions
 
 - [ADR-0024](0024-blog-provider-bakeoff.md): the superseded blinded comparison
