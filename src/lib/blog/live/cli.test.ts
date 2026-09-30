@@ -49,7 +49,7 @@ function respond(body: Record<string, unknown>): unknown {
           { type: "google_search_result", call_id: "search_001", result: [{ search_suggestions: '<div class="gs-chip">portfolio chatbot citations</div>' }] },
         ],
       );
-    case "blog-researcher-live-v2": {
+    case "blog-researcher-live-v3": {
       const spans = (payload.spans as { spanId: string }[]).slice(0, 3);
       return interaction(model, {
         schemaVersion: 1,
