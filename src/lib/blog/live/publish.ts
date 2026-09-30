@@ -50,7 +50,8 @@ export interface PublicRunSummary {
   kind: "blog-run-summary";
   runId: string;
   createdAt: string;
-  topic: string;
+  /** The final draft title. The Idea Scout brief is a grounded result and stays in the private record. */
+  title: string | null;
   status: LiveRunBundle["status"];
   holdReasons: string[];
   postSlug: string | null;
@@ -83,7 +84,7 @@ export function summarizeRun(bundle: LiveRunBundle, postSlug: string | null): Pu
     kind: "blog-run-summary",
     runId: bundle.runId,
     createdAt: bundle.createdAt,
-    topic: bundle.brief.topic,
+    title: bundle.drafts.at(-1)?.post.title ?? null,
     status: bundle.status,
     holdReasons: bundle.holdReasons,
     postSlug,

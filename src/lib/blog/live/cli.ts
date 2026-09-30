@@ -61,6 +61,43 @@ function blockText(block: BlogContentBlock) {
   }
 }
 
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/gu, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] as string);
+}
+
+/**
+ * The owner's local reading page for an idea slate. Model text is escaped;
+ * Google's Search Suggestions are inserted exactly as Google supplied them,
+ * as its grounding terms require.
+ */
+export function renderIdeasPage(record: IdeaScoutRecord) {
+  const ideas = (record.slate?.ideas ?? [])
+    .map(
+      (idea, index) => `<section><h2>[${index + 1}] ${escapeHtml(idea.topic)}</h2><dl>
+<dt>Audience</dt><dd>${escapeHtml(idea.audience)}</dd>
+<dt>Key message</dt><dd>${escapeHtml(idea.keyMessage)}</dd>
+<dt>Why it fits OJ</dt><dd>${escapeHtml(idea.fitReason)}</dd>
+<dt>Angle</dt><dd>${escapeHtml(idea.angle)}</dd>
+<dt>Why now</dt><dd>${escapeHtml(idea.whyNow)}</dd>
+<dt>Sources</dt><dd>${idea.sourceIds.map(escapeHtml).join(", ")}</dd></dl></section>`,
+    )
+    .join("\n");
+  const citations = record.webCitations
+    .slice(0, 15)
+    .map((citation) => `<li>${escapeHtml(citation.title || citation.url)}: ${escapeHtml(citation.url)}</li>`)
+    .join("");
+  return `<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Blog ideas ${escapeHtml(record.runId)}</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;color:#1d1d1f;background:#fff}section{border-top:1px solid #ddd;padding:.5rem 0}dt{font-weight:600}dd{margin:0 0 .5rem}</style></head><body>
+<h1>Idea Scout: ${escapeHtml(record.runId)}</h1>
+<p>Status: ${escapeHtml(record.status)}. ${escapeHtml(record.slate?.evidenceNote ?? record.failure?.message ?? "")}</p>
+${ideas}
+<h2>Google Search suggestions</h2>
+${record.searchSuggestions.join("\n")}
+${citations ? `<h2>Web pages the search used</h2><ul>${citations}</ul>` : ""}
+</body></html>
+`;
+}
+
 /** A plain-text reading copy of a run for the owner. */
 export function renderRunForOwner(bundle: LiveRunBundle) {
   const lines: string[] = [];
@@ -131,6 +168,10 @@ export async function main(args: readonly string[], env: NodeJS.ProcessEnv, repo
       : [];
     const record = await runIdeaScout(deps, { previousPosts });
     writeFileSync(join(dirs.ideas, `${record.runId}.json`), `${JSON.stringify(record, null, 2)}\n`);
+    // Google's grounding terms require the Search Suggestions to be shown with
+    // grounded results; this local page is how the owner reads the ideas.
+    const htmlPath = join(dirs.ideas, `${record.runId}.html`);
+    writeFileSync(htmlPath, renderIdeasPage(record));
     out(`Idea slate ${record.runId}: ${record.status}, cost ${usd(record.totalCostMicroUsd)}`);
     if (record.failure) out(`Failure: ${record.failure.code}: ${record.failure.message}`);
     record.slate?.ideas.forEach((idea, index) => {
@@ -148,6 +189,7 @@ export async function main(args: readonly string[], env: NodeJS.ProcessEnv, repo
       out("", "Web pages the search used:");
       for (const citation of record.webCitations.slice(0, 15)) out(`- ${citation.title} ${citation.url}`);
     }
+    out("", `Read the ideas with Google's search suggestions: ${htmlPath}`);
     out("", `Spend so far: ${usd(ledger.totalMicroUsd())} of ${usd(LIVE_PHASE_CEILING_MICRO_USD)}`);
     return record.status === "ideas" ? 0 : 1;
   }
