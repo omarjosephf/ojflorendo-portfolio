@@ -28,21 +28,31 @@ const STATUS_LABEL: Record<PublicRunSummary["status"], { text: string; tone: "gr
   failed: { text: "Stopped", tone: "amber" },
 };
 
-function RunCard({ run }: { run: PublicRunSummary }) {
-  const status = run.status === "owner-review" && !run.postSlug
-    ? { text: "Passed; not published", tone: "neutral" as const }
-    : run.status === "owner-review"
+function runStatus(run: PublicRunSummary) {
+  if (run.status === "owner-review") {
+    return run.postSlug
       ? { text: "Passed; published", tone: "green" as const }
-      : STATUS_LABEL[run.status];
+      : { text: "Passed; not published", tone: "neutral" as const };
+  }
+  return STATUS_LABEL[run.status];
+}
+
+const shortUsd = (micro: number) => `US${(micro / 1_000_000).toFixed(2)}`;
+
+/** One run, collapsed to a summary line unless it produced the published post. */
+function RunCard({ run }: { run: PublicRunSummary }) {
+  const status = runStatus(run);
   const headingId = `blog-run-${run.runId}`;
-  return <section className={`${styles.card} ${live.panel}`} aria-labelledby={headingId}>
-    <div className={live.panelHeading}>
-      <h3 id={headingId}>{run.title ?? "No draft was produced"}</h3>
-      <Tag tone={status.tone}>{status.text}</Tag>
-    </div>
-    <p className={live.muted}>
-      {dateFormat.format(new Date(run.createdAt))} · run {run.runId} · editorial score {run.editorialScore ?? "none"} (passes above 75) · {usd(run.totalCostMicroUsd)}
-    </p>
+  return <details className={`${styles.card} ${live.panel} ${live.runDetails}`} open={Boolean(run.postSlug)}>
+    <summary>
+      <span className={live.panelHeading}>
+        <h3 id={headingId}>{run.title ?? "No draft was produced"}</h3>
+        <Tag tone={status.tone}>{status.text}</Tag>
+      </span>
+      <span className={live.muted}>
+        {dateFormat.format(new Date(run.createdAt))} · run {run.runId} · editorial score {run.editorialScore ?? "none"} (passes above 75) · {usd(run.totalCostMicroUsd)}
+      </span>
+    </summary>
     {run.postSlug && <p>Published as <a href={`/blog/${run.postSlug}`}>/blog/{run.postSlug}</a>.</p>}
     {run.holdReasons.length > 0 && <ul>{run.holdReasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>}
     {run.hardGates.length > 0 && <>
@@ -68,7 +78,7 @@ function RunCard({ run }: { run: PublicRunSummary }) {
       <h4>Critique lessons</h4>
       <dl className={live.definitions}>{run.critique.filter((lesson) => lesson.participated).map((lesson) => <div key={lesson.agent}><dt>{blogRoleLabel(lesson.agent)}</dt><dd>{lesson.lesson}</dd></div>)}</dl>
     </>}
-  </section>;
+  </details>;
 }
 
 /** Blog section of the owner panel: read-only (ADR-0025), showing phase 18.4's live agents (ADR-0026). */
@@ -94,7 +104,25 @@ export function BlogAdminOverview() {
       <h2 id="blog-runs">Runs</h2>
       {blogRuns.length === 0
         ? <p>No run has been recorded yet.</p>
-        : <p>{blogRuns.length} recorded {blogRuns.length === 1 ? "run" : "runs"}, newest first. Private run records, with the full draft and evidence, stay on OJ&apos;s computer.</p>}
+        : <>
+          <dl className={live.metrics}>
+            <div><dt>Published posts</dt><dd>{blogRuns.filter((run) => run.postSlug).length}</dd></div>
+            <div><dt>Runs recorded</dt><dd>{blogRuns.length}</dd></div>
+            <div><dt>Passed every gate</dt><dd>{blogRuns.filter((run) => run.status === "owner-review").length} of {blogRuns.length}</dd></div>
+            <div><dt>Model spend</dt><dd>{shortUsd(blogRuns.reduce((sum, run) => sum + run.totalCostMicroUsd, 0))}</dd></div>
+          </dl>
+          <div className={styles.tableScroll} tabIndex={0} role="region" aria-label="Recorded runs">
+            <table className={styles.table}>
+              <thead><tr><th scope="col">Date</th><th scope="col">Draft</th><th scope="col">Result</th><th scope="col">Score</th><th scope="col">Cost</th></tr></thead>
+              <tbody>{blogRuns.map((run) => <tr key={run.runId}>
+                <td>{dateFormat.format(new Date(run.createdAt))}</td>
+                <th scope="row" className={live.runTitle}>{run.postSlug ? <a href={`/blog/${run.postSlug}`}>{run.title}</a> : run.title ?? "No draft"}</th>
+                <td>{runStatus(run).text}</td><td>{run.editorialScore ?? "—"}</td><td>{shortUsd(run.totalCostMicroUsd)}</td>
+              </tr>)}</tbody>
+            </table>
+          </div>
+          <p className={live.muted}>Newest first. Open a run below for its gates, calls, SEO advice and Critique lessons. Private run records, with the full draft and evidence, stay on OJ&apos;s computer. Idea Scout calls are recorded separately and are not included in this spend.</p>
+        </>}
     </section>
     {blogRuns.map((run) => <RunCard key={run.runId} run={run} />)}
     <section className={`${styles.card} ${live.panel}`} aria-labelledby="blog-pipeline">

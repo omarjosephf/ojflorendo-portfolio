@@ -61,3 +61,8 @@
 .definitions dd { margin:6px 0 0; line-height:1.6; }
 .ragSection { margin-top:32px; }
 @media(max-width:700px){ .twoPanels{grid-template-columns:minmax(0,1fr);} .panel{padding:20px 16px;} }
+.runDetails > summary { display:grid; gap:8px; cursor:pointer; list-style:revert; }
+.runDetails > summary h3 { margin:0; font-size:18px; }
+.runDetails[open] > summary { margin-bottom:12px; }
+.runDetails h4 { margin:20px 0 8px; }
+.runTitle { text-transform:none !important; }
