@@ -349,6 +349,18 @@ and returns a frozen bundle with publication denied. It has no live provider,
 network, credential, repository-write or publishing path and is not re-exported
 by the public blog module.
 
+`src/lib/blog/live` is the Phase 18.4 live runner for the six
+[ADR-0026](docs/adr/0026-gemini-first-blog-agent-models.md) agents: Idea Scout,
+Planner–Researcher, Writer, SEO Agent, an independent Reviewer–Verifier on a
+different model, and Critique. The owner runs it from their own computer with
+`scripts/blog-agents.mjs` and a Gemini key kept outside the repository. It is
+not part of the site, the build or CI. Drafting agents quote exact sentences
+from an allowlist of this repository's public files. A durable ledger caps
+spend at US$1.00 per run and US$5.00 for the phase. A run never publishes: an
+owner-approved post is promoted into `content/blog/posts` and ships through the
+normal pull request. See the [runbook](docs/runbooks/blog-agents.md) and
+[threat model](docs/threat-models/blog-live-pipeline.md).
+
 The Phase 18.3 provider bake-off harness described in
 [ADR-0024](docs/adr/0024-blog-provider-bakeoff.md) is not part of this branch.
 On 29 September 2026 the owner cancelled the comparison before any run: no
