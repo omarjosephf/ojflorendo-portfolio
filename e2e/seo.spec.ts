@@ -15,6 +15,7 @@ test.describe("SEO & metadata routes", () => {
     expect(body).toContain("/projects/personal-portfolio-website");
     // The background sections live here now; omitting it would hide them.
     expect(body).toContain("/about");
+    expect(body).toContain("/blog");
   });
 
   test("manifest.webmanifest uses the approved identity", async ({ request }) => {

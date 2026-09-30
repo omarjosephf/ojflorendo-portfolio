@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site-url";
+import { getPublishedPosts } from "@/lib/blog";
 import { projects } from "@/data/projects";
 
 /**
@@ -29,6 +30,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.9,
     },
+    {
+      url: `${SITE_URL}/blog`,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
   ];
 
   // One entry per project that has a dedicated case-study route.
@@ -40,5 +46,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     }));
 
-  return [...pages, ...caseStudies];
+  const blogPosts: MetadataRoute.Sitemap = getPublishedPosts().map((post) => ({
+    url: `${SITE_URL}/blog/${post.slug}`,
+    lastModified: post.updatedAt ?? post.publishedAt ?? undefined,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...pages, ...caseStudies, ...blogPosts];
 }

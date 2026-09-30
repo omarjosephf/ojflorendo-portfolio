@@ -51,6 +51,7 @@ export const site: SiteConfig = {
   nav: [
     { label: "Services", targetId: "services" },
     { label: "Work", targetId: "projects" },
+    { label: "Blog", targetId: "blog", href: "/blog" },
     { label: "About", targetId: "about", href: "/about" },
     { label: "Contact", targetId: "contact" },
   ],

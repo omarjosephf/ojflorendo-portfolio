@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "status": "published",
+  "slug": "evaluating-retrieval-systems-refusal-testing-and-quote-integrity",
+  "title": "Why Automated Evaluation of RAG Needs Refusal Tests, Not Just Accurate Answers",
+  "excerpt": "Automated evaluation scores can conceal critical failure modes in retrieval systems if benchmarks test only positive outcomes rather than quote integrity and refusal handling.",
+  "publishedAt": "2026-09-30",
+  "updatedAt": null,
+  "author": {
+    "name": "OJ Florendo",
+    "url": "/about"
+  },
+  "disclosure": "AI agents researched and drafted this article from OJ Florendo's own project notes, quoting them word for word; an independent AI reviewer and automated checks verified every citation. OJ Florendo reviewed and approved it and is responsible for it.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Automated evaluation pipelines for retrieval-augmented generation systems frequently risk prioritising answer fluency over strict evidentiary discipline. When evaluating an assistant, verification requires not merely generating plausible responses, but also demonstrating restraint when information is missing. The project notes state: “Cited is OJ's document-assistant demo.”"
+    },
+    {
+      "type": "heading",
+      "id": "evaluating-refusal-mechanisms-and-baseline-metrics",
+      "level": 2,
+      "text": "Evaluating Refusal Mechanisms and Baseline Metrics"
+    },
+    {
+      "type": "paragraph",
+      "text": "A common vulnerability in retrieval pipelines is the tendency to hallucinate answers instead of declining queries unsupported by source materials. For this reason, a robust test suite must deliberately incorporate negative scenarios to verify that the system abstains correctly. The original Cited demo recorded a 100% automated evaluation score across five runs of the same fifteen-question set: ten answerable questions and five refusal cases."
+    },
+    {
+      "type": "paragraph",
+      "text": "Scoring mechanisms that reward completeness without assessing refusal behaviour fail to capture whether a system recognises the limits of its provided context. In automated testing environments, passing criteria must account for both positive assertions and appropriate non-answers. This checks expected citation and refusal outcomes; it is not an independent factual review of every answer."
+    },
+    {
+      "type": "heading",
+      "id": "quotation-integrity-and-generalisation-boundaries",
+      "level": 2,
+      "text": "Quotation Integrity and Generalisation Boundaries"
+    },
+    {
+      "type": "paragraph",
+      "text": "Achieving expected outputs across fixed test scenarios does not imply that an architecture will perform reliably under different domain conditions. System performance on curated queries cannot be extrapolated to unvetted corporate documentation without dedicated validation. Quote matching, support for an answer's claims, and accuracy on a new document set need separate checks."
+    },
+    {
+      "type": "paragraph",
+      "text": "Retrieval benchmarks often overlook subtle deviations between cited passages and underlying source texts. Verifying that quotations match verbatim and genuinely substantiate the associated statements remains essential before trusting automated scores. It does not establish accuracy on your internal policy documents or other unseen material."
+    },
+    {
+      "type": "paragraph",
+      "text": "Relying purely on aggregate success metrics risks obscuring architectural fragility across diverse corpora. When evaluation is constrained to predictable conditions, downstream deployments encounter unmonitored failure modes. It is not enough to show the system generalises."
+    },
+    {
+      "type": "heading",
+      "id": "contextual-boundaries-and-responsible-evaluation",
+      "level": 2,
+      "text": "Contextual Boundaries and Responsible Evaluation"
+    },
+    {
+      "type": "paragraph",
+      "text": "Any benchmark result must be interpreted strictly within the specific parameters under which testing occurred. Operational assumptions valid for one model iteration or document pool cannot be transferred uncritically to another. This evaluation context belongs to Cited."
+    },
+    {
+      "type": "paragraph",
+      "text": "System metrics depend heavily on underlying base models, prompt framing, and contextual constraints. Changing the foundation model or retrieval parameters alters error rates and refusal reliability. These measurements concern the original Haiku-based demo."
+    },
+    {
+      "type": "paragraph",
+      "text": "Engineering effective document assistants requires maintaining human scrutiny over automated outputs rather than outsourcing verification entirely to metric dashboards. The project notes state: “OJ uses AI as an accountable tool rather than a substitute for judgement.”"
+    },
+    {
+      "type": "paragraph",
+      "text": "Rigorous retrieval evaluation demands testing both accurate retrieval and disciplined refusals. Verifying precise quotation fidelity and acknowledging contextual boundaries ensure that automated systems remain reliable aids rather than unverified sources of truth."
+    }
+  ],
+  "sources": [
+    {
+      "id": "content-assistant-how-oj-works",
+      "title": "How OJ works",
+      "url": "https://github.com/omarjosephf/ojflorendo-portfolio/blob/main/content/assistant/how-oj-works.md",
+      "publisher": "OJ Florendo",
+      "accessedAt": "2026-09-30"
+    },
+    {
+      "id": "content-assistant-project-cited",
+      "title": "Project: Cited",
+      "url": "https://github.com/omarjosephf/ojflorendo-portfolio/blob/main/content/assistant/project-cited.md",
+      "publisher": "OJ Florendo",
+      "accessedAt": "2026-09-30"
+    }
+  ],
+  "seo": {
+    "title": "Why RAG Evaluation Needs Refusal Tests",
+    "description": "Examine why retrieval-augmented generation benchmarks must evaluate refusal testing and quotation integrity rather than relying solely on accuracy scores.",
+    "keywords": [
+      "retrieval-augmented generation",
+      "automated evaluation",
+      "refusal testing",
+      "citation integrity",
+      "RAG benchmarks"
+    ]
+  }
+}

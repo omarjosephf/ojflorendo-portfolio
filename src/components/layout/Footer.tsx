@@ -8,6 +8,7 @@ import { SocialIcon } from "@/components/ui/SocialIcon";
 const footerLinks = [
   { label: "Services", href: "/#services" },
   { label: "Work", href: "/#projects" },
+  { label: "Blog", href: "/blog" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/#contact" },
 ];

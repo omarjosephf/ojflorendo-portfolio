@@ -28,7 +28,7 @@ it("opens on the E.V section and switches to a read-only Blog section",async()=>
   expect(within(nav).getByRole("button",{name:"E.V assistant"})).toHaveAttribute("aria-current","true");
   fireEvent.click(within(nav).getByRole("button",{name:"Blog agents"}));
   expect(screen.getByRole("heading",{level:1,name:"Blog agents"})).toBeInTheDocument();
-  expect(screen.getByText("Not running")).toBeInTheDocument();expect(screen.getByRole("heading",{name:"This panel will never"})).toBeInTheDocument();
+  expect(screen.getByText("Owner-run")).toBeInTheDocument();expect(screen.getByRole("heading",{name:"This panel will never"})).toBeInTheDocument();
   expect(screen.queryByRole("button",{name:"Refresh conversations"})).toBeNull();
   expect(fetcher.mock.calls.some(call=>String(call[0]).includes("view=rag"))).toBe(false);
   expect(fetcher.mock.calls.every(call=>!call[1]?.body)).toBe(true);

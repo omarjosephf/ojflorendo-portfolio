@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import sitemap from "./sitemap";
 import { SITE_URL } from "@/lib/site-url";
+import { getPublishedPosts } from "@/lib/blog";
 import { projects } from "@/data/projects";
 
 describe("sitemap", () => {
@@ -11,6 +12,7 @@ describe("sitemap", () => {
     // sections, so leaving it out would hide half the site from crawlers.
     expect(entries.some((e) => e.url === `${SITE_URL}/`)).toBe(true);
     expect(entries.some((e) => e.url === `${SITE_URL}/about`)).toBe(true);
+    expect(entries.some((e) => e.url === `${SITE_URL}/blog`)).toBe(true);
   });
 
   it("includes one absolute entry per project case study", () => {
@@ -19,9 +21,21 @@ describe("sitemap", () => {
       const url = `${SITE_URL}/projects/${project.slug}`;
       expect(entries.some((e) => e.url === url)).toBe(true);
     }
-    // Two standalone pages (/ and /about) plus one entry per case study, and
-    // nothing else: a stray entry is as much a defect as a missing one.
-    expect(entries.length).toBe(2 + withCaseStudy.length);
+    // Three standalone pages plus one entry per case study and published blog
+    // post. Drafts are filtered by the blog repository before they reach here.
+    expect(entries.length).toBe(
+      3 + withCaseStudy.length + getPublishedPosts().length,
+    );
+  });
+
+  it("includes every published blog post with its evidenced content date", () => {
+    for (const post of getPublishedPosts()) {
+      const entry = entries.find(
+        (candidate) => candidate.url === `${SITE_URL}/blog/${post.slug}`,
+      );
+      expect(entry).toBeDefined();
+      expect(entry?.lastModified).toBe(post.updatedAt ?? post.publishedAt);
+    }
   });
 
   it("uses absolute URLs", () => {
@@ -30,12 +44,13 @@ describe("sitemap", () => {
     }
   });
 
-  // Regression guard. Every entry previously carried `lastModified: new Date()`,
-  // so each deployment claimed the whole site had changed — which teaches search
-  // engines to ignore the field. No page here has a real content date, so none
-  // may assert one.
-  it("never claims a modification date it cannot evidence", () => {
-    for (const entry of entries) {
+  // Regression guard. Static pages and case studies still have no tracked
+  // revision date. Blog post records do, so only their routes may emit one.
+  it("never invents a modification date for undated content", () => {
+    const blogUrls = new Set(
+      getPublishedPosts().map((post) => `${SITE_URL}/blog/${post.slug}`),
+    );
+    for (const entry of entries.filter((item) => !blogUrls.has(item.url))) {
       expect(entry.lastModified).toBeUndefined();
     }
   });

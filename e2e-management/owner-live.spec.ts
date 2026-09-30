@@ -48,7 +48,7 @@ for(const theme of ["light","dark"] as const)for(const width of [1280,390])test(
  await page.setViewportSize({width,height:900});await fixture(page);await page.goto("/manage/live");await page.getByLabel("Workspace color theme").selectOption(theme);await signIn(page);await verify(page);
  const sections=page.getByRole("navigation",{name:"Admin sections"});
  await sections.getByRole("button",{name:"Blog agents"}).click();await expect(page.getByRole("heading",{level:1,name:"Blog agents"})).toBeVisible();
- await expect(page.getByText("Not running",{exact:true})).toBeVisible();await expect(page.getByRole("button",{name:"Refresh conversations"})).toHaveCount(0);await audit(page);
+ await expect(page.getByText("Owner-run",{exact:true})).toBeVisible();await expect(page.getByRole("button",{name:"Refresh conversations"})).toHaveCount(0);await audit(page);
  await page.screenshot({path:`.ev-preview/admin-blog-${theme}-${width}.png`,fullPage:true});
  await sections.getByRole("button",{name:"E.V assistant"}).click();await page.getByRole("button",{name:"Show RAG configuration"}).click();
  await expect(page.getByRole("heading",{name:"Target words per chunk"})).toBeVisible();await audit(page);
