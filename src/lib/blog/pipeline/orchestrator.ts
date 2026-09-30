@@ -98,10 +98,10 @@ const HARD_ISSUE_CATEGORIES = new Set([
   "unsafe-content",
 ]);
 
-function buildReviewReport(
+export function buildReviewReport(
   output: ReviewerOutput,
   draftRevision: 1 | 2,
-  budget: RunCostBudget,
+  reportedCostMicroUsd: number,
   finalReview: boolean,
 ): ReviewReport {
   const categories = new Set(output.issues.map((issue) => issue.category));
@@ -174,7 +174,7 @@ function buildReviewReport(
     issues: output.issues,
     requiredCorrections: output.requiredCorrections,
     scores: output.scores,
-    reportedFixtureCostMicroUsd: budget.snapshot().reportedActualMicroUsd,
+    reportedFixtureCostMicroUsd: reportedCostMicroUsd,
     publicationRecommendation: decision === "approve" ? "owner-review-required" : "do-not-publish",
   };
 }
@@ -505,7 +505,7 @@ export async function runOfflineBlogWorkflow(
       reviewerPayload(evidenceLedger, firstDraft, 1),
       (output) => parseReviewerOutput(output, firstDraft),
     );
-    const firstReview = buildReviewReport(firstReviewOutput, 1, budget, false);
+    const firstReview = buildReviewReport(firstReviewOutput, 1, budget.snapshot().reportedActualMicroUsd, false);
     reviews.push(firstReview);
     digests.reviewSha256.push(canonicalSha256(firstReview));
 
@@ -537,7 +537,7 @@ export async function runOfflineBlogWorkflow(
       reviewerPayload(evidenceLedger, revisedDraft, 2),
       (output) => parseReviewerOutput(output, revisedDraft),
     );
-    const finalReview = buildReviewReport(finalReviewOutput, 2, budget, true);
+    const finalReview = buildReviewReport(finalReviewOutput, 2, budget.snapshot().reportedActualMicroUsd, true);
     reviews.push(finalReview);
     digests.reviewSha256.push(canonicalSha256(finalReview));
     allFixturesConsumed(clients);
