@@ -151,7 +151,7 @@ export function renderRunForOwner(bundle: LiveRunBundle) {
   return `${lines.join("\n")}\n`;
 }
 
-export async function main(args: readonly string[], env: NodeJS.ProcessEnv, repoRootInput: string) {
+export async function main(args: readonly string[], env: Readonly<Record<string, string | undefined>>, repoRootInput: string) {
   const repoRoot = resolve(repoRootInput);
   const command = args[0];
   const dataDir = env.BLOG_AGENTS_DATA_DIR ?? "";
