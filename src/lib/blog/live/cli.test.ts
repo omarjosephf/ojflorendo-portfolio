@@ -45,8 +45,8 @@ function respond(body: Record<string, unknown>): unknown {
           evidenceNote: "One well-supported idea.",
         },
         [
-          { type: "google_search_call", queries: ["portfolio chatbot citations"] },
-          { type: "google_search_result", search_suggestions: '<div class="gs-chip">portfolio chatbot citations</div>' },
+          { type: "google_search_call", arguments: { queries: ["portfolio chatbot citations"] } },
+          { type: "google_search_result", call_id: "search_001", result: [{ search_suggestions: '<div class="gs-chip">portfolio chatbot citations</div>' }] },
         ],
       );
     case "blog-researcher-live-v1": {

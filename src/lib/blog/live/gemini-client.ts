@@ -38,6 +38,8 @@ export interface GeminiCallResult {
   outputTokens: number;
   thoughtTokens: number;
   searchQueries: string[];
+  /** Number of google_search_call steps, whether or not their queries were reported. */
+  searchCalls: number;
   groundingCitations: GroundingCitation[];
   /** Google's rendered search-suggestion snippets, kept for the owner's record. */
   searchSuggestions: string[];
@@ -123,18 +125,22 @@ export function parseGeminiInteraction(
   const searchSuggestions: string[] = [];
   for (const step of steps) {
     if (!isRecord(step)) continue;
-    if (step.type === "google_search_call" && Array.isArray(step.queries)) {
-      for (const query of step.queries) if (typeof query === "string") searchQueries.push(query);
+    // Documented shapes: google_search_call.arguments.queries and
+    // google_search_result.result[].search_suggestions.
+    if (step.type === "google_search_call") {
+      const queries = isRecord(step.arguments) ? step.arguments.queries : step.queries;
+      if (Array.isArray(queries)) for (const query of queries) if (typeof query === "string") searchQueries.push(query);
     }
-    if (step.type === "google_search_result" && typeof step.search_suggestions === "string") {
-      searchSuggestions.push(step.search_suggestions);
+    if (step.type === "google_search_result") {
+      const results = Array.isArray(step.result) ? step.result : [step];
+      for (const result of results) {
+        if (isRecord(result) && typeof result.search_suggestions === "string") searchSuggestions.push(result.search_suggestions);
+      }
     }
   }
   // An unreported query count is still charged once per search step.
-  const chargedQueries = Math.max(
-    searchQueries.length,
-    steps.filter((step) => isRecord(step) && step.type === "google_search_call").length,
-  );
+  const searchCalls = steps.filter((step) => isRecord(step) && step.type === "google_search_call").length;
+  const chargedQueries = Math.max(searchQueries.length, searchCalls);
   const cost = costMicroUsd(config.model, {
     inputTokens,
     outputTokens: outputTokens + thoughtTokens,
@@ -208,6 +214,7 @@ export function parseGeminiInteraction(
     outputTokens,
     thoughtTokens,
     searchQueries,
+    searchCalls,
     groundingCitations,
     searchSuggestions,
     costMicroUsd: cost,

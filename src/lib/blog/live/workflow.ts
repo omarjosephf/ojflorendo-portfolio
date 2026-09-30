@@ -277,7 +277,13 @@ export async function runIdeaScout(
         sourceCatalog: sourceCatalog(deps.repoRoot),
       },
       IDEA_SLATE_SCHEMA,
-      (output) => parseIdeaSlate(output, allowed),
+      (output, call) => {
+        // Google's grounding terms: grounded results are shown only with their Search Suggestions.
+        if (call.searchCalls > 0 && call.searchSuggestions.length === 0) {
+          throw new Error("Google Search was used but no Search Suggestions came back, so the ideas cannot be shown.");
+        }
+        return parseIdeaSlate(output, allowed);
+      },
     );
     return withIntegrity({
       ...base,

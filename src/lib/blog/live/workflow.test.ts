@@ -264,8 +264,8 @@ describe("runIdeaScout", () => {
               evidenceNote: "One strong idea.",
             },
             [
-              { type: "google_search_call", queries: ["grounded chatbot small business"] },
-              { type: "google_search_result", search_suggestions: "<div>chip</div>" },
+              { type: "google_search_call", arguments: { queries: ["grounded chatbot small business"] } },
+              { type: "google_search_result", call_id: "search_001", result: [{ search_suggestions: "<div>chip</div>" }] },
             ],
           );
         },
