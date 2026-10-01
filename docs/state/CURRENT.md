@@ -1,6 +1,6 @@
 # Current state
 
-Updated 30 September 2026 (phase 18.4 done; mobile-menu test fix deployed; phases 18.6 and 18.7 added; 19b moved next). This file is what a fresh session should read first.
+Updated 1 October 2026 (phases 18.6 and 18.7 added; 19b moved next; Next.js security fix deployed). This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
@@ -88,6 +88,20 @@ handbook §11's.
 
 ### Done
 
+- **Next.js updated to 16.3.8 for a critical advisory**, 1 October 2026.
+  [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j),
+  published 30 September, reports remote code execution in the Node.js
+  `ImageResponse` from `next/og` for versions from 16.2.0 up to 16.3.6.
+  Production ran 16.3.5, and the dependency audit blocked every pull request.
+  The site's only use, `src/app/opengraph-image.tsx`, renders fixed values and
+  reads no request input, so the attack path does not appear to have applied.
+  Only `next` and `eslint-config-next` changed, with their own `@next`
+  packages. Not a roadmap phase. The full gate passed locally on all 17 stages
+  (1,004 unit, 93 portfolio e2e, 50 management e2e), and `verify` passed on
+  `1fc250e`. #116 merged as `08c6904` at 01:09Z after the owner applied
+  `approved-to-deploy`. Production deployment `6773712749` succeeded;
+  `https://ojfr.me/` serves its scripts, and `/`, `/blog`, the post and
+  `/opengraph-image` return 200.
 - **Flaky mobile-menu test fixed and deployed**, 30 September 2026. The e2e
   test "the mobile menu opens and closes with Escape" could run its axe scan
   while the menu was still fading in, and failed once in CI (run `36705898877`
