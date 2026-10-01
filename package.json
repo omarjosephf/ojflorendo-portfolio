@@ -51,35 +51,35 @@
     "test:management:restore": "node scripts/test-management-backup.mjs && node scripts/test-management-backup-job.mjs && node scripts/test-management-restore.mjs"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.8",
-    "@react-three/fiber": "^9.6.1",
-    "@supabase/supabase-js": "2.116.0",
-    "framer-motion": "^13.3.0",
-    "lucide-react": "^1.46.0",
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.1",
+    "@supabase/supabase-js": "2.117.2",
+    "framer-motion": "^13.4.4",
+    "lucide-react": "^1.48.0",
     "next": "16.3.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "three": "^0.186.0"
+    "three": "^0.186.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "3.1131.0",
+    "@aws-sdk/client-s3": "3.1141.0",
     "@axe-core/playwright": "^4.13.0",
     "@electric-sql/pglite": "0.5.8",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.186.0",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.8",
-    "jsdom": "^30.0.1",
+    "jsdom": "^30.1.1",
     "pg": "8.23.0",
     "tailwindcss": "^4",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.2"
   }
 }
