@@ -18,6 +18,16 @@ describe("sentenceSpans", () => {
     ]);
   });
 
+  it("offers a bold lead sentence and the sentence after it without their emphasis markers", () => {
+    const content = "**Provider cost is zero because no provider is used.** There is no account, key or quota to manage.";
+    const spans = sentenceSpans(content);
+    expect(spans.map((span) => span.text)).toEqual([
+      "Provider cost is zero because no provider is used.",
+      "There is no account, key or quota to manage.",
+    ]);
+    for (const span of spans) expect(sliceUtf8(content, span.startByte, span.endByte)).toBe(span.text);
+  });
+
   it("keeps exact byte bounds for every offered sentence", () => {
     const content = "- Café owners ask about chat. They want answers that cite sources.";
     for (const span of sentenceSpans(content)) {
