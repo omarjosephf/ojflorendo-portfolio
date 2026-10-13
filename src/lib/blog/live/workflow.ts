@@ -240,13 +240,16 @@ class CallRunner {
       record.failureCode = error instanceof ModelCallError ? error.code : "provider-failure";
       record.failureDetail = describe(error);
       if (error instanceof ModelCallError && error.usage) this.recordUsage(record, error.usage);
+      let overReservation = false;
       if (error instanceof ModelCallError && error.partialCostMicroUsd !== undefined) {
         record.actualMicroUsd = error.partialCostMicroUsd;
-        this.deps.ledger.settle(callId, error.partialCostMicroUsd);
+        overReservation = this.deps.ledger.settle(callId, error.partialCostMicroUsd);
+        if (overReservation) record.failureDetail = `${record.failureDetail} OpenRouter also reported a cost above the reservation.`;
       }
       // Otherwise the reservation stays open and fully counted: OpenRouter may have billed it.
-      // A rejected key (401), exhausted credit or key limit (402) or refusal (403) stops every further call.
-      const global = error instanceof ModelCallError && [401, 402, 403].includes(error.status ?? 0);
+      // A rejected key (401), exhausted credit or key limit (402), refusal (403) or a cost
+      // above the reservation stops every further call.
+      const global = overReservation || (error instanceof ModelCallError && [401, 402, 403].includes(error.status ?? 0));
       throw new LiveRunFault(record.failureCode, stage, describe(error), global);
     }
 

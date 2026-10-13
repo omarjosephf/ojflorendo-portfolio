@@ -179,6 +179,14 @@ export function parseOpenRouterCompletion(
   // Reasoning tokens are part of completion_tokens and billed as output.
   const computed = costMicroUsd(config.model, { inputTokens, outputTokens: completionTokens, webSearches });
   const cost = Math.max(computed, reportedCostMicroUsd ?? 0);
+  // A usage record can settle the call only when it states the charge or, for a
+  // call without search, both token counts. Search fees appear only in the
+  // reported charge, because OpenRouter reports zero searches. Anything less is
+  // an unknown outcome, and the full reservation stays counted.
+  const settles =
+    usage !== undefined &&
+    (reportedCostMicroUsd !== null ||
+      (!config.webSearch && typeof usage.prompt_tokens === "number" && typeof usage.completion_tokens === "number"));
 
   // The response outline (field names and finish reason, never content) makes a
   // contract failure diagnosable without paying for another call.
@@ -196,12 +204,12 @@ export function parseOpenRouterCompletion(
     webSearches,
     reportedCostMicroUsd,
   };
-  // Without a usage record the charge is unknown, so the full reservation stays counted.
+  // Without a settling usage record the charge is unknown, so the full reservation stays counted.
   const fail = (code: ModelCallError["code"], message: string): never => {
-    throw new ModelCallError(code, `${message}${outline}`, usage ? cost : undefined, undefined, usage ? reported : undefined);
+    throw new ModelCallError(code, `${message}${outline}`, settles ? cost : undefined, undefined, usage ? reported : undefined);
   };
 
-  if (!usage) fail("invalid-response", "OpenRouter returned no usage record.");
+  if (!settles) fail("invalid-response", "OpenRouter returned no usage record that states the charge.");
   if (isRecord(raw.error)) fail("invalid-response", "OpenRouter returned an error inside a successful response.");
   if (!sameModel(raw.model, config.model)) fail("invalid-response", "OpenRouter answered with a different model.");
   if (!config.webSearch && webSearches > 0) fail("unexpected-tool-use", "The model searched the web in a role that has no tools.");
@@ -226,10 +234,12 @@ export function parseOpenRouterCompletion(
   if (Array.isArray(message.annotations)) {
     for (const annotation of message.annotations) {
       const citation = isRecord(annotation) && annotation.type === "url_citation" ? annotation.url_citation : undefined;
-      if (isRecord(citation) && typeof citation.url === "string" && citation.url.startsWith("https://")) {
+      // Addresses with spaces or control characters are dropped; titles lose
+      // control and direction-changing characters before they reach a terminal.
+      if (isRecord(citation) && typeof citation.url === "string" && /^https:\/\/[^\s\p{Cc}]+$/u.test(citation.url)) {
         webCitations.push({
           url: citation.url.slice(0, 2_000),
-          title: typeof citation.title === "string" ? citation.title.slice(0, 200) : "",
+          title: typeof citation.title === "string" ? citation.title.replace(UNPRINTABLE, "").slice(0, 200) : "",
         });
       }
     }
@@ -249,6 +259,8 @@ export function parseOpenRouterCompletion(
   }
   return { output, model: raw.model as string, ...reported, webCitations, costMicroUsd: cost, latencyMs };
 }
+
+const UNPRINTABLE = /[\p{Cc}‎‏‪-‮⁦-⁩]/gu;
 
 const FENCED_JSON = /^\s*```(?:json)?[ \t]*\r?\n([\s\S]*?)\r?\n```\s*$/u;
 

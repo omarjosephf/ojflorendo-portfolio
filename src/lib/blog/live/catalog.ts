@@ -172,13 +172,15 @@ export function costMicroUsd(
 /**
  * Worst-case cost for one call, reserved before dispatch. The request's UTF-8
  * byte count bounds its input tokens. With web search the model may take one
- * turn per search plus a final one, each re-reading the request and every
- * result so far and each able to use its whole output cap.
+ * turn per search plus a final one. Each turn re-reads the request, every
+ * result so far and every earlier turn's output, and each may use its whole
+ * output cap.
  */
 export function reservationMicroUsd(config: LiveAgentConfig, requestBytes: number): number {
   const turns = config.webSearch ? WEB_SEARCH.maxUses + 1 : 1;
+  const earlierOutputs = ((turns * (turns - 1)) / 2) * config.maxOutputTokens;
   return costMicroUsd(config.model, {
-    inputTokens: turns * (requestBytes + (config.webSearch ? WEB_SEARCH_RESULT_TOKENS : 0)),
+    inputTokens: turns * (requestBytes + (config.webSearch ? WEB_SEARCH_RESULT_TOKENS : 0)) + earlierOutputs,
     outputTokens: turns * config.maxOutputTokens,
     webSearches: config.webSearch ? WEB_SEARCH.maxUses : 0,
   });

@@ -332,7 +332,11 @@ above the US$1.00 per-run ceiling.
    removed. A unit test keeps the schemas to this subset.
 5. **Cost is OpenRouter's reported charge, never less than the reviewed
    price.** Each call settles at the larger of OpenRouter's `usage.cost` and
-   the cost computed from tokens and the price table.
+   the cost computed from tokens and the price table. A response whose usage
+   record states neither the charge nor, for a call without search, both
+   token counts is an unknown outcome and keeps its full reservation. A
+   search call needs the stated charge, because only that includes Exa's
+   fee. A failed call billed above its reservation stops every further call.
 
 ### Why
 

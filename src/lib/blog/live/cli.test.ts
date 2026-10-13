@@ -41,7 +41,7 @@ function respond(body: Record<string, unknown>): unknown {
     case "blog-idea-scout-search-live-v1":
       return interaction(model, "Readers ask whether chat assistants cite sources.", {
         text: true,
-        usage: { server_tool_use: { web_search_requests: 1 } },
+        usage: { server_tool_use: { web_search_requests: 1 }, cost: 0.018625 },
         annotations: [{ type: "url_citation", url_citation: { url: "https://example.com/<b>chat</b>", title: "Chat & citations" } }],
       });
     case "blog-idea-scout-live-v3":

@@ -113,8 +113,14 @@ describe("reservation", () => {
     const bytes = openRouterRequestBytes(input(scout));
     const reserved = reservationMicroUsd(scout, bytes);
     const turns = WEB_SEARCH.maxUses + 1;
+    // Every turn re-reads the request and all earlier turns' outputs (1 + 2 + 3 caps over four turns).
+    const earlierOutputs = 6 * scout.maxOutputTokens;
     expect(reserved).toBeGreaterThanOrEqual(
-      costMicroUsd(scout.model, { inputTokens: turns * bytes, outputTokens: turns * scout.maxOutputTokens, webSearches: WEB_SEARCH.maxUses }),
+      costMicroUsd(scout.model, {
+        inputTokens: turns * bytes + earlierOutputs,
+        outputTokens: turns * scout.maxOutputTokens,
+        webSearches: WEB_SEARCH.maxUses,
+      }),
     );
     expect(reserved).toBeLessThan(1_000_000);
   });
@@ -206,6 +212,52 @@ describe("parseOpenRouterCompletion", () => {
     }
     expect((caught as ModelCallError).code).toBe("invalid-response");
     expect((caught as ModelCallError).partialCostMicroUsd).toBeUndefined();
+  });
+
+  it("keeps the reservation when the usage record states neither the charge nor the token counts", () => {
+    const empty = { ...completion("google/gemini-3.8-flash", '{"ok":true}'), usage: {} };
+    expect(() => parseOpenRouterCompletion(writer, empty, 1)).toThrow(ModelCallError);
+    try {
+      parseOpenRouterCompletion(writer, empty, 1);
+    } catch (error) {
+      expect(error).toMatchObject({ code: "invalid-response", partialCostMicroUsd: undefined });
+    }
+    // The same holds for a truncated answer: an unknown charge never settles at zero.
+    const truncated = {
+      ...completion("google/gemini-3.8-flash", '{"ok":', { choice: { finish_reason: "length" } }),
+      usage: { completion_tokens_details: {} },
+    };
+    try {
+      parseOpenRouterCompletion(writer, truncated, 1);
+    } catch (error) {
+      expect((error as ModelCallError).partialCostMicroUsd).toBeUndefined();
+    }
+  });
+
+  it("settles a search call only on OpenRouter's stated charge, because the search count comes back as zero", () => {
+    const noCharge = completion("google/gemini-3.8-flash", "Readers ask about X.", { usage: { cost: undefined } });
+    let caught: unknown;
+    try {
+      parseOpenRouterCompletion(scout, noCharge, 1, "text");
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toMatchObject({ code: "invalid-response", partialCostMicroUsd: undefined });
+    const charged = completion("google/gemini-3.8-flash", "Readers ask about X.", { usage: { cost: 0.018625 } });
+    expect(parseOpenRouterCompletion(scout, charged, 1, "text").costMicroUsd).toBe(18_625);
+  });
+
+  it("drops citation addresses with spaces or control characters and strips them from titles", () => {
+    const raw = completion("google/gemini-3.8-flash", "Notes.", {
+      message: {
+        annotations: [
+          { type: "url_citation", url_citation: { url: "https://example.com/ok", title: "Safe\u001b[2J title‮\u0007" } },
+          { type: "url_citation", url_citation: { url: "https://example.com/a b", title: "Space" } },
+          { type: "url_citation", url_citation: { url: "https://example.com/\u0000", title: "Null" } },
+        ],
+      },
+    });
+    expect(parseOpenRouterCompletion(scout, raw, 1, "text").webCitations).toEqual([{ url: "https://example.com/ok", title: "Safe[2J title" }]);
   });
 
   it("refuses tool use outside the Idea Scout and searches beyond the cap", () => {

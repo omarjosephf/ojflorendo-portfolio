@@ -255,6 +255,24 @@ describe("runLiveBlogWorkflow", () => {
     expect(tiny.totalMicroUsd()).toBe(0);
   });
 
+  it("treats a failed call billed above its reservation as a global stop and skips critique", async () => {
+    let calls = 0;
+    const fetchImpl: FetchLike = async (_url, init) => {
+      calls += 1;
+      const body = JSON.parse(init.body) as Record<string, unknown>;
+      const raw = interaction(String(body.model), { partial: true }, { usage: { cost: 0.9 } });
+      raw.choices[0].finish_reason = "length";
+      return { ok: true, status: 200, text: async () => JSON.stringify(raw) };
+    };
+    const bundle = await runLiveBlogWorkflow({ repoRoot, apiKey: KEY, ledger, fetchImpl }, brief);
+    expect(calls).toBe(1);
+    expect(bundle.failure).toMatchObject({ code: "incomplete", stage: "research" });
+    expect(bundle.calls[0].actualMicroUsd).toBe(900_000);
+    expect(bundle.calls[0].failureDetail).toContain("above the reservation");
+    expect(bundle.critique).toBeNull();
+    expect(bundle.critiqueSkippedReason).toContain("forbids another provider call");
+  });
+
   it("keeps the full reservation when a call's outcome is unknown", async () => {
     const fetchImpl: FetchLike = async () => {
       throw new Error("socket closed");
@@ -284,7 +302,7 @@ describe("runIdeaScout", () => {
     expect(body).not.toHaveProperty("response_format");
     return interaction(String(body.model), NOTES, {
       text: true,
-      usage: { server_tool_use: { web_search_requests: 2 } },
+      usage: { server_tool_use: { web_search_requests: 2 }, cost: 0.025625 },
       annotations: [
         { type: "url_citation", url_citation: { url: "https://example.com/chat", title: "Chat on small sites", content: "Excerpt." } },
       ],
@@ -359,7 +377,7 @@ describe("runIdeaScout", () => {
     const seen: string[] = [];
     const fetchImpl = fakeFetch(
       {
-        "blog-idea-scout-search-live-v1": (body) => interaction(String(body.model), "x".repeat(4_001), { text: true }),
+        "blog-idea-scout-search-live-v1": (body) => interaction(String(body.model), "x".repeat(4_001), { text: true, usage: { cost: 0.018625 } }),
       },
       seen,
     );
