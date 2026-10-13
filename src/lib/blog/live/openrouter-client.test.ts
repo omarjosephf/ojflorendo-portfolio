@@ -74,7 +74,7 @@ describe("buildOpenRouterRequestBody", () => {
       ],
       response_format: { type: "json_schema", json_schema: { name: "writer-output", strict: true, schema } },
       reasoning: { effort: "medium", exclude: true },
-      max_tokens: 16_384,
+      max_tokens: 32_768,
       stream: false,
       provider: {
         only: ["google-ai-studio", "google-vertex"],

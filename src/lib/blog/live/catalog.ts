@@ -105,11 +105,13 @@ export const LIVE_AGENTS: Readonly<Record<LiveAgentRole, LiveAgentConfig>> = Obj
     maxOutputTokens: 16_384,
     webSearch: false,
   },
+  // Raised from 16,384 on 14 October 2026: one draft spent 15,728 tokens thinking
+  // and hit the cap (run-20261013-231844). The model allows 65,536.
   writer: {
     role: "writer",
     model: "google/gemini-3.8-flash",
     thinkingLevel: "medium",
-    maxOutputTokens: 16_384,
+    maxOutputTokens: 32_768,
     webSearch: false,
   },
   seo: {
