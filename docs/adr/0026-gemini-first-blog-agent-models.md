@@ -391,7 +391,7 @@ above the US$1.00 per-run ceiling.
 
 ### Verification — phase A, 13 October 2026
 
-All spend is recorded in `openrouter-spend-ledger.json`: **US$0.2516 of the
+All spend is recorded in `openrouter-spend-ledger.json`: **US$1.3736 of the
 approved US$2.00**.
 
 - **Three failed A3 attempts (US$0.1135).**
@@ -420,6 +420,30 @@ approved US$2.00**.
   | SEO | `gemini-3.5-flash-lite` | US$0.0011 |
   | Review | `gemini-3.1-pro-preview` | US$0.0647 |
   | Critique | `gemini-3.8-flash` | US$0.0037 |
+
+- **Review and final verification, 13–14 October 2026.** A fresh-context
+  review found four gaps, all fixed with tests:
+  - an empty usage record settled a call at zero;
+  - a failed call billed above its reservation was not a global stop;
+  - the search reservation omitted earlier turns' outputs;
+  - web page titles reached the terminal with control characters.
+
+  Six more live runs on slate `ideas-20261013-230822` then found further
+  faults, each fixed and checked live:
+
+  | Run | Result | What it showed |
+  | --- | --- | --- |
+  | `run-20261013-230928` | held | Quoted sentences kept their Markdown and mid-sentence capitals. Fix: Markdown sentences are no longer offered, and Writer v4 never splices a quote |
+  | `run-20261013-231844` | failed | The Writer spent 15,728 tokens thinking and hit its 16,384 cap. Fix: the cap is now 32,768 |
+  | `run-20261013-232216` | no-draft | The Researcher refused the brief. Bold lead sentences were being dropped. Fix: they are offered without their markers |
+  | `run-20261013-232504` | held | The prompt-injection gate fired, as designed, on ADR-0006, a document about prompt injection |
+  | `run-20261013-232843` | no-draft | Correct: the brief claimed what the sources do not say |
+  | `run-20261013-233000` | held | The Reviewer recommended approve, but one uncited sentence failed claim coverage, and any failed gate rejected without the revision built to fix it. Fix: a first-review claim-coverage or claim-support failure now takes the single revision; the final review must still pass every gate |
+  | `run-20261013-233533` | held | The revision ran and every gate passed on the final review. The Reviewer still asked for writing fixes: quoted sentences that rely on their source's context ("V", "recorded below") |
+
+  Every call in these runs returned valid output. The open quality gap is
+  sentence choice: the Researcher still picks sentences that need their
+  original context. That is the next prompt-quality task.
 
 ## Related decisions
 
