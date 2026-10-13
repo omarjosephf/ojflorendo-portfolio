@@ -36,7 +36,7 @@ it("shows each agent's model and a recorded run with its gates, calls, SEO advic
   expect(screen.getByText("Owner-run")).toBeInTheDocument();
   const models = screen.getByRole("region", { name: "Agent models" });
   expect(within(models).getByRole("rowheader", { name: "Reviewer–Verifier" }).closest("tr")).toHaveTextContent("gemini-3.1-pro-preview");
-  expect(within(models).getByRole("rowheader", { name: "Idea Scout" }).closest("tr")).toHaveTextContent("Google Search");
+  expect(within(models).getByRole("rowheader", { name: "Idea Scout" }).closest("tr")).toHaveTextContent("Web search (Exa)");
   expect(screen.getByRole("region", { name: "Recorded runs" })).toHaveTextContent("Passed; published");
   const run = screen.getByRole("heading", { level: 3, name: "Inside a grounded portfolio assistant" }).closest("details") as HTMLElement;
   expect(run).toHaveAttribute("open");

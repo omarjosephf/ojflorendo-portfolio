@@ -38,8 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Enforce the dependency audit gate. EXC-0001 was closed by remediation on
-      # 2026-08-01; there is no active exception, so this asserts a clean audit.
+      # Enforce the dependency audit gate. The production audit must be clean;
+      # the full audit may carry only the exact EXC-0002 advisory until it
+      # expires on 2026-11-12 (docs/exceptions/EXC-0002-eslint-braces-dev-tooling.md).
       - name: Dependency audit
         run: node scripts/verify-dependency-audit.mjs
 

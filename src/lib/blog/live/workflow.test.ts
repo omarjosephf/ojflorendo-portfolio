@@ -4,14 +4,14 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { verifyIntegrity } from "../pipeline/serialization";
 import { parseBlogPost } from "../schema";
-import { LIVE_AGENTS } from "./catalog";
-import type { FetchLike } from "./gemini-client";
+import { IDEA_SCOUT_SEARCH, LIVE_AGENTS } from "./catalog";
+import type { FetchLike } from "./openrouter-client";
 import { PUBLISHED_DISCLOSURE, PromotionRefused, promoteRun, summarizeRun } from "./publish";
 import { SpendLedger } from "./spend-ledger";
 import { type LiveBrief, runIdeaScout, runLiveBlogWorkflow } from "./workflow";
 
 const repoRoot = process.cwd();
-const KEY = "test-key-000000000000000000000";
+const KEY = "sk-or-v1-test-key-000000000000000000000";
 const brief: LiveBrief = {
   topic: "How OJ built a retrieval-grounded portfolio assistant",
   audience: "Small-business owners curious about AI assistants",
@@ -22,26 +22,41 @@ const brief: LiveBrief = {
 
 type Handler = (body: Record<string, unknown>, payload: Record<string, unknown>) => unknown;
 
-function interaction(model: string, output: unknown, extraSteps: unknown[] = []) {
+/** A chat completion in OpenRouter's documented non-streaming shape. */
+function interaction(
+  model: string,
+  output: unknown,
+  extra: { usage?: Record<string, unknown>; annotations?: unknown[]; text?: boolean } = {},
+) {
   return {
-    object: "interaction",
-    id: `int-${Math.random().toString(36).slice(2)}`,
-    status: "completed",
+    id: `gen-${Math.random().toString(36).slice(2)}`,
+    provider: "Google AI Studio",
     model,
-    steps: [...extraSteps, { type: "thought", signature: "x" }, { type: "model_output", content: [{ type: "text", text: JSON.stringify(output) }] }],
-    usage: { total_input_tokens: 4_000, total_output_tokens: 1_500, total_thought_tokens: 800 },
+    object: "chat.completion",
+    created: 1_760_000_000,
+    choices: [
+      {
+        index: 0,
+        finish_reason: "stop",
+        native_finish_reason: "STOP",
+        message: { role: "assistant", content: extra.text ? String(output) : JSON.stringify(output), ...(extra.annotations ? { annotations: extra.annotations } : {}) },
+      },
+    ],
+    usage: { prompt_tokens: 4_000, completion_tokens: 2_300, completion_tokens_details: { reasoning_tokens: 800 }, ...extra.usage },
   };
 }
+
+type Message = { role: string; content: string };
 
 function fakeFetch(handlers: Partial<Record<string, Handler>>, seen: string[]): FetchLike {
   return async (_url, init) => {
     const body = JSON.parse(init.body) as Record<string, unknown>;
-    const instruction = String(body.system_instruction);
-    const version = instruction.split("\n")[0];
+    const [system, user] = body.messages as Message[];
+    const version = system.content.split("\n")[0];
     seen.push(version);
     const handler = handlers[version];
     if (!handler) throw new Error(`no handler for ${version}`);
-    const payload = JSON.parse(String(body.input)) as Record<string, unknown>;
+    const payload = JSON.parse(user.content) as Record<string, unknown>;
     const output = handler(body, payload);
     return { ok: true, status: 200, text: async () => JSON.stringify(output) };
   };
@@ -51,7 +66,6 @@ const research: Handler = (body, payload) => {
   const spans = payload.spans as { spanId: string; text: string }[];
   const chosen = spans.slice(0, 4);
   return interaction(String(body.model), {
-    schemaVersion: 1,
     decision: {
       outcome: "evidence",
       researchQuestion: "How was the assistant designed?",
@@ -67,13 +81,12 @@ const research: Handler = (body, payload) => {
 const writer: Handler = (body, payload) => {
   const claims = (payload.evidence as { claims: { id: string; text: string }[] }).claims;
   return interaction(String(body.model), {
-    schemaVersion: 1,
     slug: "inside-a-grounded-assistant",
     title: "Inside a grounded portfolio assistant",
     excerpt: "How the portfolio assistant answers only from approved material.",
     blocks: [
       { type: "paragraph", text: "This post walks through the design." },
-      { type: "heading", id: "what-it-is", level: 2, text: "What it is" },
+      { type: "heading", id: "what-it-is", level: "2", text: "What it is" },
       ...claims.map((claim) => ({ type: "paragraph", text: `In OJ's words: ${claim.text}` })),
     ],
     seo: { title: "Inside a grounded assistant", description: "How a grounded portfolio assistant is designed.", keywords: ["rag", "assistant", "portfolio"] },
@@ -83,7 +96,6 @@ const writer: Handler = (body, payload) => {
 
 const seo: Handler = (body) =>
   interaction(String(body.model), {
-    schemaVersion: 1,
     searchIntent: "Learn how grounded assistants work",
     score: 72,
     suggestedTitle: "How a grounded portfolio assistant works",
@@ -94,7 +106,6 @@ const seo: Handler = (body) =>
 const approvingReviewer = (scores = 88): Handler => (body, payload) => {
   const draft = payload.draft as { citations: { id: string }[] };
   return interaction(String(body.model), {
-    schemaVersion: 1,
     recommendation: "approve",
     claimReviews: draft.citations.map((citation) => ({ citationId: citation.id, assessment: "supported", note: "Exact match." })),
     unmappedFactualClaims: [],
@@ -107,7 +118,6 @@ const approvingReviewer = (scores = 88): Handler => (body, payload) => {
 const critique: Handler = (body, payload) => {
   const record = payload.runRecord as { participants: string[] };
   return interaction(String(body.model), {
-    schemaVersion: 1,
     lessons: record.participants.map((agent) => ({ agent, lesson: `Keep ${agent} output tight and exact.`, evidence: "Accepted first time." })),
   });
 };
@@ -127,7 +137,7 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v3": research,
-        "blog-writer-live-v3": writer,
+        "blog-writer-live-v4": writer,
         "blog-seo-live-v1": seo,
         "blog-reviewer-live-v2": approvingReviewer(),
         "blog-critique-live-v1": critique,
@@ -139,19 +149,22 @@ describe("runLiveBlogWorkflow", () => {
     expect(bundle.status).toBe("owner-review");
     expect(seen).toEqual([
       "blog-researcher-live-v3",
-      "blog-writer-live-v3",
+      "blog-writer-live-v4",
       "blog-seo-live-v1",
       "blog-reviewer-live-v2",
       "blog-critique-live-v1",
     ]);
     expect(bundle.calls.map((call) => call.model)).toEqual([
-      "gemini-3.8-flash",
-      "gemini-3.8-flash",
-      "gemini-3.5-flash-lite",
-      "gemini-3.1-pro-preview",
-      "gemini-3.8-flash",
+      "google/gemini-3.8-flash",
+      "google/gemini-3.8-flash",
+      "google/gemini-3.5-flash-lite",
+      "google/gemini-3.1-pro-preview",
+      "google/gemini-3.8-flash",
     ]);
+    expect(bundle.calls.every((call) => call.provider === "Google AI Studio")).toBe(true);
     expect(bundle.editorialScore).toBe(88);
+    // The wire's "2" becomes the number the post schema expects.
+    expect(bundle.drafts[0].post.blocks.find((block) => block.type === "heading")).toMatchObject({ level: 2 });
     expect(bundle.publication.permitted).toBe(false);
     expect(bundle.critique?.filter((lesson) => lesson.participated).map((lesson) => lesson.agent)).toEqual([
       "planner-researcher",
@@ -174,7 +187,7 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v3": research,
-        "blog-writer-live-v3": writer,
+        "blog-writer-live-v4": writer,
         "blog-seo-live-v1": seo,
         "blog-reviewer-live-v2": approvingReviewer(75),
         "blog-critique-live-v1": critique,
@@ -190,7 +203,7 @@ describe("runLiveBlogWorkflow", () => {
   it("rejects a Writer that drops a claim's exact text and still records a critique", async () => {
     const paraphrasingWriter: Handler = (body, payload) => {
       const output = JSON.parse(
-        ((writer(body, payload) as { steps: { type: string; content?: { text: string }[] }[] }).steps.at(-1)?.content?.[0].text) ?? "{}",
+        (writer(body, payload) as { choices: { message: { content: string } }[] }).choices[0].message.content,
       ) as { blocks: { type: string; text?: string }[] };
       output.blocks = output.blocks.map((block) => (block.type === "paragraph" ? { ...block, text: "A paraphrase with no quote." } : block));
       return interaction(String(body.model), output);
@@ -198,7 +211,7 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v3": research,
-        "blog-writer-live-v3": paraphrasingWriter,
+        "blog-writer-live-v4": paraphrasingWriter,
         "blog-critique-live-v1": critique,
       },
       [],
@@ -208,6 +221,23 @@ describe("runLiveBlogWorkflow", () => {
     expect(bundle.failure?.code).toBe("schema-invalid-output");
     expect(bundle.failure?.stage).toBe("draft");
     expect(bundle.critique?.find((lesson) => lesson.agent === "writer")?.participated).toBe(true);
+  });
+
+  it.each([1, "1", "4"])("still rejects a Writer heading at level %j, now that the wire schema cannot bound it", async (level) => {
+    const badHeadingWriter: Handler = (body, payload) => {
+      const output = JSON.parse(
+        (writer(body, payload) as { choices: { message: { content: string } }[] }).choices[0].message.content,
+      ) as { blocks: { type: string; level?: unknown }[] };
+      output.blocks = output.blocks.map((block) => (block.type === "heading" ? { ...block, level } : block));
+      return interaction(String(body.model), output);
+    };
+    const fetchImpl = fakeFetch(
+      { "blog-researcher-live-v3": research, "blog-writer-live-v4": badHeadingWriter, "blog-critique-live-v1": critique },
+      [],
+    );
+    const bundle = await runLiveBlogWorkflow({ repoRoot, apiKey: KEY, ledger, fetchImpl }, brief);
+    expect(bundle.failure).toMatchObject({ code: "schema-invalid-output", stage: "draft" });
+    expect(bundle.calls.find((call) => call.stage === "draft")?.failureDetail).toContain("level must be 2 or 3");
   });
 
   it("stops before sending when the phase ceiling would be exceeded, and skips critique", async () => {
@@ -225,6 +255,88 @@ describe("runLiveBlogWorkflow", () => {
     expect(tiny.totalMicroUsd()).toBe(0);
   });
 
+  /** First review reports one problem; the second review (after revision) is clean. */
+  const reviewerWithFirstPassProblem =
+    (problem: { unmapped?: boolean; issue?: string; recommendation?: "approve" | "revise" | "reject" }): Handler =>
+    (body, payload) => {
+      const draft = payload.draft as { citations: { id: string }[] };
+      const first = payload.draftRevision === 1;
+      return interaction(String(body.model), {
+        recommendation: first ? (problem.recommendation ?? "approve") : "approve",
+        claimReviews: draft.citations.map((citation) => ({ citationId: citation.id, assessment: "supported", note: "Exact match." })),
+        unmappedFactualClaims:
+          first && problem.unmapped
+            ? [{ location: { scope: "block", blockIndex: 0, field: "text" }, text: "This post walks through the design.", reason: "Uncited." }]
+            : [],
+        issues: first && problem.issue ? [{ code: "flagged", category: problem.issue, severity: "high", message: "Flagged." }] : [],
+        requiredCorrections: [],
+        scores: { groundedness: 90, citationQuality: 90, writingAndVoice: 90, securityAndRobustness: 90 },
+      });
+    };
+
+  it("uses the one revision when the only failed gate is claim coverage, then needs every gate to pass", async () => {
+    const seenUnmapped: unknown[] = [];
+    const revisingWriter: Handler = (body, payload) => {
+      const boundary = payload.correctionBoundary as { unmappedLocations?: unknown[] } | undefined;
+      if (boundary) seenUnmapped.push(...(boundary.unmappedLocations ?? []));
+      return writer(body, payload);
+    };
+    const seen: string[] = [];
+    const fetchImpl = fakeFetch(
+      {
+        "blog-researcher-live-v3": research,
+        "blog-writer-live-v4": revisingWriter,
+        "blog-seo-live-v1": seo,
+        "blog-reviewer-live-v2": reviewerWithFirstPassProblem({ unmapped: true }),
+        "blog-critique-live-v1": critique,
+      },
+      seen,
+    );
+    const bundle = await runLiveBlogWorkflow({ repoRoot, apiKey: KEY, ledger, fetchImpl }, brief);
+    expect(bundle.calls.map((call) => call.stage)).toEqual(["research", "draft", "seo", "review", "revision", "final-review", "critique"]);
+    expect(seenUnmapped).toEqual([{ scope: "block", blockIndex: 0, field: "text" }]);
+    expect(bundle.reviews.map((review) => review.decision)).toEqual(["reject", "approve"]);
+    expect(bundle.status).toBe("owner-review");
+  });
+
+  it.each([
+    ["a prompt-injection finding", { issue: "prompt-injection" }],
+    ["a privacy finding", { issue: "privacy", unmapped: true }],
+    ["the Reviewer's own reject", { unmapped: true, recommendation: "reject" as const }],
+  ])("never revises after %s", async (_label, problem) => {
+    const fetchImpl = fakeFetch(
+      {
+        "blog-researcher-live-v3": research,
+        "blog-writer-live-v4": writer,
+        "blog-seo-live-v1": seo,
+        "blog-reviewer-live-v2": reviewerWithFirstPassProblem(problem),
+        "blog-critique-live-v1": critique,
+      },
+      [],
+    );
+    const bundle = await runLiveBlogWorkflow({ repoRoot, apiKey: KEY, ledger, fetchImpl }, brief);
+    expect(bundle.calls.map((call) => call.stage)).not.toContain("revision");
+    expect(bundle.status).toBe("held");
+  });
+
+  it("treats a failed call billed above its reservation as a global stop and skips critique", async () => {
+    let calls = 0;
+    const fetchImpl: FetchLike = async (_url, init) => {
+      calls += 1;
+      const body = JSON.parse(init.body) as Record<string, unknown>;
+      const raw = interaction(String(body.model), { partial: true }, { usage: { cost: 0.9 } });
+      raw.choices[0].finish_reason = "length";
+      return { ok: true, status: 200, text: async () => JSON.stringify(raw) };
+    };
+    const bundle = await runLiveBlogWorkflow({ repoRoot, apiKey: KEY, ledger, fetchImpl }, brief);
+    expect(calls).toBe(1);
+    expect(bundle.failure).toMatchObject({ code: "incomplete", stage: "research" });
+    expect(bundle.calls[0].actualMicroUsd).toBe(900_000);
+    expect(bundle.calls[0].failureDetail).toContain("above the reservation");
+    expect(bundle.critique).toBeNull();
+    expect(bundle.critiqueSkippedReason).toContain("forbids another provider call");
+  });
+
   it("keeps the full reservation when a call's outcome is unknown", async () => {
     const fetchImpl: FetchLike = async () => {
       throw new Error("socket closed");
@@ -240,70 +352,102 @@ describe("runLiveBlogWorkflow", () => {
 });
 
 describe("runIdeaScout", () => {
-  it("uses Google Search and accepts only allowlisted sources", async () => {
+  const SEARCH_TOOL = [
+    {
+      type: "openrouter:web_search",
+      parameters: { engine: "exa", max_uses: 3, max_results: 5, max_total_results: 15, max_characters: 2_000 },
+    },
+  ];
+  const NOTES = "Readers ask how a chat assistant avoids made-up answers.\nGrounded chat for small sites is widely covered.";
+  const searchStep: Handler = (body) => {
+    // The search call has the tool and no schema; it returns plain text.
+    expect(body.tools).toEqual(SEARCH_TOOL);
+    expect(body.max_tool_calls).toBe(3);
+    expect(body).not.toHaveProperty("response_format");
+    return interaction(String(body.model), NOTES, {
+      text: true,
+      usage: { server_tool_use: { web_search_requests: 2 }, cost: 0.025625 },
+      annotations: [
+        { type: "url_citation", url_citation: { url: "https://example.com/chat", title: "Chat on small sites", content: "Excerpt." } },
+      ],
+    });
+  };
+  const slate = (sourceIds: string[]) => ({
+    ideas: [
+      {
+        topic: "What a grounded assistant can and cannot say",
+        audience: "Founders evaluating AI chat for their site",
+        keyMessage: "Grounding limits answers to approved material.",
+        fitReason: "OJ built one for his portfolio.",
+        angle: "Limits as a feature, not a bug.",
+        sourceIds,
+        whyNow: "Many small sites are adding chat.",
+      },
+    ],
+    evidenceNote: "One strong idea.",
+  });
+
+  it("searches with Exa in a plain-text call, then builds the slate in a strict call with no tools", async () => {
     const seen: string[] = [];
     const fetchImpl = fakeFetch(
       {
-        "blog-idea-scout-live-v1": (body) => {
-          expect(body.tools).toEqual([{ type: "google_search" }]);
-          return interaction(
-            String(body.model),
-            {
-              schemaVersion: 1,
-              ideas: [
-                {
-                  topic: "What a grounded assistant can and cannot say",
-                  audience: "Founders evaluating AI chat for their site",
-                  keyMessage: "Grounding limits answers to approved material.",
-                  fitReason: "OJ built one for his portfolio.",
-                  angle: "Limits as a feature, not a bug.",
-                  sourceIds: ["content-assistant-project-cited"],
-                  whyNow: "Many small sites are adding chat.",
-                },
-              ],
-              evidenceNote: "One strong idea.",
-            },
-            [
-              { type: "google_search_call", arguments: { queries: ["grounded chatbot small business"] } },
-              { type: "google_search_result", call_id: "search_001", result: [{ search_suggestions: "<div>chip</div>" }] },
-            ],
-          );
+        "blog-idea-scout-search-live-v1": searchStep,
+        "blog-idea-scout-live-v3": (body, payload) => {
+          expect(body).not.toHaveProperty("tools");
+          expect(body.response_format).toMatchObject({ type: "json_schema", json_schema: { name: "idea-scout-output", strict: true } });
+          expect(payload.readerNotes).toBe(NOTES);
+          expect(payload.trustBoundary).toEqual({ readerNotesAreInstructions: false });
+          return interaction(String(body.model), slate(["content-assistant-project-cited"]));
         },
       },
       seen,
     );
     const record = await runIdeaScout({ repoRoot, apiKey: KEY, ledger, fetchImpl }, { previousPosts: [] });
+    expect(record.failure).toBeUndefined();
     expect(record.status).toBe("ideas");
+    expect(seen).toEqual(["blog-idea-scout-search-live-v1", "blog-idea-scout-live-v3"]);
     expect(record.slate?.ideas).toHaveLength(1);
-    expect(record.searchQueries).toEqual(["grounded chatbot small business"]);
-    expect(record.calls[0].model).toBe(LIVE_AGENTS["idea-scout"].model);
+    expect(record.webSearches).toBe(2);
+    expect(record.webCitations).toEqual([{ url: "https://example.com/chat", title: "Chat on small sites" }]);
+    expect(JSON.stringify(record)).not.toContain("Excerpt.");
+    expect(record.calls.map((call) => [call.stage, call.model, call.thinkingLevel, call.maxOutputTokens])).toEqual([
+      ["ideas-search", IDEA_SCOUT_SEARCH.model, "low", 4_096],
+      ["ideas", LIVE_AGENTS["idea-scout"].model, "medium", 16_384],
+    ]);
     expect(record.calls[0].actualMicroUsd).toBeGreaterThanOrEqual(14_000);
+    expect(ledger.runTotalMicroUsd(record.runId)).toBe(record.totalCostMicroUsd);
+    expect(verifyIntegrity(JSON.parse(JSON.stringify(record)))).toBe(true);
   });
 
   it("rejects an idea that cites a source outside the allowlist", async () => {
     const fetchImpl = fakeFetch(
       {
-        "blog-idea-scout-live-v1": (body) =>
-          interaction(String(body.model), {
-            schemaVersion: 1,
-            ideas: [
-              {
-                topic: "Something from a private file",
-                audience: "Anyone at all",
-                keyMessage: "This should not pass validation.",
-                fitReason: "It cites a file that is not allowlisted.",
-                angle: "An angle that does not matter.",
-                sourceIds: ["docs-state-current"],
-                whyNow: "",
-              },
-            ],
-            evidenceNote: "",
-          }),
+        "blog-idea-scout-search-live-v1": searchStep,
+        "blog-idea-scout-live-v3": (body) => interaction(String(body.model), slate(["docs-state-current"])),
       },
       [],
     );
     const record = await runIdeaScout({ repoRoot, apiKey: KEY, ledger, fetchImpl }, { previousPosts: [] });
     expect(record.status).toBe("failed");
-    expect(record.failure?.code).toBe("schema-invalid-output");
+    expect(record.failure).toMatchObject({ code: "schema-invalid-output", stage: "ideas" });
+    // The call record names the output's shape, never its values.
+    expect(record.calls[1].failureDetail).toContain("[output: object with 2 keys: ideas, evidenceNote]");
+    expect(record.calls[1].failureDetail).not.toContain("grounded assistant");
+    // The search step's citations are kept even when the slate fails.
+    expect(record.webCitations).toHaveLength(1);
+  });
+
+  it("stops before the slate call when the reader notes are too long", async () => {
+    const seen: string[] = [];
+    const fetchImpl = fakeFetch(
+      {
+        "blog-idea-scout-search-live-v1": (body) => interaction(String(body.model), "x".repeat(4_001), { text: true, usage: { cost: 0.018625 } }),
+      },
+      seen,
+    );
+    const record = await runIdeaScout({ repoRoot, apiKey: KEY, ledger, fetchImpl }, { previousPosts: [] });
+    expect(record.status).toBe("failed");
+    expect(record.failure).toMatchObject({ code: "schema-invalid-output", stage: "ideas-search" });
+    expect(seen).toEqual(["blog-idea-scout-search-live-v1"]);
   });
 });

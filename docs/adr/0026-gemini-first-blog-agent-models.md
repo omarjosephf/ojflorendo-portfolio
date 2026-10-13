@@ -3,6 +3,9 @@
 - Status: **Accepted — owner decision, 29 September 2026. Supersedes the
   blinded provider comparison in
   [ADR-0024](0024-blog-provider-bakeoff.md), which was never executed.**
+- Amended: **13 October 2026**: every agent reaches its model through
+  OpenRouter, and the Idea Scout searches with Exa, not Google grounding. See
+  [the amendment](#amendment--openrouter-route-13-october-2026)
 - Date: 2026-09-29
 - Owner: OJ Florendo
 - Risk: **R2** provider, model and architecture decision. It authorizes no
@@ -285,6 +288,162 @@ above the US$1.00 per-run ceiling.
 - **Not done in Phase 18.4:** the OpenAI and Anthropic fallbacks, the Model
   Scout, OpenRouter (raised by the owner for testing; a candidate for the
   fallback phase) and the nine-example calibration set.
+
+## Amendment — OpenRouter route, 13 October 2026
+
+- Status: **Accepted. Owner decision, 13 October 2026**, in the approved
+  [phase plan](../roadmaps/PLAN-blog-19b.md) (phase A). It changes only the
+  route to the models. The six agents, their models, thinking levels and
+  output caps are unchanged. Push, merge and key revocation keep their own
+  owner approvals.
+
+### Decision
+
+1. **One route.** Every live agent calls its Gemini model through
+   OpenRouter's chat-completions API with one key (`blog-agents`), which has
+   a hard US$5 total limit and expires on 11 January 2027. The direct Gemini
+   client is deleted. The runner keeps its US$1 per-run ceiling, and the
+   route has its own durable ledger with a US$2 ceiling for phase A.
+2. **Google only, at list price or below.** Each request sets
+   `provider.only` to Google AI Studio and Google Vertex, with
+   `require_parameters: true`. Its `max_price` equals the reviewed list price.
+   No other host receives blog material. The dearer priority tier cannot be
+   chosen; the cheaper flex tier can. Prices were re-read from OpenRouter's
+   endpoint list on 13 October 2026 and match the snapshot above.
+3. **Idea Scout: Exa search in two steps.** Step 1 uses OpenRouter's
+   `openrouter:web_search` server tool, with the engine fixed to Exa and at
+   most 3 searches, and returns short plain-text reader notes. Step 2 has no
+   tools and returns the strict `IdeaSlate.v1`. Two steps are needed because
+   OpenRouter did not hold a tool-using call to the schema. The engine is
+   pinned because `auto` on Gemini means Google's own grounding. Only each
+   result's address and title are kept: Exa's terms limit copying and storing
+   results. Google grounding and Search Suggestions are no longer used
+   anywhere.
+4. **Wire schemas use the subset that survives the route.** OpenRouter
+   passes the structured-output schema on to Gemini, but a schema holding an
+   integer `enum` (`schemaVersion: 1`) together with array bounds reached the
+   model as an empty object, and the model returned `{}`. So the wire schemas
+   carry:
+   - no version field;
+   - no integer `enum`, `const`, numeric range or array bound.
+
+   Code stamps the version, heading levels travel as the strings `"2"` and
+   `"3"`, and the unchanged Phase 18.2 parsers still check every rule that was
+   removed. A unit test keeps the schemas to this subset.
+5. **Cost is OpenRouter's reported charge, never less than the reviewed
+   price.** Each call settles at the larger of OpenRouter's `usage.cost` and
+   the cost computed from tokens and the price table. A response whose usage
+   record states neither the charge nor, for a call without search, both
+   token counts is an unknown outcome and keeps its full reservation. A
+   search call needs the stated charge, because only that includes Exa's
+   fee. A failed call billed above its reservation stops every further call.
+
+### Why
+
+- One key with a hard credit limit, and any agent's model changeable later by
+  changing one model name.
+- The process retro of 12 October 2026 makes Vercel AI Gateway the default
+  for apps hosted on Vercel, and OpenRouter the choice when a firm per-key
+  cap is needed. The blog runner runs on the owner's computer, not on
+  Vercel, and needs that firm cap.
+- Moving the Idea Scout off Google grounding removes the Search Suggestions
+  display and storage rules that phase B's run upload would otherwise have to
+  carry.
+
+### Alternatives considered
+
+- **Vercel AI Gateway.** It charges no markup and, on Pro, offers zero data
+  retention per request. It was rejected for this runner because its budgets
+  are soft, BYOK spend is not counted, and its keyless OIDC access is designed
+  for code hosted on Vercel. It stays the default for hosted features.
+- **Direct Gemini (status quo).** It has no intermediary and no OpenRouter
+  fee (5.5% on credit purchases, per the 12 October research), and Google
+  enforces the schema itself. It was rejected because every later model
+  change would need another provider, client and key. The Idea Scout would
+  also stay on Google grounding and its Search Suggestions rules. It remains
+  the fallback if the route fails, which is why the Gemini key is revoked
+  only after A4.
+
+### Security and privacy impact of the amendment
+
+- OpenRouter becomes a processor of blog source material, drafts and Idea
+  Scout search queries; Exa receives the search queries. Neither receives
+  visitor data, secrets or private documents.
+- Owner check, 13 October 2026: OpenRouter's input and output logging is
+  off, and so are broadcast and paid-model training. Zero data retention is
+  not switched on.
+- The key sits outside the repository in `openrouter.env`. It is passed with
+  `--env-file` and never logged, returned or included in an error.
+- Search results remain untrusted data. The reader notes are capped at 4,000
+  characters and enter step 2 only as data.
+
+### Known limits
+
+- `usage.server_tool_use.web_search_requests` reported **0** on every
+  search call, although `usage.cost` included Exa's charge. The A3 search
+  call was reported at US$0.013205 against a token cost of US$0.006205, a
+  difference of exactly one US$0.007 search. Settling at the reported cost
+  keeps the ledger whole, but the recorded search count is unreliable. The
+  3-search cap is enforced only through the request (`max_uses`,
+  `max_tool_calls`), not checked afterwards.
+- The Reviewer again scored a passing draft 100 on every measure. It remains
+  uncalibrated, and auto-publish stays off.
+
+### Verification — phase A, 13 October 2026
+
+All spend is recorded in `openrouter-spend-ledger.json`: **US$1.3736 of the
+approved US$2.00**.
+
+- **Three failed A3 attempts (US$0.1135).**
+  - One call with search and schema together returned invalid JSON.
+  - A second returned JSON that did not match `IdeaSlate.v1`.
+  - In the third, the search step worked, but the slate call, with no tools,
+    returned 4 visible tokens.
+- **Diagnosis: three tiny `gemini-3.5-flash-lite` calls (US$0.0011).**
+  1. The real slate schema came back as `{}`, with 63 prompt tokens, so the
+     schema never reached the model.
+  2. The same shape without the integer enum and array bounds was followed
+     exactly, with 309 prompt tokens.
+  3. The simplified Writer schema, with nested `anyOf`, was followed in
+     shape. It produced a level-1 heading, which led to the string-enum
+     level.
+- **A3 passed.** `ideas-20261013-040817` returned four ideas for US$0.0243:
+  the search call US$0.0132 (Google Vertex, five cited pages) and the slate
+  call US$0.0111 (Google AI Studio).
+- **A4 passed.** `run-20261013-040919` (idea 3) reached owner review on the
+  first review, with every hard gate passed, for **US$0.1127** in five calls:
+
+  | Call | Model | Cost |
+  | --- | --- | ---: |
+  | Research | `gemini-3.8-flash` | US$0.0192 |
+  | Draft | `gemini-3.8-flash` | US$0.0240 |
+  | SEO | `gemini-3.5-flash-lite` | US$0.0011 |
+  | Review | `gemini-3.1-pro-preview` | US$0.0647 |
+  | Critique | `gemini-3.8-flash` | US$0.0037 |
+
+- **Review and final verification, 13–14 October 2026.** A fresh-context
+  review found four gaps, all fixed with tests:
+  - an empty usage record settled a call at zero;
+  - a failed call billed above its reservation was not a global stop;
+  - the search reservation omitted earlier turns' outputs;
+  - web page titles reached the terminal with control characters.
+
+  Six more live runs on slate `ideas-20261013-230822` then found further
+  faults, each fixed and checked live:
+
+  | Run | Result | What it showed |
+  | --- | --- | --- |
+  | `run-20261013-230928` | held | Quoted sentences kept their Markdown and mid-sentence capitals. Fix: Markdown sentences are no longer offered, and Writer v4 never splices a quote |
+  | `run-20261013-231844` | failed | The Writer spent 15,728 tokens thinking and hit its 16,384 cap. Fix: the cap is now 32,768 |
+  | `run-20261013-232216` | no-draft | The Researcher refused the brief. Bold lead sentences were being dropped. Fix: they are offered without their markers |
+  | `run-20261013-232504` | held | The prompt-injection gate fired, as designed, on ADR-0006, a document about prompt injection |
+  | `run-20261013-232843` | no-draft | Correct: the brief claimed what the sources do not say |
+  | `run-20261013-233000` | held | The Reviewer recommended approve, but one uncited sentence failed claim coverage, and any failed gate rejected without the revision built to fix it. Fix: a first-review claim-coverage or claim-support failure now takes the single revision; the final review must still pass every gate |
+  | `run-20261013-233533` | held | The revision ran and every gate passed on the final review. The Reviewer still asked for writing fixes: quoted sentences that rely on their source's context ("V", "recorded below") |
+
+  Every call in these runs returned valid output. The open quality gap is
+  sentence choice: the Researcher still picks sentences that need their
+  original context. That is the next prompt-quality task.
 
 ## Related decisions
 

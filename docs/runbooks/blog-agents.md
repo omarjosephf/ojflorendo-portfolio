@@ -1,15 +1,16 @@
-# Runbook: blog agents (Phase 18.4)
+# Runbook: blog agents (Phase 18.4, OpenRouter route from 13 October 2026)
 
 Runs the six ADR-0026 blog agents from the owner's computer. Read the
 [threat model](../threat-models/blog-live-pipeline.md) first.
 
 ## One-time setup (owner)
 
-1. In Google AI Studio, create a project for the blog only and a Gemini API
-   key in it. Do not reuse the E.V. key or the cancelled bake-off keys. Keep
-   the prepaid balance small: it is the provider-side spending limit.
+1. In OpenRouter, create a key for the blog only, with a hard total credit
+   limit and an expiry date. Do not reuse another project's key. The key's
+   limit is the provider-side spending limit. Keep OpenRouter's input and
+   output logging off.
 2. Save the key in a file outside the repository, as one line:
-   `BLOG_GEMINI_API_KEY=<key>`. Never paste the key into a chat or a commit.
+   `OPENROUTER_API_KEY=<key>`. Never paste the key into a chat or a commit.
 3. Choose a data directory outside the repository for private run records and
    the spend ledger.
 
@@ -22,8 +23,8 @@ directory:
 node --env-file=<key file> scripts/blog-agents.mjs ideas
 ```
 
-Open the printed ideas page. It shows Google's search suggestions, as the
-grounding terms require. Pick an idea, then:
+Open the printed ideas page. It lists the ideas and the addresses and titles
+of the web pages the Exa search used. Pick an idea, then:
 
 ```text
 node --env-file=<key file> scripts/blog-agents.mjs run --slate <slate id> --idea <n>
@@ -47,7 +48,7 @@ This writes the post to `content/blog/posts` and its summary to
 the panel without publishing it, use `summarize --run <run id>` instead. The
 post and summary then go through the normal pull request and release approval.
 
-`spend` prints the phase total against its US$5.00 ceiling.
+`spend` prints the OpenRouter route's total against its US$2.00 ceiling.
 
 ## When something goes wrong
 
@@ -58,10 +59,12 @@ post and summary then go through the normal pull request and release approval.
   get past the stop.
 - **HTTP 401 or 403:** the key is wrong or revoked. The run stops without
   running Critique.
-- **Cost above reservation:** treated as a global stop. Check the Google
-  billing page before running again.
+- **HTTP 402:** the key's credit limit or the account's credits are used up.
+  The run stops without running Critique.
+- **Cost above reservation:** treated as a global stop. Check the call's
+  generation id in OpenRouter's activity log before running again.
 
 ## Rollback
 
-Revert the pull request that added the post. Revoke the key in Google AI
-Studio if it may be exposed.
+Revert the pull request that added the post. Revoke the key in OpenRouter if
+it may be exposed.
