@@ -255,6 +255,70 @@ describe("runLiveBlogWorkflow", () => {
     expect(tiny.totalMicroUsd()).toBe(0);
   });
 
+  /** First review reports one problem; the second review (after revision) is clean. */
+  const reviewerWithFirstPassProblem =
+    (problem: { unmapped?: boolean; issue?: string; recommendation?: "approve" | "revise" | "reject" }): Handler =>
+    (body, payload) => {
+      const draft = payload.draft as { citations: { id: string }[] };
+      const first = payload.draftRevision === 1;
+      return interaction(String(body.model), {
+        recommendation: first ? (problem.recommendation ?? "approve") : "approve",
+        claimReviews: draft.citations.map((citation) => ({ citationId: citation.id, assessment: "supported", note: "Exact match." })),
+        unmappedFactualClaims:
+          first && problem.unmapped
+            ? [{ location: { scope: "block", blockIndex: 0, field: "text" }, text: "This post walks through the design.", reason: "Uncited." }]
+            : [],
+        issues: first && problem.issue ? [{ code: "flagged", category: problem.issue, severity: "high", message: "Flagged." }] : [],
+        requiredCorrections: [],
+        scores: { groundedness: 90, citationQuality: 90, writingAndVoice: 90, securityAndRobustness: 90 },
+      });
+    };
+
+  it("uses the one revision when the only failed gate is claim coverage, then needs every gate to pass", async () => {
+    const seenUnmapped: unknown[] = [];
+    const revisingWriter: Handler = (body, payload) => {
+      const boundary = payload.correctionBoundary as { unmappedLocations?: unknown[] } | undefined;
+      if (boundary) seenUnmapped.push(...(boundary.unmappedLocations ?? []));
+      return writer(body, payload);
+    };
+    const seen: string[] = [];
+    const fetchImpl = fakeFetch(
+      {
+        "blog-researcher-live-v3": research,
+        "blog-writer-live-v4": revisingWriter,
+        "blog-seo-live-v1": seo,
+        "blog-reviewer-live-v2": reviewerWithFirstPassProblem({ unmapped: true }),
+        "blog-critique-live-v1": critique,
+      },
+      seen,
+    );
+    const bundle = await runLiveBlogWorkflow({ repoRoot, apiKey: KEY, ledger, fetchImpl }, brief);
+    expect(bundle.calls.map((call) => call.stage)).toEqual(["research", "draft", "seo", "review", "revision", "final-review", "critique"]);
+    expect(seenUnmapped).toEqual([{ scope: "block", blockIndex: 0, field: "text" }]);
+    expect(bundle.reviews.map((review) => review.decision)).toEqual(["reject", "approve"]);
+    expect(bundle.status).toBe("owner-review");
+  });
+
+  it.each([
+    ["a prompt-injection finding", { issue: "prompt-injection" }],
+    ["a privacy finding", { issue: "privacy", unmapped: true }],
+    ["the Reviewer's own reject", { unmapped: true, recommendation: "reject" as const }],
+  ])("never revises after %s", async (_label, problem) => {
+    const fetchImpl = fakeFetch(
+      {
+        "blog-researcher-live-v3": research,
+        "blog-writer-live-v4": writer,
+        "blog-seo-live-v1": seo,
+        "blog-reviewer-live-v2": reviewerWithFirstPassProblem(problem),
+        "blog-critique-live-v1": critique,
+      },
+      [],
+    );
+    const bundle = await runLiveBlogWorkflow({ repoRoot, apiKey: KEY, ledger, fetchImpl }, brief);
+    expect(bundle.calls.map((call) => call.stage)).not.toContain("revision");
+    expect(bundle.status).toBe("held");
+  });
+
   it("treats a failed call billed above its reservation as a global stop and skips critique", async () => {
     let calls = 0;
     const fetchImpl: FetchLike = async (_url, init) => {

@@ -409,6 +409,30 @@ export interface LiveRunBundle {
 const PUBLICATION_REASON =
   "A run never publishes. Auto-publish is off at launch (ADR-0026); the owner approves each post before it is committed.";
 
+/**
+ * Gates the single revision can fix: the correction boundary hands the Writer
+ * the failed citation indexes and the unmapped locations. Every other failed
+ * gate (injection, privacy, unsafe content, contradiction, citation integrity)
+ * rejects at once.
+ */
+export const REVISABLE_GATES: ReadonlySet<string> = new Set(["claim-coverage", "claim-support"]);
+
+/**
+ * The first review leads to the one permitted revision when the Reviewer asks
+ * for it, or when the only failed gates are revisable and the Reviewer did not
+ * itself reject. The final review still has to pass every gate.
+ */
+export function shouldRevise(review: ReviewReport) {
+  if (review.decision === "revise") return true;
+  const failed = review.hardGates.filter((gate) => !gate.passed);
+  return (
+    review.decision === "reject" &&
+    review.recommendation !== "reject" &&
+    failed.length > 0 &&
+    failed.every((gate) => REVISABLE_GATES.has(gate.id))
+  );
+}
+
 /** Mean of the four reviewer scores, rounded down so rounding can never create a pass. */
 export function editorialScore(review: ReviewReport) {
   const { groundedness, citationQuality, writingAndVoice, securityAndRobustness } = review.scores;
@@ -613,7 +637,7 @@ export async function runLiveBlogWorkflow(deps: LiveDeps, brief: LiveBrief): Pro
       let review = await reviewDraft(firstDraft, 1);
       reviews.push(review);
 
-      if (review.decision === "revise") {
+      if (shouldRevise(review)) {
         const revised = (
           await runner.invoke(
             "writer",
