@@ -137,7 +137,7 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v3": research,
-        "blog-writer-live-v3": writer,
+        "blog-writer-live-v4": writer,
         "blog-seo-live-v1": seo,
         "blog-reviewer-live-v2": approvingReviewer(),
         "blog-critique-live-v1": critique,
@@ -149,7 +149,7 @@ describe("runLiveBlogWorkflow", () => {
     expect(bundle.status).toBe("owner-review");
     expect(seen).toEqual([
       "blog-researcher-live-v3",
-      "blog-writer-live-v3",
+      "blog-writer-live-v4",
       "blog-seo-live-v1",
       "blog-reviewer-live-v2",
       "blog-critique-live-v1",
@@ -187,7 +187,7 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v3": research,
-        "blog-writer-live-v3": writer,
+        "blog-writer-live-v4": writer,
         "blog-seo-live-v1": seo,
         "blog-reviewer-live-v2": approvingReviewer(75),
         "blog-critique-live-v1": critique,
@@ -211,7 +211,7 @@ describe("runLiveBlogWorkflow", () => {
     const fetchImpl = fakeFetch(
       {
         "blog-researcher-live-v3": research,
-        "blog-writer-live-v3": paraphrasingWriter,
+        "blog-writer-live-v4": paraphrasingWriter,
         "blog-critique-live-v1": critique,
       },
       [],
@@ -232,7 +232,7 @@ describe("runLiveBlogWorkflow", () => {
       return interaction(String(body.model), output);
     };
     const fetchImpl = fakeFetch(
-      { "blog-researcher-live-v3": research, "blog-writer-live-v3": badHeadingWriter, "blog-critique-live-v1": critique },
+      { "blog-researcher-live-v3": research, "blog-writer-live-v4": badHeadingWriter, "blog-critique-live-v1": critique },
       [],
     );
     const bundle = await runLiveBlogWorkflow({ repoRoot, apiKey: KEY, ledger, fetchImpl }, brief);

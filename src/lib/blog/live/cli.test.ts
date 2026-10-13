@@ -73,7 +73,7 @@ function respond(body: Record<string, unknown>): unknown {
         },
       });
     }
-    case "blog-writer-live-v3": {
+    case "blog-writer-live-v4": {
       const claims = (payload.evidence as { claims: { id: string; text: string }[] }).claims;
       return interaction(model, {
         slug: "a-portfolio-assistant-that-cites",

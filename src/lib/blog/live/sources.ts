@@ -36,6 +36,8 @@ const MAX_SPANS_PER_SOURCE = 100;
 const MAX_SOURCES_PER_RUN = 6;
 const MIN_SPAN_CHARS = 30;
 const MAX_SPAN_CHARS = 600;
+/** Emphasis, code, strikethrough or a stray list asterisk. */
+const MARKDOWN_INLINE = /[*`]|__|~~/u;
 
 export interface SelectableSpan {
   spanId: string;
@@ -109,6 +111,10 @@ export function sentenceSpans(content: string): { startByte: number; endByte: nu
       const text = raw.trim();
       if (text.length < MIN_SPAN_CHARS || text.length > MAX_SPAN_CHARS) continue;
       if (!/[.!?]$/u.test(text)) continue;
+      // A claim is quoted byte for byte and posts carry no Markdown, so a
+      // sentence with emphasis or code markup would print its asterisks or
+      // backticks. Such sentences are never offered (run-20261013-230928).
+      if (MARKDOWN_INLINE.test(text)) continue;
       const startByte = bodyStartByte + utf8Bytes(body.slice(0, match.index + leading));
       const endByte = startByte + utf8Bytes(text);
       if (sliceUtf8(content, startByte, endByte) !== text) continue;
