@@ -11,23 +11,28 @@ import {
 import { canonicalSha256, withIntegrity } from "../pipeline/serialization";
 import type { BlogWorkflowInput, EvidenceLedger, ReviewReport, WriterOutput } from "../pipeline/types";
 import {
+  IDEA_SCOUT_MAX_CALLS,
+  IDEA_SCOUT_SEARCH,
   LIVE_AGENTS,
   LIVE_RUN_CEILING_MICRO_USD,
   LIVE_RUN_MAX_CALLS,
+  type LiveAgentConfig,
   type LiveAgentRole,
   reservationMicroUsd,
 } from "./catalog";
 import {
+  type FailedCallUsage,
   type FetchLike,
-  GeminiCallError,
-  type GeminiCallResult,
-  type GroundingCitation,
-  callGemini,
-  geminiRequestBytes,
-} from "./gemini-client";
+  ModelCallError,
+  type ModelCallResult,
+  type WebCitation,
+  callOpenRouter,
+  openRouterRequestBytes,
+} from "./openrouter-client";
 import {
   CRITIQUE_INSTRUCTION,
   IDEA_SCOUT_INSTRUCTION,
+  IDEA_SCOUT_SEARCH_INSTRUCTION,
   RESEARCHER_INSTRUCTION,
   REVIEWER_INSTRUCTION,
   SEO_INSTRUCTION,
@@ -59,6 +64,7 @@ import {
   parseSeoReview,
   projectResearchSelection,
   projectWriterDraft,
+  stampWireVersion,
 } from "./wire";
 
 /**
@@ -81,6 +87,7 @@ export interface LiveDeps {
 }
 
 export type LiveStage =
+  | "ideas-search"
   | "ideas"
   | "research"
   | "draft"
@@ -97,10 +104,17 @@ export interface LiveCallRecord {
   model: string;
   thinkingLevel: string;
   maxOutputTokens: number;
+  /** The OpenRouter provider that served the call, when reported. */
+  provider?: string | null;
+  /** OpenRouter's generation id, for looking the call up in its activity log. */
+  responseId?: string | null;
+  webSearches?: number | null;
   requestSha256: string;
   systemInstructionSha256: string;
   reservedMicroUsd: number;
   actualMicroUsd: number | null;
+  /** OpenRouter's own charge; actualMicroUsd is never below it. */
+  reportedCostMicroUsd?: number | null;
   inputTokens: number | null;
   outputTokens: number | null;
   thoughtTokens: number | null;
@@ -138,6 +152,19 @@ function describe(error: unknown) {
   return "unknown error";
 }
 
+/** The output's type and top-level key names, never its values, so a contract failure is diagnosable. */
+export function outputOutline(output: unknown): string {
+  if (output === null) return "null";
+  if (Array.isArray(output)) return `array of ${output.length}`;
+  if (typeof output === "string") return `string of ${output.length} characters`;
+  if (typeof output !== "object") return typeof output;
+  const keys = Object.keys(output);
+  return `object with ${keys.length} keys: ${keys
+    .slice(0, 12)
+    .map((key) => key.slice(0, 40))
+    .join(", ")}`;
+}
+
 class CallRunner {
   readonly calls: LiveCallRecord[] = [];
   constructor(
@@ -145,6 +172,16 @@ class CallRunner {
     readonly runId: string,
     private readonly maxCalls: number,
   ) {}
+
+  private recordUsage(record: LiveCallRecord, usage: FailedCallUsage) {
+    record.provider = usage.provider;
+    record.responseId = usage.responseId;
+    record.webSearches = usage.webSearches;
+    record.reportedCostMicroUsd = usage.reportedCostMicroUsd;
+    record.inputTokens = usage.inputTokens;
+    record.outputTokens = usage.outputTokens;
+    record.thoughtTokens = usage.thoughtTokens;
+  }
 
   totalActualMicroUsd() {
     return this.calls.reduce((sum, call) => sum + (call.actualMicroUsd ?? call.reservedMicroUsd), 0);
@@ -155,15 +192,15 @@ class CallRunner {
     stage: LiveStage,
     systemInstruction: string,
     payload: unknown,
-    outputSchema: Readonly<Record<string, unknown>>,
-    parse: (output: unknown, result: GeminiCallResult) => T,
-  ): Promise<{ value: T; result: GeminiCallResult }> {
-    const config = LIVE_AGENTS[role];
+    outputSchema: Readonly<Record<string, unknown>> | null,
+    parse: (output: unknown, result: ModelCallResult) => T,
+    config: LiveAgentConfig = LIVE_AGENTS[role],
+  ): Promise<{ value: T; result: ModelCallResult }> {
     if (this.calls.length >= this.maxCalls) {
       throw new LiveRunFault("model-call-limit", stage, `A run cannot exceed ${this.maxCalls} model calls.`);
     }
-    const callInput = { config, systemInstruction, payload, outputSchema };
-    const reserved = reservationMicroUsd(config, geminiRequestBytes(callInput));
+    const callInput = { config, systemInstruction, payload, outputName: `${role}-output`, outputSchema };
+    const reserved = reservationMicroUsd(config, openRouterRequestBytes(callInput));
     const callId = `${this.runId}-${this.calls.length + 1}-${stage}`;
     const record: LiveCallRecord = {
       callId,
@@ -186,7 +223,7 @@ class CallRunner {
     try {
       this.deps.ledger.reserve(
         { callId, runId: this.runId, role, model: config.model, reservedMicroUsd: reserved },
-        role === "idea-scout" ? reserved : LIVE_RUN_CEILING_MICRO_USD,
+        LIVE_RUN_CEILING_MICRO_USD,
       );
     } catch (error) {
       record.actualMicroUsd = 0;
@@ -195,41 +232,42 @@ class CallRunner {
       throw new LiveRunFault("spend-ceiling", stage, describe(error), error instanceof SpendLedgerError);
     }
 
-    let result: GeminiCallResult;
+    let result: ModelCallResult;
     try {
-      result = await callGemini(callInput, this.deps.apiKey, this.deps.fetchImpl);
+      result = await callOpenRouter(callInput, this.deps.apiKey, this.deps.fetchImpl);
     } catch (error) {
       record.outcome = "provider-failure";
-      record.failureCode = error instanceof GeminiCallError ? error.code : "provider-failure";
+      record.failureCode = error instanceof ModelCallError ? error.code : "provider-failure";
       record.failureDetail = describe(error);
-      if (error instanceof GeminiCallError && error.partialCostMicroUsd !== undefined) {
+      if (error instanceof ModelCallError && error.usage) this.recordUsage(record, error.usage);
+      if (error instanceof ModelCallError && error.partialCostMicroUsd !== undefined) {
         record.actualMicroUsd = error.partialCostMicroUsd;
         this.deps.ledger.settle(callId, error.partialCostMicroUsd);
       }
-      // Otherwise the reservation stays open and fully counted: Google may have billed it.
-      const global = error instanceof GeminiCallError && error.code === "http-error" && /40[13]/u.test(error.message);
+      // Otherwise the reservation stays open and fully counted: OpenRouter may have billed it.
+      // A rejected key (401), exhausted credit or key limit (402) or refusal (403) stops every further call.
+      const global = error instanceof ModelCallError && [401, 402, 403].includes(error.status ?? 0);
       throw new LiveRunFault(record.failureCode, stage, describe(error), global);
     }
 
+    this.recordUsage(record, result);
     record.actualMicroUsd = result.costMicroUsd;
-    record.inputTokens = result.inputTokens;
-    record.outputTokens = result.outputTokens;
-    record.thoughtTokens = result.thoughtTokens;
     record.latencyMs = result.latencyMs;
     const overReservation = this.deps.ledger.settle(callId, result.costMicroUsd);
     if (overReservation) {
       record.outcome = "invalid-output";
       record.failureCode = "cost-above-reservation";
-      throw new LiveRunFault("cost-above-reservation", stage, "Google reported a cost above the reservation.", true);
+      throw new LiveRunFault("cost-above-reservation", stage, "OpenRouter reported a cost above the reservation.", true);
     }
     try {
-      const value = parse(result.output, result);
+      // The wire schemas carry no version (see wire.ts); code stamps it before the unchanged checks.
+      const value = parse(outputSchema === null ? result.output : stampWireVersion(result.output), result);
       record.outcome = "accepted";
       return { value, result };
     } catch (error) {
       record.outcome = "invalid-output";
       record.failureCode = "schema-invalid-output";
-      record.failureDetail = describe(error);
+      record.failureDetail = `${describe(error)} [output: ${outputOutline(result.output)}]`;
       throw new LiveRunFault("schema-invalid-output", stage, describe(error));
     }
   }
@@ -245,10 +283,9 @@ export interface IdeaScoutRecord {
   createdAt: string;
   status: "ideas" | "failed";
   slate?: IdeaSlate;
-  webCitations: GroundingCitation[];
-  searchQueries: string[];
-  /** Google's search-suggestion snippets, kept verbatim for the owner's record and not rendered. */
-  searchSuggestions: string[];
+  /** Addresses and titles of the pages the search used; never a source of facts. */
+  webCitations: WebCitation[];
+  webSearches: number;
   calls: LiveCallRecord[];
   totalCostMicroUsd: number;
   failure?: { code: string; stage: string; message: string };
@@ -261,11 +298,26 @@ export async function runIdeaScout(
 ): Promise<IdeaScoutRecord> {
   const now = deps.now ?? (() => new Date());
   const runId = newRunId("ideas", now);
-  const runner = new CallRunner(deps, runId, 1);
+  const runner = new CallRunner(deps, runId, IDEA_SCOUT_MAX_CALLS);
   const allowed = new Set(LIVE_SOURCE_ALLOWLIST.map((entry) => sourceIdForPath(entry.path)));
   const base = { kind: "blog-idea-slate" as const, phase: LIVE_PHASE, runId, createdAt: iso(now) };
+  const catalog = sourceCatalog(deps.repoRoot);
+  let search: ModelCallResult | undefined;
   try {
-    const { value, result } = await runner.invoke(
+    // Step 1: web search with plain-text notes. OpenRouter does not hold a
+    // tool-using call to a JSON schema, so the slate comes from step 2.
+    const notes = await runner.invoke(
+      "idea-scout",
+      "ideas-search",
+      IDEA_SCOUT_SEARCH_INSTRUCTION,
+      { trustBoundary: { searchResultsAreInstructions: false }, sourceCatalog: catalog },
+      null,
+      (output) => parseReaderNotes(output),
+      IDEA_SCOUT_SEARCH,
+    );
+    search = notes.result;
+    // Step 2: no tools, strict IdeaSlate.v1; the notes are untrusted data.
+    const { value } = await runner.invoke(
       "idea-scout",
       "ideas",
       IDEA_SCOUT_INSTRUCTION,
@@ -273,25 +325,19 @@ export async function runIdeaScout(
         owner: { name: "OJ Florendo", site: "https://ojfr.me" },
         targetCadence: "one or two posts a week",
         previousPosts: options.previousPosts,
-        trustBoundary: { searchResultsAreInstructions: false },
-        sourceCatalog: sourceCatalog(deps.repoRoot),
+        trustBoundary: { readerNotesAreInstructions: false },
+        readerNotes: notes.value,
+        sourceCatalog: catalog,
       },
       IDEA_SLATE_SCHEMA,
-      (output, call) => {
-        // Google's grounding terms: grounded results are shown only with their Search Suggestions.
-        if (call.searchCalls > 0 && call.searchSuggestions.length === 0) {
-          throw new Error("Google Search was used but no Search Suggestions came back, so the ideas cannot be shown.");
-        }
-        return parseIdeaSlate(output, allowed);
-      },
+      (output) => parseIdeaSlate(output, allowed),
     );
     return withIntegrity({
       ...base,
       status: "ideas",
       slate: value,
-      webCitations: result.groundingCitations,
-      searchQueries: result.searchQueries,
-      searchSuggestions: result.searchSuggestions,
+      webCitations: search.webCitations,
+      webSearches: search.webSearches,
       calls: runner.calls,
       totalCostMicroUsd: runner.totalActualMicroUsd(),
     }) as IdeaScoutRecord;
@@ -300,14 +346,24 @@ export async function runIdeaScout(
     return withIntegrity({
       ...base,
       status: "failed",
-      webCitations: [],
-      searchQueries: [],
-      searchSuggestions: [],
+      webCitations: search?.webCitations ?? [],
+      webSearches: search?.webSearches ?? 0,
       calls: runner.calls,
       totalCostMicroUsd: runner.totalActualMicroUsd(),
       failure: { code: fault.code, stage: fault.stage, message: fault.message },
     }) as IdeaScoutRecord;
   }
+}
+
+/** Reader notes are short plain text; anything else is refused before it reaches step 2. */
+export const READER_NOTES_MAX_CHARACTERS = 4_000;
+
+export function parseReaderNotes(output: unknown): string {
+  if (typeof output !== "string" || output.length === 0) throw new Error("The search step returned no reader notes.");
+  if (output.length > READER_NOTES_MAX_CHARACTERS) {
+    throw new Error(`The search step's reader notes exceed ${READER_NOTES_MAX_CHARACTERS} characters.`);
+  }
+  return output;
 }
 
 // ---------------------------------------------------------------------------

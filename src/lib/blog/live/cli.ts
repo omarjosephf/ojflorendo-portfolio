@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import type { BlogContentBlock } from "../types";
-import { LIVE_PHASE_CEILING_MICRO_USD } from "./catalog";
+import { LIVE_SPEND_CEILING_MICRO_USD } from "./catalog";
+import { OPENROUTER_KEY_PATTERN } from "./openrouter-client";
 import { PromotionRefused, promoteRun, summarizeRun } from "./publish";
 import { SpendLedger } from "./spend-ledger";
 import {
@@ -13,7 +14,7 @@ import {
 } from "./workflow";
 
 /**
- * Owner-run command line for Phase 18.4. Launched by scripts/blog-agents.mjs.
+ * Owner-run command line for the live blog agents. Launched by scripts/blog-agents.mjs.
  *
  *   ideas                       Idea Scout suggests topics
  *   run --slate <id> --idea <n> run the drafting agents on the chosen idea
@@ -45,7 +46,9 @@ function paths(repoRoot: string, dataDir: string) {
   const ideas = join(dataDir, "ideas");
   const runs = join(dataDir, "runs");
   for (const dir of [dataDir, ideas, runs]) if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  return { ideas, runs, ledger: join(dataDir, "spend-ledger.json") };
+  // The OpenRouter route has its own ledger and ceiling; the Phase 18.4 Gemini
+  // ledger (spend-ledger.json) stays as a closed record.
+  return { ideas, runs, ledger: join(dataDir, "openrouter-spend-ledger.json") };
 }
 
 function blockText(block: BlogContentBlock) {
@@ -65,11 +68,7 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/gu, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] as string);
 }
 
-/**
- * The owner's local reading page for an idea slate. Model text is escaped;
- * Google's Search Suggestions are inserted exactly as Google supplied them,
- * as its grounding terms require.
- */
+/** The owner's local reading page for an idea slate. Every model and search text is escaped. */
 export function renderIdeasPage(record: IdeaScoutRecord) {
   const ideas = (record.slate?.ideas ?? [])
     .map(
@@ -91,8 +90,6 @@ export function renderIdeasPage(record: IdeaScoutRecord) {
 <h1>Idea Scout: ${escapeHtml(record.runId)}</h1>
 <p>Status: ${escapeHtml(record.status)}. ${escapeHtml(record.slate?.evidenceNote ?? record.failure?.message ?? "")}</p>
 ${ideas}
-<h2>Google Search suggestions</h2>
-${record.searchSuggestions.join("\n")}
 ${citations ? `<h2>Web pages the search used</h2><ul>${citations}</ul>` : ""}
 </body></html>
 `;
@@ -157,16 +154,16 @@ export async function main(args: readonly string[], env: Readonly<Record<string,
   const dataDir = env.BLOG_AGENTS_DATA_DIR ?? "";
   const dirs = paths(repoRoot, dataDir);
   const ledger = new SpendLedger(dirs.ledger);
-  const apiKey = env.BLOG_GEMINI_API_KEY ?? "";
-  if ((command === "ideas" || command === "run") && !/^[A-Za-z0-9._-]{20,200}$/u.test(apiKey)) {
+  const apiKey = env.OPENROUTER_API_KEY ?? "";
+  if ((command === "ideas" || command === "run") && !OPENROUTER_KEY_PATTERN.test(apiKey)) {
     // Checked before any reservation, so a missing key never consumes ledger room.
-    throw new Error("BLOG_GEMINI_API_KEY is missing or malformed; pass the key file with --env-file.");
+    throw new Error("OPENROUTER_API_KEY is missing or malformed; pass the key file with --env-file.");
   }
   const deps = { repoRoot, apiKey, ledger };
   const out = (...lines: string[]) => process.stdout.write(`${(lines.length ? lines : [""]).join("\n")}\n`);
 
   if (command === "spend") {
-    out(`Phase 18.4 spend so far: ${usd(ledger.totalMicroUsd())} of ${usd(LIVE_PHASE_CEILING_MICRO_USD)}`);
+    out(`OpenRouter spend so far: ${usd(ledger.totalMicroUsd())} of ${usd(LIVE_SPEND_CEILING_MICRO_USD)}`);
     return 0;
   }
 
@@ -179,8 +176,7 @@ export async function main(args: readonly string[], env: Readonly<Record<string,
       : [];
     const record = await runIdeaScout(deps, { previousPosts });
     writeFileSync(join(dirs.ideas, `${record.runId}.json`), `${JSON.stringify(record, null, 2)}\n`);
-    // Google's grounding terms require the Search Suggestions to be shown with
-    // grounded results; this local page is how the owner reads the ideas.
+    // A local page is the easiest way for the owner to read the ideas.
     const htmlPath = join(dirs.ideas, `${record.runId}.html`);
     writeFileSync(htmlPath, renderIdeasPage(record));
     out(`Idea slate ${record.runId}: ${record.status}, cost ${usd(record.totalCostMicroUsd)}`);
@@ -200,8 +196,8 @@ export async function main(args: readonly string[], env: Readonly<Record<string,
       out("", "Web pages the search used:");
       for (const citation of record.webCitations.slice(0, 15)) out(`- ${citation.title} ${citation.url}`);
     }
-    out("", `Read the ideas with Google's search suggestions: ${htmlPath}`);
-    out("", `Spend so far: ${usd(ledger.totalMicroUsd())} of ${usd(LIVE_PHASE_CEILING_MICRO_USD)}`);
+    out("", `Read the ideas: ${htmlPath}`);
+    out("", `Spend so far: ${usd(ledger.totalMicroUsd())} of ${usd(LIVE_SPEND_CEILING_MICRO_USD)}`);
     return record.status === "ideas" ? 0 : 1;
   }
 
@@ -223,7 +219,7 @@ export async function main(args: readonly string[], env: Readonly<Record<string,
       if (call.failureDetail) out(`    ${call.failureDetail}`);
     }
     out(`Reading copy: ${join(dirs.runs, `${bundle.runId}.md`)}`);
-    out(`Spend so far: ${usd(ledger.totalMicroUsd())} of ${usd(LIVE_PHASE_CEILING_MICRO_USD)}`);
+    out(`Spend so far: ${usd(ledger.totalMicroUsd())} of ${usd(LIVE_SPEND_CEILING_MICRO_USD)}`);
     return bundle.status === "failed" ? 1 : 0;
   }
 
