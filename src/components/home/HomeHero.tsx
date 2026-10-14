@@ -23,7 +23,7 @@ export function HomeHero() {
               </span>
             ))}
           </h1>
-          <p className="jf-hero-role">{hero.eyebrow}</p>
+          <p className="jf-hero-role">{hero.role}</p>
           <p className="jf-hero-lede">{hero.headline.join(" ")}</p>
           <div className="jf-hero-actions">
             <a href="#contact" className="jf-button">

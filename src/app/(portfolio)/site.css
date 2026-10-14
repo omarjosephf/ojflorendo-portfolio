@@ -16,7 +16,7 @@
   --color-accent: #f2c66d;
   --color-accent-hover: #f8d993;
   --color-on-accent: #000000;
-  --color-sky: #b8c6ff;
+  --color-sky: #7a6639;
   --jf-text-2: #d3d8e3;
   --jf-line-strong: #3a4155;
   --jf-panel: rgb(8 10 17 / 0.74);
@@ -83,7 +83,7 @@
   transition: background-color 0.3s var(--jf-ease), border-color 0.3s var(--jf-ease);
 }
 .jf-header[data-scrolled] {
-  background: rgb(0 0 0 / 0.94);
+  background: #000000;
   border-bottom-color: var(--color-line);
 }
 .jf-header .jf-nav {
@@ -363,7 +363,7 @@
     gap: 64px;
   }
   .jf-hero-name {
-    font-size: clamp(4.25rem, 7.4vw, 8rem);
+    font-size: clamp(4.25rem, 7.4vw, 7rem);
   }
 }
 
@@ -387,13 +387,6 @@
   margin: 0;
   font-size: 1.0625rem;
   font-weight: 700;
-}
-.jf-run-tag {
-  padding: 3px 12px;
-  border: 1px solid var(--jf-line-strong);
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  color: var(--color-muted);
 }
 .jf-run-steps {
   margin: 6px 0 0;
@@ -492,7 +485,7 @@
 /* ---------- Sections ---------- */
 .jf-section {
   position: relative;
-  padding: clamp(72px, 9vw, 128px) 0;
+  padding: clamp(64px, 7vw, 104px) 0;
 }
 .jf-section-head {
   max-width: 48rem;
@@ -767,7 +760,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0;
+  margin: 12px 0 0;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--color-accent);
@@ -776,7 +769,8 @@
   color: var(--color-muted);
 }
 .jf-work-title {
-  margin: 14px 0 0;
+  margin: 0;
+  text-wrap: balance;
   font-size: clamp(1.625rem, 2.6vw, 2.25rem);
   font-weight: 800;
   font-stretch: 110%;
@@ -810,6 +804,7 @@
   margin-top: 28px;
 }
 .jf-work-shot img {
+  filter: brightness(0.78);
   display: block;
   width: 100%;
   height: auto;
@@ -1079,7 +1074,7 @@
 /* ---------- About: the journey (ADR-0030) ---------- */
 .jf-about .jf-stage {
   position: relative;
-  padding: clamp(80px, 11vw, 150px) 0;
+  padding: clamp(64px, 7vw, 104px) 0;
 }
 .jf-stage-head {
   max-width: 46rem;
@@ -1107,16 +1102,18 @@
   max-width: 60ch;
   color: var(--jf-text-2);
 }
+/* Only the journey's stages hold the screen; supporting sections flow.
+   The arrival keeps a full screen (below) so its card clears the star-name. */
 @media (min-width: 1024px) {
-  .jf-about .jf-stage {
-    min-height: 90svh;
+  .jf-about .jf-stage[data-stage]:not(.jf-arrival) {
+    min-height: 80svh;
   }
 }
 
 /* Arrival */
 .jf-about .jf-arrival {
   display: flex;
-  min-height: 100svh;
+  min-height: max(100svh, 780px);
   align-items: flex-end;
   padding: 120px 0 64px;
 }
@@ -1235,15 +1232,8 @@
   border-top: 1px solid var(--color-line);
 }
 .jf-teaching-item {
-  display: grid;
-  gap: 4px 32px;
   padding: 28px 0;
   border-bottom: 1px solid var(--color-line);
-}
-.jf-teaching-when {
-  margin: 0;
-  font-weight: 600;
-  color: var(--color-accent);
 }
 .jf-teaching-org {
   margin: 0;
@@ -1259,15 +1249,6 @@
 }
 .jf-teaching-item .jf-stage-text {
   margin-top: 10px;
-}
-@media (min-width: 768px) {
-  .jf-teaching-item {
-    grid-template-columns: 10rem minmax(0, 1fr);
-  }
-  .jf-teaching-when {
-    grid-row: span 4;
-    padding-top: 6px;
-  }
 }
 
 /* Building: the list keeps left so the planet of running work shows right. */
@@ -1297,7 +1278,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0;
+  margin: 10px 0 0;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--color-accent);
@@ -1306,7 +1287,8 @@
   color: var(--color-muted);
 }
 .jf-system-title {
-  margin: 12px 0 0;
+  margin: 0;
+  text-wrap: balance;
   font-size: clamp(1.375rem, 2.2vw, 1.75rem);
   font-weight: 780;
   font-stretch: 110%;
@@ -1346,4 +1328,102 @@
 }
 .jf-about #education a {
   min-height: 44px;
+}
+
+/* ---------- Review fixes, 14 October 2026 ---------- */
+.jf-work-note {
+  margin-top: 12px;
+}
+/* Rows for the later About stages: hairlines, readable measure, no cards. */
+.jf-rows {
+  max-width: 64rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-line);
+}
+.jf-row {
+  display: grid;
+  gap: 8px 40px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.jf-row-title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  font-weight: 750;
+  font-stretch: 108%;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.jf-row-text {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--jf-text-2);
+}
+.jf-row .jf-offer-list {
+  max-width: 62ch;
+}
+.jf-updated {
+  margin-top: 20px;
+}
+@media (min-width: 900px) {
+  .jf-row {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+/* Experience and credentials: the older components, re-cut as rows. */
+.jf-about #experience .glass,
+.jf-about #education .glass {
+  border-width: 1px 0 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 22px 0;
+}
+.jf-about #experience li li,
+.jf-about #education .glass p {
+  max-width: 70ch;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.jf-about #experience h3 {
+  font-size: 1.25rem;
+}
+.jf-about #education .glass .text-xs,
+.jf-about #education .glass .text-sm {
+  font-size: 0.9375rem;
+}
+.jf-about #education a.rounded-full {
+  border-radius: 999px;
+}
+/* Arrival: the card sits under the star-name, centred on wide screens. */
+@media (min-width: 900px) {
+  .jf-arrival-inner {
+    align-items: center;
+  }
+  .jf-arrival-card {
+    width: 100%;
+  }
+}
+.jf-contact .jf-section-head {
+  margin-bottom: 28px;
+}
+/* Phones: the floating E.V launcher shrinks to its avatar so it does not
+   sit on content; its accessible name ("Open E.V") is unchanged. */
+@media (max-width: 767px) {
+  .jf-site .ev-launcher-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .jf-site [data-testid="oj-assistant"] > button[aria-label="Open E.V"] {
+    padding: 6px;
+  }
+  .jf-site main {
+    padding-bottom: 24px;
+  }
 }

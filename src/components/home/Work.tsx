@@ -34,8 +34,8 @@ export function Work() {
       <div className="jf-work">
         <article className="jf-work-feature" aria-labelledby="work-cited">
           <div className="jf-work-feature-copy">
-            <Kind kind={cited.kind} status={cited.status} />
             <h3 id="work-cited" className="jf-work-title jf-work-title-large">{cited.title}</h3>
+            <Kind kind={cited.kind} status={cited.status} />
             <p className="jf-work-text">{cited.summary}</p>
             <p className="jf-work-fact">{cited.fact}</p>
             <div className="jf-work-links">
@@ -65,8 +65,8 @@ export function Work() {
         </article>
 
         <article className="jf-work-card jf-work-blog" aria-labelledby="work-blog">
-          <Kind kind={blog.kind} status={blog.status} />
           <h3 id="work-blog" className="jf-work-title">{blog.title}</h3>
+          <Kind kind={blog.kind} status={blog.status} />
           <p className="jf-work-text">{blog.summary}</p>
           <ol className="jf-chain" aria-label="Who handles each post, in order">
             {blog.agents.map((agent) => (
@@ -80,22 +80,22 @@ export function Work() {
         </article>
 
         <article className="jf-work-card" aria-labelledby="work-ev">
-          <Kind kind={ev.kind} status={ev.status} />
           <h3 id="work-ev" className="jf-work-title">{ev.title}</h3>
+          <Kind kind={ev.kind} status={ev.status} />
           <p className="jf-work-text">{ev.summary}</p>
           <AskEvButton label="Ask E.V" className="jf-text-link jf-text-button" />
         </article>
 
         <article className="jf-work-card jf-work-pending" aria-labelledby="work-lyw">
-          <Kind kind={learnYourWay.kind} status={learnYourWay.status} />
           <h3 id="work-lyw" className="jf-work-title">{learnYourWay.title}</h3>
+          <Kind kind={learnYourWay.kind} status={learnYourWay.status} />
           <p className={learnYourWay.summary.startsWith("[") ? "jf-work-text jf-placeholder" : "jf-work-text"}>{learnYourWay.summary}</p>
-          <p className="jf-fine">{learnYourWay.note}</p>
+          <p className="jf-fine jf-work-note">{learnYourWay.note}</p>
         </article>
 
         <article className="jf-work-card" aria-labelledby="work-portfolio">
-          <Kind kind={portfolio.kind} status={portfolio.status} />
           <h3 id="work-portfolio" className="jf-work-title">{portfolio.title}</h3>
+          <Kind kind={portfolio.kind} status={portfolio.status} />
           <p className="jf-work-text">{portfolio.summary}</p>
           <div className="jf-work-links">
             <Link

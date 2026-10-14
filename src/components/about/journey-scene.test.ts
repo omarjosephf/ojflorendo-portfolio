@@ -25,8 +25,8 @@ describe("journey budget (ADR-0030)", () => {
   it("caps frames, pixel ratio and points, with fewer on phones", () => {
     expect(JOURNEY_BUDGET.fpsCap).toBeLessThanOrEqual(60);
     expect(JOURNEY_BUDGET.dprCap).toBeLessThanOrEqual(2);
-    const sum = (c: { tunnel: number; name: number; planet: number; moon: number }) =>
-      c.tunnel + c.name + c.planet + c.moon * MOONS;
+    const sum = (c: { tunnel: number; name: number; planet: number; moon: number; galaxy: number }) =>
+      c.tunnel + c.name + c.planet + c.moon * MOONS + c.galaxy;
     expect(sum(JOURNEY_BUDGET.counts.desktop)).toBeLessThanOrEqual(10_000);
     expect(sum(JOURNEY_BUDGET.counts.compact)).toBeLessThan(sum(JOURNEY_BUDGET.counts.desktop) / 2);
     expect(journeyCountsFor(390)).toBe(JOURNEY_BUDGET.counts.compact);
@@ -70,22 +70,23 @@ describe("camera path", () => {
 
 describe("scene points", () => {
   it("builds every group with the right kinds", () => {
-    const counts = { tunnel: 5, name: 6, planet: 7, moon: 3 };
+    const counts = { tunnel: 5, name: 6, planet: 7, moon: 3, galaxy: 4 };
     const samples = new Float32Array([0.1, 0.2, 0.5, 0.5, 0.9, 0.8]);
     const data = buildJourney(counts, 1.6, samples, seeded(3));
-    const total = 5 + 6 + 7 + 3 * MOONS;
+    const total = 5 + 6 + 7 + 3 * MOONS + 4;
     expect(data.length).toBe(total * POINT_STRIDE);
     const kinds = Array.from({ length: total }, (_, i) => data[i * POINT_STRIDE + 6]);
     expect(kinds.filter((k) => k === KIND.tunnel)).toHaveLength(5);
     expect(kinds.filter((k) => k === KIND.name)).toHaveLength(6);
     expect(kinds.filter((k) => k === KIND.planet)).toHaveLength(7);
     expect(kinds.filter((k) => k === KIND.moon)).toHaveLength(3 * MOONS);
+    expect(kinds.filter((k) => k === KIND.galaxy)).toHaveLength(4);
   });
 
   it("draws the name inside its frame", () => {
     const frame = nameFrame(1.6);
     const samples = new Float32Array([0, 0, 1, 1, 0.5, 0.5]);
-    const data = buildJourney({ tunnel: 0, name: 50, planet: 0, moon: 0 }, 1.6, samples, seeded(5));
+    const data = buildJourney({ tunnel: 0, name: 50, planet: 0, moon: 0, galaxy: 0 }, 1.6, samples, seeded(5));
     for (let i = 0; i < 50; i += 1) {
       const x = data[i * POINT_STRIDE];
       const y = data[i * POINT_STRIDE + 1];
@@ -95,7 +96,7 @@ describe("scene points", () => {
   });
 
   it("scatters the name points as plain stars when there are no samples", () => {
-    const data = buildJourney({ tunnel: 0, name: 10, planet: 0, moon: 0 }, 1.6, new Float32Array(), seeded(9));
+    const data = buildJourney({ tunnel: 0, name: 10, planet: 0, moon: 0, galaxy: 0 }, 1.6, new Float32Array(), seeded(9));
     for (let i = 0; i < 10; i += 1) {
       const o = i * POINT_STRIDE;
       expect([data[o], data[o + 1], data[o + 2]]).toEqual([data[o + 3], data[o + 4], data[o + 5]]);

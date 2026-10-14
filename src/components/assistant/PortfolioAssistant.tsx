@@ -99,7 +99,7 @@ export function PortfolioAssistant({storageEnabled=false,nonce}:{storageEnabled?
           decoding="async"
           className="h-7 w-7 rounded-full border border-night/40 bg-night/20 object-cover"
         />
-        Ask E.V
+        <span className="ev-launcher-label">Ask E.V</span>
       </button>
     </div>
   );

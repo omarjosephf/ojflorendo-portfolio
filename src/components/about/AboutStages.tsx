@@ -9,7 +9,6 @@ export function AboutOrigin() {
   return (
     <Section id="origin" stage title="Where it started" className="jf-origin">
       <p className="jf-placeholder">[YOUR STORY: ORIGIN, PUBLIC PARTS ONLY]</p>
-      <p className="jf-stage-text">{site.about[0]}</p>
     </Section>
   );
 }
@@ -25,9 +24,8 @@ export function AboutTeaching() {
       <ol className="jf-teaching">
         {taught.map((item) => (
           <li key={`${item.organisation}-${item.period}`} className="jf-teaching-item">
-            <p className="jf-teaching-when">{item.period}</p>
             <h3 className="jf-teaching-org">{item.organisation}</h3>
-            <p className="jf-teaching-role">{item.role}</p>
+            <p className="jf-teaching-role">{`${item.role}, ${item.period}`}</p>
             <p className="jf-stage-text">{item.responsibilities[0]}</p>
           </li>
         ))}
@@ -53,11 +51,11 @@ export function AboutBuilding() {
       <ul className="jf-systems">
         {systems.map((system) => (
           <li key={system.title} className={system.status === "Live" ? "jf-system" : "jf-system jf-system-pending"}>
+            <h3 className="jf-system-title">{system.title}</h3>
             <p className="jf-system-status">
               <span className={system.status === "Live" ? "jf-status-dot" : "jf-status-dot jf-status-dot-hollow"} aria-hidden="true" />
               {system.status}
             </p>
-            <h3 className="jf-system-title">{system.title}</h3>
             <p className={system.text.startsWith("[") ? "jf-stage-text jf-placeholder" : "jf-stage-text"}>{system.text}</p>
             {system.link ? (
               <Link href={system.link.href} className="jf-text-link">

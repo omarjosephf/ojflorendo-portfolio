@@ -4,7 +4,8 @@
  * the page. At the start, stars assemble into the owner's name; between stages
  * the camera warps forward and the stars streak; at the Building stage four
  * small systems settle into orbit around a planet made of gold stars, the
- * "planet of running work".
+ * "planet of running work"; at the end the corridor opens onto a distant
+ * galaxy, the next destination.
  *
  * Pure module: geometry, budget and shaders only. AboutSky.tsx owns WebGL.
  */
@@ -16,15 +17,15 @@ export const JOURNEY_BUDGET = {
   maxPixels: 4_000_000,
   compactBelow: 768,
   counts: {
-    desktop: { tunnel: 2200, name: 3200, planet: 2200, moon: 120 },
-    compact: { tunnel: 900, name: 1600, planet: 1000, moon: 70 },
+    desktop: { tunnel: 2200, name: 3200, planet: 2200, moon: 120, galaxy: 1800 },
+    compact: { tunnel: 900, name: 1600, planet: 1000, moon: 70, galaxy: 700 },
   },
   brightness: 0.9,
   /** Seconds for the name to assemble after the scene starts. */
   assembleSeconds: 2.4,
 } as const;
 
-export type JourneyCounts = { tunnel: number; name: number; planet: number; moon: number };
+export type JourneyCounts = { tunnel: number; name: number; planet: number; moon: number; galaxy: number };
 
 export function journeyCountsFor(width: number): JourneyCounts {
   return width < JOURNEY_BUDGET.compactBelow ? JOURNEY_BUDGET.counts.compact : JOURNEY_BUDGET.counts.desktop;
@@ -35,13 +36,15 @@ export const STAGE_ANCHORS = [10, -50, -110, -190, -270, -320, -370] as const;
 /** Index of the Building stage, where the planet sits. */
 export const BUILDING_STAGE = 3;
 export const PLANET_Z = -228;
+/** The distant galaxy the journey ends facing. */
+export const GALAXY_Z = -470;
 export const NAME_Z = -18;
 export const MOONS = 4;
 export const FOV = (55 * Math.PI) / 180;
 
 /** Floats per point: target xyz, start xyz, kind, random. */
 export const POINT_STRIDE = 8;
-export const KIND = { tunnel: 0, name: 1, planet: 2, moon: 3 } as const;
+export const KIND = { tunnel: 0, name: 1, planet: 2, moon: 3, galaxy: 4 } as const;
 
 const smooth = (edge0: number, edge1: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
@@ -103,7 +106,7 @@ export function buildJourney(
   rand: () => number = Math.random,
 ): Float32Array {
   const moonTotal = counts.moon * MOONS;
-  const total = counts.tunnel + counts.name + counts.planet + moonTotal;
+  const total = counts.tunnel + counts.name + counts.planet + moonTotal + counts.galaxy;
   const data = new Float32Array(total * POINT_STRIDE);
   let o = 0;
   const push = (tx: number, ty: number, tz: number, sx: number, sy: number, sz: number, kind: number) => {
@@ -161,6 +164,16 @@ export function buildJourney(
       push(Math.sin(phi) * Math.cos(theta) * r, Math.sin(phi) * Math.sin(theta) * r, Math.cos(phi) * r, moon, 0, 0, KIND.moon);
     }
   }
+
+  // A three-armed spiral in its own plane; the shader tilts and turns it.
+  for (let i = 0; i < counts.galaxy; i += 1) {
+    const core = rand() < 0.15;
+    const t = core ? Math.pow(rand(), 2) * 0.18 : Math.pow(rand(), 0.75);
+    const arm = Math.floor(rand() * 3);
+    const angle = core ? rand() * Math.PI * 2 : arm * ((2 * Math.PI) / 3) + t * 3.8 + (rand() - 0.5) * 0.5 * (1 - t * 0.4);
+    const r = t * 16;
+    push(Math.cos(angle) * r, (rand() - 0.5) * 1.2 * (1 - t), Math.sin(angle) * r, t, 0, 0, KIND.galaxy);
+  }
   return data;
 }
 
@@ -176,6 +189,8 @@ uniform float u_time;
 uniform float u_assemble;
 uniform float u_build;
 uniform vec3 u_planet;
+uniform vec3 u_galaxy;
+uniform float u_others;
 uniform float u_scale;
 uniform float u_dpr;
 uniform float u_bright;
@@ -196,7 +211,7 @@ void main() {
   if (a_kind < 0.5) {
     p = a_target;
     size = 0.09 + step(0.94, a_rand) * 0.08;
-    alpha = 0.55 * twinkle;
+    alpha = 0.55 * twinkle * u_others;
     if (a_rand > 0.85) color = vec3(0.769, 0.839, 1.0);
   } else if (a_kind < 1.5) {
     float e = 1.0 - pow(1.0 - u_assemble, 3.0);
@@ -207,19 +222,27 @@ void main() {
   } else if (a_kind < 2.5) {
     p = u_planet + rotY(u_time * 0.05) * a_target;
     size = 0.16;
-    alpha = 0.7 * (0.7 + 0.3 * twinkle);
+    alpha = 0.7 * (0.7 + 0.3 * twinkle) * mix(0.25, 1.0, u_build) * u_others;
     color = vec3(0.949, 0.776, 0.427);
-  } else {
+  } else if (a_kind < 3.5) {
     float i = a_start.x;
-    float radius = 14.0 + i * 4.5;
+    float radius = 10.5 + i * 2.2;
     float angle = u_time * (0.22 - i * 0.035) + i * 1.7;
     vec3 orbit = rotX(0.35 - i * 0.18) * vec3(cos(angle) * radius, 0.0, sin(angle) * radius);
     vec3 far = vec3((i - 1.5) * 42.0, (mod(i, 2.0) < 0.5 ? 1.0 : -1.0) * 28.0, 70.0);
     float e = 1.0 - pow(1.0 - u_build, 3.0);
     p = u_planet + mix(far, orbit, e) + a_target;
     size = 0.12;
-    alpha = 0.75 * (0.7 + 0.3 * twinkle);
-    color = vec3(0.843, 0.894, 1.0);
+    // Three live systems in gold; the fourth, still in progress, pale and dim.
+    bool live = i < 2.5;
+    alpha = (live ? 0.75 : 0.4) * (0.7 + 0.3 * twinkle) * u_others;
+    color = live ? vec3(0.949, 0.776, 0.427) : vec3(0.62, 0.66, 0.74);
+  } else {
+    p = u_galaxy + rotX(0.55) * rotY(u_time * 0.01) * a_target;
+    float t = a_start.x;
+    size = 0.22;
+    alpha = (0.16 + 0.22 * twinkle) * (1.0 - t * 0.55) * u_others;
+    color = mix(vec3(1.0, 0.906, 0.769), vec3(0.769, 0.839, 1.0), t);
   }
   vec4 eye = u_view * vec4(p, 1.0);
   float depth = -eye.z;

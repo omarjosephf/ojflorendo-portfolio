@@ -48,7 +48,10 @@ stage of the page (arrival, origin, teaching, building, experience, now,
 credentials). At arrival, stars assemble into the owner's name; between stages
 the camera warps forward and the stars streak; at the Building stage four small
 systems fly in and settle into orbit around a planet made of gold stars, "the
-planet of running work". While the scene draws the name, the real h1 is
+planet of running work" (three gold for the live systems, one pale for the one
+in progress); at the end the corridor opens onto a faint, distant galaxy. The
+planet and the galaxy sit to the right of the content column on wide screens.
+While the scene draws the name, the real h1 is
 visually hidden but stays in the accessibility tree; without the scene it is
 painted normally. No rocket, satellite-around-the-name, constellation-job or
 reticle-cursor signature from the reference site is used.
@@ -65,8 +68,8 @@ unit-tested):
 | --- | --- |
 | Frame rate | at most 30 frames a second (motion is slow by design) |
 | Backing store | device pixel ratio capped at 1.5, and at most 4 million pixels |
-| Points | home 6,250 wide / 2,460 below 768 px; About 8,080 wide / 3,780 below 768 px |
-| Brightness | home 0.9, with stars behind text blocks keeping 15% of their light; About 0.9, 0.72 on phones |
+| Points | home 6,250 wide / 2,460 below 768 px; About 9,880 wide / 4,480 below 768 px |
+| Brightness | home 0.9, with stars behind text blocks keeping 15% of their light; About 0.9, with everything but the name at 30% on phones, where text spans the screen |
 | Start | after `load` and an idle callback, so it never competes with first paint |
 | Hidden tab | loop stopped; resumes on return |
 | Reduced motion | one still frame, redrawn only on scroll or resize; no loop |

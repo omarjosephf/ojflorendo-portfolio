@@ -2,7 +2,7 @@ export const positioning = {
   professionalName: "Joseph Florendo",
   hero: {
     // The role and place, shown above the name.
-    eyebrow: "AI Automation Developer in Windsor, UK",
+    role: "AI Automation Developer in Windsor, UK",
     /** Display wordmark: the name, set large. */
     displayName: ["Joseph", "Florendo"],
     // The offer in one sentence, split over two lines.
@@ -134,7 +134,7 @@ export const positioning = {
   work: {
     heading: "Work you can check",
     intro:
-      "Each of these is running in public. Try the demo, read the case study or ask E.V how it works.",
+      "Four are live and one is in progress, built in public. Try the demo, read the case studies or ask E.V how they work.",
     cited: {
       title: "Cited",
       kind: "Document assistant",

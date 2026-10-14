@@ -18,7 +18,7 @@ export const now: NowData = {
       iconKey: "portfolio",
       title: "Learn Your Way",
       description:
-        "[LEARN YOUR WAY: ONE-LINE DESCRIPTION] In progress, and built in public.",
+        "[LEARN YOUR WAY: ONE-LINE DESCRIPTION]",
     },
     {
       iconKey: "study",

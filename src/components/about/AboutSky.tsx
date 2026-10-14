@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { createProgram, isSoftwareRenderer, lookAt, perspective } from "@/components/webgl/gl";
 import {
   FOV,
+  GALAXY_Z,
   JOURNEY_BUDGET,
   JOURNEY_FRAGMENT,
   JOURNEY_VERTEX,
@@ -103,7 +104,7 @@ export function AboutSky() {
     const su = (name: string) => gl.getUniformLocation(streaks, name);
     const U = {
       proj: pu("u_proj"), view: pu("u_view"), time: pu("u_time"), assemble: pu("u_assemble"),
-      build: pu("u_build"), planet: pu("u_planet"), scale: pu("u_scale"), dpr: pu("u_dpr"),
+      build: pu("u_build"), planet: pu("u_planet"), galaxy: pu("u_galaxy"), others: pu("u_others"), scale: pu("u_scale"), dpr: pu("u_dpr"),
       bright: pu("u_bright"), warp: pu("u_warp"), camZ: pu("u_camZ"),
     };
     const S = { proj: su("u_proj"), view: su("u_view"), warp: su("u_warp") };
@@ -237,7 +238,11 @@ export function AboutSky() {
       gl.uniform1f(U.time, seconds);
       gl.uniform1f(U.assemble, assemble);
       gl.uniform1f(U.build, buildProgressFor(camZ));
-      gl.uniform3f(U.planet, compact ? 0 : 14, compact ? 8 : 2, PLANET_Z);
+      gl.uniform3f(U.planet, compact ? 0 : 22, compact ? 8 : 2, PLANET_Z);
+      // The ending galaxy keeps to the right of the content column, like the planet.
+      gl.uniform3f(U.galaxy, compact ? 0 : 58, compact ? 12 : 8, GALAXY_Z);
+      // On phones the text spans the screen, so everything but the name dims.
+      gl.uniform1f(U.others, compact ? 0.3 : 1);
       gl.uniform1f(U.scale, height / (2 * Math.tan(FOV / 2)));
       gl.uniform1f(U.dpr, dpr);
       gl.uniform1f(U.bright, JOURNEY_BUDGET.brightness * (compact ? 0.8 : 1));

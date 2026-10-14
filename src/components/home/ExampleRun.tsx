@@ -68,7 +68,6 @@ export function ExampleRun({ content: exampleRun }: { content: ExampleRunContent
     <figure className="jf-run" aria-labelledby="example-run-title">
       <div className="jf-run-head">
         <p id="example-run-title" className="jf-run-title">{exampleRun.title}</p>
-        <span className="jf-run-tag">Example</span>
       </div>
       <ol className="jf-run-steps">
         {exampleRun.steps.map((step, index) => {
