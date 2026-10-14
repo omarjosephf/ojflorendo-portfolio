@@ -331,8 +331,8 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
             textarea alongside the character counter.
           */}
           <p id={`${fid("message")}-guide`} className="mb-1.5 text-xs leading-relaxed text-muted">
-            What do you offer, who is it for and what would you like to improve?
-            Include your website link, timing and budget if useful.
+            Which task do you repeat, which tools are involved and what would a finished job look like?
+            Include timing and budget if useful.
           </p>
           <textarea
             id={fid("message")}

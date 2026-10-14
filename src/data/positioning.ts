@@ -112,6 +112,94 @@ export const positioning = {
     relatedWork:
       "I also co-deliver AI, Python and data training, and I have worked in digital content and e-commerce operations.",
   },
+  /**
+   * The hero's example run. Synthetic by design and labelled as such on the
+   * page: it shows how a typical automation behaves, not a client project.
+   */
+  exampleRun: {
+    title: "An example automation",
+    caption: "An illustration of a typical flow, not a client project.",
+    steps: [
+      { title: "A new enquiry arrives", detail: "A customer emails to ask about availability next week." },
+      { title: "AI reads and sorts it", detail: "Marked as a booking request, with the dates and contact details pulled out." },
+      { title: "A reply is drafted", detail: "Written in your tone, with the details already filled in." },
+      { title: "You approve it", detail: "One click sends it, files the request and logs what happened." },
+    ],
+  },
+  /**
+   * The Work section. Every item is real and live except Learn Your Way, which
+   * is labelled in progress. Case-study links exist only for Cited and the
+   * portfolio; the blog links to /blog and E.V opens the assistant.
+   */
+  work: {
+    heading: "Work you can check",
+    intro:
+      "Each of these is running in public. Try the demo, read the case study or ask E.V how it works.",
+    cited: {
+      title: "Cited",
+      kind: "Document assistant",
+      status: "Live",
+      summary:
+        "Answers questions from a set of documents and shows the exact passage behind every answer. Questions the documents can't answer are refused, not guessed.",
+      fact:
+        "On its fixed 15-question test set, every answerable question was answered correctly and every out-of-scope question was refused.",
+      demoUrl: "https://cited-demo.fly.dev",
+      caseStudySlug: "cited",
+      image: "/images/projects/cited.webp",
+    },
+    blog: {
+      title: "A blog written by AI agents, approved by me",
+      kind: "Multi-agent system",
+      status: "Live",
+      summary:
+        "Agents suggest ideas, research, write and review posts from my own material. Nothing is published until I read it and approve it.",
+      agents: ["Idea Scout", "Researcher", "Writer", "SEO review", "Reviewer", "Critique"],
+      approver: "Joseph approves",
+      href: "/blog",
+    },
+    ev: {
+      title: "E.V and its admin panel",
+      kind: "Assistant on this site",
+      status: "Live",
+      summary:
+        "E.V answers questions about my work from my published documents, with sources. I run it from an owner-only admin panel.",
+    },
+    learnYourWay: {
+      title: "Learn Your Way",
+      kind: "My first product",
+      status: "In progress",
+      summary: "[LEARN YOUR WAY: ONE-LINE DESCRIPTION]",
+      note: "Built in public.",
+    },
+    portfolio: {
+      title: "This website",
+      kind: "Portfolio platform",
+      status: "Live",
+      summary:
+        "Built with Next.js and TypeScript, tested on every change and served under a strict security policy.",
+      caseStudySlug: "personal-portfolio-website",
+      sourceUrl: "https://github.com/omarjosephf/ojflorendo-portfolio",
+    },
+  },
+  assistant: {
+    heading: "Ask E.V about my work",
+    body:
+      "E.V is the assistant on this site. It answers from my published documents and shows the source behind each answer. If the documents don't cover a question, it says so instead of guessing.",
+    action: "Ask E.V a question",
+    example: {
+      question: "What does Cited do?",
+      answer:
+        "Cited answers questions from a set of documents and shows the passage each answer came from. It refuses questions the documents don't cover.",
+      source: "Cited — Document Assistant",
+    },
+    exampleLabel: "An example of how E.V answers.",
+  },
+  why: {
+    heading: "Why I build this",
+    // Placeholder until the owner writes the short version of his story.
+    body: "[YOUR STORY: SHORT VERSION]",
+    link: "Read the full story",
+  },
   contact: {
     heading: "What do you repeat every week?",
     supportingCopy:

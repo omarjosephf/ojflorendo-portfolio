@@ -16,7 +16,7 @@
  * the delivered notification, so they are not display-only.
  */
 export const ENQUIRY_TYPES = [
-  { value: "freelance", label: "Freelance project" },
+  { value: "freelance", label: "Automation, AI or website project" },
   { value: "collaboration", label: "Collaboration" },
   { value: "speaking", label: "Speaking / training" },
   { value: "partnership", label: "Sponsorship / partnership" },

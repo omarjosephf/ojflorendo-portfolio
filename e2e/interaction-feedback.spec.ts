@@ -32,7 +32,7 @@ test("click feedback is finite, bounded and does not delay navigation or violate
   await observeFeedback(page);
   await page.goto("/");
   await page.waitForLoadState("networkidle");
-  for (let i = 0; i < 6; i++) await page.locator(".hero-meta").click({ position: { x: 200, y: 5 } });
+  for (let i = 0; i < 6; i++) await page.locator(".jf-hero-role").click({ position: { x: 20, y: 8 } });
   const recorded = await page.evaluate(() => window.__interactionAnimations);
   expect(recorded.length).toBeGreaterThan(0);
   expect(recorded.every(a => a.iterations === 1 && a.duration <= 500)).toBe(true);
@@ -77,12 +77,12 @@ test("touch activates header links and the mobile menu exactly once", async ({ b
   await expect(page.locator("#mobile-menu")).toBeVisible();
   await page.getByRole("button", { name: "Close menu", exact: true }).tap();
   await expect(page.locator("#mobile-menu")).toBeHidden();
-  await page.getByRole("link", { name: "Discuss your website", exact: true }).tap();
+  await page.getByRole("link", { name: "Automate a task", exact: true }).tap();
   await expect(page).toHaveURL(/#contact$/);
   // A tap must never queue more than the single bounded burst.
   const bursts = await page.evaluate(() => window.__interactionAnimations.filter(a => a.kind === "burst"));
   expect(bursts.every(a => a.iterations === 1 && a.duration <= 500)).toBe(true);
-  await expect(page.locator("#projects .reveal").first()).toHaveCSS("animation-name", "none");
+  expect(await page.locator("#projects").evaluate((el) => el.getAnimations({ subtree: true }).length)).toBe(0);
   await context.close();
 });
 
@@ -90,7 +90,7 @@ test("reduced motion cancels feedback immediately and preserves keyboard navigat
   await observeFeedback(page);
   await page.goto("/");
   await page.waitForLoadState("networkidle");
-  await page.locator(".hero-meta").click({ position: { x: 200, y: 5 } });
+  await page.locator(".jf-hero-role").click({ position: { x: 20, y: 8 } });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect.poll(() => page.locator(".click-feedback").evaluate(el => el.getAnimations({ subtree: true }).length)).toBe(0);
   const before = await page.evaluate(() => window.__interactionAnimations.length);

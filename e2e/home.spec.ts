@@ -9,16 +9,14 @@ test.describe("Homepage", () => {
     const watcher = await watchPage(page);
     await page.goto("/");
 
-    // The h1 states the offer; the name is carried by the hero meta line, the
-    // nav wordmark, About and the footer.
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Make your services clear.Make the next step easy.",
-    );
+    // The h1 is the name (ADR-0029); the role and the offer follow it.
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Joseph Florendo");
+    await expect(page.getByText("AI Automation Developer in Windsor, UK")).toBeVisible();
     await expect(page).toHaveTitle(
       /Joseph Florendo \| AI Automation Developer/,
     );
     await expect(
-      page.getByRole("link", { name: "Discuss your website" }),
+      page.getByRole("link", { name: "Automate a task" }),
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "See my work" }),
@@ -55,48 +53,39 @@ test.describe("Homepage", () => {
     }
   });
 
-  // The rotating project-preview stack was replaced by the owner-approved
-  // portrait, which is deliberately static. The finite-entrance contract now
-  // belongs to the hero heading, which is what still animates.
-  test("hero heading visibly settles, then stops animating", async ({ page }) => {
+  // The hero's one orchestrated moment: an example automation plays once,
+  // step by step, then rests with every step visible. Replay repeats it.
+  test("the example run plays once, then rests", async ({ page }) => {
     await page.goto("/");
-    const line = page.locator(".hero-offer > span").first();
-    await page.evaluate(async () => {
-      await document.fonts.ready;
-      for (const animation of document.getAnimations()) {
-        animation.pause();
-        animation.currentTime = 0;
-      }
-    });
-    const start = await line.evaluate((el) => getComputedStyle(el).transform);
-    // Text must retain its reviewed contrast even at the entrance's first frame.
-    expect(await page.locator(".hero-offer > span").evaluateAll((elements) =>
-      elements.every((el) => getComputedStyle(el).opacity === "1")
-    )).toBe(true);
-    await page.evaluate(() => {
-      for (const animation of document.getAnimations()) animation.finish();
-    });
-    const end = await line.evaluate((el) => getComputedStyle(el).transform);
-    expect(end).not.toBe(start);
-    expect(await page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === "running").length)).toBe(0);
+    const steps = page.locator(".jf-run-step");
+    await expect(steps).toHaveCount(4);
+    // Every step's text is visible at all times; only the markers change.
+    for (const step of await steps.all()) await expect(step).toBeVisible();
+    await expect(page.locator('.jf-run-step[data-state="done"]')).toHaveCount(4, { timeout: 10_000 });
+    const replay = page.getByRole("button", { name: "Replay" });
+    await expect(replay).toBeEnabled();
+    await expect
+      .poll(() => page.evaluate(() => document.getAnimations().filter((a) => a.playState === "running").length))
+      .toBe(0);
+    await replay.click();
+    await expect(page.locator('.jf-run-step[data-state="done"]')).not.toHaveCount(4);
+    await expect(page.locator('.jf-run-step[data-state="done"]')).toHaveCount(4, { timeout: 10_000 });
   });
 
   test("reduced motion is complete and static", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    await expect(page.locator(".hero-portrait-blend img")).toBeVisible();
     await expect(page.locator("#services-heading")).toBeVisible();
+    await expect(page.locator('.jf-run-step[data-state="done"]')).toHaveCount(4);
+    await expect(page.getByRole("button", { name: "Replay" })).toHaveCount(0);
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
-    expect(await page.locator(".hero-offer > span").first().evaluate((el) => getComputedStyle(el).transform)).toBe("none");
-  });
-  test("the project enquiry action is immediately available", async ({
+  });  test("the project enquiry action is immediately available", async ({
     page,
   }) => {
     await page.goto("/");
-    // The particle-wave canvas is fixed over the whole viewport on every page.
     // Playwright's actionability check fails if another element would receive
-    // the click, so this asserts the canvas stays pointer-events: none.
-    await page.getByRole("link", { name: "Discuss your website" }).click();
+    // the click, so this also proves no background layer intercepts it.
+    await page.getByRole("link", { name: "Automate a task" }).click();
     await expect(page).toHaveURL(/#contact$/);
   });
 

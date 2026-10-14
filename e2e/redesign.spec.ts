@@ -4,25 +4,22 @@ import { hasNoHorizontalOverflow } from "./helpers";
 
 // These tests protect the changed interaction contract, rather than only the
 // presence of new classes. Artifacts stay in Playwright's ignored output folder.
-test("project frame responds to keyboard focus and opens its case study", async ({ page }) => {
+test("work case-study links open from the keyboard", async ({ page }) => {
   await page.goto("/");
-  const frame = page.locator("#projects .project-frame").first();
-  await frame.scrollIntoViewIfNeeded();
-  await frame.focus();
-  await expect(frame).toBeFocused();
-  await expect.poll(() => frame.evaluate((el) => getComputedStyle(el).transform)).not.toBe("none");
-  await expect(page.locator("#projects .project-links").first()).toBeVisible();
-  await frame.press("Enter");
+  const link = page.getByRole("link", { name: /Read the Personal Portfolio .* case study/i });
+  await link.scrollIntoViewIfNeeded();
+  await link.focus();
+  await expect(link).toBeFocused();
+  await link.press("Enter");
   await expect(page).toHaveURL(/\/projects\/personal-portfolio-website$/);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Personal Portfolio");
 });
-
 // The owner retired the contact portrait circle, so the link this test used to
 // drive no longer exists. The contract it protected does: a keyboard visitor
 // must be able to reach the enquiry form from the hero and start typing.
 test("the enquiry form is reachable and usable from the keyboard", async ({ page }) => {
   await page.goto("/");
-  const cta = page.getByRole("link", { name: "Discuss your website", exact: true });
+  const cta = page.getByRole("link", { name: "Automate a task", exact: true });
   await cta.focus();
   await expect(cta).toBeFocused();
   await cta.press("Enter");
@@ -39,7 +36,7 @@ test("all portfolio content and project links work without JavaScript", async ({
   const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
   const page = await context.newPage();
   await page.goto("/");
-  for (const id of ["services", "projects", "approach", "contact"]) {
+  for (const id of ["approach", "services", "projects", "assistant", "why", "contact"]) {
     await expect(page.locator(`#${id}-heading`)).toBeVisible();
   }
   // The background sections moved to their own route. Sweeping it here keeps
@@ -61,7 +58,7 @@ test("small phones, tablets and 200 percent reflow retain content without overfl
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
     expect(await hasNoHorizontalOverflow(page), `overflow at ${viewport.width}px`).toBe(true);
-    await expect(page.getByRole("link", { name: "Discuss your website", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Automate a task", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "See my work", exact: true })).toBeVisible();
 
     // /about is a public route in its own right and carries the long-form

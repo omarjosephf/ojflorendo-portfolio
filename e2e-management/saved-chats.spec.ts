@@ -48,13 +48,13 @@ test("failed saving preserves the visible answer and retries storage without gen
   await expect(page.getByText("Replies saved without asking the model again.",{exact:true})).toBeVisible();expect(state.counts()).toEqual({generationCalls:1,saveCalls:1});
 });
 for(const theme of ["light","dark"] as const)for(const width of [1280,390])test(`saved chat controls are accessible in ${theme} at ${width}px`,async({page})=>{
-  await page.setViewportSize({width,height:900});await fixture(page);await open(page);await page.getByLabel("Portfolio color theme").selectOption(theme);await connect(page);await send(page);
+  await page.setViewportSize({width,height:900});await fixture(page);await open(page);await page.emulateMedia({colorScheme:theme});await connect(page);await send(page);
   const audit=await new AxeBuilder({page}).include('[role="dialog"]').withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();expect(audit.violations).toEqual([]);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
 });
 
 for(const theme of ["light","dark"] as const)test(`signup challenge remains usable at 390px in ${theme}`,async({page})=>{
-  await page.setViewportSize({width:390,height:900});const state=await fixture(page);await open(page);await page.getByLabel("Portfolio color theme").selectOption(theme);
+  await page.setViewportSize({width:390,height:900});const state=await fixture(page);await open(page);await page.emulateMedia({colorScheme:theme});
   await page.getByRole("button",{name:"Start a new saved chat"}).click();const start=page.getByRole("button",{name:"Verify and start saved chat"});await expect(start).toBeDisabled();
   const audit=await new AxeBuilder({page}).include('[role="dialog"]').withTags(["wcag2a","wcag2aa","wcag21a","wcag21aa"]).analyze();expect(audit.violations).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   const scriptNonce=await page.locator("#cf-turnstile-script").evaluate((element:HTMLScriptElement)=>element.nonce);expect(scriptNonce.length).toBeGreaterThan(10);
