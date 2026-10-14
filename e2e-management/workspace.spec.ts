@@ -116,8 +116,11 @@ for (const theme of ["light", "dark"] as const) for (const width of [1280, 390])
 test("navigation to the public portfolio restores its own layout", async ({ page,baseURL }) => {
   await page.goto("/manage"); await page.getByLabel("Workspace color theme").selectOption("dark");
   await page.getByRole("link", { name: "View portfolio", exact: true }).click();
-  await expect(page.getByLabel("Portfolio color theme")).toHaveValue("dark");
   await expect(page).toHaveURL(`${baseURL}/`);
+  // The public site has one night palette and no theme control of its own (ADR-0030).
+  await expect(page.getByLabel("Portfolio color theme")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveCSS("color-scheme", "dark");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(0, 0, 0)");
   await expect(page.getByRole("button", { name: "Open E.V", exact: true })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Management sections" })).toHaveCount(0);
 });

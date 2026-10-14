@@ -8,10 +8,13 @@ import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
 import { SITE_URL } from "@/lib/site-url";
 
+// Inter and Barlow serve /manage only; the public site sets Archivo in its own
+// layout. Not preloaded, so public pages never download them (ADR-0030).
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  preload: false,
 });
 
 const display = Barlow_Condensed({
@@ -19,6 +22,7 @@ const display = Barlow_Condensed({
   weight: ["500", "600", "700"],
   variable: "--font-display",
   display: "swap",
+  preload: false,
 });
 
 const title = "Joseph Florendo | AI Automation Developer";

@@ -42,17 +42,46 @@ test.describe("Homepage", () => {
     expect(await hasNoHorizontalOverflow(page)).toBe(true);
   });
 
-  test("the redesign loads no continuous canvas on phones or desktop", async ({ page }) => {
+  // ADR-0030: one decorative canvas behind the home page, never in the way.
+  test("the star sky is one decorative canvas behind the page, with no large chunk", async ({ page }) => {
     for (const width of [390, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
       await page.waitForLoadState("load");
-      await expect(page.locator("canvas")).toHaveCount(0);
+      const sky = page.locator("canvas");
+      await expect(sky).toHaveCount(1);
+      await expect(sky).toHaveAttribute("aria-hidden", "true");
+      await expect(sky).toHaveCSS("pointer-events", "none");
+      await expect(sky).toHaveCSS("position", "fixed");
+      await expect(sky).toHaveAttribute("data-engine", "running");
       const oversizedChunks = await page.evaluate(() => performance.getEntriesByType("resource").filter((r) => /chunks/.test(r.name) && (r as PerformanceResourceTiming).transferSize > 150_000).length);
       expect(oversizedChunks).toBe(0);
     }
   });
 
+  test("the star sky pauses in a hidden tab and resumes", async ({ page }) => {
+    await page.goto("/");
+    const sky = page.locator("canvas.jf-sky");
+    await expect(sky).toHaveAttribute("data-engine", "running");
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => true });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(sky).toHaveAttribute("data-engine", "paused");
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => false });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(sky).toHaveAttribute("data-engine", "running");
+  });
+
+  test("other public pages carry no star canvas", async ({ page }) => {
+    for (const path of ["/blog", "/projects/cited"]) {
+      await page.goto(path);
+      await page.waitForLoadState("load");
+      await expect(page.locator("canvas")).toHaveCount(0);
+    }
+  });
   // The hero's one orchestrated moment: an example automation plays once,
   // step by step, then rests with every step visible. Replay repeats it.
   test("the example run plays once, then rests", async ({ page }) => {
@@ -78,8 +107,12 @@ test.describe("Homepage", () => {
     await expect(page.locator("#services-heading")).toBeVisible();
     await expect(page.locator('.jf-run-step[data-state="done"]')).toHaveCount(4);
     await expect(page.getByRole("button", { name: "Replay" })).toHaveCount(0);
+    // The sky draws one still frame and runs no loop.
+    await expect(page.locator("canvas.jf-sky")).toHaveAttribute("data-engine", "still");
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
-  });  test("the project enquiry action is immediately available", async ({
+  });
+
+  test("the project enquiry action is immediately available", async ({
     page,
   }) => {
     await page.goto("/");

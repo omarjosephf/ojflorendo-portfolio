@@ -19,7 +19,7 @@
   --color-sky: #b8c6ff;
   --jf-text-2: #d3d8e3;
   --jf-line-strong: #3a4155;
-  --jf-panel: rgb(8 10 17 / 0.84);
+  --jf-panel: rgb(8 10 17 / 0.74);
   --jf-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 .jf-site {
@@ -50,6 +50,27 @@
 }
 .jf-site :where(h1, h2, h3, h4) {
   font-family: var(--font-heading);
+}
+
+/* ---------- The star sky (ADR-0030) ---------- */
+.jf-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.2s var(--jf-ease);
+}
+.jf-sky[data-ready] {
+  opacity: 1;
+}
+.jf-site main,
+.jf-site footer {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------- Header ---------- */
@@ -156,6 +177,13 @@
   overflow: hidden;
   border-top: 1px solid var(--color-line);
   background: #000000;
+  animation: jf-menu-in 0.22s var(--jf-ease) both;
+}
+@keyframes jf-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
 }
 .jf-mobile-link {
   display: block;

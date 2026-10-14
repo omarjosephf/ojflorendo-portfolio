@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X, FileText } from "lucide-react";
 import { site } from "@/data/site";
 import { Container } from "@/components/ui/Container";
@@ -32,7 +31,6 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
   const firstLinkRef = useRef<HTMLAnchorElement | null>(null);
-  const reduceMotion = useReducedMotion();
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -282,17 +280,9 @@ export function Nav() {
         </nav>
       </Container>
 
-      {/* Mobile menu panel */}
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            id="mobile-menu"
-            initial={reduceMotion ? false : { opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            className="jf-mobile-menu"
-          >
+      {/* Mobile menu panel. Its short entrance is CSS, cancelled by reduced motion. */}
+      {open ? (
+          <div id="mobile-menu" className="jf-mobile-menu">
             <Container>
               <ul className="flex flex-col gap-1 py-4">
                 {site.nav.map((item, i) => {
@@ -333,9 +323,8 @@ export function Nav() {
                 ))}
               </div>
             </Container>
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
     </header>
   );
 }

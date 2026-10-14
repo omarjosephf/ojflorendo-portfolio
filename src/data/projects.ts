@@ -47,7 +47,7 @@ export const projects: ProjectItem[] = [
         "Defined the product scope, audience, content model, and security-first delivery plan before implementation.",
         "Built the typed content foundation, design system, security headers, and nonce-based Content Security Policy.",
         "Implemented the main sections, experience timeline, project case studies, and the secure contact boundary.",
-        "Explored a procedural 3D hero as progressive enhancement. It was measured, then retired: the current presentation uses typography, project imagery, and finite interaction feedback instead (ADR-0010).",
+        "Explored a procedural 3D hero as progressive enhancement. It was measured, then retired (ADR-0010). In October 2026 a much lighter WebGL star sky returned on the home page under its own measured budget (ADR-0030).",
         "Organise the public content, review the important visitor journeys, and use tests and manual checks to assess changes — keeping each change small enough to inspect and release deliberately.",
       ],
       architecture: [
@@ -55,7 +55,7 @@ export const projects: ProjectItem[] = [
         "Typed content modules kept separate from presentation components.",
         "A per-request nonce Content Security Policy generated in the Next.js proxy, with complementary security headers configured centrally.",
         "Build-time font optimisation and no runtime third-party font dependency.",
-        "A server-side contact route with a swappable email transport. The 3D renderers remain in the repository with their unit coverage so the decision can be reversed, but no decorative scene is mounted in the current presentation.",
+        "A server-side contact route with a swappable email transport. The home page's star sky is plain WebGL in its own small lazy chunk; the earlier 3D renderers remain retired.",
       ],
       features: [
         "Responsive and accessible interface with clear navigation and calls to action.",
@@ -72,7 +72,7 @@ export const projects: ProjectItem[] = [
         "The contact boundary uses bounded server-side validation, a honeypot, rate limiting, plain-text email output, generic errors, and server-only credentials.",
       ],
       performance: [
-        "No continuous decorative canvas or infinite CSS animation is mounted; interaction feedback is bounded and event-driven.",
+        "The home page's star sky is capped at 30 frames a second, starts only after the page has loaded, stops in hidden tabs and draws a single still frame with reduced motion; interaction feedback is bounded and event-driven.",
         "Expensive visual effects and unnecessary compositor layers were reduced after profiling.",
         "Scroll-linked behaviour uses requestAnimationFrame throttling and compositor-friendly transforms rather than per-frame React updates.",
         "Performance choices preserve readable content and navigation when animation is unavailable. The measurements recorded in ADR-0010 came from a 4x-throttled local sample and do not establish real-phone or universal smoothness.",
@@ -84,7 +84,7 @@ export const projects: ProjectItem[] = [
         },
         {
           title: "A distinctive 3D hero that had to earn its frames",
-          body: "A continuously rendering WebGL scene can harm scrolling and input responsiveness. I first kept it as progressive enhancement, capped its work, and paused it when it was not useful. On review the decorative scenes were unmounted altogether (ADR-0010); the source and its unit coverage remain so the decision can be reversed.",
+          body: "A continuously rendering WebGL scene can harm scrolling and input responsiveness. I first kept it as progressive enhancement, capped its work, and paused it when it was not useful. On review the decorative scenes were unmounted altogether (ADR-0010). The star sky that replaced them in October 2026 moves every star on the graphics card, so the page does almost no work per frame (ADR-0030).",
         },
         {
           title: "A distinctive site that still had to state an offer",
