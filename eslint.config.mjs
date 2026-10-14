@@ -20,6 +20,10 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "test-results/**",
     ".ev-preview/**",
+    // Machine-local, git-ignored agent files: prototypes, specs and nested
+    // worktrees. A checkout that holds a worktree under .claude/worktrees
+    // would otherwise lint that whole second copy of the repository.
+    ".claude/**",
   ]),
   {
     rules: {

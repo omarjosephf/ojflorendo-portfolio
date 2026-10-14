@@ -14,14 +14,19 @@ function flatten(value: unknown): string {
 }
 
 describe("approved Track B positioning", () => {
-  it("uses the approved display and professional identities", () => {
-    expect(site.name).toBe("OJ Florendo Rayatchi");
-    expect(positioning.professionalName).toBe("OJ Florendo");
-    expect(site.descriptor).toBe("Web developer · AI product builder");
+  it("uses the approved display identity and title (ADR-0029)", () => {
+    expect(site.name).toBe("Joseph Florendo");
+    expect(positioning.professionalName).toBe("Joseph Florendo");
+    expect(site.descriptor).toBe("AI Automation Developer");
+  });
+
+  it("never publishes the previous or private names in site copy", () => {
+    const content = flatten({ positioning, site: { ...site, cvPath: null } });
+    expect(content).not.toMatch(/Rayatchi|\bOJ\b/);
   });
 
   it("labels every service with a status the handbook permits", () => {
-    expect(positioning.services.offers).toHaveLength(3);
+    expect(positioning.services.offers).toHaveLength(4);
 
     /*
      * Handbook 6.2 allows exactly three maturity labels. Asserting membership
@@ -38,24 +43,31 @@ describe("approved Track B positioning", () => {
     }
   });
 
-  it("keeps the document-assistant offer scoped rather than open-ended", () => {
+  it("orders the offers as the owner decided and keeps them scoped", () => {
     /*
-     * This offer moved from "Experimental" to "Available now" on the strength
-     * of two systems that were actually built and deployed. That is a claim
-     * about capability, not a promise to run anything a visitor asks for — so
-     * the scope note is load-bearing and is asserted here. Removing it would
-     * turn an honest "available" into an unscoped yes.
+     * ADR-0029 D3: automation builds first, websites last as one line. Every
+     * offer is "Available now" by owner decision. That is a claim about what is
+     * offered, not a promise to run anything a visitor asks for, so the scope
+     * note is load-bearing and is asserted here. Removing it would turn an
+     * honest "available" into an unscoped yes.
      */
-    const assistant = positioning.services.offers.at(-1);
-    expect(assistant?.status).toBe("Available now");
-    expect(assistant?.title.toLowerCase()).toContain("document assistant");
-    expect(positioning.services.scopeNote).toContain("defined set of documents");
+    const titles = positioning.services.offers.map((offer) => offer.title);
+    expect(titles).toEqual([
+      "Automation and workflow builds",
+      "AI agents and assistants",
+      "Automation audit",
+      "Websites",
+    ]);
+    for (const offer of positioning.services.offers) {
+      expect(offer.status).toBe("Available now");
+    }
+    expect(positioning.services.scopeNote).toContain("defined task");
     expect(positioning.services.scopeNote).toContain("privacy review");
   });
 
   it("keeps verified background visible rather than deleting it", () => {
     // Training and digital/e-commerce work are verified experience. The offer
-    // narrowed to websites; the background must not silently disappear with it.
+    // moved to automation; the background must not silently disappear with it.
     expect(positioning.services.relatedWork).toContain("training");
     expect(positioning.services.relatedWork).toContain("e-commerce");
   });

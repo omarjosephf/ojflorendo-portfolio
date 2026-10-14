@@ -24,7 +24,7 @@ const GROUNDED = {
   citations: [
     {
       quote: "OJ has two published projects",
-      label: "About OJ",
+      label: "About Joseph",
       href: "/about#about",
     },
   ],
@@ -124,7 +124,7 @@ test.describe("E.V", () => {
       dialog.getByAltText("Illustrated avatar of E.V", { exact: true }),
     ).toBeVisible();
     await expect(
-      dialog.getByText("OJ’s portfolio AI assistant", { exact: true }),
+      dialog.getByText("Joseph’s portfolio AI assistant", { exact: true }),
     ).toBeVisible();
     await expect(
       dialog.getByRole("heading", { name: "Hi, I'm E.V.", exact: true }),
@@ -152,12 +152,12 @@ test.describe("E.V", () => {
     ).toBeVisible();
     await expect(
       dialog.getByText(
-        "AI answers from OJ’s published portfolio, with sources. Not OJ.",
+        "AI answers from Joseph’s published portfolio, with sources. Not Joseph.",
         { exact: true },
       ),
     ).toBeVisible();
     await expect(
-      dialog.getByText(/questions go through oj's server to google, with openai as a backup/i),
+      dialog.getByText(/questions go through joseph's server to google, with openai as a backup/i),
     ).toBeVisible();
     await expect(dialog.getByText(/up to 20 recent completed exchanges/i)).toBeVisible();
     await expect(dialog.getByText(/duplicated tab may begin with a copy/i)).toBeVisible();
@@ -180,7 +180,7 @@ test.describe("E.V", () => {
     ).toBe(initialHeight);
     await dialog.getByText("1 source", { exact: true }).click();
     await expect(dialog.getByText(`“${GROUNDED.citations[0].quote}”`)).toBeVisible();
-    await expect(dialog.getByRole("link", { name: "About OJ" })).toHaveAttribute(
+    await expect(dialog.getByRole("link", { name: "About Joseph" })).toHaveAttribute(
       "href",
       "/about#about",
     );
@@ -198,7 +198,7 @@ test.describe("E.V", () => {
       outcomes(page).getByText(GROUNDED.answer, { exact: true }),
     ).toBeVisible();
     await dialog.getByText("1 source", { exact: true }).click();
-    await dialog.getByRole("link", { name: "About OJ" }).click();
+    await dialog.getByRole("link", { name: "About Joseph" }).click();
     // The About source now lives on its own route, so following the citation is
     // a navigation rather than a scroll. Asserting the URL as well as the
     // section keeps this a real check that the link resolves.
@@ -267,7 +267,7 @@ test.describe("E.V", () => {
       }),
     ).toBeVisible();
     await expect(outcomes(page).getByText("OJ has not published that detail.", { exact: true })).toHaveCount(0);
-    await dialog.getByRole("link", { name: /contact oj/i }).click();
+    await dialog.getByRole("link", { name: /contact joseph/i }).click();
     await expect(page.locator("#contact")).toBeVisible();
   });
 
@@ -497,8 +497,8 @@ test.describe("E.V", () => {
       outcomes(page).getByText(unsafeResult.answer, { exact: true }),
     ).toBeVisible();
     await page.getByText("1 source", { exact: true }).click();
-    await expect(page.getByRole("link", { name: "About OJ" })).toBeHidden();
-    await expect(page.getByText("About OJ", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "About Joseph" })).toBeHidden();
+    await expect(page.getByText("About Joseph", { exact: true })).toBeVisible();
 
     const storedPage = await context.newPage();
     await storedPage.goto("/");
@@ -508,8 +508,8 @@ test.describe("E.V", () => {
     );
     await openAssistant(storedPage);
     await storedPage.getByText("1 source", { exact: true }).click();
-    await expect(storedPage.getByRole("link", { name: "About OJ" })).toBeHidden();
-    await expect(storedPage.getByText("About OJ", { exact: true })).toBeVisible();
+    await expect(storedPage.getByRole("link", { name: "About Joseph" })).toBeHidden();
+    await expect(storedPage.getByText("About Joseph", { exact: true })).toBeVisible();
   });
 
   test("sends only four question/source turns and excludes answer prose", async ({
@@ -521,7 +521,7 @@ test.describe("E.V", () => {
       citations: [
         {
           quote: `Synthetic quote for ${question}`,
-          label: "About OJ",
+          label: "About Joseph",
           href: "/about#about",
         },
       ],
@@ -550,7 +550,7 @@ test.describe("E.V", () => {
     expect(requests.at(-1)?.history).toEqual(
       questions.slice(1, 5).map((question) => ({
         question,
-        sources: ["About OJ"],
+        sources: ["About Joseph"],
       })),
     );
     const finalBody = JSON.stringify(requests.at(-1));
@@ -630,7 +630,7 @@ test.describe("E.V", () => {
 
     await page.getByText("1 source", { exact: true }).click();
     await expect(status).toHaveText(`E.V: ${GROUNDED.answer}`);
-    const source = page.getByRole("link", { name: "About OJ" });
+    const source = page.getByRole("link", { name: "About Joseph" });
     await source.focus();
     await expect(source).toBeFocused();
     await page.keyboard.press("Escape");
@@ -759,7 +759,7 @@ test.describe("E.V", () => {
       outcomes(page).getByText(GROUNDED.answer, { exact: true }),
     ).toBeVisible();
     await page.getByText("1 source", { exact: true }).click();
-    await expect(page.getByRole("link", { name: "About OJ" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "About Joseph" })).toBeVisible();
     expect(await hasNoHorizontalOverflow(page)).toBe(true);
   });
 });

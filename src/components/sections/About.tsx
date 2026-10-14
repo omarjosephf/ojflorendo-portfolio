@@ -27,7 +27,7 @@ export function About() {
     <Section
       id="about"
       eyebrow="01 / About"
-      title="I'm OJ. I build the work you see here."
+      title="I'm Joseph. I build the work you see here."
       as="h1"
     >
       <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">

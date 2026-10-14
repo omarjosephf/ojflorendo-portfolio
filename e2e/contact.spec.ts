@@ -14,7 +14,7 @@ async function fillValidExcept(
   await form
     .getByLabel(/tell me about the project/i)
     .fill("We run a small physiotherapy studio and our site does not explain what we offer.");
-  await form.getByLabel(/happy for OJ Florendo/i).check();
+  await form.getByLabel(/happy for Joseph Florendo/i).check();
 }
 
 test.describe("Contact form", () => {

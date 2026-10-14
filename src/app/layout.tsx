@@ -21,7 +21,7 @@ const display = Barlow_Condensed({
   display: "swap",
 });
 
-const title = "OJ Florendo Rayatchi | Websites for Service Businesses";
+const title = "Joseph Florendo | AI Automation Developer";
 const description = positioning.seoDescription;
 
 export const metadata: Metadata = {
@@ -35,13 +35,14 @@ export const metadata: Metadata = {
   authors: [{ name: site.name }],
   creator: site.name,
   keywords: [
-    "OJ Florendo Rayatchi",
-    "OJ Florendo",
-    "web developer",
-    "websites for small businesses",
-    "service business website",
-    "AI product builder",
-    "AI document assistant",
+    "Joseph Florendo",
+    "AI automation developer",
+    "AI automation",
+    "workflow automation",
+    "AI agents",
+    "AI assistants",
+    "automation audit",
+    "small business automation",
     "portfolio",
     "Python",
     "AI training",

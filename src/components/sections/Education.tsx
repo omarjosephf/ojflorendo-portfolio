@@ -25,12 +25,13 @@ const INTRO =
   "My credentials support my experience across Python, data, UX/UI, business intelligence, communication, and prompt engineering. Every credential below links to the certificate itself, and where the issuer also publishes a public verification page, I link to that as well.";
 
 /**
- * Published under the owner's explicit decision of 31 August 2026. The wording is
- * his own and was chosen from three drafts; do not expand it with the family
- * detail he deliberately left out.
+ * The disclosure the owner chose on 31 August 2026, shortened for the
+ * Joseph Florendo identity (ADR-0029, 14 October 2026). Do not add family
+ * detail or any other name: public copy uses only the brand name and, for
+ * credentials, the legal name.
  */
 const NAME_DISCLOSURE =
-  "Some certificates show my legal name, Omar Joseph Florendo — the name on my birth certificate, and the name each issuer recorded. I go by OJ, and I present professionally as OJ Florendo Rayatchi, using both family surnames. Issuer records are preserved exactly as issued rather than rewritten.";
+  "Some certificates show my legal name, Omar Joseph Florendo, which is the name each issuer recorded. I work as Joseph Florendo. Issuer records are preserved exactly as issued rather than rewritten.";
 
 export function Education() {
   return (

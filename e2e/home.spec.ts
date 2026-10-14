@@ -15,7 +15,7 @@ test.describe("Homepage", () => {
       "Make your services clear.Make the next step easy.",
     );
     await expect(page).toHaveTitle(
-      /OJ Florendo Rayatchi \| Websites for Service Businesses/,
+      /Joseph Florendo \| AI Automation Developer/,
     );
     await expect(
       page.getByRole("link", { name: "Discuss your website" }),

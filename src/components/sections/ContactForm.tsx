@@ -381,7 +381,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
         />
         <div>
           <label htmlFor={fid("consent")} className="text-sm text-muted">
-            I&apos;m happy for OJ Florendo to use these details to reply to my
+            I&apos;m happy for Joseph Florendo to use these details to reply to my
             enquiry.{" "}
             <span className="text-accent">*</span>
           </label>

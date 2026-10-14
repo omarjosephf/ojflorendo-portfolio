@@ -575,7 +575,7 @@ describe("POST /api/assistant — citation mapping", () => {
 
     const body = await (await POST(request({ question: "q" }, freshIp()))).json();
 
-    expect(body.citations[0].label).toBe("About OJ");
+    expect(body.citations[0].label).toBe("About Joseph");
     expect(body.citations[0].href).toBe("/about#about");
   });
 
@@ -658,7 +658,7 @@ describe("POST /api/assistant — citation mapping", () => {
 
     expect(body.citations.map((c: { label: string }) => c.label)).toEqual([
       "Skills and capabilities",
-      "About OJ",
+      "About Joseph",
       "Skills and capabilities",
     ]);
     expect(body.citations.map((c: { evidenceId: string }) => c.evidenceId)).toEqual([

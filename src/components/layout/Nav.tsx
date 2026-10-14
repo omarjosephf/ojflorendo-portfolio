@@ -214,7 +214,7 @@ export function Nav() {
             aria-label={`${site.name} — home`}
           >
             <span className="font-heading text-lg font-semibold text-ink">
-              OJ Florendo
+              {site.name}
             </span>
           </Link>
 

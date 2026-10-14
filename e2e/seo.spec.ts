@@ -22,21 +22,20 @@ test.describe("SEO & metadata routes", () => {
     const response = await request.get("/manifest.webmanifest");
     expect(response.status()).toBe(200);
     const manifest = JSON.parse(await response.text());
-    expect(manifest.name).toBe(
-      "OJ Florendo Rayatchi — Portfolio & Professional Platform",
-    );
-    expect(manifest.short_name).toBe("OJ Florendo");
+    expect(manifest.name).toBe("Joseph Florendo — AI Automation Developer");
+    expect(manifest.short_name).toBe("Joseph Florendo");
   });
 
-  test("structured data includes the display and alternate names", async ({
+  test("structured data names Joseph Florendo and no earlier name", async ({
     page,
   }) => {
     await page.goto("/");
     const jsonLd = await page
       .locator('script[type="application/ld+json"]')
       .textContent();
-    expect(jsonLd).toContain("OJ Florendo Rayatchi");
-    expect(jsonLd).toContain('"alternateName":"OJ Florendo"');
+    expect(jsonLd).toContain('"name":"Joseph Florendo"');
+    expect(jsonLd).toContain('"jobTitle":"AI Automation Developer"');
+    expect(jsonLd).not.toMatch(/Rayatchi|"OJ /);
   });
 
   test("an unknown route returns HTTP 404", async ({ request }) => {

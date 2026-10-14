@@ -46,7 +46,7 @@ describe("ContactForm (client validation)", () => {
     fireEvent.change(screen.getByLabelText(/tell me about the project/i), {
       target: { value: "A message long enough to pass validation." },
     });
-    fireEvent.click(screen.getByLabelText(/happy for OJ Florendo/i));
+    fireEvent.click(screen.getByLabelText(/happy for Joseph Florendo/i));
     fireEvent.click(screen.getByRole("button", { name: /send project enquiry/i }));
 
     expect(await screen.findByText(/valid email address/i)).toBeInTheDocument();

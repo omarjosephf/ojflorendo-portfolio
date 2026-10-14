@@ -34,7 +34,7 @@ const PANEL_CLASS =
   "overflow-hidden rounded-[4px] border border-line bg-surface shadow-[0_18px_45px_-28px_rgba(41,42,38,0.45)] " +
   "sm:left-auto sm:w-[27rem]";
 
-const UNAVAILABLE_MESSAGE = "I can't answer right now. You can keep exploring OJ's work or contact him directly.";
+const UNAVAILABLE_MESSAGE = "I can't answer right now. You can keep exploring Joseph's work or contact him directly.";
 const COUNTER_VISIBLE_AT = ASSISTANT_INPUT_LIMIT - 40;
 
 interface AssistantPanelProps {
@@ -355,7 +355,7 @@ export function AssistantPanel({
             </button>
           </div>
         </div>
-        <p id={descriptionId} className="mt-2 text-xs leading-4 text-muted">OJ&rsquo;s portfolio AI assistant</p>
+        <p id={descriptionId} className="mt-2 text-xs leading-4 text-muted">Joseph&rsquo;s portfolio AI assistant</p>
       </div>
 
       {storageEnabled&&<details className="border-b border-line bg-surface text-xs text-muted">
@@ -371,16 +371,16 @@ export function AssistantPanel({
         className="max-h-[50%] space-y-2 overflow-y-auto border-b border-line bg-surface-2/55 px-4 py-3 text-xs leading-5 text-muted"
       >
         <p className="font-medium text-ink">
-          AI answers from OJ&rsquo;s published portfolio, with sources. Not OJ.
+          AI answers from Joseph&rsquo;s published portfolio, with sources. Not Joseph.
         </p>
         <p>
-          Questions go through OJ&apos;s server to Google, with OpenAI as a
+          Questions go through Joseph&apos;s server to Google, with OpenAI as a
           backup if the primary service is unavailable. Please don&apos;t enter
           personal or sensitive information.
         </p>
         <p>The website’s display-preference cookie remembers your chosen color theme; it contains no chat content or identifier.</p>
         {storageEnabled ? (
-          <p>This tab keeps up to 20 recent exchanges within its size limit. If you start a saved chat, new questions and replies are stored for 30 days and may be reviewed by OJ. HttpOnly guest cookies let this browser return to them; they do not provide access on another device. Delete saved chat removes its server copy. Disconnecting ends access to the guest account; Start new chat keeps earlier saved chats.</p>
+          <p>This tab keeps up to 20 recent exchanges within its size limit. If you start a saved chat, new questions and replies are stored for 30 days and may be reviewed by Joseph. HttpOnly guest cookies let this browser return to them; they do not provide access on another device. Delete saved chat removes its server copy. Disconnecting ends access to the guest account; Start new chat keeps earlier saved chats.</p>
         ) : persistence === "available" ? (
           <p>
             This tab remembers up to 20 recent completed exchanges so the chat
@@ -554,7 +554,7 @@ function AssistantOutcome({
         )}
         <p className="text-sm leading-6 text-ink">{result.answer}</p>
         <p className="mt-2 text-sm leading-6 text-muted">
-          You can also ask OJ directly through the contact section.
+          You can also ask Joseph directly through the contact section.
         </p>
         <FallbackLinks onNavigate={onNavigate} />
       </article>

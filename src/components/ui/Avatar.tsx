@@ -35,7 +35,7 @@ export function Avatar({ className = "" }: { className?: string }) {
             className="font-heading text-lg font-bold text-gradient"
             aria-hidden="true"
           >
-            OJ
+            JF
           </span>
         )}
       </div>

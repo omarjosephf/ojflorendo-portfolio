@@ -55,7 +55,7 @@ function enquiryLabel(value: ContactInput["enquiryType"]): string {
  * nothing — the enquirer already appears in `reply_to`, the subject and the
  * body.
  */
-const SENDER_DISPLAY_NAME = "OJ Florendo Portfolio";
+const SENDER_DISPLAY_NAME = "Joseph Florendo Portfolio";
 
 /**
  * Present the configured address as a named sender. If `CONTACT_FROM_EMAIL`

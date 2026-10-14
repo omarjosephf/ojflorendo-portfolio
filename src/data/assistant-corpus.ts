@@ -43,7 +43,7 @@ export const assistantCorpusSources: readonly AssistantCorpusSource[] = [
   },
   {
     path: "about-oj.md",
-    label: "About OJ",
+    label: "About Joseph",
     publicUrl: "/about#about",
   },
   {
@@ -63,7 +63,7 @@ export const assistantCorpusSources: readonly AssistantCorpusSource[] = [
   },
   {
     path: "how-oj-works.md",
-    label: "How OJ works",
+    label: "How Joseph works",
     publicUrl: "/#approach",
   },
   {

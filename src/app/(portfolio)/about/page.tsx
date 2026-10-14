@@ -7,7 +7,7 @@ import { Education } from "@/components/sections/Education";
 
 const title = "About";
 const description =
-  "OJ Florendo Rayatchi — background, current work, skills, experience and verified credentials behind the websites and AI document assistants he builds.";
+  "Joseph Florendo, AI automation developer: his story, the systems he runs, his training work, experience and verified credentials.";
 
 export const metadata: Metadata = {
   title,

@@ -47,7 +47,7 @@ export async function Contact() {
               className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-night transition-transform hover:-translate-y-0.5"
             >
               <Mail className="h-4 w-4" aria-hidden="true" />
-              Email OJ
+              Email Joseph
             </a>
 
             <div className="flex flex-col gap-3 border-t border-line/60 pt-6">

@@ -53,7 +53,7 @@ function fillValidForm() {
   fireEvent.change(screen.getByLabelText(/tell me about the project/i), {
     target: { value: "We have an opening that fits your profile nicely." },
   });
-  fireEvent.click(screen.getByLabelText(/happy for OJ Florendo/i));
+  fireEvent.click(screen.getByLabelText(/happy for Joseph Florendo/i));
 }
 
 const submitButton = () =>

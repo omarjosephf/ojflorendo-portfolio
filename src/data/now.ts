@@ -2,34 +2,34 @@ import type { NowData } from "@/types";
 
 /**
  * "What I'm working on now" snapshot. Data-driven in the same style as the other
- * content, ready for a Version 2 migration. Keep it concise, current and honest.
+ * content. Keep it concise, current and honest: work in progress is described
+ * as in progress, never as done.
  */
 export const now: NowData = {
-  updated: "September 2026",
+  updated: "October 2026",
   items: [
     {
-      iconKey: "portfolio",
-      title: "A clearer client offer",
-      description:
-        "Focusing this platform on websites and carefully scoped product work, with a clearer way to discuss a project.",
-    },
-    {
       iconKey: "build",
-      title: "Products as evidence",
+      title: "A newsletter automation, built on camera",
       description:
-        "Developing my own software and AI ideas, with case studies that explain decisions, checks and limitations.",
+        "My first public proof build: an automation that helps me write and send my own newsletter, recorded while I make it.",
     },
     {
-      iconKey: "learn",
-      title: "Sharing the work",
+      iconKey: "portfolio",
+      title: "Learn Your Way",
       description:
-        "Building a personal brand around the products I make and the useful lessons behind them.",
+        "[LEARN YOUR WAY: ONE-LINE DESCRIPTION] In progress, and built in public.",
     },
     {
       iconKey: "study",
-      title: "Learning through my own marketing",
+      title: "My final year, and CS50",
       description:
-        "Exploring how AI can help me explain and market my own products. I will distinguish experiments from results I can demonstrate.",
+        "Finishing my BSc in Computing and IT with The Open University, and working through CS50 alongside it.",
+    },
+    {
+      iconKey: "learn",
+      title: "Games with Claude Code",
+      description: "A hobby: building small games with Claude Code.",
     },
   ],
   personalNote: "Outside work, I stay active with fitness and boxing.",

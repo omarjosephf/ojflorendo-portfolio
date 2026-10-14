@@ -77,7 +77,7 @@ function loggedText(spy: ReturnType<typeof vi.spyOn>): string {
 describe("senderIdentity", () => {
   it("names a bare address so it is not treated as an anonymous sender", () => {
     expect(senderIdentity("enquiries@send.ojfr.me")).toBe(
-      "OJ Florendo Portfolio <enquiries@send.ojfr.me>",
+      "Joseph Florendo Portfolio <enquiries@send.ojfr.me>",
     );
   });
 
@@ -168,7 +168,7 @@ describe("resend transport", () => {
     const body = sentBody(fetchSpy);
 
     // Named sender: a bare address from a young domain gets filtered as spam.
-    expect(body.from).toBe("OJ Florendo Portfolio <enquiries@send.example.com>");
+    expect(body.from).toBe("Joseph Florendo Portfolio <enquiries@send.example.com>");
     expect(body.to).toEqual(["inbox@example.com"]);
     // Replies must reach the enquirer, not the configured sender address.
     expect(body.reply_to).toBe(message.email);

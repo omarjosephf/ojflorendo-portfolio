@@ -1,9 +1,17 @@
 import { ImageResponse } from "next/og";
 import { site } from "@/data/site";
 
-export const alt = `${site.name} — Websites and AI document assistants`;
+export const alt = `${site.name} — ${site.descriptor}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+/** A fixed star field, so the card is identical on every build. */
+const STARS: ReadonlyArray<readonly [number, number, number, number]> = [
+  [86, 74, 2, 0.7], [212, 140, 1, 0.5], [348, 52, 2, 0.6], [520, 96, 1, 0.45],
+  [688, 44, 2, 0.55], [804, 128, 1, 0.5], [948, 70, 3, 0.8], [1096, 110, 2, 0.6],
+  [1150, 236, 1, 0.45], [1012, 300, 2, 0.5], [1122, 404, 1, 0.5], [968, 520, 2, 0.6],
+  [1104, 566, 1, 0.45], [842, 584, 1, 0.4], [70, 560, 1, 0.45], [40, 300, 2, 0.5],
+];
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -16,49 +24,45 @@ export default function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px",
-          background:
-            "#f5f2e9",
-          color: "#292a26",
+          position: "relative",
+          background: "#05060a",
+          color: "#eef1f7",
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+        {STARS.map(([x, y, r, a]) => (
           <div
+            key={`${x}-${y}`}
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "56px",
-              height: "56px",
-              borderRadius: "28px",
-              border: "1px solid #d4d1c5",
-              background: "#292a26",
-              color: "#f5f2e9",
-              fontSize: "22px",
-              fontWeight: 700,
+              position: "absolute",
+              left: `${x}px`,
+              top: `${y}px`,
+              width: `${r * 2}px`,
+              height: `${r * 2}px`,
+              borderRadius: "9999px",
+              background: `rgba(234, 242, 255, ${a})`,
             }}
-          >
-            OJ
-          </div>
-          <div style={{ display: "flex", fontSize: "22px", color: "#65665c" }}>
-            Web development · AI document assistants
-          </div>
+          />
+        ))}
+        <div style={{ display: "flex", fontSize: "26px", color: "#a4aaba" }}>
+          {`${site.descriptor} · Windsor, UK`}
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontSize: "62px", fontWeight: 700 }}>
-            Make your services clear.
+          <div style={{ display: "flex", fontSize: "104px", fontWeight: 800, letterSpacing: "-4px", lineHeight: 0.95 }}>
+            {site.name}
           </div>
           <div
             style={{
               display: "flex",
-              marginTop: "20px",
-              fontSize: "34px",
-              color: "#65665c",
-              maxWidth: "920px",
+              marginTop: "28px",
+              fontSize: "36px",
+              color: "#d6dbe6",
+              maxWidth: "900px",
+              lineHeight: 1.3,
             }}
           >
-            {`${site.headline} · ${site.name}`}
+            {site.headline}
           </div>
         </div>
 
@@ -66,14 +70,14 @@ export default function OpengraphImage() {
           <div
             style={{
               display: "flex",
-              width: "180px",
-              height: "8px",
+              width: "160px",
+              height: "6px",
               borderRadius: "9999px",
-              background: "#294fc9",
+              background: "#f2c66d",
             }}
           />
-          <div style={{ display: "flex", fontSize: "24px", color: "#65665c" }}>
-            Windsor, Berkshire · UK
+          <div style={{ display: "flex", fontSize: "24px", color: "#a4aaba" }}>
+            Built in public
           </div>
         </div>
       </div>

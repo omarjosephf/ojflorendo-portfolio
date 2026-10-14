@@ -4,7 +4,7 @@ import { getPublishedPosts } from "@/lib/blog";
 
 const title = "Blog";
 const description =
-  "Evidence-led notes from OJ Florendo about building useful software, responsible AI systems and clear digital products.";
+  "Evidence-led notes from Joseph Florendo about building useful software, responsible AI systems and clear digital products.";
 
 export const metadata: Metadata = {
   title,
