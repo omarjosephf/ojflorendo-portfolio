@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { watchPage, hasNoHorizontalOverflow } from "./helpers";
+import { watchPage, hasNoHorizontalOverflow, simulateHardwareWebGL, SCENE_VIEWPORT } from "./helpers";
 
 test.describe("Homepage", () => {
   test("loads with the approved identity and no page/CSP errors", async ({
@@ -44,8 +44,10 @@ test.describe("Homepage", () => {
 
   // ADR-0030: one decorative canvas behind the home page, never in the way.
   test("the star sky is one decorative canvas behind the page, with no large chunk", async ({ page }) => {
-    for (const width of [390, 1440]) {
-      await page.setViewportSize({ width, height: 900 });
+    await simulateHardwareWebGL(page);
+    // Both sides of the 768 px compact breakpoint, kept short (SCENE_VIEWPORT).
+    for (const width of [390, 1024]) {
+      await page.setViewportSize({ width, height: SCENE_VIEWPORT.height });
       await page.goto("/");
       await page.waitForLoadState("load");
       const sky = page.locator("canvas");
@@ -60,6 +62,8 @@ test.describe("Homepage", () => {
   });
 
   test("the star sky pauses in a hidden tab and resumes", async ({ page }) => {
+    await simulateHardwareWebGL(page);
+    await page.setViewportSize(SCENE_VIEWPORT);
     await page.goto("/");
     const sky = page.locator("canvas.jf-sky");
     await expect(sky).toHaveAttribute("data-engine", "running");
@@ -73,6 +77,13 @@ test.describe("Homepage", () => {
       document.dispatchEvent(new Event("visibilitychange"));
     });
     await expect(sky).toHaveAttribute("data-engine", "running");
+  });
+
+  test("a software WebGL renderer draws no sky, like no WebGL at all", async ({ page }) => {
+    await page.goto("/");
+    const sky = page.locator("canvas.jf-sky");
+    await expect(sky).toHaveAttribute("data-renderer", "software");
+    await expect(sky).toHaveAttribute("data-engine", "off");
   });
 
   test("other public pages carry no star canvas", async ({ page }) => {
@@ -102,6 +113,8 @@ test.describe("Homepage", () => {
   });
 
   test("reduced motion is complete and static", async ({ page }) => {
+    await simulateHardwareWebGL(page);
+    await page.setViewportSize(SCENE_VIEWPORT);
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await expect(page.locator("#services-heading")).toBeVisible();

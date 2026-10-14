@@ -15,6 +15,8 @@ export const STAR_BUDGET = {
   fpsCap: 30,
   /** Backing-store cap. Points are sized in physical pixels via the shader. */
   dprCap: 1.5,
+  /** Hard cap on backing-store pixels, for unusually tall viewports. */
+  maxPixels: 4_000_000,
   /** Viewport width below which the compact counts apply. */
   compactBelow: 768,
   counts: {

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { About } from "@/components/sections/About";
-import { Now } from "@/components/sections/Now";
-import { Skills } from "@/components/sections/Skills";
+import { AboutArrival } from "@/components/about/AboutArrival";
+import { AboutBuilding, AboutOrigin, AboutTeaching } from "@/components/about/AboutStages";
+import { AboutSkyLazy } from "@/components/about/AboutSkyLazy";
 import { Experience } from "@/components/sections/Experience";
+import { Skills } from "@/components/sections/Skills";
+import { Now } from "@/components/sections/Now";
 import { Education } from "@/components/sections/Education";
 
 const title = "About";
@@ -18,25 +20,24 @@ export const metadata: Metadata = {
 };
 
 /**
- * Background lives on its own route rather than under the offer.
- *
- * The landing page has one job — state the offer, show the evidence, make the
- * enquiry easy — and every section here answers a different question, asked by
- * someone who has already decided they are interested. Splitting them keeps the
- * landing page short without deleting anything: skills, experience and
- * credentials are all retained in full, one click away.
- *
- * `About` renders the page-level h1 here (see its `as` prop); every other
- * section on this route is an h2 beneath it.
+ * The About page is a journey in seven stages: arrival, origin, teaching,
+ * building, experience (with skills), now, and education and credentials.
+ * A 3D star scene behind it moves one stage at a time (ADR-0030); every stage
+ * is complete without it. Section ids are stable because E.V's sources and
+ * the navigation link to them.
  */
 export default function AboutPage() {
   return (
-    <>
-      <About />
-      <Now />
-      <Skills />
+    <div className="jf-about">
+      <AboutSkyLazy />
+      <AboutArrival />
+      <AboutOrigin />
+      <AboutTeaching />
+      <AboutBuilding />
       <Experience />
+      <Skills />
+      <Now />
       <Education />
-    </>
+    </div>
   );
 }

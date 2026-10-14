@@ -22,7 +22,7 @@ const categories: CredentialCategory[] = [
  * issuer page is an extra where one exists.
  */
 const INTRO =
-  "My credentials support my experience across Python, data, UX/UI, business intelligence, communication, and prompt engineering. Every credential below links to the certificate itself, and where the issuer also publishes a public verification page, I link to that as well.";
+  "My credentials support my experience across Python, data, AI, UX/UI, business intelligence, communication, and prompt engineering. Every credential below links to the certificate itself, and where the issuer also publishes a public verification page, I link to that as well.";
 
 /**
  * The disclosure the owner chose on 31 August 2026, shortened for the
@@ -37,8 +37,8 @@ export function Education() {
   return (
     <Section
       id="education"
-      eyebrow="05 / Education & credentials"
-      title="Verified learning and professional development"
+      stage
+      title="Education and credentials"
       intro={INTRO}
     >
       <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
@@ -79,7 +79,7 @@ export function Education() {
                 <section key={category} aria-labelledby={`credential-${category}`}>
                   <h4
                     id={`credential-${category}`}
-                    className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-accent"
+                    className="mb-3 text-base font-semibold text-accent"
                   >
                     {category}
                   </h4>

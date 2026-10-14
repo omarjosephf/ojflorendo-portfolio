@@ -141,6 +141,18 @@ function normalise(v: [number, number, number]): [number, number, number] {
   return [v[0] / length, v[1] / length, v[2] / length];
 }
 
+/**
+ * True when WebGL is drawn on the CPU (SwiftShader, llvmpipe, Microsoft Basic
+ * Render): virtual machines, remote desktops and machines whose GPU driver is
+ * blocked. The decorative star scenes do not draw there at all: compiling and
+ * drawing them on the CPU costs far more than a decoration is worth.
+ */
+export function isSoftwareRenderer(gl: WebGLRenderingContext): boolean {
+  const info = gl.getExtension("WEBGL_debug_renderer_info");
+  const renderer = String(info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+  return /swiftshader|llvmpipe|software|basic render/i.test(renderer);
+}
+
 /** Parses `#rrggbb` into the 0..1 triple the shader's `vec3` uniforms expect. */
 export function rgb(hex: string): [number, number, number] {
   const value = parseInt(hex.replace("#", ""), 16);

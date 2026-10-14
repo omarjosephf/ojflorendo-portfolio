@@ -6,9 +6,8 @@ export function Skills() {
   return (
     <Section
       id="skills"
-      eyebrow="03 / Skills"
-      title="The skills behind the work."
-      intro="My projects combine web development, interface design, testing and clear technical communication. My broader experience includes data, training and digital operations."
+      title="The skills behind the work"
+      intro="My projects combine AI automation, web development, testing and clear technical communication. My broader experience includes data, training and digital operations."
     >
       <div className="grid gap-5 sm:grid-cols-2">
         {skillGroups.map((group, index) => (

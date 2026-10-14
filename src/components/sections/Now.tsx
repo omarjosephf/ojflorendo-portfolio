@@ -15,8 +15,8 @@ export function Now() {
   return (
     <Section
       id="now"
-      eyebrow="02 / Now"
-      title="What I'm building towards."
+      stage
+      title="What I'm working on now"
       intro={`My current focus, updated ${now.updated}.`}
     >
       <div className="grid gap-5 sm:grid-cols-2">

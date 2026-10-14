@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createProgram } from "@/components/webgl/gl";
+import { createProgram, isSoftwareRenderer } from "@/components/webgl/gl";
 import {
   DIM_SELECTOR,
   FRAGMENT_SHADER,
@@ -44,6 +44,14 @@ export function StarSky() {
       preserveDrawingBuffer: false,
     });
     if (!gl) {
+      setState("off");
+      return;
+    }
+    // A CPU (software) renderer gets the plain black page, as without WebGL:
+    // checked before compiling anything, because compiling is the costly part.
+    if (isSoftwareRenderer(gl)) {
+      canvas.setAttribute("data-renderer", "software");
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
       setState("off");
       return;
     }
@@ -101,7 +109,11 @@ export function StarSky() {
     const measure = () => {
       width = Math.max(1, canvas.clientWidth);
       height = Math.max(1, canvas.clientHeight);
-      const dpr = Math.min(window.devicePixelRatio || 1, STAR_BUDGET.dprCap);
+      const dpr = Math.min(
+        window.devicePixelRatio || 1,
+        STAR_BUDGET.dprCap,
+        Math.sqrt(STAR_BUDGET.maxPixels / (width * height)),
+      );
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -137,6 +149,7 @@ export function StarSky() {
 
     const reduceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const frameGap = 1000 / STAR_BUDGET.fpsCap;
+    const stillOnly = () => reduceQuery.matches;
     const start = performance.now();
     let raf = 0;
     let lastFrame = 0;
@@ -166,7 +179,7 @@ export function StarSky() {
     const schedule = () => {
       stop();
       if (lost) return setState("off");
-      if (reduceQuery.matches) {
+      if (stillOnly()) {
         setState("still");
         queueStill();
         return;
@@ -177,7 +190,7 @@ export function StarSky() {
     };
 
     const onScroll = () => {
-      if (reduceQuery.matches) queueStill();
+      if (stillOnly()) queueStill();
     };
 
     let resizeQueued = 0;
@@ -186,7 +199,7 @@ export function StarSky() {
       resizeQueued = window.requestAnimationFrame(() => {
         resizeQueued = 0;
         measure();
-        if (reduceQuery.matches || document.hidden) queueStill();
+        if (stillOnly() || document.hidden) queueStill();
       });
     };
 

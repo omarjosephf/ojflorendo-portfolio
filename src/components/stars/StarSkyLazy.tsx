@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useAfterLoadIdle } from "@/components/stars/use-after-load-idle";
 
 const StarSky = dynamic(() => import("@/components/stars/StarSky").then((m) => m.StarSky), {
   ssr: false,
@@ -13,26 +13,5 @@ const StarSky = dynamic(() => import("@/components/stars/StarSky").then((m) => m
  * then the page is black, which is what the sky's background already is.
  */
 export function StarSkyLazy() {
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    let idle = 0;
-    let timer = 0;
-    const begin = () => {
-      if (typeof window.requestIdleCallback === "function") {
-        idle = window.requestIdleCallback(() => setReady(true), { timeout: 1500 });
-      } else {
-        timer = globalThis.setTimeout(() => setReady(true), 300) as unknown as number;
-      }
-    };
-    if (document.readyState === "complete") begin();
-    else window.addEventListener("load", begin, { once: true });
-    return () => {
-      window.removeEventListener("load", begin);
-      if (idle) window.cancelIdleCallback(idle);
-      if (timer) globalThis.clearTimeout(timer);
-    };
-  }, []);
-
-  return ready ? <StarSky /> : null;
+  return useAfterLoadIdle() ? <StarSky /> : null;
 }
