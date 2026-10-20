@@ -12,6 +12,8 @@ import {
   countsFor,
   galaxyFor,
   riverBand,
+  riverShape,
+  riverStartPhase,
 } from "@/components/stars/star-field";
 
 type EngineState = "running" | "still" | "paused" | "off";
@@ -70,6 +72,7 @@ export function StarSky() {
       doc: u("u_doc"),
       galaxy: u("u_galaxy"),
       band: u("u_band"),
+      river: u("u_river"),
       dpr: u("u_dpr"),
       bright: u("u_bright"),
       rects: u("u_rects"),
@@ -135,6 +138,8 @@ export function StarSky() {
       gl.uniform3f(uniforms.galaxy, gx, gy, gr);
       const [bandCentre, bandSwing] = riverBand(width);
       gl.uniform2f(uniforms.band, bandCentre, bandSwing);
+      const { sweep, halfWidth } = riverShape(width);
+      gl.uniform3f(uniforms.river, riverStartPhase(width, gx), sweep, halfWidth);
       gl.uniform4fv(uniforms.rects, rects);
       gl.uniform1i(uniforms.rectCount, blocks.length);
     };

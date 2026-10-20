@@ -1,7 +1,7 @@
 /**
  * The home page's star sky (ADR-0030): a slowly turning galaxy behind the hero
- * and a river of stars that flows from it down the whole page, over a sparse
- * parallax field. Everything moves in the vertex shader from per-star random
+ * and a ribbon of stars that streams from it down the whole page, weaving from
+ * side to side and twisting as it goes, over a sparse parallax field. Everything moves in the vertex shader from per-star random
  * values and a handful of uniforms, so the CPU's work per frame is setting
  * those uniforms and issuing one draw call.
  *
@@ -20,8 +20,8 @@ export const STAR_BUDGET = {
   /** Viewport width below which the compact counts apply. */
   compactBelow: 768,
   counts: {
-    desktop: { field: 650, galaxy: 3200, river: 2400 },
-    compact: { field: 260, galaxy: 1300, river: 900 },
+    desktop: { field: 650, galaxy: 3200, river: 5000 },
+    compact: { field: 260, galaxy: 1300, river: 1800 },
   },
   /** Text blocks the stars dim behind, measured from the DOM. */
   maxDimRects: 24,
@@ -55,7 +55,7 @@ function gauss(rand: () => number): number {
 /**
  * Per-star attributes, interleaved: [kind, r1, r2, r3 | r4, r5, r6, r7].
  * The meaning of r1..r7 depends on the kind and is decoded in the shader;
- * the river stores a normal sample in r3 for its sideways spread.
+ * the river stores a normal sample in r3 for the ribbon's thickness.
  */
 export function buildStars(counts: StarCounts, rand: () => number = Math.random): Float32Array {
   const total = counts.field + counts.galaxy + counts.river;
@@ -75,23 +75,57 @@ export function buildStars(counts: StarCounts, rand: () => number = Math.random)
 }
 
 /**
- * The band the river meanders in, as fractions of the viewport width: centre
- * and swing. On wide screens it keeps to the right, where the left-aligned
- * headings leave the sky open; on phones it uses the whole width.
+ * Pixels a second the whole river streams down the page. Every river star
+ * moves at this one pace, so the ribbon flows as one piece.
+ */
+export const RIVER_SPEED = 12;
+
+/** Share of the river drawn as fine dust around the ribbon rather than in it. */
+export const RIVER_DUST = 0.32;
+
+/**
+ * The band the river weaves across, as fractions of the viewport width:
+ * centre and swing. It crosses the whole width, right to left and back, and
+ * turns out at the screen's edges, where the margins leave the sky open; text
+ * blocks dim the stars behind them, so the crossing never competes with text.
  */
 export function riverBand(width: number): [number, number] {
-  return width < STAR_BUDGET.compactBelow ? [0.5, 0.32] : [0.7, 0.18];
+  return width < STAR_BUDGET.compactBelow ? [0.5, 0.32] : [0.5, 0.42];
+}
+
+/**
+ * The ribbon's shape in pixels: the height of one sweep from one side to the
+ * other (about a screen), and the ribbon's half-width.
+ */
+export function riverShape(width: number): { sweep: number; halfWidth: number } {
+  return {
+    sweep: Math.min(960, Math.max(520, width * 0.62)),
+    halfWidth: Math.min(100, Math.max(36, width * 0.06)),
+  };
+}
+
+/** The phase that starts the river at the galaxy's x, heading right first. */
+export function riverStartPhase(width: number, galaxyX: number): number {
+  const [centre, swing] = riverBand(width);
+  return Math.asin(Math.max(-1, Math.min(1, (galaxyX / width - centre) / swing)));
 }
 
 /**
  * The river's centre line in document pixels, mirrored exactly by the shader.
  * `s` runs 0..1 from the galaxy to the foot of the page.
  */
-export function riverPoint(s: number, width: number, top: number, docHeight: number): [number, number] {
+export function riverPoint(
+  s: number,
+  width: number,
+  top: number,
+  docHeight: number,
+  galaxyX: number = width / 2,
+): [number, number] {
   const length = Math.max(docHeight - top - 80, 1);
-  const phase = s * Math.PI * 3.2 + 1.2;
+  const along = s * length;
+  const phase = riverStartPhase(width, galaxyX) + (Math.PI * along) / riverShape(width).sweep;
   const [centre, swing] = riverBand(width);
-  return [width * (centre + swing * Math.sin(phase)), top + s * length];
+  return [width * (centre + swing * Math.sin(phase)), top + along];
 }
 
 /** Where the galaxy sits, in document pixels, for a hero of the given size. */
@@ -112,6 +146,7 @@ uniform float u_time;
 uniform float u_doc;
 uniform vec3 u_galaxy;
 uniform vec2 u_band;
+uniform vec3 u_river;
 uniform float u_dpr;
 uniform float u_bright;
 uniform vec4 u_rects[${STAR_BUDGET.maxDimRects}];
@@ -155,16 +190,34 @@ void main() {
     alpha = (0.24 + 0.44 * twinkle) * (1.0 - t * 0.45) * (a_b.w < 0.16 ? 1.3 : 1.0);
     size = 1.2 + step(0.95, a_b.z) * 1.4;
   } else {
-    float s = fract(a_a.y + u_time * (0.001 + a_a.z * 0.0016));
+    // The river: one ribbon of stars streaming down the page at one shared
+    // pace, weaving from side to side (u_river: start phase, sweep height,
+    // half-width) and twisting as it goes. Stars gather at the ribbon's two
+    // edges, so the edges read as two strands winding round each other; a
+    // share of the river is fine dust drifting in a soft haze around it. The
+    // river shimmers slowly rather than twinkling, so it reads as one smooth flow.
     float len = max(u_doc - u_galaxy.y - 80.0, 1.0);
-    float ph = s * PI * 3.2 + 1.2;
-    vec2 centre = vec2(u_view.x * (u_band.x + u_band.y * sin(ph)), u_galaxy.y + s * len);
-    vec2 tangent = normalize(vec2(u_view.x * u_band.y * cos(ph) * PI * 3.2, len));
+    float along = fract(a_a.y + u_time * ${RIVER_SPEED.toFixed(1)} / len) * len;
+    float ph = u_river.x + PI * along / u_river.y;
+    vec2 centre = vec2(u_view.x * (u_band.x + u_band.y * sin(ph)), u_galaxy.y + along);
+    vec2 tangent = normalize(vec2(u_view.x * u_band.y * cos(ph) * PI / u_river.y, 1.0));
     vec2 normal = vec2(-tangent.y, tangent.x);
-    float spread = min(130.0, u_view.x * 0.12) * (0.6 + 0.4 * sin(u_time * 0.3 + a_b.y * 6.2831));
-    doc = centre + normal * a_a.w * spread;
-    alpha = (0.34 + 0.42 * twinkle) * max(0.15, 1.0 - abs(a_a.w) * 0.3);
-    size = 1.4 + step(0.9, a_b.z) * 1.3;
+    float ends = smoothstep(0.0, 0.05, along / len) * (1.0 - smoothstep(0.93, 1.0, along / len));
+    float shimmer = 0.78 + 0.22 * sin(u_time * (0.2 + a_b.x * 0.4) + a_b.y * 6.2831);
+    if (a_b.z < ${RIVER_DUST.toFixed(2)}) {
+      doc = centre + normal * u_river.z * a_a.w * 0.75;
+      alpha = 0.26 * shimmer * (1.0 - abs(a_a.w) * 0.25) * ends;
+      size = 1.15;
+    } else {
+      float twist = PI * along / (u_river.y * 0.55) - u_time * 0.08;
+      float face = cos(twist);
+      float c = a_a.z * 2.0 - 1.0;
+      float across = sign(c) * pow(abs(c), 0.3);
+      doc = centre + normal * u_river.z * (across * face + a_a.w * 0.06);
+      float near = 0.8 + 0.2 * across * sin(twist);
+      alpha = 0.72 * shimmer * mix(0.45, 1.0, abs(face)) * mix(0.55, 1.0, abs(across)) * near * ends;
+      size = 1.6 + step(0.9, a_b.z) * 1.2;
+    }
   }
   alpha *= dimAt(doc) * u_bright;
   vec2 screen = vec2(doc.x, doc.y - u_scroll);
