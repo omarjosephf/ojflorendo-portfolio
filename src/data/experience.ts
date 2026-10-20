@@ -3,9 +3,9 @@ import type { ExperienceItem } from "@/types";
 /**
  * Verified work experience (docs/ENGINEERING_HANDBOOK.md §6.2, content rules). Newest first.
  *
- * Training work is described as co-delivered, which is accurate for every
- * engagement listed. How the work was obtained, and who led it, stay out of
- * public copy. The pharmacy role is kept on the CV only (owner decision,
+ * Training roles carry `teaching: true` and describe the sessions the owner
+ * taught as the instructor (owner decision, 15 October 2026). How the work
+ * was obtained stays out of public copy. The pharmacy role is kept on the CV only (owner decision,
  * 14 October 2026): it is real, but it says nothing about the work on offer.
  */
 export const experience: ExperienceItem[] = [
@@ -23,14 +23,14 @@ export const experience: ExperienceItem[] = [
     ],
   },
   {
-    role: "AI Trainer (co-delivered)",
+    role: "AI Trainer",
     organisation: "LCT International",
     location: "London",
     period: "Sep 2026",
     current: false,
+    teaching: true,
     responsibilities: [
-      "Co-delivered the five-day course Advanced AI Implementation and Innovation for professional learners.",
-      "Delivered the modules on data-driven decision-making with AI and on rapid experimentation and prototyping.",
+      "Taught two modules of the five-day course Advanced AI Implementation and Innovation for professional learners: data-driven decision-making with AI, and rapid experimentation and prototyping.",
       "Ran hands-on labs with AI coding and agent tools, including Claude Code and Codex.",
     ],
   },
@@ -48,26 +48,28 @@ export const experience: ExperienceItem[] = [
     ],
   },
   {
-    role: "AI, Python & Data Training Facilitator (co-delivered)",
+    role: "AI, Python & Data Trainer",
     organisation: "London Premier Centre",
     location: "London / International",
     period: "Jul 2025 – Nov 2025",
     current: false,
+    teaching: true,
     responsibilities: [
-      "Co-delivered professional training in Python, data science and AI, including a five-day Python for Data Science and AI course.",
+      "Taught professional courses in Python, data science and AI, including a five-day Python for Data Science and AI course.",
       "Covered prompt engineering, AI and machine-learning fundamentals for finance and public-sector groups.",
       "Explained practical topics including Python libraries, exploratory data analysis and Excel analysis.",
       "Built learner-friendly examples to help small and large groups understand technical concepts.",
     ],
   },
   {
-    role: "Prompt Engineering Trainer (co-delivered)",
+    role: "Prompt Engineering Trainer",
     organisation: "London Training for Excellence",
     location: "London",
     period: "Jul 2025",
     current: false,
+    teaching: true,
     responsibilities: [
-      "Co-delivered prompt-engineering training and prepared the course handouts.",
+      "Taught prompt-engineering training and prepared the course handouts.",
     ],
   },
   {
@@ -77,9 +79,9 @@ export const experience: ExperienceItem[] = [
     period: "Jun 2023 – Jul 2023",
     current: false,
     responsibilities: [
-      "Designed and developed simple landing pages with clear, responsive layouts.",
+      "Designed and developed landing pages with clear, responsive layouts.",
       "Applied UX/UI skills to wireframing, page structure and visual improvement.",
-      "Focused on user-friendly presentation and basic front-end work.",
+      "Focused on user-friendly presentation and front-end build quality.",
     ],
   },
 ];

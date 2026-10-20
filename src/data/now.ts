@@ -10,15 +10,15 @@ export const now: NowData = {
   items: [
     {
       iconKey: "build",
-      title: "A newsletter automation, built on camera",
+      title: "Building AI automations and agents",
       description:
-        "My first public proof build: an automation that helps me write and send my own newsletter, recorded while I make it.",
+        "Automations and agents that take repetitive work off a business, built in public. On camera right now: an automation that writes and sends my newsletter.",
     },
     {
       iconKey: "portfolio",
-      title: "Learn Your Way",
+      title: "Building SaaS tools",
       description:
-        "[LEARN YOUR WAY: ONE-LINE DESCRIPTION]",
+        "The first is Learn Your Way. It turns any study material into lessons you can read, watch or listen to, so you study the way that suits you and studying becomes something to enjoy.",
     },
     {
       iconKey: "study",
@@ -28,8 +28,8 @@ export const now: NowData = {
     },
     {
       iconKey: "learn",
-      title: "Games with Claude Code",
-      description: "A hobby: building small games with Claude Code.",
+      title: "Building games",
+      description: "Game development is my passion. I build games with Claude Code, and I'm working towards releasing my first.",
     },
   ],
   personalNote: "Outside work, I stay active with fitness and boxing.",

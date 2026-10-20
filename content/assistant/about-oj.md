@@ -26,7 +26,7 @@ github.com/omarjosephf.
 ## OJ's current services and marketing background
 
 OJ builds practical digital products with software and AI. His leading offer is a
-focused website or landing page for a small service business, with AI document
+focused website or landing page for a service business, with AI document
 assistants over an approved set of documents as a second line of work. He has
 built and deployed document assistants twice, so that is a capability he offers
 rather than an idea he is exploring.

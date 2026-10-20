@@ -1,8 +1,10 @@
 # ADR-0030: Night palette and measured star scenes (home sky, About journey)
 
 - Status: Accepted for the preview — owner direction of 13 and 14 October 2026
-  (design canvas option A, the star prototype, and the build spec). Confirmed
-  or revised at the owner's preview review.
+  (design canvas option A, the star prototype, and the build spec). Revised
+  for the About journey after the owner's preview review of 15 October 2026
+  (see "Revision, 15 October 2026"), and for the home sky's river after the
+  review of 20 October 2026 (see "Revision, 20 October 2026").
 - Date: 2026-10-14
 - Owner: OJ Florendo
 - Risk: R2. Continuous WebGL canvases return to the public site under a
@@ -39,22 +41,34 @@ preloaded on public pages.
 
 **D2 — The home page's star sky.** A fixed WebGL canvas behind the home page
 draws a sparse parallax field, a slowly turning galaxy behind the hero, and a
-river of stars that flows from it down the page, keeping to the right on wide
-screens where the left-aligned headings leave the sky open.
+ribbon of stars that streams from it down the page at one shared pace. The
+ribbon weaves from right to left and back across the whole width about once a
+screen, turning out at the screen's edges, and twists as it goes, so its two
+edges wind round each other like a spiral (revised 20 October 2026).
 
 **D3 — The About journey.** A second fixed canvas behind /about is a true 3D
-scene: a perspective camera flies along a corridor of stars with one anchor per
-stage of the page (arrival, origin, teaching, building, experience, now,
-credentials). At arrival, stars assemble into the owner's name; between stages
-the camera warps forward and the stars streak; at the Building stage four small
-systems fly in and settle into orbit around a planet made of gold stars, "the
-planet of running work" (three gold for the live systems, one pale for the one
-in progress); at the end the corridor opens onto a faint, distant galaxy. The
-planet and the galaxy sit to the right of the content column on wide screens.
-While the scene draws the name, the real h1 is
-visually hidden but stays in the accessibility tree; without the scene it is
-painted normally. No rocket, satellite-around-the-name, constellation-job or
-reticle-cursor signature from the reference site is used.
+scene: a perspective camera flies along a corridor of stars with one evenly
+spaced anchor per stage of the page (arrival, origin, teaching, building,
+experience, skills, now, credentials) and one for the end of the page. The
+camera moves whenever the reader scrolls, slowest in the middle of a stage and
+quickest between stages, and the stars streak only when travel is fast. At
+arrival, stars assemble into the owner's name, sampled from the h1's own
+typeface with even spacing and outline-first placement so every letter keeps
+its shape. Each later stage has its own landmark, framed mid-stage and passed
+on the way to the next: a nebula with a young star (origin), a ringed planet
+(teaching), the planet of gold stars with four systems settling into orbit,
+"the planet of running work" (building; three gold for the live systems, one
+pale for the one in progress), an asteroid belt round a small star
+(experience), a star cluster (skills), a comet among three tumbling asteroids
+(now) and a spiral galaxy (credentials, framed at the end of the page). On wide
+screens the camera turns slightly left once it leaves the name, so the way
+ahead and every landmark open to the right of the content column; on phones the
+landmarks sit high, smaller and dimmer. The h1 is never painted as solid text
+before the stars draw the name: it waits unpainted (in the accessibility tree)
+until the scene reports, and is painted at once when no scene can run, without
+JavaScript, in forced colours, or after a 4-second fallback. No rocket,
+satellite-around-the-name, constellation-job or reticle-cursor signature from
+the reference site is used.
 
 Both scenes are plain WebGL with no library, and every point moves in the vertex
 shader from values fixed at start-up, so the main thread sets a few uniforms and
@@ -66,15 +80,15 @@ unit-tested):
 
 | Item | Budget |
 | --- | --- |
-| Frame rate | at most 30 frames a second (motion is slow by design) |
+| Frame rate | home: at most 30 frames a second. About: up to 60 while the camera travels or the name assembles, 30 once settled |
 | Backing store | device pixel ratio capped at 1.5, and at most 4 million pixels |
-| Points | home 6,250 wide / 2,460 below 768 px; About 9,880 wide / 4,480 below 768 px |
-| Brightness | home 0.9, with stars behind text blocks keeping 15% of their light; About 0.9, with everything but the name at 30% on phones, where text spans the screen |
-| Start | after `load` and an idle callback, so it never competes with first paint |
+| Points | home 8,850 wide / 3,360 below 768 px; About 19,840 wide / 8,420 below 768 px |
+| Brightness | home 0.9, with stars behind text blocks keeping 15% of their light; About 1.0 on wide screens, where landmarks keep right of the text, and 0.85 on phones with everything but the name at 38%, where text spans the screen |
+| Start | after `load` and an idle callback, so it never competes with first paint. On /about a one-off WebGL probe runs at hydration, so without a GPU renderer the h1 paints the name at once |
 | Hidden tab | loop stopped; resumes on return |
 | Reduced motion | one still frame, redrawn only on scroll or resize; no loop |
 | Software renderer | no scene at all, as without WebGL (see D5) |
-| No WebGL | the canvas stays black, like the page; content is unaffected |
+| No WebGL | home: the canvas stays black, like the page. About: no canvas, and the h1 paints the name. Content is unaffected |
 | Bundle | each scene its own lazy chunk; no chunk on the home page over 150 KB |
 | Page | Lighthouse mobile performance ≥ 90 on home and /about |
 
@@ -116,6 +130,76 @@ opened.
 No new origin, request, cookie or storage. Shaders are compiled from strings in
 the bundle; WebGL needs no CSP change and no `unsafe-eval`. A lost WebGL context
 stops a scene and leaves the page black.
+
+## Revision, 20 October 2026 (owner preview review, home sky)
+
+The owner found the home river messy behind the Services section and asked
+for it to spiral down the page from right to left and back. Each river star
+had its own speed and its own sideways sway, so the stars drifted out of step,
+and the river stayed in the right-hand 52–88% of the width. Now every river
+star moves at one slow pace (12 pixels a second, after the owner asked for
+slower and smoother movement), the path crosses the whole width about once a
+screen and turns at the edges, and the ribbon twists slowly, with its stars
+gathered at the two edges so they read as two strands winding round each
+other (D2). A third of the river is fine dust in a soft haze around the
+ribbon, and river stars shimmer gently instead of twinkling. At the owner's
+request for more stars, the river has 5,000 points on wide screens and 1,800
+on phones, up from 2,400 and 900 (D4).
+
+Where the Services panel and its rows fill the width, the ribbon still passes
+behind them at 15% of its light, so there the change shows mostly at the
+screen's edges and between blocks. Checked on a local production build with
+screenshots at 1440 and 390 pixels wide (simulated GPU). Lighthouse has not
+been re-run for this revision.
+
+## Revision, 15 October 2026 (owner preview review)
+
+The owner reviewed the About journey on 15 October 2026 and asked for four
+changes, all made in D3 and D4 above:
+
+1. **No solid name first.** The solid h1 showed for a moment before the stars
+   assembled. The h1 now waits unpainted until the scene reports (see D3).
+2. **Letters that keep their shape.** The stars were sampled from the body
+   face at random, so thin parts such as the bar of the "e" and the last "o"
+   came out ragged. Sampling now reads the h1's own family, weight, width,
+   tracking and line height, keeps a minimum distance between stars, and fills
+   the letter outlines first. The camera looks dead straight at the name.
+3. **Something to see at every stop, and smoother travel.** The camera used
+   to hold still for most of a stage and then warp; between stops nothing was
+   in view after the planet. It now moves continuously with scrolling, and
+   every stage has its own landmark (D3). Skills became a stage of its own.
+   The frame cap rises to 60 only while the camera travels, which is what made
+   motion look stepped at 30.
+4. **More visible.** The planet, galaxy and every new landmark are brighter
+   and nearer than the old planet and galaxy; far landmarks fade in nearer
+   than corridor stars, so the next one never crowds the current view.
+
+The point budget roughly doubles (D4). Software renderers still get no scene
+(D5), so the extra points and frames cost only on a GPU, where they are drawn
+in one call; GPU cost on a low-end phone is still not measured.
+
+Start-up is kept off the main thread's critical path: the name sampling
+yields between passes, both shader programs link in the background where
+KHR_parallel_shader_compile is offered, and the hidden h1 keeps its place in
+the layout, so starting the scene shifts nothing.
+
+**Measured, 15 October 2026** (local production builds, the owner's laptop):
+
+- Gate on the working tree: stage 1 fails only on the sharp and source-map-js
+  advisories (#119); stages 2–17 exit 0, including 1,027 unit tests, 101
+  portfolio and 50 management browser tests.
+- Lighthouse 12.8.2 mobile on /about, five runs alternating with the previous
+  build (`76c90c3`) on the same machine: this revision 93, 83, 79, 93, 93
+  (median 93); previous build 91, 90, 92, 89, 91 (median 91). Accessibility,
+  best practices and SEO 100; layout shift 0 in all five runs. Two runs of
+  this revision had one 475–656 ms task under Lighthouse's simulated 4x CPU;
+  ten profiled loads with the long-animation-frame API (four at a real 4x CPU
+  throttle, six unthrottled) showed no long frame from the scene, so its
+  source is unexplained.
+- **Correction to the 14 October note below:** headless Lighthouse on this
+  laptop draws WebGL on the GPU (ANGLE, Direct3D 11), and its final screenshots
+  show the star scene in both builds. Those runs therefore scored the pages
+  with the scenes, not without them.
 
 ## Verification — local preview, 14 October 2026
 

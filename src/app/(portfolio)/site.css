@@ -1134,22 +1134,40 @@
 .jf-about-name > span {
   display: block;
 }
-/* While the scene draws the name in stars, the heading stays readable to
-   assistive technology but is not painted twice. */
+/* The stars draw the name, so the heading waits unpainted (still in the
+   accessibility tree) and never shows as solid text first. The page sets
+   data-journey-name to "on" once the stars draw it, or to "text" when no
+   scene can, and the heading paints at once. If neither arrives, it paints
+   after 4 s; without JavaScript it paints straight away. */
+.jf-about-name {
+  opacity: 0;
+  animation: jf-name-fallback 0.5s var(--jf-ease) 4s forwards;
+}
+@keyframes jf-name-fallback {
+  to {
+    opacity: 1;
+  }
+}
+:root[data-journey-name] .jf-about-name {
+  opacity: 1;
+  animation: none;
+}
+/* The stars draw it: the heading keeps its place in the layout, so nothing
+   shifts when the scene starts, and stays in the accessibility tree. */
 :root[data-journey-name="on"] .jf-about-name {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  opacity: 0;
+}
+@media (scripting: none) {
+  .jf-about-name {
+    opacity: 1;
+    animation: none;
+  }
 }
 @media (forced-colors: active) {
+  .jf-about-name,
   :root[data-journey-name="on"] .jf-about-name {
-    position: static;
-    width: auto;
-    height: auto;
-    clip-path: none;
+    opacity: 1;
+    animation: none;
   }
 }
 .jf-arrival-card {
@@ -1219,8 +1237,20 @@
 }
 
 /* Origin */
-.jf-origin .jf-placeholder {
-  margin: 0 0 8px;
+.jf-story {
+  max-width: 62ch;
+  font-size: clamp(1.125rem, 1.6vw, 1.3125rem);
+  line-height: 1.6;
+  color: var(--jf-text-2);
+}
+.jf-story p {
+  margin: 0;
+}
+.jf-story p + p {
+  margin-top: 1.1em;
+}
+.jf-story p:first-child {
+  color: var(--color-ink);
 }
 
 /* Teaching */

@@ -27,8 +27,8 @@ can respond directly.
 
 ## What E.V is and how it answers questions
 
-E.V is this website’s AI assistant. Its knowledge source is a small collection
-of OJ’s approved portfolio documents.
+E.V is this website’s AI assistant. Its knowledge source is a set of OJ’s
+approved portfolio documents.
 
 It works by retrieval: it searches those approved documents for the passages most
 relevant to a question, answers using only those passages, and shows the source

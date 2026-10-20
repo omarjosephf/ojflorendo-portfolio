@@ -1,3 +1,5 @@
+import { story } from "./story";
+
 export const positioning = {
   professionalName: "Joseph Florendo",
   hero: {
@@ -7,7 +9,7 @@ export const positioning = {
     displayName: ["Joseph", "Florendo"],
     // The offer in one sentence, split over two lines.
     headline: [
-      "I build AI automations that take repetitive work off small businesses,",
+      "I build AI automations that take repetitive work off your business,",
       "and I show you how they work.",
     ],
     supportingCopy:
@@ -110,7 +112,7 @@ export const positioning = {
     scopeNote:
       "Every build starts with a defined task and a defined set of tools, and I say plainly what it does not cover. Anything that handles personal or sensitive data gets its own privacy review, running costs and support arrangements, agreed before the work starts.",
     relatedWork:
-      "I also co-deliver AI, Python and data training, and I have worked in digital content and e-commerce operations.",
+      "I also run AI, Python and data training for professional groups, and I have worked in digital content and e-commerce operations.",
   },
   /**
    * The hero's example run. Synthetic by design and labelled as such on the
@@ -168,7 +170,8 @@ export const positioning = {
       title: "Learn Your Way",
       kind: "My first product",
       status: "In progress",
-      summary: "[LEARN YOUR WAY: ONE-LINE DESCRIPTION]",
+      summary:
+        "Turns any study material into lessons you can read, watch or listen to. Everyone learns differently, so you choose the way that suits you, and studying becomes something to enjoy.",
       note: "Built in public.",
     },
     portfolio: {
@@ -196,8 +199,7 @@ export const positioning = {
   },
   why: {
     heading: "Why I build this",
-    // Placeholder until the owner writes the short version of his story.
-    body: "[YOUR STORY: SHORT VERSION]",
+    body: story.short,
     link: "Read the full story",
   },
   contact: {
@@ -212,8 +214,8 @@ export const positioning = {
       "You can send the same details by email. Scope, price and timing are agreed with me once I understand the work.",
   },
   seoDescription:
-    "Joseph Florendo is an AI automation developer in Windsor, UK. He builds AI automations, agents and assistants that take repetitive work off small businesses.",
+    "Joseph Florendo is an AI automation developer in Windsor, UK. He builds AI automations, agents and assistants that take repetitive work off businesses.",
   /** Third-person descriptor used by structured data. */
   personDescription:
-    "Joseph Florendo is an AI automation developer based in Windsor, Berkshire, building AI automations, agents and assistants for small businesses.",
+    "Joseph Florendo is an AI automation developer based in Windsor, Berkshire, building AI automations, agents and assistants for businesses.",
 } as const;

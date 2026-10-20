@@ -7,6 +7,7 @@ const STOPS = [
   { label: "Teaching", href: "#teaching" },
   { label: "Building", href: "#building" },
   { label: "Experience", href: "#experience" },
+  { label: "Skills", href: "#skills" },
   { label: "Now", href: "#now" },
   { label: "Credentials", href: "#education" },
 ];

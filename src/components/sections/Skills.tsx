@@ -6,6 +6,7 @@ export function Skills() {
   return (
     <Section
       id="skills"
+      stage
       title="The skills behind the work"
       intro="My projects combine AI automation, web development, testing and clear technical communication. My broader experience includes data, training and digital operations."
     >

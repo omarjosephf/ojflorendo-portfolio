@@ -124,7 +124,7 @@ export const projects: ProjectItem[] = [
     summary:
       "Explore answers alongside the document passages used to produce them.",
     description:
-      "A document assistant that retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It is designed to decline questions its documents do not cover, and its small evaluation set tests both answerable questions and questions the documents cannot answer.",
+      "A document assistant that retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It is designed to decline questions its documents do not cover, and its evaluation set tests both answerable questions and questions the documents cannot answer.",
     status: "Live",
     technologies: [
       "Python",
@@ -147,9 +147,9 @@ export const projects: ProjectItem[] = [
       tagline:
         "Explore answers alongside the document passages used to produce them.",
       overview:
-        "Cited is my document-assistant demo. It retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It also tests how the assistant handles questions the documents do not cover. It is deployed as a small containerised web service with a command-line interface, and every claim made about its quality is reproducible from the repository with a single command.",
+        "Cited is my document-assistant demo. It retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It also tests how the assistant handles questions the documents do not cover. It is deployed as a containerised web service with a command-line interface, and every claim made about its quality is reproducible from the repository with a single command.",
       context:
-        "I wanted to explore a practical limitation of AI question answering: a plausible answer is difficult to trust without seeing what supports it. Ordinary search has the opposite problem — it returns a list of documents and leaves the reading to you. This project investigates retrieval, visible sources, and evaluation within a small, defined document set, and holds the result to a standard where the honesty is measured rather than claimed.",
+        "I wanted to explore a practical limitation of AI question answering: a plausible answer is difficult to trust without seeing what supports it. Ordinary search has the opposite problem — it returns a list of documents and leaves the reading to you. This project investigates retrieval, visible sources, and evaluation within a defined document set, and holds the result to a standard where the honesty is measured rather than claimed.",
       goals: [
         "Return answers grounded in supplied documents, with the source passage shown alongside each answer.",
         "Refuse questions the documents cannot answer, and treat wrongly refusing an answerable question as an equally real failure.",
@@ -184,7 +184,7 @@ export const projects: ProjectItem[] = [
         "The service sends a nonce-based Content Security Policy alongside HSTS, X-Content-Type-Options, and Referrer-Policy.",
         "Spend is bounded in three independent ways — request rate, a daily answer budget, and a cap on the size of any single question — and the documentation is explicit that only a provider-level spend cap truly bounds the loss, because the in-process budget resets on restart.",
         "The build fails if a secret reaches a tracked file, and a test guards the corpus against ignore rules that could silently empty it.",
-        "The demo interface is deliberately small and has the basics right — a language attribute, a single main heading, visible focus styling, and colour-scheme support — but it has not been through a full accessibility audit, and I would not describe it as meeting the standard the rest of my work is held to until it has.",
+        "The demo interface is deliberately minimal and has the basics right — a language attribute, a single main heading, visible focus styling, and colour-scheme support — but it has not been through a full accessibility audit, and I would not describe it as meeting the standard the rest of my work is held to until it has.",
       ],
       performance: [
         "The embedding stack runs through ONNX rather than PyTorch — 223 MB against roughly 2 GB — and was verified working on the target Python version and platform before anything depended on it.",

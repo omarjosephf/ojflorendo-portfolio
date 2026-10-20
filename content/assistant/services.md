@@ -2,7 +2,7 @@
 
 ## Website development services: the work OJ takes on now
 
-OJ currently offers website and landing-page development for small service businesses. This is his main service for new project enquiries. He can build a focused new website or landing page, with scope, suitability and timing agreed directly with OJ.
+OJ currently offers website and landing-page development for service businesses. This is his main service for new project enquiries. He can build a focused new website or landing page, with scope, suitability and timing agreed directly with OJ.
 
 It begins with understanding the offer, the intended visitor and the enquiry
 journey. Work may include content structure and page priorities, responsive

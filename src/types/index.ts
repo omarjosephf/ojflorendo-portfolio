@@ -37,6 +37,8 @@ export interface ExperienceItem {
   location: string;
   period: string;
   current: boolean;
+  /** A training role, listed again in the About page's Teaching stage. */
+  teaching?: boolean;
   responsibilities: string[];
 }
 

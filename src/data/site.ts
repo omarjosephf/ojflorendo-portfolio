@@ -10,13 +10,13 @@ import type { SiteConfig } from "@/types";
 export const site: SiteConfig = {
   name: "Joseph Florendo",
   // Rendered on the social preview card; the on-page hero owns its own copy.
-  headline: "AI automations that take repetitive work off small businesses.",
+  headline: "AI automations that take repetitive work off your business.",
   descriptor: "AI Automation Developer",
   location: "Windsor, Berkshire, United Kingdom",
   email: "ojflorendo.connect@gmail.com",
   about: [
-    "I'm Joseph Florendo, an AI automation developer based in Windsor, Berkshire. I build automations, AI agents and assistants that take repetitive work off small businesses, and I show how each one works.",
-    "I have co-delivered AI, Python and data training for professional groups, and I'm in the final year of a BSc in Computing and IT with The Open University.",
+    "I'm Joseph Florendo, an AI automation developer based in Windsor, Berkshire. I build automations, AI agents and assistants that take repetitive work off businesses, and I show how each one works.",
+    "I have taught AI, Python and data courses to professional groups, and I'm in the final year of a BSc in Computing and IT with The Open University.",
     "I build in public. The E.V assistant, the agent-written blog and the panel I run them from are live on this site, and I share how they are made.",
   ],
   // This path points only to the separately reviewed, phone-free public CV.

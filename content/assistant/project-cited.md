@@ -106,7 +106,7 @@ measurement, check the instrument is measuring what you think it is.
 
 ## Cited: honest limitations
 
-The demo interface is deliberately small and has the basics right — a language
+The demo interface is deliberately minimal and has the basics right — a language
 attribute, a single main heading, visible focus styling, colour-scheme support —
 but it has not been through a full accessibility audit, and OJ does not describe
 it as meeting the standard the rest of his work is held to until it has.

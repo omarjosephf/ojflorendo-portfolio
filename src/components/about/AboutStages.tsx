@@ -2,23 +2,28 @@ import Link from "next/link";
 import { experience } from "@/data/experience";
 import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
+import { story } from "@/data/story";
 import { Section } from "@/components/ui/Section";
 
-/** Stage two: the owner's story. A marked placeholder until he writes it. */
+/** Stage two: the owner's story, public parts only. */
 export function AboutOrigin() {
   return (
     <Section id="origin" stage title="Where it started" className="jf-origin">
-      <p className="jf-placeholder">[YOUR STORY: ORIGIN, PUBLIC PARTS ONLY]</p>
+      <div className="jf-story">
+        {story.origin.map((paragraph) => (
+          <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+        ))}
+      </div>
     </Section>
   );
 }
 
 /**
- * Stage three. Only roles marked co-delivered, described as such; how the work
- * was obtained and who led it stay out of public copy (ADR-0029).
+ * Stage three: the training roles, as the sessions the owner taught. How the
+ * work was obtained stays out of public copy (ADR-0029).
  */
 export function AboutTeaching() {
-  const taught = experience.filter((item) => item.role.includes("co-delivered"));
+  const taught = experience.filter((item) => item.teaching);
   return (
     <Section id="teaching" stage title="Teaching AI to working professionals" intro={site.about[1]}>
       <ol className="jf-teaching">

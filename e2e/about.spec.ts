@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { hasNoHorizontalOverflow, simulateHardwareWebGL, SCENE_VIEWPORT, watchPage } from "./helpers";
 
-const STAGES = ["about", "origin", "teaching", "building", "experience", "now", "education"];
+const STAGES = ["about", "origin", "teaching", "building", "experience", "skills", "now", "education"];
 
 test.describe("About journey (ADR-0030)", () => {
-  test("seven stages in order, with the scene as one decorative canvas", async ({ page }) => {
+  test("eight stages in order, with the scene as one decorative canvas", async ({ page }) => {
     const watcher = await watchPage(page);
     await simulateHardwareWebGL(page);
     await page.setViewportSize(SCENE_VIEWPORT);
@@ -20,26 +20,32 @@ test.describe("About journey (ADR-0030)", () => {
     expect(await watcher.cspViolations()).toEqual([]);
   });
 
-  test("the name stays the page's heading while the stars draw it", async ({ page }) => {
+  test("the name stays the page's heading while the stars draw it, and never paints as text first", async ({ page }) => {
     await simulateHardwareWebGL(page);
     await page.setViewportSize(SCENE_VIEWPORT);
-    await page.goto("/about");
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    const early = await page.evaluate(() => ({
+      flag: document.documentElement.getAttribute("data-journey-name"),
+      opacity: getComputedStyle(document.querySelector("#about-heading")!).opacity,
+    }));
+    expect(early.flag === "on" || early.opacity === "0").toBe(true);
     await expect(page.locator("html")).toHaveAttribute("data-journey-name", "on", { timeout: 10_000 });
     await expect(page.getByRole("heading", { level: 1, name: "Joseph Florendo" })).toHaveCount(1);
-    await expect(page.locator("#about-heading")).toHaveCSS("position", "absolute");
+    await expect(page.locator("#about-heading")).toHaveCSS("opacity", "0");
   });
 
-  test("on a software renderer there is no scene and the name is painted", async ({ page }) => {
+  test("on a software renderer there is no scene and the name is painted at once", async ({ page }) => {
     await page.goto("/about");
-    await expect(page.locator("canvas.jf-sky")).toHaveAttribute("data-engine", "off");
-    await expect(page.locator("#about-heading")).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("data-journey-name", "text", { timeout: 3_000 });
+    await expect(page.locator("#about-heading")).toHaveCSS("opacity", "1");
+    await expect(page.locator("canvas")).toHaveCount(0);
   });
 
   test("without JavaScript the name is painted as the heading", async ({ browser, baseURL }) => {
     const context = await browser.newContext({ baseURL, javaScriptEnabled: false });
     const page = await context.newPage();
     await page.goto("/about");
-    await expect(page.locator("#about-heading")).toBeVisible();
+    await expect(page.locator("#about-heading")).toHaveCSS("opacity", "1", { timeout: 1_000 });
     await expect(page.locator("canvas")).toHaveCount(0);
     for (const id of STAGES) await expect(page.locator(`#${id}`)).toBeAttached();
     await context.close();
@@ -62,16 +68,27 @@ test.describe("About journey (ADR-0030)", () => {
       await page.goto("/about");
       expect(await hasNoHorizontalOverflow(page)).toBe(true);
     }
+    // One stop for every stage after the arrival, in page order.
+    const stops = await page
+      .getByRole("navigation", { name: "Journey" })
+      .locator('a[href^="#"]')
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+    const stages = await page
+      .locator("[data-stage]")
+      .evaluateAll((sections) => sections.slice(1).map((section) => `#${section.id}`));
+    expect(stops).toEqual(stages);
     await page.getByRole("navigation", { name: "Journey" }).getByRole("link", { name: "Building" }).click();
     await expect(page).toHaveURL(/#building$/);
     await expect(page.locator("#building-heading")).toBeInViewport();
   });
 
-  test("teaching is described as co-delivered and Learn Your Way as in progress", async ({ page }) => {
+  test("teaching lists the three training roles, the story is written and Learn Your Way is in progress", async ({ page }) => {
     await page.goto("/about");
     const teaching = page.locator("#teaching li");
     await expect(teaching).toHaveCount(3);
-    for (const item of await teaching.all()) await expect(item).toContainText("co-delivered");
+    for (const item of await teaching.all()) await expect(item).toContainText("Trainer");
+    await expect(page.locator("#origin")).toContainText("The Open University");
     await expect(page.locator("#building")).toContainText("In progress");
+    await expect(page.locator("main .jf-placeholder")).toHaveCount(0);
   });
 });

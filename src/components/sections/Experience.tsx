@@ -8,7 +8,7 @@ export function Experience() {
       id="experience"
       stage
       title="Where I've worked"
-      intro="Co-delivered training, digital content and e-commerce operations, and front-end work, newest first."
+      intro="AI training, digital content and e-commerce operations, and front-end work, newest first."
     >
       <ExperienceTimeline items={experience} />
     </Section>
