@@ -1,10 +1,11 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, join } from "node:path";
 
 import { BlogPostValidationError, parseBlogPost } from "./schema";
 import type { BlogPost } from "./types";
 
 const POSTS_DIRECTORY = join(process.cwd(), "content", "blog", "posts");
+const PUBLIC_DIRECTORY = join(process.cwd(), "public");
 const VALID_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function parseJson(contents: string, fileName: string) {
@@ -17,7 +18,10 @@ function parseJson(contents: string, fileName: string) {
 }
 
 /** @internal Exported for deterministic repository-boundary tests. */
-export function loadBlogPostsFromDirectory(directory: string): BlogPost[] {
+export function loadBlogPostsFromDirectory(
+  directory: string,
+  publicDirectory: string = PUBLIC_DIRECTORY,
+): BlogPost[] {
   let fileNames: string[];
   try {
     fileNames = readdirSync(directory, { withFileTypes: true })
@@ -36,6 +40,14 @@ export function loadBlogPostsFromDirectory(directory: string): BlogPost[] {
     if (post.slug !== fileSlug) {
       throw new BlogPostValidationError(
         [`root.slug must match its file name (${JSON.stringify(fileSlug)})`],
+        source,
+      );
+    }
+    // The parser has already limited the path to one file name under
+    // /blog/covers/, so joining it to the public folder cannot leave it.
+    if (post.schemaVersion === 2 && post.cover && !existsSync(join(publicDirectory, ...post.cover.src.split("/")))) {
+      throw new BlogPostValidationError(
+        [`root.cover.src must name a file committed in public${post.cover.src}`],
         source,
       );
     }

@@ -2,23 +2,12 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { BlogPost } from "@/lib/blog";
 import { Container } from "@/components/ui/Container";
+import { postTypeOf } from "@/lib/blog/showcase";
+import { PostTypeLabel } from "./PostTypeLabel";
+import { formatDate } from "./format-date";
 import styles from "./blog.module.css";
 
 type BlogContentBlock = BlogPost["blocks"][number];
-
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
-
-function formatDate(value: string) {
-  const normalized = /^\d{4}-\d{2}-\d{2}$/.test(value)
-    ? `${value}T00:00:00Z`
-    : value;
-  return dateFormatter.format(new Date(normalized));
-}
 
 function ContentBlock({
   block,
@@ -73,6 +62,7 @@ function ContentBlock({
 
 export function BlogArticle({ post }: { post: BlogPost }) {
   const articleIdPrefix = `blog-${post.slug}`;
+  const type = postTypeOf(post);
 
   return (
     <article className={styles.page}>
@@ -98,6 +88,7 @@ export function BlogArticle({ post }: { post: BlogPost }) {
                 Updated <time dateTime={post.updatedAt}>{formatDate(post.updatedAt)}</time>
               </span>
             ) : null}
+            {type ? <PostTypeLabel type={type} /> : null}
           </div>
           <aside className={styles.disclosure} aria-label="AI assistance disclosure">
             <span>How this was made</span>

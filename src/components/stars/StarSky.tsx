@@ -18,19 +18,33 @@ import {
 
 type EngineState = "running" | "still" | "paused" | "off";
 
+/** The home hero, which the galaxy sits behind by default. */
+const HOME_ANCHOR = "#top";
+
+export interface StarSkyPlacement {
+  /** CSS selector of the element the galaxy sits behind. */
+  anchor?: string;
+  /** CSS selector of the text blocks the stars dim behind. */
+  dimSelector?: string;
+}
+
 /** The time the still frame shows: the galaxy and river at a settled moment. */
 const STILL_TIME = 42;
 
 /**
- * The decorative star sky behind the home page (ADR-0030). One fixed canvas,
- * hidden from assistive technology and from the pointer. It draws at most
+ * The decorative star sky behind the home page and the blog front page
+ * (ADR-0030, ADR-0027). One fixed canvas, hidden from assistive technology
+ * and from the pointer. It draws at most
  * STAR_BUDGET.fpsCap frames a second, stops while the tab is hidden, and with
  * reduced motion draws a single still frame that only redraws when the page
  * scrolls or resizes. If WebGL is unavailable it stays black, like the page.
  *
  * `data-engine` reports the state for the browser tests.
+ *
+ * `anchor` names the element the galaxy sits behind, and `dimSelector` the
+ * text blocks the stars dim behind. Both default to the home page's values.
  */
-export function StarSky() {
+export function StarSky({ anchor = HOME_ANCHOR, dimSelector = DIM_SELECTOR }: StarSkyPlacement = {}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -123,9 +137,9 @@ export function StarSky() {
       upload(width);
 
       const scrollY = window.scrollY;
-      const hero = document.getElementById("top")?.getBoundingClientRect();
+      const hero = document.querySelector(anchor)?.getBoundingClientRect();
       const [gx, gy, gr] = galaxyFor(width, (hero?.top ?? 0) + scrollY, hero?.height ?? height);
-      const blocks = Array.from(document.querySelectorAll(DIM_SELECTOR)).slice(0, STAR_BUDGET.maxDimRects);
+      const blocks = Array.from(document.querySelectorAll(dimSelector)).slice(0, STAR_BUDGET.maxDimRects);
       rects.fill(0);
       blocks.forEach((element, index) => {
         const box = element.getBoundingClientRect();
@@ -237,7 +251,7 @@ export function StarSky() {
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
     };
-  }, []);
+  }, [anchor, dimSelector]);
 
   return <canvas ref={canvasRef} className="jf-sky" aria-hidden="true" data-engine="off" />;
 }

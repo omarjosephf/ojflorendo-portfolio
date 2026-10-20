@@ -1,13 +1,17 @@
 import {
   BLOG_AUTHOR,
+  BLOG_AUTHOR_V2,
   BLOG_POST_SCHEMA_VERSION,
-  type BlogAuthor,
+  BLOG_POST_SCHEMA_VERSION_2,
+  BLOG_POST_TYPES,
   type BlogCalloutBlock,
   type BlogContentBlock,
+  type BlogCover,
   type BlogHeadingBlock,
   type BlogListBlock,
   type BlogParagraphBlock,
   type BlogPost,
+  type BlogPostType,
   type BlogSeo,
   type BlogSource,
 } from "./types";
@@ -15,6 +19,11 @@ import {
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const UNSAFE_CONTROL_CHARACTERS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
+// One committed file directly inside `public/blog/covers/` (BLOG_COVER_PATH_PREFIX):
+// lowercase words joined by hyphens, WebP or PNG. No sub-folders, dots,
+// encodings, queries or other origins.
+const COVER_PATH_PATTERN = /^\/blog\/covers\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:webp|png)$/;
+const COVER_MAX_DIMENSION = 4_000;
 
 type JsonObject = Record<string, unknown>;
 
@@ -135,17 +144,58 @@ function readSourceUrl(value: unknown, path: string, issues: string[]) {
   return url;
 }
 
-function parseAuthor(value: unknown, path: string, issues: string[]): BlogAuthor {
+/** The author is locked per format version; the caller stores the constant. */
+function checkAuthor(
+  value: unknown,
+  path: string,
+  issues: string[],
+  expected: typeof BLOG_AUTHOR | typeof BLOG_AUTHOR_V2,
+) {
   if (!isObject(value)) {
     issues.push(`${path} must be an object`);
-    return { ...BLOG_AUTHOR };
+    return;
   }
   validateKeys(value, ["name", "url"], [], path, issues);
   const name = readText(value.name, `${path}.name`, issues, { min: 2, max: 80, singleLine: true });
   const url = readInternalPath(value.url, `${path}.url`, issues);
-  if (name !== BLOG_AUTHOR.name) issues.push(`${path}.name must be ${JSON.stringify(BLOG_AUTHOR.name)}`);
-  if (url !== BLOG_AUTHOR.url) issues.push(`${path}.url must be ${JSON.stringify(BLOG_AUTHOR.url)}`);
-  return { ...BLOG_AUTHOR };
+  if (name !== expected.name) issues.push(`${path}.name must be ${JSON.stringify(expected.name)}`);
+  if (url !== expected.url) issues.push(`${path}.url must be ${JSON.stringify(expected.url)}`);
+}
+
+function readPostType(value: unknown, path: string, issues: string[]): BlogPostType {
+  if (typeof value !== "string" || !(BLOG_POST_TYPES as readonly string[]).includes(value)) {
+    issues.push(`${path} must be case-study, build-notes or explainer`);
+    return "explainer";
+  }
+  return value as BlogPostType;
+}
+
+function readDimension(value: unknown, path: string, issues: string[]) {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 1 || value > COVER_MAX_DIMENSION) {
+    issues.push(`${path} must be a whole number of pixels between 1 and ${COVER_MAX_DIMENSION}`);
+    return 1;
+  }
+  return value;
+}
+
+function parseCover(value: unknown, path: string, issues: string[]): BlogCover {
+  if (!isObject(value)) {
+    issues.push(`${path} must be an object`);
+    return { kind: "image", src: "", width: 1, height: 1, alt: "" };
+  }
+  validateKeys(value, ["kind", "src", "width", "height", "alt"], [], path, issues);
+  if (value.kind !== "image") issues.push(`${path}.kind must be image`);
+  const src = readText(value.src, `${path}.src`, issues, { max: 200, singleLine: true });
+  if (src && !COVER_PATH_PATTERN.test(src)) {
+    issues.push(`${path}.src must name a WebP or PNG file directly under /blog/covers/ on this site`);
+  }
+  return {
+    kind: "image",
+    src,
+    width: readDimension(value.width, `${path}.width`, issues),
+    height: readDimension(value.height, `${path}.height`, issues),
+    alt: readText(value.alt, `${path}.alt`, issues, { min: 4, max: 300, singleLine: true }),
+  };
 }
 
 function parseHeadingBlock(value: JsonObject, path: string, issues: string[]): BlogHeadingBlock {
@@ -330,6 +380,9 @@ export function parseBlogPost(value: unknown, source = "blog post"): BlogPost {
   const issues: string[] = [];
   if (!isObject(value)) throw new BlogPostValidationError(["root must be an object"], source);
 
+  // Version 1 is checked exactly as it was before version 2 existed. Version 2
+  // adds a required post type and an optional cover (ADR-0027).
+  const isVersion2 = value.schemaVersion === BLOG_POST_SCHEMA_VERSION_2;
   validateKeys(
     value,
     [
@@ -345,14 +398,15 @@ export function parseBlogPost(value: unknown, source = "blog post"): BlogPost {
       "blocks",
       "sources",
       "seo",
+      ...(isVersion2 ? ["postType"] : []),
     ],
-    [],
+    isVersion2 ? ["cover"] : [],
     "root",
     issues,
   );
 
-  if (value.schemaVersion !== BLOG_POST_SCHEMA_VERSION) {
-    issues.push(`root.schemaVersion must be ${BLOG_POST_SCHEMA_VERSION}`);
+  if (value.schemaVersion !== BLOG_POST_SCHEMA_VERSION && !isVersion2) {
+    issues.push(`root.schemaVersion must be ${BLOG_POST_SCHEMA_VERSION} or ${BLOG_POST_SCHEMA_VERSION_2}`);
   }
 
   const status = value.status;
@@ -377,19 +431,21 @@ export function parseBlogPost(value: unknown, source = "blog post"): BlogPost {
     issues.push("root.sources must contain at least one source for a published post");
   }
 
-  const post: BlogPost = {
-    schemaVersion: BLOG_POST_SCHEMA_VERSION,
-    status: status === "published" ? "published" : "draft",
-    slug: readIdentifier(value.slug, "root.slug", issues),
-    title: readText(value.title, "root.title", issues, { min: 4, max: 120, singleLine: true }),
-    excerpt: readText(value.excerpt, "root.excerpt", issues, {
-      min: 10,
-      max: 240,
-      singleLine: true,
-    }),
+  const slug = readIdentifier(value.slug, "root.slug", issues);
+  const title = readText(value.title, "root.title", issues, { min: 4, max: 120, singleLine: true });
+  const excerpt = readText(value.excerpt, "root.excerpt", issues, {
+    min: 10,
+    max: 240,
+    singleLine: true,
+  });
+  checkAuthor(value.author, "root.author", issues, isVersion2 ? BLOG_AUTHOR_V2 : BLOG_AUTHOR);
+  const fields = {
+    status: status === "published" ? ("published" as const) : ("draft" as const),
+    slug,
+    title,
+    excerpt,
     publishedAt,
     updatedAt,
-    author: parseAuthor(value.author, "root.author", issues),
     disclosure: readText(value.disclosure, "root.disclosure", issues, {
       min: 10,
       max: 500,
@@ -399,6 +455,19 @@ export function parseBlogPost(value: unknown, source = "blog post"): BlogPost {
     sources,
     seo: parseSeo(value.seo, "root.seo", issues),
   };
+
+  let post: BlogPost;
+  if (isVersion2) {
+    post = {
+      schemaVersion: BLOG_POST_SCHEMA_VERSION_2,
+      ...fields,
+      author: { ...BLOG_AUTHOR_V2 },
+      postType: readPostType(value.postType, "root.postType", issues),
+    };
+    if (Object.hasOwn(value, "cover")) post.cover = parseCover(value.cover, "root.cover", issues);
+  } else {
+    post = { schemaVersion: BLOG_POST_SCHEMA_VERSION, ...fields, author: { ...BLOG_AUTHOR } };
+  }
 
   if (issues.length > 0) throw new BlogPostValidationError(issues, source);
   return post;

@@ -7,7 +7,9 @@
 - Risk: R2 for the code, contract and agent-instruction changes. R3 for
   provider spend, publication and deployment, each approved immediately before
   it happens
-- Decision record: ADR-0027, written and accepted at the start of phase 18.6.
+- Decision record: [ADR-0027](../adr/0027-blog-showcase-front-page.md),
+  accepted on 20 October 2026 with the blog front page; phase 18.6 adds its
+  revision for the post-page journal.
   Related: [ADR-0026](../adr/0026-gemini-first-blog-agent-models.md) (the six
   agents and their models),
   [ADR-0010](../adr/0010-warm-portfolio-and-finite-motion.md) (finite motion),
@@ -49,7 +51,9 @@ Its elements:
 - on the index, an introduction with the owner's photo, one featured case
   study, and cards that give each post's result in one sentence.
 
-The mockup's other ideas are listed under [out of scope](#out-of-scope).
+The mockup's other ideas are listed under [out of scope](#out-of-scope). The
+index now ships with the Joseph Florendo redesign instead (see the owner
+decisions of 20 October 2026 below).
 
 ## Owner decisions, 30 September 2026
 
@@ -70,12 +74,30 @@ The mockup's other ideas are listed under [out of scope](#out-of-scope).
    plain SVG shapes.
 4. **Scope.** The two phases below.
 
+## Owner decisions, 20 October 2026
+
+The owner approved a showcase front page for the blog in the night look and
+placed it in the Joseph Florendo redesign (roadmap row 10), recorded in
+[ADR-0027](../adr/0027-blog-showcase-front-page.md). Its effect on this plan:
+
+1. **The front page leaves phase 18.6.** `/blog` is now one featured post, a row
+   of up to three cards and a list of older posts, each with a post type
+   label. Phase 18.6 keeps the journal design for **post pages**.
+2. **Post format version 2 is taken.** It adds the post type (case study,
+   build notes or explainer), an optional screenshot cover and the Joseph
+   Florendo byline. The journal's new blocks therefore become **post format
+   version 3**.
+3. **The live post's byline changed.** Its author and disclosure now say
+   "Joseph Florendo"; nothing else in it changed. This amends criterion 1's
+   "the live post's approved text is unchanged", for the name only.
+4. **Phase 18.7 gains two items** (criteria 9 and 10 below).
+
 ## Phases
 
 | Phase | Delivers | Risk |
 | --- | --- | --- |
-| **18.6** | The journal layout on `/blog`; post format version 2 with a post type, "In short", sidenotes, takeaways, a bar chart and a step-through diagram, all data only; version 1 posts unchanged; the agents unchanged | R2 code; R3 deployment |
-| **18.7** | The Writer, Reviewer and SEO Agent extended to the version 2 blocks; code checks for every chart number and every first-person sentence; capped live runs; one owner-approved post with a figure, published | R2 code and instructions; R3 spend and publication |
+| **18.6** | The journal layout on post pages (`/blog/[slug]`); post format version 3 with "In short", sidenotes, takeaways, a bar chart and a step-through diagram, all data only; version 1 and 2 posts unchanged; the agents unchanged | R2 code; R3 deployment |
+| **18.7** | The Writer, Reviewer and SEO Agent extended to the version 3 blocks; code checks for every chart number and every first-person sentence; the agents suggest a post type; published posts written as version 2 or later with the new byline; capped live runs; one owner-approved post with a figure, published | R2 code and instructions; R3 spend and publication |
 
 ## 18.6 acceptance criteria
 

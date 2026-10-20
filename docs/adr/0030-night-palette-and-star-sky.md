@@ -3,8 +3,10 @@
 - Status: Accepted for the preview — owner direction of 13 and 14 October 2026
   (design canvas option A, the star prototype, and the build spec). Revised
   for the About journey after the owner's preview review of 15 October 2026
-  (see "Revision, 15 October 2026"), and for the home sky's river after the
-  review of 20 October 2026 (see "Revision, 20 October 2026").
+  (see "Revision, 15 October 2026"), for the home sky's river after the
+  review of 20 October 2026 (see "Revision, 20 October 2026"), and for the
+  blog front page's sky the same day (see "Revision, 20 October 2026: the sky
+  on /blog").
 - Date: 2026-10-14
 - Owner: OJ Florendo
 - Risk: R2. Continuous WebGL canvases return to the public site under a
@@ -130,6 +132,17 @@ opened.
 No new origin, request, cookie or storage. Shaders are compiled from strings in
 the bundle; WebGL needs no CSP change and no `unsafe-eval`. A lost WebGL context
 stops a scene and leaves the page black.
+
+## Revision, 20 October 2026: the sky on /blog
+
+D3's "no other public page has a canvas" no longer holds for one page: the
+blog front page now carries the home page's star sky, by the owner's decision
+recorded in [ADR-0027](0027-blog-showcase-front-page.md) D9. It is the same
+canvas and the same budget (D4), unchanged: `StarSky` only gained two settings,
+the element the galaxy sits behind and the blocks the stars dim behind, whose
+defaults are the home page's. On `/blog` the galaxy sits behind the header and
+the cards dim the stars behind them. Post pages, case studies and every other
+public page still have no canvas, and the browser tests check both.
 
 ## Revision, 20 October 2026 (owner preview review, home sky)
 

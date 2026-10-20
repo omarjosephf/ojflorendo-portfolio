@@ -86,8 +86,13 @@ test.describe("Homepage", () => {
     await expect(sky).toHaveAttribute("data-engine", "off");
   });
 
+  // ADR-0027: the blog front page shares the sky; post pages and case studies keep none.
   test("other public pages carry no star canvas", async ({ page }) => {
-    for (const path of ["/blog", "/projects/cited"]) {
+    await page.goto("/blog");
+    await page.waitForLoadState("load");
+    await expect(page.locator("canvas.jf-sky")).toHaveCount(1);
+    await expect(page.locator("canvas")).toHaveCount(1);
+    for (const path of ["/blog/evaluating-retrieval-systems-refusal-testing-and-quote-integrity", "/projects/cited"]) {
       await page.goto(path);
       await page.waitForLoadState("load");
       await expect(page.locator("canvas")).toHaveCount(0);
