@@ -1,59 +1,46 @@
 # Current state
 
-Updated 14 October 2026 (the Joseph Florendo redesign row added; earlier: phases 18.6 and 18.7 added, 19b moved next, Next.js security fix deployed). This file is what a fresh session should read first.
+Updated 21 October 2026 (the roadmap re-ordered by importance and urgency; earlier: the Joseph Florendo redesign row added, phases 18.6 and 18.7 added, 19b moved next, Next.js security fix deployed). This file is what a fresh session should read first.
 The session-start hook points at it by name. Keep it short and true; when it
 stops matching reality, correct it rather than adding to it.
 
 ## Roadmap
 
 **This is the only place project status and order are written.** Other
-documents link here and do not restate either. Checked on 28 September 2026
-against `origin/main` at `1e6417c` and the live systems listed under
-[how the roadmap was checked](#how-the-roadmap-was-checked). When a row stops
-matching reality, correct the row and its "Checked" cell.
+documents link here and do not restate either. Re-ordered on 21 October 2026 by
+owner request ("organise each phase by importance and urgency") and checked
+that day against `origin/main` at `ed1641d`, the open pull requests in both
+repositories, the code on this branch and the live home page. The live systems
+listed under [how the roadmap was checked](#how-the-roadmap-was-checked) were
+last checked on 28 September. When a row stops matching reality, correct the
+row and its "Checked" cell.
 
 ### Now
 
-- **Phase 0.1 is done**: this roadmap and the re-checked
-  [owner-action inventory](owner-actions.md) merged as `d113d31` (#107).
-- **Phase 19a is done**: the owner-only admin panel is live at
-  `https://ojfr.me/manage`, merged as `97ecb23` (#108) and smoke-tested from the
-  owner's phone on 28 September; evidence in
-  [ADR-0025](../adr/0025-unified-owner-admin-panel.md#verification).
-- **Phase 18.3 was dropped** on 29 September: the owner cancelled the provider
-  comparison before any run and chose Gemini per agent
-  ([ADR-0026](../adr/0026-gemini-first-blog-agent-models.md)).
-- **Phase 18.4 is done**: the first agent-written, owner-approved post is live
-  at `https://ojfr.me/blog` and the read-only Blog panel in `/manage` shows its
-  run. Merged as `5351e73` (#110) and deployed on 30 September; evidence in
-  [ADR-0026](../adr/0026-gemini-first-blog-agent-models.md#verification--phase-184-30-september-2026).
-- **Phases 18.6 and 18.7 were added** on 30 September by owner decision: the
-  owner-approved journal design for the blog, then the writing agents filling
-  in charts and step-through diagrams. They come straight after phase 15a;
-  scope, criteria and the owner's decisions are in
-  [the phase plan](../roadmaps/blog-journal-and-figures.md).
-- **Next phase: 19b**, the owner decisions in the admin panel's Blog section.
-  The owner moved it ahead of phase 13a on 30 September, with the scope
-  [ADR-0025](../adr/0025-unified-owner-admin-panel.md) approved: the panel
-  records decisions and starts no model call. 13a follows it.
-- **The Joseph Florendo redesign is being built as a preview** (row 10), by owner
-  decision on 14 October 2026. Its branch is pushed for the private preview
-  but nothing is live, and the launch waits
-  for phase 15a. This file has not otherwise been re-checked since 1 October.
-- **The only date gate is 1 October 2026 UTC**, and it applies to phase 15a
-  alone.
-- **Instructor deadline: Wednesday 30 September 2026**, for packages 18 and 19
-  and for a new SaaS tool project the instructor set to start on 28 September.
-  The SaaS project is built outside this repository and has no row until its
-  scope is known.
-- **One phase at a time, in the order below.** A Ready phase that is not first
-  waits its turn. A date gate fixes when a phase may start; it is not
-  permission to run two phases at once.
+- **The owner's next step is phase 15a**, the answer captures. Its date gate
+  passed on 1 October and no capture has run. It blocks the launch, E.V's
+  sign-off, E.V's knowledge update and blog phase 18.6. Phase 15-prep's free
+  checks come first.
+- **Work that changes nothing live continues meanwhile** on the redesign
+  branch (rows 8 and 9), by owner decision on 21 October 2026: the owner asked
+  for this list to be worked through autonomously. Pushing, merging,
+  deploying, paid runs, accounts and console changes stay owner steps.
+- **The live site is still the September version.** `ojfr.me` serves
+  `origin/main` (`ed1641d`) under the old name; the Joseph Florendo redesign
+  (row 8) launches only after phase 15a.
+- **Blog billing changed by owner decision on 21 October 2026**: the blog
+  agents move to Claude, paid from the owner's Claude plan's monthly API credit
+  (row 15). The approved spec is kept outside Git. The OpenRouter switch
+  (#120) is built but not merged, and that spec decides whether it closes.
+- **Done since 28 September:** phases 0.1, 19a and 18.4; 18.3 was dropped.
+  See rows 1–4.
+- **Instructor-set work** keeps its rows here; the SaaS project the instructor
+  set on 28 September (Learn Your Way) is built outside this repository.
 
 ### How to read the table
 
 **Status words, and only these.** **Done** means merged to `main` or verified
-live, never "complete locally". **Active** is the one phase in progress.
+live, never "complete locally". **Active** is the phase in progress.
 **Ready** means nothing blocks it but its turn. **Blocked** names the blocker.
 **Not started**, **Deferred** (by decision, with what would reopen it) and
 **Dropped** complete the set.
@@ -65,7 +52,8 @@ an order; the order is this table. **Package numbers** are those of
 [the 18-package tracker](../roadmaps/ev-management-progress.md), which keeps
 each package's acceptance evidence; its status column stopped being maintained
 on 28 September 2026. **Tracks** are handbook §48's. **R-tiers** are
-handbook §11's.
+handbook §11's. Rows without a package number are owner decisions or launch
+work, not tracker packages.
 
 ### Phase sequence
 
@@ -74,22 +62,30 @@ handbook §11's.
 | 1 | **0.1** Master roadmap | This section; the owner-action inventory re-checked and on `main` | Governance | **Done** | The pull request carrying both is merged | 28 Sep: #107 merged as `d113d31` on `origin/main` |
 | 2 | **19a** Online owner-only admin panel | The admin switch separated from visitor chat storage; a new production Supabase project with owner sign-in, CAPTCHA and MFA; the E.V section (live views and read-only RAG configuration) and a static read-only Blog section, deployed | 19 (instructor-set; not a release gate) | **Done** | The plan's six acceptance criteria are met from a second device and ADR-0025's Verification block is filled | 28 Sep: merged `97ecb23` (#108); production deployment READY; owner sign-in, CAPTCHA, TOTP and sign-out verified from a phone against `ev-management-production`; visitor routes and alias 404 |
 | 3 | **18.3** Blog provider bake-off | Cancelled before any run | D / 18 | **Dropped** by owner decision on 29 September 2026: two of the three frozen candidates were superseded and the owner chose Gemini, recorded in [ADR-0026](../adr/0026-gemini-first-blog-agent-models.md). Reopens only with a new ADR | — | 30 Sep: no ledger, credential access, provider request or spend ever occurred; the harness stays outside `main` |
-| 4 | **18.4** First generated blog post and read-only Blog panel | Phases 18.1 and 18.2 on `main`; a live Gemini runner for the six ADR-0026 agents, run by the owner; one post published only after owner approval; a read-only Blog panel in `/manage` showing the agents, ideas, checks, cost and lessons of real runs | D / 18 and 19 | **Done** | One owner-approved post is live on `/blog` and the Blog panel shows its run | 30 Sep: #110 merged as `5351e73` at 12:09Z; production deployment `6758982335` success; live `/blog` and the article return 200 with the disclosure, `/blog/inside-ev-rag` 404, sitemap lists the post, `/manage` redirects to sign-in. The Blog section behind sign-in was checked by CI management e2e, not yet live by the owner. Spend US$0.67 of US$5 |
-| 5 | **19b** Blog decisions in the admin panel | Recorded owner decisions in the Blog section of `/manage`: select a brief, approve, request a revision, reject and accept a lesson, each tied to the review bundle's SHA-256 digest; an owner audit log; a pause switch. No model call starts from the panel, and an approval never publishes, merges or deploys ([ADR-0025](../adr/0025-unified-owner-admin-panel.md)) | 19 | Ready. **Moved ahead of phase 13a by owner decision on 30 September 2026**, with the scope ADR-0025 approved. Its own plan is approved before building | The approved 19b plan's acceptance criteria are met on the live panel and the full gate passes | — |
-| 6 | **13a** Owner sitting one | Items 1–3: deployed backend event call, assistant smoke check, contact delivery smoke check; plus a read of Vercel's Spend Management setting, unchecked since the team moved to Pro | C / 13 and 16 | Ready | All three results and the Spend Management setting recorded in the inventory | 28 Sep: Fly `/health` ok, corpus `7bddb04dedc7`, `answers_remaining_today` 10; production on `1e6417c` |
-| 7 | **13d** Managed recovery rehearsal | Item 6: clone, lock down, measure, delete, all in one working session; plus, in the same dashboard, turning on leaked-password protection (Pro only) and confirming the Spend Cap is on and Point-in-Time Recovery off | C / 13 | Ready. **Moved before the captures by owner decision on 28 September**, because Supabase Pro is now being paid for | ADR-0022 and ADR-0023 Verification blocks complete; the organization lists its two permanent projects again (staging and `ev-management-production`, per ADR-0025); the leaked-password advisor finding is gone | 28 Sep: organization plan `pro`; one project; six extensions installed, `pg_cron` the only external-operation one |
-| 8 | **15-prep** Capture preparation | Restage `deploy/oj-assistant` from the pin, run the pin gate, diff the staged corpus and system prompt against the pinned revision, and re-check the capture script's paths after the 28 September folder move | C / 15 | Ready. Must finish before phase 15a, and needs no owner | Every check passes and is recorded | Not yet checked |
-| 9 | **15a** Answer captures | Items 7 then 8, one October sitting, never the same session as phase 13d | C / 15 | **Blocked by date: 1 October 2026 UTC** | Both captures complete and the release manifest validates | 28 Sep: `allowance-225` reads 225 attempts with 0 reservations; service ledger holds 36 reservations, all September; `integrity_check` ok on all three ledgers |
-| 10 | **JF** Joseph Florendo redesign | The public identity becomes Joseph Florendo, AI Automation Developer ([ADR-0029](../adr/0029-public-identity-joseph-florendo.md), handbook v1.3.0); a new home page over a dim, moving star background ([ADR-0030](../adr/0030-night-palette-and-star-sky.md)); a cinematic About journey; the blog showcase front page, with post types, star pictures, post format version 2 and the live post's new byline ([ADR-0027](../adr/0027-blog-showcase-front-page.md), added by owner decision on 20 October 2026); previewed on a private Vercel link | Brand (owner decision, not a package) | **Active: preview build only**, by owner decision on 14 October 2026. Launch is blocked by phase 15a, so the live site does not change during the captures. E.V's corpus is unchanged until a corpus update after 15a | The owner approves the preview on laptop and phone, the full gate passes, and the launch pull request merges after 15a | 20 Oct: `origin/main` at `ed1641d`; branch `feat/brand-redesign-joseph-florendo` pushed at `b4b5b37`, no pull request; the blog front page is built on it, not yet committed |
-| 11 | **18.6** Blog journal design and figure components | The owner-approved journal layout on post pages (`/blog/[slug]`); post format version 3 with "In short", sidenotes, takeaways, a bar chart and a step-through diagram, all data only; version 1 and 2 posts unchanged; the agents unchanged; a revision of ADR-0027. The front page moved to row 10 on 20 October 2026 | D / 18 | Ready. Plan approved by the owner on 30 September 2026 and narrowed on 20 October 2026 ([phase plan](../roadmaps/blog-journal-and-figures.md)); placed after phase 15a so the live site does not change during the captures | The live post renders in the new layout in production, and a test post using every new block passes the full gate, including accessibility, reduced motion and Lighthouse mobile 90+ | 20 Oct: scope changed in the JF branch, not yet on `main` |
-| 12 | **18.7** Agent-filled figures | The Writer, Reviewer and SEO Agent extended to the version 3 blocks; code checks that every chart number appears in its cited claim; first person only as exact quotes from owner-written first-person notes; the agents suggest a post type for the owner to approve; after #120 merges, `promoteRun` writes post format version 2 with the Joseph Florendo byline and the agents' name strings change; capped live runs | D / 18 | Blocked by phase 18.6. The owner's first-person notes can be written now | One agent-written post with at least one verified figure is approved by the owner and live on `/blog`, and ADR-0027's Verification block is filled | 20 Oct: two items added in the JF branch, not yet on `main` |
-| 13 | **15b** Independent labelling | Item 9 | C / 15 | Blocked by phase 15a. Recruiting labellers can start now | Labels scored with `review --review` | — |
-| 14 | **13b** CAPTCHA enforcement | Item 4 | C / 13 | Ready | Enforcement on, and owner sign-in confirmed working afterwards | — |
-| 15 | **13c** Off-site encrypted backups | Item 5 | C / 13 | Ready. The `ev-backups` GitHub environment does not exist yet, and the R2 bucket is unconfirmed | Synthetic backup verified, then `EV_BACKUP_ENABLED=true` | 28 Sep: no repository variables; environments `Preview` and `Production` only; last three scheduled runs `skipped`; the Cloudflare connector lists zero R2 buckets, from an account not confirmed to be the right one |
-| 16 | **16** Public release | Items 10–12 | C / 16 | Blocked by phases 13a–13d, 15-prep, 15a and 15b | `release-approval` passed on the release pull request and one smoke pass covers everything | — |
-| 17 | **0.2** Workspace fold-in | The archived workspace documents folded into the repository or discarded; the history below moved out of this file so it is short again | Governance | Not started. Agreed on 16 September to wait until both captures are saved | Nothing outside Git can be mistaken for current state | — |
-| 18 | **18.5** Scheduled operation and governed content-only automation | — | D / 18 | Not started | — | — |
-| 19 | **19c** Live runs in the admin panel | Live runs shown in the Blog section | 19 | Not started. The read-only Blog panel from phase 18.4 already shows real runs; 19c's own plan decides what remains | — | — |
+| 4 | **18.4** First generated blog post and read-only Blog panel | Phases 18.1 and 18.2 on `main`; a live Gemini runner for the six ADR-0026 agents, run by the owner; one post published only after owner approval; a read-only Blog panel in `/manage` showing the agents, ideas, checks, cost and lessons of real runs | D / 18 and 19 | **Done** | One owner-approved post is live on `/blog` and the Blog panel shows its run | 30 Sep: #110 merged as `5351e73` at 12:09Z; production deployment `6758982335` success; live `/blog` and the article return 200 with the disclosure, `/blog/inside-ev-rag` 404, sitemap lists the post, `/manage` redirects to sign-in. Spend US$0.67 of US$5 |
+| 5 | **15-prep** Capture preparation | Restage `deploy/oj-assistant` from the pin, run the pin gate, diff the staged corpus and system prompt against the pinned revision, and re-check the capture script's paths after the 28 September folder move | C / 15 | Ready, and first. Needs no owner, but it writes inside `deploy/oj-assistant`, so it runs in the capture sitting's own session | Every check passes and is recorded | 21 Oct: not yet run |
+| 6 | **15a** Answer captures | Items 7 then 8, one sitting, never the same session as phase 13d. The redesign's corpus edit (row 8) stays off `main` until both are saved | C / 15 | Ready. The 1 October 2026 date gate has passed | Both captures complete and the release manifest validates | 21 Oct: no capture recorded in either repository; `omarjosephf/cited` has no commit after `360e8fa` (15 Sep); 20 Oct reading: `allowance-225` at 0 reservations. Ceiling US$10.44; ~US$0.0024 per answer measured |
+| 7 | **DEP** Dependency audit fix | `sharp` and `source-map-js` patched so the `verify` job's audit stage passes; #119 | Security (not a package) | Ready. Every release pull request fails `verify` until it merges | #119, or its replacement, merged with `verify` green on its head | 21 Oct: #119 open; the audit fails on `main` and on the redesign branch |
+| 8 | **JF** Joseph Florendo redesign | The public identity becomes Joseph Florendo, AI Automation Developer ([ADR-0029](../adr/0029-public-identity-joseph-florendo.md), handbook v1.3.0); the home page over a dim, moving star sky ([ADR-0030](../adr/0030-night-palette-and-star-sky.md)); the About journey; the blog showcase front page ([ADR-0027](../adr/0027-blog-showcase-front-page.md)); builder services quoted per project ([ADR-0031](../adr/0031-build-check-services-and-prices.md), replaced by [ADR-0032](../adr/0032-builder-services-quoted-per-project.md)); the project enquiry form and call-booking link ([ADR-0033](../adr/0033-project-enquiry-form-and-call-booking-link.md)) | Brand (owner decision, not a package) | **Active: preview build only**, by owner decision on 14 October 2026. Launch is row 13 | The owner approves the preview on laptop and phone, the full gate passes, and the launch pull request merges after 15a | 21 Oct: branch `feat/brand-redesign-joseph-florendo` 12 commits ahead of `origin/main`; `origin` holds it at `90b511a`, and `81daba5` and `dda66f4` are local only; no pull request. `3cc6cb5` (owner-approved 20 Oct) edited six `content/assistant/*.md` files, so row 10 is needed before launch |
+| 9 | **JF-2** Launch gaps | A privacy page covering the enquiry form, E.V and analytics; Vercel Web Analytics (owner-approved 20 Oct); a "Your questions" section; the 404 page in the new look and an error page; the CV under the new name; the call-booking link once the owner sends it | Brand (inside row 8) | Active, on the row 8 branch | Each item is on the branch with the full gate green, and the owner has approved the privacy wording | 21 Oct: none exists in `src/app`; `site.bookingUrl` is `null`; `site.cvPath` is the old-name PDF |
+| 10 | **EV-C** E.V knowledge and name update | E.V's knowledge files and system prompt use the Joseph Florendo name; the retrieval evidence and management snapshot rebuilt with the `cited` tools; the free retrieval evaluation re-run; the back end redeployed | C (not a package) | Blocked by phase 15a | E.V names Joseph Florendo in production and the corpus check passes on the launch pull request | 21 Oct: corpus checksum on the branch differs from the pinned `7bddb04`; `system-prompt.md` and the deployed corpus still say "OJ Florendo Rayatchi" |
+| 11 | **SEC** Debugging and security test | A full pass over the redesign before launch: the enquiry route, `/manage` sign-in, E.V's limits (the back end may apply one 10-per-minute limit to all visitors, because visitor addresses are not forwarded: unverified), headers and CSP, the browser tests that fail under machine load | Security (owner order, 21 Oct) | Ready, after row 9 | Every finding is fixed or recorded with its risk, and the full gate passes | — |
+| 12 | **SEO** Search step 2 and domain move | Service pages and search wording for the ADR-0032 services; `josephflorendo.com` becomes the main address at launch, with `NEXT_PUBLIC_SITE_URL`, `EV_MANAGEMENT_ORIGIN`, Supabase sign-in addresses and the Resend sender moved with it | Brand (owner decision) | Ready. Paused on 21 October until the services were settled; ADR-0032 settled them the same day, so the owner confirms the restart | The new domain serves the site, `ojfr.me` forwards to it, and `/manage` sign-in and contact email work on it | 21 Oct: step 1 done (Search Console and Bing); step 2 uncommitted in another worktree |
+| 13 | **13a** Owner sitting one, and the **launch** | Items 1–3 (deployed backend event call, assistant smoke check, contact delivery with the new form's fields), the Vercel Spend Management read, then items 10–12 for the redesign: preview review, one full release smoke pass, approval | C / 13 and 16 | Blocked by rows 6, 7, 9, 10, 11 and 12 | `release-approval` passed on the launch pull request and one smoke pass covers everything | The September launch skipped the release smoke pass and the contact-delivery test; this row does not |
+| 14 | **ET** Enquiry triage automation | Each enquiry saved, acknowledged, a reply drafted, a phone alert sent, and the reply approved in `/manage`; reverses ADR-0001 item 11 and handbook §24's "no database storage", so R2 with R3 owner steps and a handbook amendment | Business (owner decision, 21 Oct) | Ready after row 13. Spec approved by the owner on 21 October 2026, kept outside Git | The owner receives and answers a test enquiry end to end from `/manage` | — |
+| 15 | **Blog A** Blog agents on Claude | The six agents moved from Gemini to Claude, paid from the owner's Claude plan's monthly API credit; the old name removed from the published-post disclosure; ADR-0026 revised | D / 18 | Ready after row 14. Spec approved by the owner on 21 October 2026, kept outside Git; its first phase is the owner's own Console setup. Decides whether #120 (OpenRouter, built, unmerged) closes | One owner-approved post written by the Claude agents is live | 21 Oct: #120 open, US$1.37 of US$2 spent on its branch |
+| 16 | **19b** Blog decisions in the admin panel, slim | Approve, reject, a pause switch and an owner audit log in the Blog section of `/manage`, and `promote` refusing a run the owner has not approved. No model call starts from the panel, and an approval never publishes, merges or deploys ([ADR-0025](../adr/0025-unified-owner-admin-panel.md)). Revise, panel briefs and lessons were cut on 13 October | 19 | Ready after row 15 | Its plan's checklist passes on the live panel and the full gate passes | 21 Oct: no code; its plan and ADR-0028 draft are uncommitted outside this checkout |
+| 17 | **15b** Independent labelling | Item 9 | C / 15 | Blocked by phase 15a. Recruiting labellers can start now | Labels scored with `review --review` | — |
+| 18 | **16** E.V sign-off | ADR-0006's graduation evidence: the third evaluation run and the soak, so the removed maturity label matches the evidence | C / 16 | Blocked by phases 15a and 15b | ADR-0006's criteria met and recorded | The label was removed on 10 September before the criteria were met |
+| 19 | **13b** CAPTCHA and E.V protection | Item 4; plus alerting beyond Fly's `/health`, and a recorded spend cap on the fallback provider's account | C / 13 | Ready | Enforcement on and owner sign-in confirmed afterwards; an alert reaches the owner in a test | — |
+| 20 | **18.6** Blog journal design and figure components | The owner-approved journal layout on post pages; post format version 3 with "In short", sidenotes, takeaways, a bar chart and a step-through diagram, all data only; version 1 and 2 posts unchanged ([phase plan](../roadmaps/blog-journal-and-figures.md)) | D / 18 | Blocked by phase 15a, so the live site does not change during the captures | The live post renders in the new layout in production, and a test post using every new block passes the full gate, including accessibility, reduced motion and Lighthouse mobile 90+ | 20 Oct: the front page moved to row 8 |
+| 21 | **18.7** Agent-filled figures | The writing agents extended to the version 3 blocks; code checks that every chart number appears in its cited claim; first person only as exact quotes from owner-written notes | D / 18 | Blocked by phase 18.6. The owner's first-person notes can be written now | One agent-written post with at least one verified figure is approved by the owner and live on `/blog` | — |
+| 22 | **13c** Off-site encrypted backups | Item 5 | C / 13 | Ready. Moved after the launch on 21 October: production stores no visitor chats yet | Synthetic backup verified, then `EV_BACKUP_ENABLED=true` | 28 Sep: the `ev-backups` environment does not exist; the last three scheduled runs `skipped` |
+| 23 | **13d** Managed recovery rehearsal | Item 6, plus leaked-password protection and the Spend Cap and Point-in-Time Recovery checks | C / 13 | Ready. Moved after the launch on 21 October; Supabase Pro is paid for meanwhile | ADR-0022 and ADR-0023 Verification blocks complete | 28 Sep: organization plan `pro` |
+| 24 | **18.5** Scheduled operation | Reviewer calibration against the owner's judgement first (every passing draft scores 100 today), then scheduled runs, failure alerts and a larger source pool | D / 18 | Not started | — | — |
+| 25 | **BR** Blog reach | An RSS feed, tags, drafts for LinkedIn and X, and a newsletter (Track E) | D (not a package) | Not started. Needs its own spec | — | — |
+| 26 | **0.2** Workspace fold-in | The archived workspace documents folded into the repository or discarded; the history below moved out of this file | Governance | Not started. Waits until both captures are saved | Nothing outside Git can be mistaken for current state | — |
+| 27 | **19c** Live runs in the admin panel | Live runs shown in the Blog section | 19 | Not started | — | — |
 
 ### Done
 

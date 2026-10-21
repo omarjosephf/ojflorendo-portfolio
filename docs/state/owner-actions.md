@@ -97,6 +97,7 @@ item *could* start; [the roadmap](CURRENT.md#roadmap) says when it *will*.
 | 10 | [Owner preview review](#10-owner-preview-review) | R1 | Yes | none | after 9 |
 | 11 | [Release smoke pass](#11-release-smoke-pass) | R1 | Partly | none | after final deploy |
 | 12 | [Final publication approval](#12-final-publication-approval) | **R3** | Yes, by rollback | none | last |
+| 13 | [Call-booking account](#13-call-booking-account) | R1 | Yes | none on the free plan | now |
 
 Items 1–3 are one sitting. Item 4 is one sitting. Item 5 is one sitting and
 should not share it. Item 6 is one working session, start to finish, including
@@ -581,6 +582,20 @@ Auto-fix off, because the Auto-fix switch also re-enables auto-merge.
   [the rollback runbook](../runbooks/rollback.md). **Cost:** none.
 - **Unblocks:** package 16, and the release.
 - **Depends on:** everything above.
+
+### 13. Call-booking account
+
+Added 21 October 2026 from
+[ADR-0033](../adr/0033-project-enquiry-form-and-call-booking-link.md). The
+owner creates a Cal.com account with a 20–30-minute call type and sends the
+public booking link. It goes into `site.bookingUrl` in `src/data/site.ts`,
+which is `null` until then and hides every booking button. Creating the
+account is the owner's step; no session does it.
+
+- **R-tier: R1.** **Reversible:** yes, the link can be removed again.
+  **Cost:** none on the free plan.
+- **Unblocks:** the booking buttons in row 9 of
+  [the roadmap](CURRENT.md#roadmap). **Depends on:** nothing.
 
 ---
 
