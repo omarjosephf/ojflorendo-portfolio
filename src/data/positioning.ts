@@ -210,14 +210,17 @@ export const positioning = {
     body: story.short,
     link: "Read the full story",
   },
+  /**
+   * The contact section (ADR-0033). No reply-time promise until the enquiry
+   * triage automation is live; the call length matches "How it works".
+   */
   contact: {
-    heading: "What did you build?",
+    heading: "Tell me what you want to build",
     supportingCopy:
-      "Tell me what your app does, which tools you built it with and when you want to launch. I'll tell you whether a build check fits and what it would cover.",
-    reassurance:
-      "You don't need a technical brief. A rough description and a link are enough to start.",
-    secondary:
-      "Already launched, and want to automate the busywork? Describe the task you repeat and what a finished job looks like.",
+      "Describe the task or the idea. I'll reply by email, and we can talk it through on a free 30-minute call before I send a written quote.",
+    reassurance: "No technical brief needed. A few lines is enough.",
+    bookingTitle: "Rather talk first?",
+    bookingAction: "Book a free 30-minute call",
     asideCopy:
       "You can send the same details by email. I confirm the scope and price in writing before any work starts.",
   },

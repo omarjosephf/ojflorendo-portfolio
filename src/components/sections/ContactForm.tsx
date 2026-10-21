@@ -1,24 +1,40 @@
 "use client";
 
 import { useId, useState, type FormEvent, type ReactNode } from "react";
-import { CheckCircle2, Loader2, Send } from "lucide-react";
+import { CalendarDays, CheckCircle2, Loader2, Send } from "lucide-react";
 import {
+  BUDGET_RANGES,
+  COMPANY_SIZES,
   ENQUIRY_TYPES,
+  IMPROVEMENT_AREAS,
   LIMITS,
   validateContact,
+  type BudgetRange,
+  type CompanySize,
   type EnquiryType,
   type FieldErrors,
+  type ImprovementArea,
 } from "@/lib/contact/schema";
 import { TurnstileWidget } from "@/components/sections/TurnstileWidget";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
+/** The free-call link (ADR-0033). Absent until the owner adds it to site config. */
+export interface BookingLink {
+  href: string;
+  label: string;
+}
+
 interface FormValues {
   name: string;
   email: string;
+  role: string;
   company: string;
+  companyUrl: string;
+  companySize: CompanySize | "";
   enquiryType: EnquiryType | "";
-  subject: string;
+  areas: ImprovementArea[];
+  budget: BudgetRange | "";
   message: string;
   consent: boolean;
   website: string; // honeypot — always empty for real users
@@ -27,9 +43,13 @@ interface FormValues {
 const EMPTY: FormValues = {
   name: "",
   email: "",
+  role: "",
   company: "",
+  companyUrl: "",
+  companySize: "",
   enquiryType: "",
-  subject: "",
+  areas: [],
+  budget: "",
   message: "",
   consent: false,
   website: "",
@@ -38,14 +58,21 @@ const EMPTY: FormValues = {
 const FIELD_ORDER: (keyof FieldErrors)[] = [
   "name",
   "email",
+  "role",
   "company",
+  "companyUrl",
+  "companySize",
   "enquiryType",
-  "subject",
+  "areas",
+  "budget",
   "message",
   "consent",
 ];
 
-export function ContactForm({ nonce }: { nonce?: string } = {}) {
+export function ContactForm({
+  nonce,
+  booking,
+}: { nonce?: string; booking?: BookingLink } = {}) {
   const uid = useId();
   const [values, setValues] = useState<FormValues>(EMPTY);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -79,10 +106,32 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
   }
 
   const fid = (name: string) => `${uid}-${name}`;
+  // Each option in a group has its own id; an error on the group focuses the first.
+  const optionId = (group: string, value: string) => `${fid(group)}-${value}`;
+  const focusTarget = (field: keyof FieldErrors) =>
+    field === "enquiryType"
+      ? optionId("enquiryType", ENQUIRY_TYPES[0].value)
+      : field === "areas"
+        ? optionId("areas", IMPROVEMENT_AREAS[0].value)
+        : fid(field);
+
+  function focusFirstError(fieldErrors: FieldErrors) {
+    const first = FIELD_ORDER.find((f) => fieldErrors[f]);
+    if (first) document.getElementById(focusTarget(first))?.focus();
+  }
 
   function update<K extends keyof FormValues>(key: K, value: FormValues[K]) {
     setValues((v) => ({ ...v, [key]: value }));
     if (key in errors) setErrors((e) => ({ ...e, [key]: undefined }));
+  }
+
+  function toggleArea(area: ImprovementArea, checked: boolean) {
+    update(
+      "areas",
+      checked
+        ? [...values.areas, area]
+        : values.areas.filter((a) => a !== area),
+    );
   }
 
   async function onSubmit(e: FormEvent) {
@@ -93,8 +142,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
     if (!result.ok) {
       setErrors(result.errors);
       setStatus("idle");
-      const first = FIELD_ORDER.find((f) => result.errors[f]);
-      if (first) document.getElementById(fid(first))?.focus();
+      focusFirstError(result.errors);
       return;
     }
 
@@ -130,8 +178,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
       if (res.status === 422 && data.fieldErrors) {
         setErrors(data.fieldErrors);
         setStatus("idle");
-        const first = FIELD_ORDER.find((f) => data.fieldErrors?.[f]);
-        if (first) document.getElementById(fid(first))?.focus();
+        focusFirstError(data.fieldErrors);
         return;
       }
       setServerError(
@@ -157,22 +204,23 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
           <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
         </span>
         <div>
-          <p className="font-heading text-xl font-semibold text-ink">
-            Thanks for reaching out
-          </p>
+          <p className="font-heading text-xl font-semibold text-ink">Thanks.</p>
           <p className="mt-2 text-sm text-muted">
             {delivered
-              ? "Your message has been sent — I'll get back to you soon."
+              ? "I'll read it and reply by email."
               : "Your message passed validation. Email delivery isn't configured in this environment, so nothing was actually sent yet. You can reach me directly using the email button."}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setStatus("idle")}
-          className="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent/60"
-        >
-          Send another enquiry
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          {booking ? <BookingButton booking={booking} /> : null}
+          <button
+            type="button"
+            onClick={() => setStatus("idle")}
+            className="rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent/60"
+          >
+            Send another enquiry
+          </button>
+        </div>
       </div>
     );
   }
@@ -180,12 +228,18 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
   const submitting = status === "submitting";
   const inputCls =
     "w-full rounded-xl border border-line bg-surface-2/60 px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/70 focus:border-accent/60 focus:outline-none";
+  const choiceCls =
+    "flex min-h-11 cursor-pointer items-center gap-2.5 rounded-xl border border-line bg-surface-2/60 px-3.5 py-2 text-sm text-ink transition-colors hover:border-accent/60 has-[:checked]:border-accent has-[:checked]:bg-accent/10";
+  const describedBy = (field: keyof FieldErrors, ...extra: string[]) =>
+    [...extra, errors[field] ? `${fid(field)}-error` : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   return (
     <form onSubmit={onSubmit} noValidate className="glass rounded-2xl p-6 sm:p-8">
-      <p className="font-heading text-lg font-semibold text-ink">
-        Discuss a project
-      </p>
+      <h3 className="font-heading text-lg font-semibold text-ink">
+        Start a project
+      </h3>
       <p className="mt-1 text-sm text-muted">
         Fields marked <span className="text-accent">*</span> are required.
       </p>
@@ -199,128 +253,219 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
         </p>
       ) : null}
 
-      <div className="mt-6 grid gap-5 sm:grid-cols-2">
-        <Field
-          id={fid("name")}
-          label="Your name"
-          required
-          error={errors.name}
-        >
-          <input
-            id={fid("name")}
-            name="name"
-            type="text"
-            autoComplete="name"
-            maxLength={LIMITS.name}
-            required
-            aria-required="true"
-            aria-invalid={!!errors.name}
-            aria-describedby={errors.name ? `${fid("name")}-error` : undefined}
-            value={values.name}
-            onChange={(e) => update("name", e.target.value)}
-            className={inputCls}
-          />
-        </Field>
+      <Group legend="About you">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field id={fid("name")} label="Your name" required error={errors.name}>
+            <input
+              id={fid("name")}
+              name="name"
+              type="text"
+              autoComplete="name"
+              maxLength={LIMITS.name}
+              required
+              aria-required="true"
+              aria-invalid={!!errors.name}
+              aria-describedby={describedBy("name")}
+              value={values.name}
+              onChange={(e) => update("name", e.target.value)}
+              className={inputCls}
+            />
+          </Field>
 
-        <Field id={fid("email")} label="Email address" required error={errors.email}>
-          <input
-            id={fid("email")}
-            name="email"
-            type="email"
-            autoComplete="email"
-            maxLength={LIMITS.email}
-            required
-            aria-required="true"
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? `${fid("email")}-error` : undefined}
-            value={values.email}
-            onChange={(e) => update("email", e.target.value)}
-            className={inputCls}
-          />
-        </Field>
+          <Field id={fid("email")} label="Email address" required error={errors.email}>
+            <input
+              id={fid("email")}
+              name="email"
+              type="email"
+              autoComplete="email"
+              maxLength={LIMITS.email}
+              required
+              aria-required="true"
+              aria-invalid={!!errors.email}
+              aria-describedby={describedBy("email")}
+              value={values.email}
+              onChange={(e) => update("email", e.target.value)}
+              className={inputCls}
+            />
+          </Field>
 
-        <Field
-          id={fid("company")}
-          label="Business or organisation"
-          hint="Optional"
-          error={errors.company}
-        >
-          <input
+          <Field id={fid("role")} label="Your role" hint="Optional" error={errors.role}>
+            <input
+              id={fid("role")}
+              name="role"
+              type="text"
+              autoComplete="organization-title"
+              maxLength={LIMITS.role}
+              aria-invalid={!!errors.role}
+              aria-describedby={describedBy("role", `${fid("role")}-hint`)}
+              value={values.role}
+              onChange={(e) => update("role", e.target.value)}
+              className={inputCls}
+            />
+          </Field>
+        </div>
+      </Group>
+
+      <Group legend="Your business">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field
             id={fid("company")}
-            name="company"
-            type="text"
-            autoComplete="organization"
-            maxLength={LIMITS.company}
-            aria-invalid={!!errors.company}
-            aria-describedby={`${fid("company")}-hint${errors.company ? ` ${fid("company")}-error` : ""}`}
-            value={values.company}
-            onChange={(e) => update("company", e.target.value)}
-            className={inputCls}
-          />
-        </Field>
+            label="Company name"
+            hint="Optional"
+            error={errors.company}
+          >
+            <input
+              id={fid("company")}
+              name="company"
+              type="text"
+              autoComplete="organization"
+              maxLength={LIMITS.company}
+              aria-invalid={!!errors.company}
+              aria-describedby={describedBy("company", `${fid("company")}-hint`)}
+              value={values.company}
+              onChange={(e) => update("company", e.target.value)}
+              className={inputCls}
+            />
+          </Field>
 
-        <Field
+          <Field
+            id={fid("companyUrl")}
+            label="Company website"
+            hint="Optional"
+            error={errors.companyUrl}
+          >
+            <input
+              id={fid("companyUrl")}
+              name="companyUrl"
+              type="text"
+              inputMode="url"
+              autoComplete="url"
+              placeholder="example.com"
+              maxLength={LIMITS.companyUrl}
+              aria-invalid={!!errors.companyUrl}
+              aria-describedby={describedBy(
+                "companyUrl",
+                `${fid("companyUrl")}-hint`,
+              )}
+              value={values.companyUrl}
+              onChange={(e) => update("companyUrl", e.target.value)}
+              className={inputCls}
+            />
+          </Field>
+
+          <Field
+            id={fid("companySize")}
+            label="Company size"
+            hint="Optional"
+            error={errors.companySize}
+          >
+            <select
+              id={fid("companySize")}
+              name="companySize"
+              aria-invalid={!!errors.companySize}
+              aria-describedby={describedBy(
+                "companySize",
+                `${fid("companySize")}-hint`,
+              )}
+              value={values.companySize}
+              onChange={(e) =>
+                update("companySize", e.target.value as CompanySize | "")
+              }
+              className={`${inputCls} appearance-none`}
+            >
+              <option value="">Choose…</option>
+              {COMPANY_SIZES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+      </Group>
+
+      <Group legend="Your project">
+        <ChoiceGroup
           id={fid("enquiryType")}
-          label="Enquiry type"
+          legend="What do you need?"
+          radio
           required
           error={errors.enquiryType}
         >
-          <select
-            id={fid("enquiryType")}
-            name="enquiryType"
-            required
-            aria-required="true"
-            aria-invalid={!!errors.enquiryType}
-            aria-describedby={
-              errors.enquiryType ? `${fid("enquiryType")}-error` : undefined
-            }
-            value={values.enquiryType}
-            onChange={(e) =>
-              update("enquiryType", e.target.value as EnquiryType)
-            }
-            className={`${inputCls} appearance-none`}
-          >
-            <option value="" disabled>
-              Choose one…
-            </option>
+          <div className="grid gap-2.5 sm:grid-cols-2">
             {ENQUIRY_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
+              <label key={t.value} className={choiceCls}>
+                <input
+                  id={optionId("enquiryType", t.value)}
+                  type="radio"
+                  name="enquiryType"
+                  value={t.value}
+                  required
+                  checked={values.enquiryType === t.value}
+                  onChange={() => update("enquiryType", t.value)}
+                  className="h-4 w-4 shrink-0 accent-accent"
+                />
                 {t.label}
-              </option>
+              </label>
             ))}
-          </select>
-        </Field>
-      </div>
+          </div>
+        </ChoiceGroup>
 
-      <div className="mt-5">
-        <Field
-          id={fid("subject")}
-          label="Subject"
-          required
-          error={errors.subject}
+        <ChoiceGroup
+          id={fid("areas")}
+          legend="Areas to improve"
+          hint="Optional. Tick any."
+          error={errors.areas}
         >
-          <input
-            id={fid("subject")}
-            name="subject"
-            type="text"
-            maxLength={LIMITS.subject}
-            required
-            aria-required="true"
-            aria-invalid={!!errors.subject}
-            aria-describedby={
-              errors.subject ? `${fid("subject")}-error` : undefined
-            }
-            value={values.subject}
-            onChange={(e) => update("subject", e.target.value)}
-            className={inputCls}
-          />
-        </Field>
-      </div>
+          <div className="flex flex-wrap gap-2.5">
+            {IMPROVEMENT_AREAS.map((a) => (
+              <label key={a.value} className={choiceCls}>
+                <input
+                  id={optionId("areas", a.value)}
+                  type="checkbox"
+                  name="areas"
+                  value={a.value}
+                  aria-invalid={!!errors.areas}
+                  aria-describedby={describedBy("areas")}
+                  checked={values.areas.includes(a.value)}
+                  onChange={(e) => toggleArea(a.value, e.target.checked)}
+                  className="h-4 w-4 shrink-0 accent-accent"
+                />
+                {a.label}
+              </label>
+            ))}
+          </div>
+        </ChoiceGroup>
 
-      <div className="mt-5">
+        <div className="sm:max-w-[calc(50%-0.625rem)]">
+          <Field
+            id={fid("budget")}
+            label="Budget"
+            hint="Optional"
+            error={errors.budget}
+          >
+            <select
+              id={fid("budget")}
+              name="budget"
+              aria-invalid={!!errors.budget}
+              aria-describedby={describedBy("budget", `${fid("budget")}-hint`)}
+              value={values.budget}
+              onChange={(e) => update("budget", e.target.value as BudgetRange | "")}
+              className={`${inputCls} appearance-none`}
+            >
+              <option value="">Choose…</option>
+              {BUDGET_RANGES.map((b) => (
+                <option key={b.value} value={b.value}>
+                  {b.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
         <Field
           id={fid("message")}
-          label="Tell me about the project"
+          label="How can I help?"
           required
           error={errors.message}
           hint={`${values.message.length}/${LIMITS.message}`}
@@ -331,8 +476,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
             textarea alongside the character counter.
           */}
           <p id={`${fid("message")}-guide`} className="mb-1.5 text-xs leading-relaxed text-muted">
-            What does your app do, which tools did you build it with, and when do you want to launch?
-            A link helps. Or describe the task you&apos;d like automated.
+            The task you repeat, or the idea, and what &lsquo;done&rsquo; looks like.
           </p>
           <textarea
             id={fid("message")}
@@ -342,13 +486,17 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
             required
             aria-required="true"
             aria-invalid={!!errors.message}
-            aria-describedby={`${fid("message")}-guide ${fid("message")}-hint${errors.message ? ` ${fid("message")}-error` : ""}`}
+            aria-describedby={describedBy(
+              "message",
+              `${fid("message")}-guide`,
+              `${fid("message")}-hint`,
+            )}
             value={values.message}
             onChange={(e) => update("message", e.target.value)}
             className={`${inputCls} resize-y`}
           />
         </Field>
-      </div>
+      </Group>
 
       {/* Honeypot — hidden from users and assistive tech, catches naive bots. */}
       <div aria-hidden="true" className="sr-only">
@@ -364,7 +512,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
         />
       </div>
 
-      <div className="mt-5 flex items-start gap-3">
+      <div className="mt-6 flex items-start gap-3">
         <input
           id={fid("consent")}
           name="consent"
@@ -372,9 +520,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
           required
           aria-required="true"
           aria-invalid={!!errors.consent}
-          aria-describedby={
-            errors.consent ? `${fid("consent")}-error` : undefined
-          }
+          aria-describedby={describedBy("consent")}
           checked={values.consent}
           onChange={(e) => update("consent", e.target.checked)}
           className="mt-1 h-4 w-4 shrink-0 accent-accent"
@@ -418,7 +564,7 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
           ) : (
             <Send className="h-4 w-4" aria-hidden="true" />
           )}
-          {submitting ? "Sending…" : "Send project enquiry"}
+          {submitting ? "Sending…" : "Send enquiry"}
         </button>
         {showVerifyHint ? (
           <span id={`${uid}-verify-hint`} className="text-sm text-muted">
@@ -435,6 +581,94 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
         </span>
       </div>
     </form>
+  );
+}
+
+/** The booking link opens Cal.com in a new tab; nothing of it loads into the page. */
+export function BookingButton({ booking }: { booking: BookingLink }) {
+  return (
+    <a
+      href={booking.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${booking.label} (opens in a new tab)`}
+      className="jf-button"
+    >
+      <CalendarDays className="h-4 w-4" aria-hidden="true" />
+      {booking.label}
+    </a>
+  );
+}
+
+/** One of the form's three sections, announced by its legend. */
+function Group({ legend, children }: { legend: string; children: ReactNode }) {
+  return (
+    <fieldset className="mt-7 grid gap-5 border-t border-line pt-5">
+      <legend className="float-left mb-1 w-full text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+        {legend}
+      </legend>
+      {children}
+    </fieldset>
+  );
+}
+
+/**
+ * A set of radios or tick boxes, with its question as the legend. A radio set
+ * is a radiogroup, because ARIA puts its required and invalid states on the
+ * group rather than on each radio.
+ */
+function ChoiceGroup({
+  id,
+  legend,
+  radio,
+  required,
+  hint,
+  error,
+  children,
+}: {
+  id: string;
+  legend: string;
+  radio?: boolean;
+  required?: boolean;
+  hint?: string;
+  error?: string;
+  children: ReactNode;
+}) {
+  const describedBy =
+    [hint ? `${id}-hint` : null, error ? `${id}-error` : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+  return (
+    <fieldset
+      role={radio ? "radiogroup" : undefined}
+      aria-labelledby={`${id}-legend`}
+      aria-required={radio && required ? true : undefined}
+      aria-invalid={radio ? !!error : undefined}
+      aria-describedby={describedBy}
+    >
+      <legend className="mb-1.5 flex w-full items-baseline justify-between gap-2 text-sm font-medium text-ink">
+        <span id={`${id}-legend`}>
+          {legend}
+          {required ? (
+            <span className="text-accent" aria-hidden="true">
+              {" "}
+              *
+            </span>
+          ) : null}
+        </span>
+        {hint ? (
+          <span id={`${id}-hint`} className="text-xs font-normal text-muted">
+            {hint}
+          </span>
+        ) : null}
+      </legend>
+      {children}
+      {error ? (
+        <p id={`${id}-error`} className="mt-1 text-sm text-red-300">
+          {error}
+        </p>
+      ) : null}
+    </fieldset>
   );
 }
 

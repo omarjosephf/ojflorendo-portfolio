@@ -14,6 +14,10 @@ export const site: SiteConfig = {
   descriptor: "AI Automation Developer",
   location: "Windsor, Berkshire, United Kingdom",
   email: "ojflorendo.connect@gmail.com",
+  // The owner's Cal.com link for the free 30-minute call (ADR-0033). A plain
+  // link that opens in a new tab, so the CSP is unchanged. Null until the
+  // owner creates the account; every booking button stays hidden until then.
+  bookingUrl: null,
   about: [
     "I'm Joseph Florendo, an AI automation developer based in Windsor, Berkshire. I build automations, AI agents and assistants that take repetitive work off businesses, and I show how each one works.",
     "I have taught AI, Python and data courses to professional groups, and I'm in the final year of a BSc in Computing and IT with The Open University.",

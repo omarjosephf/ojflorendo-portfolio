@@ -26,8 +26,7 @@ const validBody = {
   name: "Jane Recruiter",
   email: "jane@example.com",
   company: "Acme",
-  enquiryType: "job",
-  subject: "Frontend role",
+  enquiryType: "automation",
   message: "We have an opening that fits your profile nicely.",
   consent: true,
 };
@@ -105,13 +104,45 @@ describe("POST /api/contact", () => {
 
   it("rejects missing / too-short fields with 422 and field errors", async () => {
     const res = await POST(
-      post("t-missing", { ...validBody, name: "", subject: "" }),
+      post("t-missing", { ...validBody, name: "", enquiryType: "" }),
     );
     expect(res.status).toBe(422);
     const json = await res.json();
     expect(json.ok).toBe(false);
     expect(json.fieldErrors.name).toBeDefined();
-    expect(json.fieldErrors.subject).toBeDefined();
+    expect(json.fieldErrors.enquiryType).toBeDefined();
+  });
+
+  it("accepts the full project enquiry in mock mode (ADR-0033)", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    const res = await POST(
+      post("t-full", {
+        ...validBody,
+        role: "Owner",
+        companyUrl: "acme.example",
+        companySize: "11-50",
+        areas: ["enquiries", "reports"],
+        budget: "not-sure",
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("refuses retired and unlisted choices server-side", async () => {
+    const res = await POST(
+      post("t-retired", {
+        ...validBody,
+        enquiryType: "job",
+        budget: "lots",
+        areas: ["admin", "anything"],
+      }),
+    );
+    expect(res.status).toBe(422);
+    const { fieldErrors } = await res.json();
+    expect(fieldErrors.enquiryType).toBeDefined();
+    expect(fieldErrors.budget).toBeDefined();
+    expect(fieldErrors.areas).toBeDefined();
   });
 
   it("rejects an invalid email server-side", async () => {

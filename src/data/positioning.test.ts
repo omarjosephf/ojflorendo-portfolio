@@ -71,10 +71,9 @@ describe("approved Track B positioning", () => {
   });
 
   it("offers building, not checks or fixes of other people's apps", () => {
-    // ADR-0032 retires the build check and the fixes offer (amending ADR-0031).
-    // The contact section is rewritten in its own step, so it is not yet held
-    // to this.
-    const content = flatten({ positioning: { ...positioning, contact: null }, site }).toLowerCase();
+    // ADR-0032 retires the build check and the fixes offer (amending ADR-0031);
+    // ADR-0033 removed the last mentions from the contact section.
+    const content = flatten({ positioning, site }).toLowerCase();
     for (const retired of ["build check", "fixes before launch", "get your app checked"]) {
       expect(content).not.toContain(retired);
     }
@@ -133,6 +132,24 @@ describe("approved Track B positioning", () => {
     }
     expect(positioning.services.intro).toContain("quote");
     expect(positioning.services.priceNote).toContain("not VAT-registered");
+  });
+
+  it("publishes no amounts outside the contact form's budget choices (ADR-0033)", async () => {
+    // ADR-0033 lets the budget bands show amounts, and nothing else.
+    const schema = await import("@/lib/contact/schema");
+    const { BUDGET_RANGES, ...rest } = schema;
+    expect(flatten(rest)).not.toMatch(/[£$€]\s?\d/);
+    expect(BUDGET_RANGES.some((band) => /£\d/.test(band.label))).toBe(true);
+  });
+
+  it("invites a free call in the contact section, with no reply-time promise", () => {
+    // No reply-time promise until the enquiry triage automation is live, and
+    // the call length must match "How it works".
+    const contact = flatten(positioning.contact).toLowerCase();
+    expect(contact).not.toMatch(/working day|within \d|reply within|hours?\b/);
+    expect(positioning.contact.bookingAction).toBe("Book a free 30-minute call");
+    expect(flatten(positioning)).toContain("free 30-minute call. Then I send a written quote");
+    expect(site.bookingUrl === null || site.bookingUrl.startsWith("https://")).toBe(true);
   });
 
   it("states that scope, timing and price are agreed individually", () => {

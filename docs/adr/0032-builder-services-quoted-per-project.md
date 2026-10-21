@@ -12,6 +12,8 @@
 - Amends: [ADR-0031](0031-build-check-services-and-prices.md) D1, D2 and D4
   (the hero), and the home share-card line in D5. D3's personal-data rule
   stands; D4's contact section is rewritten in its own step.
+- Amended by: [ADR-0033](0033-project-enquiry-form-and-call-booking-link.md)
+  D3, which lets the contact form's budget choices show amounts.
 
 ## Context
 

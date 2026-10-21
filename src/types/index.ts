@@ -122,6 +122,8 @@ export interface SiteConfig {
   descriptor: string;
   location: string;
   email: string;
+  /** Public link for booking a free call; null hides every booking button. */
+  bookingUrl: string | null;
   about: string[];
   cvPath: string | null;
   profileImage: string | null;

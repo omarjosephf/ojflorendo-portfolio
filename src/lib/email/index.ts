@@ -1,5 +1,11 @@
 import type { ContactInput } from "@/lib/contact/schema";
-import { ENQUIRY_TYPES } from "@/lib/contact/schema";
+import {
+  BUDGET_RANGES,
+  COMPANY_SIZES,
+  ENQUIRY_TYPES,
+  IMPROVEMENT_AREAS,
+  labelOf,
+} from "@/lib/contact/schema";
 
 /**
  * Server-only email delivery abstraction.
@@ -39,7 +45,15 @@ export interface EmailTransport {
 }
 
 function enquiryLabel(value: ContactInput["enquiryType"]): string {
-  return ENQUIRY_TYPES.find((t) => t.value === value)?.label ?? value;
+  return labelOf(ENQUIRY_TYPES, value);
+}
+
+/**
+ * The subject names the need and who is asking: the company when given,
+ * otherwise the enquirer. Both are single-line by validation (ADR-0033).
+ */
+function buildSubject(input: ContactInput): string {
+  return `[Portfolio] ${enquiryLabel(input.enquiryType)}: ${input.company ?? input.name}`;
 }
 
 /**
@@ -66,17 +80,26 @@ export function senderIdentity(from: string): string {
   return from.includes("<") ? from : `${SENDER_DISPLAY_NAME} <${from}>`;
 }
 
+/** Plain text only; the website is written out, never turned into a link. */
 function buildText(input: ContactInput): string {
   return [
-    `Enquiry type: ${enquiryLabel(input.enquiryType)}`,
+    `Needs: ${enquiryLabel(input.enquiryType)}`,
     `Name: ${input.name}`,
     `Email: ${input.email}`,
+    input.role ? `Role: ${input.role}` : null,
     input.company ? `Company: ${input.company}` : null,
-    `Subject: ${input.subject}`,
+    input.companyUrl ? `Website: ${input.companyUrl}` : null,
+    input.companySize
+      ? `Company size: ${labelOf(COMPANY_SIZES, input.companySize)}`
+      : null,
+    input.areas.length > 0
+      ? `Areas to improve: ${input.areas.map((a) => labelOf(IMPROVEMENT_AREAS, a)).join(", ")}`
+      : null,
+    input.budget ? `Budget: ${labelOf(BUDGET_RANGES, input.budget)}` : null,
     "",
     input.message,
   ]
-    .filter(Boolean)
+    .filter((part) => part !== null)
     .join("\n");
 }
 
@@ -118,7 +141,7 @@ function createResendTransport(
             from: senderIdentity(from),
             to: [to],
             reply_to: input.email,
-            subject: `[Portfolio] ${enquiryLabel(input.enquiryType)}: ${input.subject}`,
+            subject: buildSubject(input),
             text: buildText(input),
           }),
           signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
