@@ -26,6 +26,9 @@ const SITEVERIFY_URL =
 /** Upper bound on a verification attempt, so a hung provider cannot stall the route. */
 const TURNSTILE_TIMEOUT_MS = 10_000;
 
+/** Cloudflare's documented maximum token length. */
+export const TURNSTILE_TOKEN_MAX_LENGTH = 2048;
+
 export type TurnstileOutcome =
   /** No secret configured — the check is switched off entirely. */
   | "disabled"
@@ -95,6 +98,12 @@ export async function verifyTurnstile(
   // signal, not an infrastructure problem, so it is refused.
   if (typeof token !== "string" || token === "") {
     return { ok: false, outcome: "missing-token" };
+  }
+  // Cloudflare documents 2,048 characters as the most a token can be. A longer
+  // one is not from the widget, and sending it on could draw an error reply
+  // that the fail-open policy would let through.
+  if (token.length > TURNSTILE_TOKEN_MAX_LENGTH) {
+    return { ok: false, outcome: "rejected" };
   }
 
   try {

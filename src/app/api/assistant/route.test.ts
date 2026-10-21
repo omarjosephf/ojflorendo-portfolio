@@ -725,3 +725,29 @@ describe("POST /api/assistant — privacy of logs", () => {
     expect(JSON.stringify(fetchMock.mock.calls[0])).not.toContain("198.51.100.7");
   });
 });
+
+describe("POST /api/assistant — only this site's own panel", () => {
+  beforeEach(() => {
+    for (const [key, value] of Object.entries(CONFIG)) vi.stubEnv(key, value);
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("refuses a text/plain question before any backend call", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const res = await POST(request(JSON.stringify({ question: "What does Cited do?" }), { "Content-Type": "text/plain" }));
+    expect(res.status).toBe(415);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("refuses a question the browser marks as cross-site", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const res = await POST(request({ question: "What does Cited do?" }, { "Sec-Fetch-Site": "cross-site" }));
+    expect(res.status).toBe(415);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+});

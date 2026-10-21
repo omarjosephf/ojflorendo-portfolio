@@ -178,8 +178,13 @@ export function getEmailTransport(): EmailTransport {
     from ? null : "CONTACT_FROM_EMAIL",
   ].filter((name): name is string => name !== null);
 
-  // All three absent is the expected local/dev default, not a misconfiguration.
-  if (missing.length < 3) {
+  // All three absent is the expected local/dev default, not a misconfiguration,
+  // except on Vercel's production deployment, where every enquiry would be lost.
+  if (missing.length === 3 && process.env.VERCEL_ENV === "production") {
+    console.error(
+      "[contact] email delivery is NOT configured in production: RESEND_API_KEY, CONTACT_TO_EMAIL and CONTACT_FROM_EMAIL are all missing. No enquiry will be sent.",
+    );
+  } else if (missing.length < 3) {
     console.warn(
       `[contact] email delivery is NOT configured: missing ${missing.join(", ")}. Falling back to the mock transport — no email will be sent.`,
     );

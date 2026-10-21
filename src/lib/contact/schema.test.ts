@@ -246,3 +246,11 @@ describe("validateContact", () => {
     if (result.ok) expect(result.data).not.toHaveProperty("subject");
   });
 });
+
+describe("validateContact — email", () => {
+  it("refuses a display-name form that would reach the reply-to header", () => {
+    for (const email of ["x<attacker@evil.com>", "\"a\"@b.com", "a@b.com,c@d.com", "a@b.com;c@d.com"]) {
+      expect(validateContact({ ...valid, email }).ok, email).toBe(false);
+    }
+  });
+});

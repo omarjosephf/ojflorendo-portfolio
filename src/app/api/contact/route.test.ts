@@ -392,3 +392,33 @@ describe("POST /api/contact", () => {
     }
   });
 });
+
+describe("POST /api/contact — only this site's own form", () => {
+  it("refuses a text/plain body a foreign page could send without a preflight", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const req = new NextRequest("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "content-type": "text/plain", "x-forwarded-for": "t-plain" },
+      body: JSON.stringify(validBody),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(415);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("refuses a JSON request the browser marks as cross-site", async () => {
+    const req = new NextRequest("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "content-type": "application/json", "sec-fetch-site": "cross-site", "x-forwarded-for": "t-cross" },
+      body: JSON.stringify(validBody),
+    });
+    expect((await POST(req)).status).toBe(415);
+  });
+
+  it("answers a honeypot submission with the same shape as a real success", async () => {
+    const honeypot = await (await POST(post("t-honeypot-shape", { ...validBody, website: "x" }))).json();
+    const real = await (await POST(post("t-real-shape", validBody))).json();
+    expect(honeypot).toEqual(real);
+  });
+});

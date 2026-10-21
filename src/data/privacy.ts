@@ -48,7 +48,7 @@ export const privacySections: readonly PrivacySection[] = [
     id: "enquiries",
     heading: "The enquiry form",
     paragraphs: [
-      "The form asks for your name and email address. Everything else is optional: your role, company, company website, company size, what you need, a budget range and your message.",
+      "The form asks for your name, email address, what you need and a short message, and for your agreement that I can reply. Everything else is optional: your role, company, company website, company size, the areas you want to improve and a budget range.",
       "I use these details only to reply to your enquiry and, if we go ahead, to prepare a quote. You ask me to reply, and you tick the box to agree, so my legal basis is taking the steps you ask for before a possible contract.",
       "The form emails your enquiry to my inbox through Resend, an email delivery service. It isn't saved in a database on this site, and its contents are never written to the site's logs. I keep enquiries for up to 12 months after we last spoke, then delete them, unless we work together and the project needs its records.",
     ],
@@ -67,7 +67,7 @@ export const privacySections: readonly PrivacySection[] = [
     heading: "E.V, the assistant",
     paragraphs: [
       "Questions you type into E.V go through my server to Google's Gemini API, with OpenAI as a backup when Google is unavailable. Google handles them under its paid API terms, which say paid-tier data isn't used to improve its products. Each provider may keep requests for a limited time under its own policy.",
-      "E.V's logs record only whether a request worked and how long it took, never your question. Your browser keeps up to 20 recent exchanges in that tab so the chat survives a refresh, and Clear chat removes them. Please don't type personal or sensitive information into E.V.",
+      "E.V's logs record only whether a request worked and how long it took, never your question. Your browser keeps up to 20 recent exchanges in that tab so the chat survives a refresh, and Clear chat removes them. Saved chats are switched off on this site; if that changes, this notice will describe them first. Please don't type personal or sensitive information into E.V.",
     ],
   },
   {

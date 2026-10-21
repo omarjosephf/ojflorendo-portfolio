@@ -5,6 +5,7 @@ import { screenContact } from "@/lib/contact/screening";
 import { getEmailTransport } from "@/lib/email";
 import { createRateLimiter } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
+import { isSameOriginJson } from "@/lib/same-origin-json";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -69,6 +70,11 @@ async function readBoundedBody(
 }
 
 export async function POST(req: NextRequest) {
+  // Only this site's own form may post here (src/lib/same-origin-json.ts).
+  if (!isSameOriginJson(req)) {
+    return json({ ok: false, error: "Invalid request." }, 415);
+  }
+
   if (!limiter.check(clientIp(req))) {
     return json(
       { ok: false, error: "Too many messages. Please try again in a minute." },
@@ -90,10 +96,12 @@ export async function POST(req: NextRequest) {
   }
 
   // Honeypot: real users never fill the hidden `website` field. If present,
-  // respond as if accepted (don't tip off bots) but do nothing.
+  // respond exactly as a real success would here (so bots cannot tell) but
+  // send nothing.
   const website = (body as Record<string, unknown>)?.website;
   if (typeof website === "string" && website.trim() !== "") {
-    return json({ ok: true, delivered: false, mode: "mock" }, 200);
+    const mode = getEmailTransport().mode;
+    return json({ ok: true, delivered: mode === "resend", mode }, 200);
   }
 
   const result = validateContact(body);

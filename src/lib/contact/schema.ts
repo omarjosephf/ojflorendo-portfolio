@@ -103,7 +103,9 @@ export type ValidationResult =
   | { ok: false; errors: FieldErrors };
 
 // Pragmatic email check — intentionally permissive but blocks obvious garbage.
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// No angle brackets, quotes, commas or semicolons: the address becomes the
+// reply-to, which must be one plain address, never a display-name form.
+const EMAIL_RE = /^[^\s@<>",;]+@[^\s@<>",;]+\.[^\s@<>",;]{2,}$/;
 
 // A web address with or without http(s)://, such as example.com or
 // https://www.example.co.uk/about. Any other scheme is refused.
