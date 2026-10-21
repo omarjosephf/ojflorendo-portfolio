@@ -1,9 +1,11 @@
 /**
- * The home page's star sky (ADR-0030): a slowly turning galaxy behind the hero
- * and a ribbon of stars that streams from it down the whole page, weaving from
- * side to side and twisting as it goes, over a sparse parallax field. Everything moves in the vertex shader from per-star random
- * values and a handful of uniforms, so the CPU's work per frame is setting
- * those uniforms and issuing one draw call.
+ * The star sky behind the home page and the blog front page (ADR-0030,
+ * ADR-0027): a two-armed galaxy behind the hero whose stars swirl outward along
+ * its arms and pour off each arm's tip into a stream; the two streams braid
+ * down the whole page, one crossing right to left while the other crosses left
+ * to right, over a sparse parallax field. Everything moves in the vertex
+ * shader from per-star random values and a handful of uniforms, so the CPU's
+ * work per frame is setting those uniforms and issuing one draw call.
  *
  * This module is pure (no DOM, no WebGL calls) so its budget and geometry can
  * be unit-tested; StarSky.tsx owns the context and the frame loop.
@@ -19,9 +21,11 @@ export const STAR_BUDGET = {
   maxPixels: 4_000_000,
   /** Viewport width below which the compact counts apply. */
   compactBelow: 768,
+  // The same totals as before the two streams (8,850 and 3,360): stars moved
+  // from the galaxy to the streams, which now share them between two.
   counts: {
-    desktop: { field: 650, galaxy: 3200, river: 5000 },
-    compact: { field: 260, galaxy: 1300, river: 1800 },
+    desktop: { field: 650, galaxy: 2200, river: 6000 },
+    compact: { field: 260, galaxy: 900, river: 2200 },
   },
   /** Text blocks the stars dim behind, measured from the DOM. */
   maxDimRects: 24,
@@ -29,6 +33,12 @@ export const STAR_BUDGET = {
   dimInside: 0.15,
   /** Global brightness. The owner asked for a dim sky that never competes with text. */
   brightness: 0.9,
+  /**
+   * Most stream stars drawn per pixel of each stream. A short page (the blog)
+   * draws fewer of the budgeted stars, so its streams are no denser than the
+   * home page's.
+   */
+  streamDensity: 0.4,
 } as const;
 
 export type StarCounts = { field: number; galaxy: number; river: number };
@@ -55,7 +65,8 @@ function gauss(rand: () => number): number {
 /**
  * Per-star attributes, interleaved: [kind, r1, r2, r3 | r4, r5, r6, r7].
  * The meaning of r1..r7 depends on the kind and is decoded in the shader;
- * the river stores a normal sample in r3 for the ribbon's thickness.
+ * a stream star stores a normal sample in r3 for the stream's thickness, and
+ * r2 picks its stream.
  */
 export function buildStars(counts: StarCounts, rand: () => number = Math.random): Float32Array {
   const total = counts.field + counts.galaxy + counts.river;
@@ -75,65 +86,123 @@ export function buildStars(counts: StarCounts, rand: () => number = Math.random)
 }
 
 /**
- * Pixels a second the whole river streams down the page. Every river star
- * moves at this one pace, so the ribbon flows as one piece.
+ * Pixels a second the stars flow: outward along the galaxy's arms and on down
+ * the two streams. Every flowing star moves at this one pace, so the arms and
+ * the streams read as one piece.
  */
 export const RIVER_SPEED = 12;
 
-/** Share of the river drawn as fine dust around the ribbon rather than in it. */
-export const RIVER_DUST = 0.32;
+/** Share of the streams drawn as fine dust around them rather than in them. */
+export const RIVER_DUST = 0.22;
 
 /**
- * The band the river weaves across, as fractions of the viewport width:
- * centre and swing. It crosses the whole width, right to left and back, and
- * turns out at the screen's edges, where the margins leave the sky open; text
- * blocks dim the stars behind them, so the crossing never competes with text.
+ * The galaxy's shape: two arms, each winding this many radians from the core
+ * to its tip, on a disc seen at a slant (its x and y stretch). The arms keep
+ * their shape while their stars flow outward along them, and the core turns
+ * slowly (`GALAXY_TURN` radians a second).
  */
-export function riverBand(width: number): [number, number] {
-  return width < STAR_BUDGET.compactBelow ? [0.5, 0.32] : [0.5, 0.42];
+export const GALAXY_SHAPE = { arms: 2, winding: 3.8, stretchX: 1.35, stretchY: 0.55 } as const;
+export const GALAXY_TURN = 0.012;
+
+export type Galaxy = [x: number, y: number, radius: number];
+
+/**
+ * Where the galaxy sits, in document pixels, for a hero of the given size: at
+ * the hero's foot, so its arm tips sit in open sky below the hero's text and
+ * its streams pour down the page from there. Sized so both tips, at the disc's
+ * left and right ends, stay on screen.
+ */
+export function galaxyFor(width: number, heroTop: number, heroHeight: number): Galaxy {
+  if (width < STAR_BUDGET.compactBelow) {
+    return [width * 0.5, heroTop + heroHeight * 0.96, width * 0.28];
+  }
+  return [width * 0.5, heroTop + heroHeight * 0.9, Math.min(width * 0.27, 420)];
 }
 
 /**
- * The ribbon's shape in pixels: the height of one sweep from one side to the
- * other (about a screen), and the ribbon's half-width.
+ * A point on arm `arm` (0 or 1) at `t` from the core (0) to the tip (1),
+ * mirrored by the shader. Arm 0 ends at the disc's right end, arm 1 at its left.
  */
-export function riverShape(width: number): { sweep: number; halfWidth: number } {
+export function armPoint(arm: 0 | 1, t: number, [gx, gy, radius]: Galaxy): [number, number] {
+  const angle = arm * Math.PI + GALAXY_SHAPE.winding * (t - 1);
+  const r = t * radius;
+  return [gx + Math.cos(angle) * r * GALAXY_SHAPE.stretchX, gy + Math.sin(angle) * r * GALAXY_SHAPE.stretchY];
+}
+
+/** The unit direction an arm leaves its tip in, so its stream carries straight on. */
+export function armTipDirection(arm: 0 | 1, galaxy: Galaxy): [number, number] {
+  const [x0, y0] = armPoint(arm, 1 - 1e-4, galaxy);
+  const [x1, y1] = armPoint(arm, 1, galaxy);
+  const length = Math.hypot(x1 - x0, y1 - y0) || 1;
+  return [(x1 - x0) / length, (y1 - y0) / length];
+}
+
+/** An arm's length in pixels, so its stars flow at RIVER_SPEED like the streams. */
+export function armLength(galaxy: Galaxy): number {
+  let length = 0;
+  let previous = armPoint(0, 0, galaxy);
+  for (let step = 1; step <= 64; step += 1) {
+    const next = armPoint(0, step / 64, galaxy);
+    length += Math.hypot(next[0] - previous[0], next[1] - previous[1]);
+    previous = next;
+  }
+  return Math.max(length, 1);
+}
+
+/**
+ * The lanes the two streams braid along, as fractions of the viewport width
+ * (centre and swing), with the height of one sweep from one side to the other
+ * (about a screen), the distance over which a stream bends from its arm into
+ * its lane, and a stream's half-width. The lanes mirror each other, so one
+ * stream crosses right to left while the other crosses left to right.
+ */
+export function strandLanes(width: number) {
+  const compact = width < STAR_BUDGET.compactBelow;
+  const sweep = Math.min(960, Math.max(520, width * 0.62));
   return {
-    sweep: Math.min(960, Math.max(520, width * 0.62)),
-    halfWidth: Math.min(100, Math.max(36, width * 0.06)),
+    centre: 0.5,
+    swing: compact ? 0.34 : 0.42,
+    sweep,
+    bend: sweep * 0.45,
+    halfWidth: Math.min(90, Math.max(30, width * 0.05)),
   };
 }
 
-/** The phase that starts the river at the galaxy's x, heading right first. */
-export function riverStartPhase(width: number, galaxyX: number): number {
-  const [centre, swing] = riverBand(width);
-  return Math.asin(Math.max(-1, Math.min(1, (galaxyX / width - centre) / swing)));
+/**
+ * The lanes' starting phase: stream 0 begins level with its arm's tip and
+ * heads back across the page, so the two streams cross below the galaxy.
+ */
+export function strandPhase(width: number, galaxy: Galaxy): number {
+  const { centre, swing } = strandLanes(width);
+  const [tipX] = armPoint(0, 1, galaxy);
+  return Math.PI - Math.asin(Math.max(-1, Math.min(1, (tipX / width - centre) / swing)));
 }
 
 /**
- * The river's centre line in document pixels, mirrored exactly by the shader.
- * `s` runs 0..1 from the galaxy to the foot of the page.
+ * A stream's centre line in document pixels, mirrored exactly by the shader.
+ * `along` runs from the arm's tip (0) down the page. The stream leaves the tip
+ * in the arm's own direction and bends into its lane.
  */
-export function riverPoint(
-  s: number,
-  width: number,
-  top: number,
-  docHeight: number,
-  galaxyX: number = width / 2,
-): [number, number] {
-  const length = Math.max(docHeight - top - 80, 1);
-  const along = s * length;
-  const phase = riverStartPhase(width, galaxyX) + (Math.PI * along) / riverShape(width).sweep;
-  const [centre, swing] = riverBand(width);
-  return [width * (centre + swing * Math.sin(phase)), top + along];
+export function strandPoint(arm: 0 | 1, along: number, width: number, galaxy: Galaxy): [number, number] {
+  const { centre, swing, sweep, bend } = strandLanes(width);
+  const [tipX, tipY] = armPoint(arm, 1, galaxy);
+  const [dx, dy] = armTipDirection(arm, galaxy);
+  const side = arm === 0 ? 1 : -1;
+  const laneX = width * (centre + side * swing * Math.sin(strandPhase(width, galaxy) + (Math.PI * along) / sweep));
+  const u = Math.max(0, Math.min(1, along / bend));
+  const blend = u * u * (3 - 2 * u);
+  const [nearX, nearY] = [tipX + dx * along, tipY + dy * along];
+  return [nearX + (laneX - nearX) * blend, nearY + (tipY + along - nearY) * blend];
 }
 
-/** Where the galaxy sits, in document pixels, for a hero of the given size. */
-export function galaxyFor(width: number, heroTop: number, heroHeight: number): [number, number, number] {
-  if (width < STAR_BUDGET.compactBelow) {
-    return [width * 0.55, heroTop + heroHeight * 0.18, width * 0.5];
-  }
-  return [width * 0.555, heroTop + heroHeight * 0.44, Math.min(width * 0.42, 640)];
+/**
+ * The share of the budgeted stream stars to draw on a page of this height, so
+ * every stream carries at most STAR_BUDGET.streamDensity stars a pixel.
+ */
+export function streamShare(width: number, docHeight: number, galaxy: Galaxy): number {
+  const perStream = countsFor(width).river / GALAXY_SHAPE.arms;
+  const length = Math.max(docHeight - armPoint(0, 1, galaxy)[1] - 80, 1);
+  return Math.min(1, (STAR_BUDGET.streamDensity * length) / perStream);
 }
 
 export const VERTEX_SHADER = `
@@ -145,8 +214,12 @@ uniform float u_scroll;
 uniform float u_time;
 uniform float u_doc;
 uniform vec3 u_galaxy;
-uniform vec2 u_band;
-uniform vec3 u_river;
+uniform vec4 u_tip0;
+uniform vec4 u_tip1;
+uniform vec4 u_lane;
+uniform vec2 u_strand;
+uniform float u_armFlow;
+uniform float u_share;
 uniform float u_dpr;
 uniform float u_bright;
 uniform vec4 u_rects[${STAR_BUDGET.maxDimRects}];
@@ -164,6 +237,14 @@ float dimAt(vec2 p) {
   return 1.0;
 }
 
+// A stream's centre line (u_tip: arm tip and leaving direction; u_lane: lane
+// centre, swing, start phase and sweep; u_strand.x: the bend distance).
+vec2 strandAt(float along, vec4 tip, float side) {
+  float blend = smoothstep(0.0, u_strand.x, along);
+  vec2 lane = vec2(u_view.x * (u_lane.x + side * u_lane.y * sin(u_lane.z + PI * along / u_lane.w)), tip.y + along);
+  return mix(tip.xy + tip.zw * along, lane, blend);
+}
+
 void main() {
   float kind = a_a.x;
   float twinkle = 0.5 + 0.5 * sin(u_time * (0.6 + a_b.x * 2.0) + a_b.y * 6.2831);
@@ -178,46 +259,51 @@ void main() {
     alpha = (0.24 + 0.4 * twinkle) * (0.6 + depth);
     size = 1.2 + step(0.93, a_b.z) * 1.3;
   } else if (kind < 1.5) {
-    float t = pow(a_a.y, 0.75);
-    float arm = floor(a_a.z * 3.0);
-    float ang = arm * 2.0943951 + t * 3.8 + (a_a.w - 0.5) * 0.5 * (1.0 - t * 0.4) + u_time * 0.012;
-    float r = t * u_galaxy.z;
     if (a_b.w < 0.16) {
-      r = a_a.y * a_a.y * u_galaxy.z * 0.22;
-      ang = a_a.z * 6.2831 + u_time * 0.012;
+      // The core turns slowly.
+      float r = a_a.y * a_a.y * u_galaxy.z * 0.22;
+      float ang = a_a.z * 6.2831 + u_time * ${GALAXY_TURN.toFixed(3)};
+      doc = vec2(u_galaxy.x + cos(ang) * r * ${GALAXY_SHAPE.stretchX.toFixed(2)}, u_galaxy.y + sin(ang) * r * ${GALAXY_SHAPE.stretchY.toFixed(2)});
+      alpha = (0.24 + 0.44 * twinkle) * 1.3;
+    } else {
+      // Two arms keep their shape while their stars swirl outward along them
+      // at the streams' pace, fading as they reach the tip, where each arm's
+      // stream carries on down the page.
+      float arm = a_a.z < 0.5 ? 0.0 : PI;
+      float t = fract(a_a.y + u_time * u_armFlow);
+      float ang = arm + ${GALAXY_SHAPE.winding.toFixed(2)} * (t - 1.0) + (a_a.w - 0.5) * 0.5 * (1.0 - t * 0.5);
+      float r = t * u_galaxy.z;
+      doc = vec2(u_galaxy.x + cos(ang) * r * ${GALAXY_SHAPE.stretchX.toFixed(2)}, u_galaxy.y + sin(ang) * r * ${GALAXY_SHAPE.stretchY.toFixed(2)});
+      alpha = (0.24 + 0.44 * twinkle) * (1.0 - t * 0.35) * smoothstep(0.0, 0.06, t) * (1.0 - smoothstep(0.9, 1.0, t));
     }
-    doc = vec2(u_galaxy.x + cos(ang) * r * 1.35, u_galaxy.y + sin(ang) * r * 0.55);
-    alpha = (0.24 + 0.44 * twinkle) * (1.0 - t * 0.45) * (a_b.w < 0.16 ? 1.3 : 1.0);
     size = 1.2 + step(0.95, a_b.z) * 1.4;
   } else {
-    // The river: one ribbon of stars streaming down the page at one shared
-    // pace, weaving from side to side (u_river: start phase, sweep height,
-    // half-width) and twisting as it goes. Stars gather at the ribbon's two
-    // edges, so the edges read as two strands winding round each other; a
-    // share of the river is fine dust drifting in a soft haze around it. The
-    // river shimmers slowly rather than twinkling, so it reads as one smooth flow.
-    float len = max(u_doc - u_galaxy.y - 80.0, 1.0);
+    // The streams: each pours off one arm's tip, carries on in the arm's own
+    // direction, then bends into its lane and braids down the page with the
+    // other, one crossing right to left while the other crosses left to right.
+    // Every star moves at one shared pace, so each stream flows as one piece;
+    // a share of it is fine dust in a soft haze around it, and it shimmers
+    // slowly rather than twinkling.
+    float side = a_a.z < 0.5 ? 1.0 : -1.0;
+    vec4 tip = a_a.z < 0.5 ? u_tip0 : u_tip1;
+    float len = max(u_doc - tip.y - 80.0, 1.0);
     float along = fract(a_a.y + u_time * ${RIVER_SPEED.toFixed(1)} / len) * len;
-    float ph = u_river.x + PI * along / u_river.y;
-    vec2 centre = vec2(u_view.x * (u_band.x + u_band.y * sin(ph)), u_galaxy.y + along);
-    vec2 tangent = normalize(vec2(u_view.x * u_band.y * cos(ph) * PI / u_river.y, 1.0));
+    vec2 centre = strandAt(along, tip, side);
+    vec2 tangent = normalize(strandAt(along + 2.0, tip, side) - centre);
     vec2 normal = vec2(-tangent.y, tangent.x);
-    float ends = smoothstep(0.0, 0.05, along / len) * (1.0 - smoothstep(0.93, 1.0, along / len));
+    float ends = smoothstep(0.0, 60.0, along) * (1.0 - smoothstep(0.93, 1.0, along / len));
     float shimmer = 0.78 + 0.22 * sin(u_time * (0.2 + a_b.x * 0.4) + a_b.y * 6.2831);
     if (a_b.z < ${RIVER_DUST.toFixed(2)}) {
-      doc = centre + normal * u_river.z * a_a.w * 0.75;
-      alpha = 0.26 * shimmer * (1.0 - abs(a_a.w) * 0.25) * ends;
+      doc = centre + normal * u_strand.y * a_a.w * 0.6;
+      alpha = 0.24 * shimmer * (1.0 - abs(a_a.w) * 0.25) * ends;
       size = 1.15;
     } else {
-      float twist = PI * along / (u_river.y * 0.55) - u_time * 0.08;
-      float face = cos(twist);
-      float c = a_a.z * 2.0 - 1.0;
-      float across = sign(c) * pow(abs(c), 0.3);
-      doc = centre + normal * u_river.z * (across * face + a_a.w * 0.06);
-      float near = 0.8 + 0.2 * across * sin(twist);
-      alpha = 0.72 * shimmer * mix(0.45, 1.0, abs(face)) * mix(0.55, 1.0, abs(across)) * near * ends;
-      size = 1.6 + step(0.9, a_b.z) * 1.2;
+      doc = centre + normal * u_strand.y * a_a.w * 0.22;
+      alpha = 0.9 * shimmer * (1.0 - abs(a_a.w) * 0.2) * ends;
+      size = 1.7 + step(0.9, a_b.z) * 1.2;
     }
+    // On a short page, draw only u_share of the stream stars (size 0 draws nothing).
+    if (fract(a_b.y * 97.0 + a_a.y * 31.0) > u_share) size = 0.0;
   }
   alpha *= dimAt(doc) * u_bright;
   vec2 screen = vec2(doc.x, doc.y - u_scroll);

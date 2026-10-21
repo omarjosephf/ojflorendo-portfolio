@@ -4,13 +4,16 @@ import {
   STAR_BUDGET,
   STRIDE,
   VERTEX_SHADER,
+  armLength,
+  armPoint,
+  armTipDirection,
   buildStars,
   countsFor,
   galaxyFor,
   RIVER_SPEED,
-  riverBand,
-  riverPoint,
-  riverShape,
+  strandLanes,
+  strandPoint,
+  streamShare,
 } from "./star-field";
 
 /** A small deterministic generator so the geometry tests are repeatable. */
@@ -60,36 +63,54 @@ describe("star attributes", () => {
   });
 });
 
-describe("river and galaxy geometry", () => {
-  it("keeps the river inside its band from the galaxy to the foot of the page", () => {
-    for (const width of [390, 1440]) {
-      const [centre, swing] = riverBand(width);
-      for (let s = 0; s <= 1; s += 0.05) {
-        const [x, y] = riverPoint(s, width, 400, 6000);
-        expect(x).toBeGreaterThanOrEqual(width * (centre - swing) - 0.001);
-        expect(x).toBeLessThanOrEqual(width * (centre + swing) + 0.001);
-        expect(y).toBeGreaterThanOrEqual(400);
-        expect(y).toBeLessThanOrEqual(6000 - 80 + 0.001);
+
+describe("galaxy and stream geometry (ADR-0030, revision of 20 October 2026)", () => {
+  const WIDTHS = [390, 768, 1024, 1440, 1920];
+  const HERO = 900;
+
+  it("places the galaxy at the hero's foot, with both arm tips on screen", () => {
+    for (const width of WIDTHS) {
+      const galaxy = galaxyFor(width, 0, HERO);
+      expect(galaxy[1]).toBeGreaterThan(HERO * 0.85);
+      expect(galaxy[1]).toBeLessThanOrEqual(HERO);
+      for (const arm of [0, 1] as const) {
+        const [x] = armPoint(arm, 1, galaxy);
+        expect(x).toBeGreaterThan(width * 0.05);
+        expect(x).toBeLessThan(width * 0.95);
       }
     }
   });
 
-  it("starts the river at the galaxy", () => {
-    for (const width of [390, 1440]) {
-      const [gx, gy] = galaxyFor(width, 0, 900);
-      const [x, y] = riverPoint(0, width, gy, 6000, gx);
-      expect(x).toBeCloseTo(gx, 6);
-      expect(y).toBe(gy);
+  it("starts each stream at its arm's tip, carrying on in the arm's direction", () => {
+    for (const width of WIDTHS) {
+      const galaxy = galaxyFor(width, 0, HERO);
+      for (const arm of [0, 1] as const) {
+        const tip = armPoint(arm, 1, galaxy);
+        const start = strandPoint(arm, 0, width, galaxy);
+        expect(start[0]).toBeCloseTo(tip[0], 6);
+        expect(start[1]).toBeCloseTo(tip[1], 6);
+        // The first pixel of the stream leaves along the arm's own direction.
+        const next = strandPoint(arm, 1, width, galaxy);
+        const [dx, dy] = armTipDirection(arm, galaxy);
+        expect(next[0] - start[0]).toBeCloseTo(dx, 2);
+        expect(next[1] - start[1]).toBeCloseTo(dy, 2);
+      }
     }
   });
 
-  it("weaves from right to left and back across the page, about once a screen", () => {
-    for (const width of [390, 1440]) {
-      const [gx, gy] = galaxyFor(width, 0, 900);
-      const length = 6000 - gy - 80;
-      const { sweep } = riverShape(width);
-      // Sample two sweeps' worth of path: it must reach both sides.
-      const xs = Array.from({ length: 41 }, (_, i) => riverPoint(((i / 40) * 2 * sweep) / length, width, gy, 6000, gx)[0]);
+  it("braids the two streams down the page: mirrored lanes that cross, reaching both sides", () => {
+    for (const width of WIDTHS) {
+      const galaxy = galaxyFor(width, 0, HERO);
+      const { bend, sweep, centre } = strandLanes(width);
+      const samples = Array.from({ length: 81 }, (_, i) => bend + (i / 80) * 3 * sweep);
+      const a = samples.map((along) => strandPoint(0, along, width, galaxy));
+      const b = samples.map((along) => strandPoint(1, along, width, galaxy));
+      // Past the bend, the lanes mirror each other about the page's centre...
+      a.forEach(([x], i) => expect(x + b[i][0]).toBeCloseTo(2 * centre * width, 4));
+      // ...so they cross, one going right to left while the other goes left to right.
+      const signs = new Set(a.map(([x], i) => Math.sign(x - b[i][0])).filter(Boolean));
+      expect(signs.size).toBe(2);
+      const xs = a.map(([x]) => x);
       expect(Math.min(...xs)).toBeLessThan(width * 0.25);
       expect(Math.max(...xs)).toBeGreaterThan(width * 0.75);
       expect(sweep).toBeGreaterThanOrEqual(520);
@@ -97,19 +118,44 @@ describe("river and galaxy geometry", () => {
     }
   });
 
-  it("moves every river star at one shared pace, so the ribbon flows in step", () => {
-    expect(RIVER_SPEED).toBeGreaterThan(0);
-    expect(VERTEX_SHADER).toContain(`fract(a_a.y + u_time * ${RIVER_SPEED.toFixed(1)} / len)`);
+  it("keeps both streams on the page and always flowing down after the bend", () => {
+    for (const width of WIDTHS) {
+      const galaxy = galaxyFor(width, 0, HERO);
+      const { bend } = strandLanes(width);
+      for (const arm of [0, 1] as const) {
+        let previousY = -Infinity;
+        for (let along = 0; along <= 6000; along += 20) {
+          const [x, y] = strandPoint(arm, along, width, galaxy);
+          expect(x).toBeGreaterThanOrEqual(0);
+          expect(x).toBeLessThanOrEqual(width);
+          if (along >= bend) {
+            expect(y).toBeGreaterThan(previousY);
+            previousY = y;
+          }
+        }
+      }
+    }
   });
 
-  it("places the galaxy inside the hero", () => {
-    for (const width of [390, 1440]) {
-      const [x, y, radius] = galaxyFor(width, 0, 900);
-      expect(x).toBeGreaterThan(0);
-      expect(x).toBeLessThan(width);
-      expect(y).toBeGreaterThan(0);
-      expect(y).toBeLessThan(900);
-      expect(radius).toBeGreaterThan(0);
+  it("moves every flowing star at one shared pace, along the arms and down the streams", () => {
+    expect(RIVER_SPEED).toBeGreaterThan(0);
+    expect(VERTEX_SHADER).toContain(`fract(a_a.y + u_time * ${RIVER_SPEED.toFixed(1)} / len)`);
+    expect(VERTEX_SHADER).toContain("fract(a_a.y + u_time * u_armFlow)");
+    for (const width of WIDTHS) expect(armLength(galaxyFor(width, 0, HERO))).toBeGreaterThan(width * 0.3);
+  });
+
+  it("draws fewer stream stars on a short page, so no stream is denser than the budget", () => {
+    for (const width of WIDTHS) {
+      const galaxy = galaxyFor(width, 0, HERO);
+      const perStream = countsFor(width).river / 2;
+      for (const docHeight of [1600, 3000, 8000, 12000]) {
+        const length = docHeight - armPoint(0, 1, galaxy)[1] - 80;
+        const share = streamShare(width, docHeight, galaxy);
+        expect(share).toBeGreaterThan(0);
+        expect(share).toBeLessThanOrEqual(1);
+        expect((share * perStream) / length).toBeLessThanOrEqual(STAR_BUDGET.streamDensity + 1e-9);
+      }
     }
+    expect(VERTEX_SHADER).toContain("> u_share) size = 0.0");
   });
 });

@@ -4,9 +4,11 @@
   (design canvas option A, the star prototype, and the build spec). Revised
   for the About journey after the owner's preview review of 15 October 2026
   (see "Revision, 15 October 2026"), for the home sky's river after the
-  review of 20 October 2026 (see "Revision, 20 October 2026"), and for the
-  blog front page's sky the same day (see "Revision, 20 October 2026: the sky
-  on /blog").
+  review of 20 October 2026 (see "Revision, 20 October 2026"), for the blog
+  front page's sky the same day (see "Revision, 20 October 2026: the sky on
+  /blog"), and for the galaxy feeding the streams after the owner's review of
+  the blog page (see "Revision, 20 October 2026: the galaxy feeds the
+  streams").
 - Date: 2026-10-14
 - Owner: OJ Florendo
 - Risk: R2. Continuous WebGL canvases return to the public site under a
@@ -42,11 +44,12 @@ public layout. Inter and Barlow, used only by `/manage`, are no longer
 preloaded on public pages.
 
 **D2 — The home page's star sky.** A fixed WebGL canvas behind the home page
-draws a sparse parallax field, a slowly turning galaxy behind the hero, and a
-ribbon of stars that streams from it down the page at one shared pace. The
-ribbon weaves from right to left and back across the whole width about once a
-screen, turning out at the screen's edges, and twists as it goes, so its two
-edges wind round each other like a spiral (revised 20 October 2026).
+draws a sparse parallax field and a two-armed galaxy at the foot of the hero.
+The galaxy's core turns slowly and its stars swirl outward along its arms; at
+each arm's tip they pour off into a stream, which carries on in the arm's
+direction and then bends down the page. The two streams braid down the whole
+page at one shared pace, one crossing right to left while the other crosses
+left to right, about once a screen (revised twice on 20 October 2026).
 
 **D3 — The About journey.** A second fixed canvas behind /about is a true 3D
 scene: a perspective camera flies along a corridor of stars with one evenly
@@ -132,6 +135,50 @@ opened.
 No new origin, request, cookie or storage. Shaders are compiled from strings in
 the bundle; WebGL needs no CSP change and no `unsafe-eval`. A lost WebGL context
 stops a scene and leaves the page black.
+
+## Revision, 20 October 2026: the galaxy feeds the streams
+
+On reviewing the blog front page, the owner found that the river of stars
+"doesn't make sense where the flow of dust is coming from": it started inside
+the galaxy but was not joined to its arms, and on the home page the galaxy sat
+in a 64-pixel gap between the hero text and the example card, so neither end
+of the river could be seen. He asked for a galaxy that turns slowly, with the
+ends of its strands flowing down in a spiral from left to right and right to
+left, on the blog and behind Services alike. The changes, all in D2:
+
+1. **Two arms that feed two streams.** The galaxy has two arms (was three).
+   Their shape holds still while their stars swirl outward along them at the
+   streams' pace, and the core turns as before. At each arm's tip the stars
+   pour off into a stream that carries on in the arm's own direction, then
+   bends into a lane. The two lanes mirror each other, so the streams cross
+   below the galaxy and braid down the page, one crossing right to left while
+   the other crosses left to right, about once a screen. The single twisting
+   ribbon is gone.
+2. **The galaxy moves to the foot of the hero** (on the blog, the foot of the
+   header), so both arm tips sit in open sky, and it is smaller (radius 27% of
+   the width, at most 420 pixels; 28% on phones) so both tips stay on screen.
+   On phones it now appears after the hero's example card instead of behind
+   the name, where the hero text dimmed it.
+3. **The same point totals** (D4: 8,850 wide, 3,360 on phones), moved from
+   the galaxy to the streams, which now share them: the galaxy 2,200 and the
+   streams 6,000 (900 and 2,200 on phones). Stream stars are brighter and a
+   smaller share of them (22%, was 32%) is haze. A short page draws only as
+   many stream stars as keep each stream to 0.4 stars a pixel, so the blog's
+   streams are no denser than the home page's.
+
+Frame rate, pixel ratio, the hidden-tab stop, the reduced-motion still frame,
+the software-renderer rule and the lazy chunk are unchanged. Unit tests check
+that each stream starts at its arm's tip in the arm's direction, that the
+lanes mirror and cross, that both tips stay on screen from 390 to 1920 pixels
+wide, and that no stream exceeds the density cap.
+
+Measured on a local production build the same day: the 17 gate stages run one
+by one, with stage 1 failing only on the sharp and source-map-js advisories
+(#119) and stages 2–17 exiting 0 (1,076 unit tests, 111 portfolio and 50
+management browser tests); Lighthouse 12.8.2 mobile, three runs each, home
+95, 92, 95 (median 95) and `/blog` 91, 94, 94 (median 94), with
+accessibility, best practices and SEO 100 in every run. GPU cost on a low-end
+phone is still not measured.
 
 ## Revision, 20 October 2026: the sky on /blog
 

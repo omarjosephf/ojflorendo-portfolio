@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 
 /**
  * The blog front page over the home page's star sky (ADR-0027, ADR-0030): the
- * galaxy sits behind the header, and the stars dim behind every card. Post
- * pages keep no canvas.
+ * galaxy sits at the foot of the header, and the stars dim behind every card.
+ * Post pages keep no canvas.
  */
 export default function BlogPage() {
   return (

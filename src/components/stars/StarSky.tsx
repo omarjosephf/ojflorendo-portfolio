@@ -6,23 +6,27 @@ import {
   DIM_SELECTOR,
   FRAGMENT_SHADER,
   STAR_BUDGET,
+  RIVER_SPEED,
   STRIDE,
   VERTEX_SHADER,
+  armLength,
+  armPoint,
+  armTipDirection,
   buildStars,
   countsFor,
   galaxyFor,
-  riverBand,
-  riverShape,
-  riverStartPhase,
+  strandLanes,
+  strandPhase,
+  streamShare,
 } from "@/components/stars/star-field";
 
 type EngineState = "running" | "still" | "paused" | "off";
 
-/** The home hero, which the galaxy sits behind by default. */
+/** The home hero, at whose foot the galaxy sits by default. */
 const HOME_ANCHOR = "#top";
 
 export interface StarSkyPlacement {
-  /** CSS selector of the element the galaxy sits behind. */
+  /** CSS selector of the element at whose foot the galaxy sits. */
   anchor?: string;
   /** CSS selector of the text blocks the stars dim behind. */
   dimSelector?: string;
@@ -41,8 +45,8 @@ const STILL_TIME = 42;
  *
  * `data-engine` reports the state for the browser tests.
  *
- * `anchor` names the element the galaxy sits behind, and `dimSelector` the
- * text blocks the stars dim behind. Both default to the home page's values.
+ * `anchor` names the element at whose foot the galaxy sits, and `dimSelector`
+ * the text blocks the stars dim behind. Both default to the home page's values.
  */
 export function StarSky({ anchor = HOME_ANCHOR, dimSelector = DIM_SELECTOR }: StarSkyPlacement = {}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -85,8 +89,12 @@ export function StarSky({ anchor = HOME_ANCHOR, dimSelector = DIM_SELECTOR }: St
       time: u("u_time"),
       doc: u("u_doc"),
       galaxy: u("u_galaxy"),
-      band: u("u_band"),
-      river: u("u_river"),
+      tip0: u("u_tip0"),
+      tip1: u("u_tip1"),
+      lane: u("u_lane"),
+      strand: u("u_strand"),
+      armFlow: u("u_armFlow"),
+      share: u("u_share"),
       dpr: u("u_dpr"),
       bright: u("u_bright"),
       rects: u("u_rects"),
@@ -138,7 +146,7 @@ export function StarSky({ anchor = HOME_ANCHOR, dimSelector = DIM_SELECTOR }: St
 
       const scrollY = window.scrollY;
       const hero = document.querySelector(anchor)?.getBoundingClientRect();
-      const [gx, gy, gr] = galaxyFor(width, (hero?.top ?? 0) + scrollY, hero?.height ?? height);
+      const galaxy = galaxyFor(width, (hero?.top ?? 0) + scrollY, hero?.height ?? height);
       const blocks = Array.from(document.querySelectorAll(dimSelector)).slice(0, STAR_BUDGET.maxDimRects);
       rects.fill(0);
       blocks.forEach((element, index) => {
@@ -149,11 +157,15 @@ export function StarSky({ anchor = HOME_ANCHOR, dimSelector = DIM_SELECTOR }: St
       gl.uniform2f(uniforms.view, width, height);
       gl.uniform1f(uniforms.dpr, dpr);
       gl.uniform1f(uniforms.doc, document.documentElement.scrollHeight);
-      gl.uniform3f(uniforms.galaxy, gx, gy, gr);
-      const [bandCentre, bandSwing] = riverBand(width);
-      gl.uniform2f(uniforms.band, bandCentre, bandSwing);
-      const { sweep, halfWidth } = riverShape(width);
-      gl.uniform3f(uniforms.river, riverStartPhase(width, gx), sweep, halfWidth);
+      gl.uniform3f(uniforms.galaxy, ...galaxy);
+      // Each stream starts at its arm's tip, leaving in the arm's direction.
+      gl.uniform4f(uniforms.tip0, ...armPoint(0, 1, galaxy), ...armTipDirection(0, galaxy));
+      gl.uniform4f(uniforms.tip1, ...armPoint(1, 1, galaxy), ...armTipDirection(1, galaxy));
+      const lanes = strandLanes(width);
+      gl.uniform4f(uniforms.lane, lanes.centre, lanes.swing, strandPhase(width, galaxy), lanes.sweep);
+      gl.uniform2f(uniforms.strand, lanes.bend, lanes.halfWidth);
+      gl.uniform1f(uniforms.armFlow, RIVER_SPEED / armLength(galaxy));
+      gl.uniform1f(uniforms.share, streamShare(width, document.documentElement.scrollHeight, galaxy));
       gl.uniform4fv(uniforms.rects, rects);
       gl.uniform1i(uniforms.rectCount, blocks.length);
     };

@@ -116,15 +116,16 @@ notifications, local paths, email addresses, secrets, personal data,
 backgrounds) before it is committed. None exists yet.
 
 **D9 — The sky on `/blog`.** The front page reuses the home page's star sky.
-`StarSky` takes two settings, the element the galaxy sits behind and the blocks
+`StarSky` takes two settings, the element the galaxy sits at and the blocks
 the stars dim behind, whose defaults are the home page's, so the home page does
-not change. On `/blog` the galaxy sits behind the header and the river streams
-down behind the cards. The intro line, every card, the older list and the
-footer dim the stars behind them. The large heading does not: the sky dims in
-straight-edged boxes, and a box round the heading would cut through the
-galaxy's core, while the heading's large, bright type stays clear over the dim
-stars. ADR-0030's
-budget is unchanged: at most 30
+not change. On `/blog` the galaxy sits at the foot of the header, between the
+intro and the featured card, and its two streams pour down behind the cards
+(ADR-0030, "Revision, 20 October 2026: the galaxy feeds the streams", which
+changed the sky on both pages the same day at the owner's request). The intro
+line, every card, the older list and the footer dim the stars behind them. The
+large heading does not: the sky dims in straight-edged boxes, and a box round
+the heading would cut through the galaxy, while the heading's large, bright
+type stays clear over the dim stars. ADR-0030's budget is unchanged: at most 30
 frames a second, the same point counts, pixel ratio at most 1.5, a still frame
 for reduced motion, a stopped loop in a hidden tab, no scene on a software
 renderer, and a lazy chunk. Post pages keep no canvas.
