@@ -77,7 +77,7 @@ test("touch activates header links and the mobile menu exactly once", async ({ b
   await expect(page.locator("#mobile-menu")).toBeVisible();
   await page.getByRole("button", { name: "Close menu", exact: true }).tap();
   await expect(page.locator("#mobile-menu")).toBeHidden();
-  await page.getByRole("link", { name: "Get your app checked", exact: true }).tap();
+  await page.getByRole("link", { name: "Start a project", exact: true }).tap();
   await expect(page).toHaveURL(/#contact$/);
   // A tap must never queue more than the single bounded burst.
   const bursts = await page.evaluate(() => window.__interactionAnimations.filter(a => a.kind === "burst"));

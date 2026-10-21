@@ -27,7 +27,7 @@ const SPOKEN: Record<StepState, string> = {
 };
 
 /**
- * The hero's one orchestrated moment: an example build check runs once, step by
+ * The hero's one orchestrated moment: an example automation runs once, step by
  * step, and then rests. Server HTML shows the finished run, so the content is
  * complete without JavaScript and with reduced motion; with motion allowed, the
  * markers reset and play through once after hydration. Only the step markers

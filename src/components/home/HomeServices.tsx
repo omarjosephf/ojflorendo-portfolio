@@ -5,37 +5,30 @@ const { services } = positioning;
 const [lead, ...rest] = services.offers;
 
 function Status({ label }: { label: string }) {
+  const available = label === "Available now";
   return (
     <p className="jf-status">
-      <span className="jf-status-dot" aria-hidden="true" />
+      <span
+        className={available ? "jf-status-dot" : "jf-status-dot jf-status-dot-hollow"}
+        aria-hidden="true"
+      />
       {label}
     </p>
   );
 }
 
-/** The total the client pays, then the terms that go with it. */
-function Price({ price, detail }: { price: string; detail: string }) {
-  return (
-    <div className="jf-offer-price">
-      <p className="jf-offer-price-amount">{price}</p>
-      <p className="jf-offer-price-detail">{detail}</p>
-    </div>
-  );
-}
-
 /**
- * The owner's order (ADR-0031). The build check is the lead offer and gets the
- * room; the next three are rows. Every offer shows its §6.2 label and its
- * approved price beside its title.
+ * The owner's order (ADR-0032). Automations and workflows lead and get the
+ * room; the next three are rows. Every offer shows its §6.2 label beside its
+ * title. No offer carries a price: each is quoted after a free call.
  */
 export function HomeServices() {
   return (
-    <HomeSection id="services" title="Services and prices" intro={services.intro}>
+    <HomeSection id="services" title="Services" intro={services.intro}>
       <article className="jf-offer-lead" aria-labelledby="offer-lead-title">
         <div className="jf-offer-lead-copy">
           <h3 id="offer-lead-title" className="jf-offer-lead-title">{lead.title}</h3>
           <Status label={lead.status} />
-          <Price price={lead.price} detail={lead.priceDetail} />
           <p className="jf-offer-text">{lead.description}</p>
         </div>
         <ul className="jf-offer-includes" aria-label={`Included in ${lead.title.toLowerCase()}`}>
@@ -51,7 +44,6 @@ export function HomeServices() {
             <div>
               <h3 className="jf-offer-title">{offer.title}</h3>
               <Status label={offer.status} />
-              <Price price={offer.price} detail={offer.priceDetail} />
             </div>
             <div>
               <p className="jf-offer-text">{offer.description}</p>
@@ -70,6 +62,12 @@ export function HomeServices() {
         <p>{services.priceNote}</p>
         <p>{services.foundingNote}</p>
         <p>{services.relatedWork}</p>
+      </div>
+
+      <div className="jf-offer-action">
+        <a href="#contact" className="jf-button">
+          Ask for a quote
+        </a>
       </div>
     </HomeSection>
   );

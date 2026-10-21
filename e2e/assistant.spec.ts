@@ -288,7 +288,7 @@ test.describe("E.V", () => {
       .analyze();
     expect(results.violations).toEqual([]);
     await page.keyboard.press("Escape");
-    await page.getByRole("link", { name: "Get your app checked", exact: true }).click();
+    await page.getByRole("link", { name: "Start a project", exact: true }).click();
     await expect(page.locator("#contact")).toBeVisible();
   });
 

@@ -620,24 +620,6 @@
   background: transparent;
   box-shadow: none;
 }
-.jf-offer-price {
-  margin-top: 18px;
-}
-.jf-offer-price-amount {
-  margin: 0;
-  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
-  font-weight: 760;
-  font-stretch: 108%;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-}
-.jf-offer-price-detail {
-  max-width: 44ch;
-  margin: 6px 0 0;
-  font-size: 0.9375rem;
-  color: var(--jf-text-2);
-}
 .jf-offer-text {
   margin: 16px 0 0;
   max-width: 52ch;
@@ -727,6 +709,9 @@
   margin: 0;
   font-size: 0.9375rem;
   color: var(--color-muted);
+}
+.jf-offer-action {
+  margin-top: 32px;
 }
 @media (min-width: 900px) {
   .jf-offer-lead {

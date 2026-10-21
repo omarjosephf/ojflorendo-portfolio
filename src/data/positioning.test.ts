@@ -45,24 +45,39 @@ describe("approved Track B positioning", () => {
 
   it("orders the offers as the owner decided and keeps them scoped", () => {
     /*
-     * ADR-0031 D1: the build check leads, then fixes, automation and the care
-     * plan. Every offer is "Available now" by owner decision. That is a claim
-     * about what is offered, not a promise to run anything a visitor asks for,
-     * so the scope note is load-bearing and is asserted here. Removing it would
-     * turn an honest "available" into an unscoped yes.
+     * ADR-0032 D1: automations and workflows lead, then AI agents, games and
+     * websites with care plans. Games stay "Future roadmap" until the owner's
+     * first game is released (D2); the rest are "Available now". That is a
+     * claim about what is offered, not a promise to run anything a visitor
+     * asks for, so the scope note is load-bearing and is asserted here.
+     * Removing it would turn an honest "available" into an unscoped yes.
      */
     const titles = positioning.services.offers.map((offer) => offer.title);
     expect(titles).toEqual([
-      "AI build check",
-      "Fixes before launch",
-      "Then automate the busywork",
-      "Care plan",
+      "AI automations and workflows",
+      "AI agents",
+      "Games",
+      "Websites and care plans",
     ]);
-    for (const offer of positioning.services.offers) {
-      expect(offer.status).toBe("Available now");
-    }
+    expect(positioning.services.offers.map((offer) => offer.status)).toEqual([
+      "Available now",
+      "Available now",
+      "Future roadmap",
+      "Available now",
+    ]);
     expect(positioning.services.scopeNote).toContain("defined task");
     expect(positioning.services.scopeNote).toContain("privacy review");
+    expect(positioning.services.scopeNote).toContain("without your permission");
+  });
+
+  it("offers building, not checks or fixes of other people's apps", () => {
+    // ADR-0032 retires the build check and the fixes offer (amending ADR-0031).
+    // The contact section is rewritten in its own step, so it is not yet held
+    // to this.
+    const content = flatten({ positioning: { ...positioning, contact: null }, site }).toLowerCase();
+    for (const retired of ["build check", "fixes before launch", "get your app checked"]) {
+      expect(content).not.toContain(retired);
+    }
   });
 
   it("keeps verified background visible rather than deleting it", () => {
@@ -105,34 +120,24 @@ describe("approved Track B positioning", () => {
     }
   });
 
-  it("shows only the owner-approved prices (ADR-0031)", () => {
+  it("publishes no fixed prices (ADR-0032)", () => {
     /*
-     * The prices the owner approved on 21 October 2026, in pounds and in US
-     * dollars at the 12-month average rate. Any other amount in the copy is a
-     * typo or an unapproved price, and a published price is an offer.
+     * On 21 October 2026 the owner withdrew the fixed prices of ADR-0031: every
+     * project is quoted after a free call. A published price is an offer, so
+     * any currency amount in the copy is an unapproved one.
      */
-    const approved = new Set([
-      "£195", "£250", "£450", "£500", "£760", "£950", "£1,000", "£2,500", "£3,150",
-      "US$260", "US$600", "US$1,020", "US$1,275", "US$1,350", "US$3,350", "US$4,200",
-    ]);
-    const amounts = flatten({ positioning, site }).match(/US\$\d{1,3}(?:,\d{3})*|£\d{1,3}(?:,\d{3})*/g) ?? [];
-    expect(amounts.length).toBeGreaterThan(0);
-    for (const amount of amounts) {
-      expect(approved.has(amount), `${amount} is not an approved price`).toBe(true);
+    const content = flatten({ positioning, site });
+    expect(content).not.toMatch(/[£$€]\s?\d/);
+    for (const offer of positioning.services.offers) {
+      expect(Object.keys(offer)).not.toContain("price");
     }
-
-    const [check, fixes, automation, care] = positioning.services.offers;
-    expect(check.price).toBe("£950 (US$1,275)");
-    expect(check.priceDetail).toContain("£760 (US$1,020)");
-    expect(fixes.price).toBe("From £1,000 (US$1,350)");
-    expect(automation.priceDetail).toContain("£2,500 (US$3,350)");
-    expect(care.price).toBe("£195 (US$260) a month");
+    expect(positioning.services.intro).toContain("quote");
     expect(positioning.services.priceNote).toContain("not VAT-registered");
   });
 
   it("states that scope, timing and price are agreed individually", () => {
     expect(positioning.hero.availability).toContain(
-      "Scope and timing agreed individually",
+      "Scope, timing and price agreed individually",
     );
   });
 });

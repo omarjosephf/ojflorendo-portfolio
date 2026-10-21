@@ -19,7 +19,7 @@ test("work case-study links open from the keyboard", async ({ page }) => {
 // must be able to reach the enquiry form from the hero and start typing.
 test("the enquiry form is reachable and usable from the keyboard", async ({ page }) => {
   await page.goto("/");
-  const cta = page.getByRole("link", { name: "Get your app checked", exact: true });
+  const cta = page.getByRole("link", { name: "Start a project", exact: true });
   await cta.focus();
   await expect(cta).toBeFocused();
   await cta.press("Enter");
@@ -58,7 +58,7 @@ test("small phones, tablets and 200 percent reflow retain content without overfl
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
     expect(await hasNoHorizontalOverflow(page), `overflow at ${viewport.width}px`).toBe(true);
-    await expect(page.getByRole("link", { name: "Get your app checked", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Start a project", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "See my work", exact: true })).toBeVisible();
 
     // /about is a public route in its own right and carries the long-form

@@ -9,6 +9,8 @@
 - Risk: R1. Owner-approved public content on the home page and one enquiry
   label. No API, provider, secret, data boundary, runtime origin or CSP
   change; the accepted enquiry values are unchanged.
+- Amended by: [ADR-0032](0032-builder-services-quoted-per-project.md) (D1, D2,
+  the hero in D4, and the home share-card line in D5).
 - Amends: [ADR-0029](0029-public-identity-joseph-florendo.md) D3 (the offer).
   D1, D2 and D4–D6 stand.
 

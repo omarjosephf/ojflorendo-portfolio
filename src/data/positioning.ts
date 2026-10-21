@@ -7,15 +7,15 @@ export const positioning = {
     role: "AI Automation Developer in Windsor, UK, working worldwide",
     /** Display wordmark: the name, set large. */
     displayName: ["Joseph", "Florendo"],
-    // The owner's niche line of 20 October 2026, word for word.
+    // The owner's chosen line of 21 October 2026 (ADR-0032), word for word.
     headline: [
-      "I help founders and creators who built with AI tools",
-      "make their app or automation safe, solid and ready to launch, then automate the busywork.",
+      "I design and build AI agents and automations for businesses and creators,",
+      "and I make games, all built in public.",
     ],
-    primaryCta: "Get your app checked",
+    primaryCta: "Start a project",
     secondaryCta: "See my work",
     availability:
-      "Taking on build checks, fixes and automation now, remotely and worldwide. Scope and timing agreed individually.",
+      "Taking on AI automation and agent projects now, remotely and worldwide. Scope, timing and price agreed individually.",
     locationNote: "Windsor, Berkshire · Working remotely",
   },
   /**
@@ -24,81 +24,48 @@ export const positioning = {
    */
   howIWork: {
     intro:
-      "Three steps, from an app you built with AI to one you can launch with confidence.",
+      "Three steps, from a task you repeat to a system that does it for you.",
     principle:
-      "You work directly with me. I stay responsible for what I check, fix and hand over.",
+      "You work directly with me. I stay responsible for what I build and hand over.",
     steps: [
       {
-        title: "Tell me what you built",
+        title: "Tell me the task",
         description:
-          "What it does, who uses it, and which tools you built it with. A rough description is enough; no technical brief needed.",
+          "What you do again and again, which tools you use, and what a finished job looks like. A rough description is enough; no technical brief needed.",
       },
       {
-        title: "I check it and rank the fixes",
+        title: "A free call, then a written quote",
         description:
-          "About two days of review: code, database rules, logins, secret keys, payments and running costs. You get a ranked fix list with time estimates, and a 30-minute call.",
+          "We talk it through on a free 30-minute call. Then I send a written quote with the scope, timing and price, before any work starts.",
       },
       {
-        title: "Fix it, launch it, then automate",
+        title: "I build it, test it and hand it over",
         description:
-          "I fix what you choose at a fixed price, re-check it, and set up error alerts and spending caps. Then we automate the busywork, with you approving anything that matters.",
+          "Built in code you own and tested on real examples, with an approval step for anything that matters. You get error alerts, spending caps and a handover guide.",
       },
     ],
   },
   services: {
     intro:
-      "Start with a build check. It tells you what to fix before launch, and what each fix would cost. Every price is the total you pay.",
+      "I build the systems that take repetitive work off your business. Every project is different, so I quote each one after a free call, in writing, before any work starts.",
     /**
-     * Four offers in the owner's order (ADR-0031, amending ADR-0029 D3), each
-     * with a §6.2 label. Every price is copied from the owner-approved pricing
-     * of 21 October 2026; the unit test pins each amount to that table. Copy
-     * states what is offered and what has been built, never client results.
+     * Four offers in the owner's order (ADR-0032, amending ADR-0031 D1), each
+     * with a §6.2 label. The owner builds; he does not check or fix other
+     * people's apps. No offer carries a fixed price: each is quoted per project,
+     * and the unit test blocks any amount from returning. Copy states what is
+     * offered and what has been built, never client results.
      */
     offers: [
-      {
-        title: "AI build check",
-        status: "Available now",
-        price: "£950 (US$1,275)",
-        priceDetail:
-          "Founding price for my first five clients: £760 (US$1,020), in return for a published case study.",
-        description:
-          "About two days of review by me, not just a scanner. I check what you built, then walk you through what to fix first.",
-        includes: [
-          "A review of your app's code",
-          "Database rules, logins and secret keys",
-          "Payments and running costs",
-          "A ranked fix list with time estimates",
-          "A 30-minute call to go through it",
-          "For apps with a chatbot or AI agent: an AI answer test, +£450 (US$600). I test for made-up answers, leaked data and prompt injection (tricking the AI into breaking its rules).",
-        ],
-      },
-      {
-        title: "Fixes before launch",
-        status: "Available now",
-        price: "From £1,000 (US$1,350)",
-        priceDetail:
-          "£500 per day in the quote, minimum two days. £250 off if you book within 30 days of your check.",
-        description:
-          "I fix what's on your list, test each fix and re-check the app. A fixed price, agreed in writing before I start.",
-        includes: [
-          "Fixes from your list, each tested",
-          "A re-check once they're done",
-          "Or the launch-ready bundle, £3,150 (US$4,200): the check, up to 4 days of fixes, launch setup (error alerts, spending caps, a backup check) and 2 weeks of help with anything my fixes affect. Unused fix days are refunded at £500 each.",
-        ],
-      },
       {
         /**
          * Evidence named in the copy is what has been built and deployed: the
          * blog's agents draft posts that the owner approves before anything
-         * publishes, and Cited answers from documents with the source shown.
+         * publishes.
          */
-        title: "Then automate the busywork",
+        title: "AI automations and workflows",
         status: "Available now",
-        price: "From £1,000 (US$1,350)",
-        priceDetail:
-          "For one automation. An AI agent that asks you before it acts, from £2,500 (US$3,350).",
         description:
-          "Once your app is solid, I take repetitive work off you. I build and run this kind of system myself: a team of AI agents drafts the posts on my blog for me to approve, and Cited answers from documents with the source shown.",
+          "I take the tasks you repeat every week off your hands: moving data between tools, reports, follow-ups and first drafts. I build and run this kind of system myself: a team of AI agents drafts the posts on my blog for me to approve.",
         includes: [
           "Built in code you own, with no per-task fees",
           "Tested on real examples before it goes live",
@@ -108,45 +75,65 @@ export const positioning = {
         ],
       },
       {
-        // No reply-time promise until the enquiry triage automation is live.
-        title: "Care plan",
+        // Cited and E.V are live; both answer only from their documents.
+        title: "AI agents",
         status: "Available now",
-        price: "£195 (US$260) a month",
-        priceDetail: "Cancel with 30 days' notice.",
         description:
-          "Keeps a launched app healthy. Only for apps I've checked or built. It's not an emergency service.",
+          "Agents that read, decide and draft, then ask you before they act. Cited answers from documents and shows the source behind every answer, and E.V answers questions about my work on this site.",
         includes: [
-          "Security updates, error logs, spending and backups checked monthly",
-          "Up to 2 hours of small fixes",
-          "A short monthly report",
+          "Answers from your own documents, with sources",
+          "Says so when your documents don't cover a question",
+          "Asks you before it sends, posts or spends anything",
+        ],
+      },
+      {
+        // Future roadmap until the owner's first game is released (ADR-0032 D2).
+        title: "Games",
+        status: "Future roadmap",
+        description:
+          "I'm building my first Roblox game with Roblox Studio and Claude Code, in public. Game projects open once it's released.",
+        includes: [
+          "Follow the build from first idea to release",
+        ],
+      },
+      {
+        // No reply-time promise until the enquiry triage automation is live.
+        title: "Websites and care plans",
+        status: "Available now",
+        description:
+          "I also build websites like this one. For anything I've built, a monthly care plan keeps it healthy. It's not an emergency service.",
+        includes: [
+          "Built with Next.js and TypeScript, tested on every change",
+          "Care plan: updates, error logs, spending and backups checked monthly, plus small fixes",
         ],
       },
     ],
     /**
-     * v0 is left out until its code export has been checked; n8n, Make and
-     * Zapier are not offered yet (pricing paper §3).
+     * n8n, Make and Zapier are not offered yet: the owner builds in code. The
+     * public-build line exists because building in public is the brand, and a
+     * client must know their details stay private.
      */
     scopeNote:
-      "What I check: apps built with Lovable, Bolt, Cursor, Claude Code or similar tools, usually React or Next.js with a Supabase database, plus any AI chatbot or agent inside them. Every fix or build starts with a defined task and a written quote that says what it doesn't cover. Anything that handles personal data gets its own privacy review, agreed before work starts.",
+      "Every project starts with a defined task and a written quote that says what it includes and what it doesn't. Anything that handles personal data gets its own privacy review, agreed before work starts. I build in public, but I never share your data or details without your permission.",
     priceNote:
-      "Every price is the total. I'm not VAT-registered, so no VAT is added. Your app's hosting and AI costs stay in your own accounts; I estimate them in your check.",
+      "Each quote is the total you pay. I'm not VAT-registered, so no VAT is added. Your hosting and AI running costs stay in your own accounts; I estimate them in the quote.",
     foundingNote:
-      "Founding offer: my first five clients get 20% off the first thing they buy, in return for permission to publish an honest case study. Care plans aren't discounted.",
+      "Founding offer: my first five clients get 20% off their first project, in return for permission to publish an honest case study. Care plans aren't discounted.",
     relatedWork:
-      "I also build websites, run AI, Python and data training for professional groups, and have worked in digital content and e-commerce operations.",
+      "I also run AI, Python and data training for professional groups, and have worked in digital content and e-commerce operations.",
   },
   /**
    * The hero's example run. Synthetic by design and labelled as such on the
-   * page: it shows what a typical build check finds, not a client's app.
+   * page: it shows how an agent handles one enquiry, not a client's system.
    */
   exampleRun: {
-    title: "An example build check",
-    caption: "An illustration of what a check looks at, not a client's app.",
+    title: "An example automation",
+    caption: "An illustration of how an automation runs, not a client's system.",
     steps: [
-      { title: "Logins and database rules", detail: "Found: any signed-in user can read every customer's records. Fix first, about 2 hours." },
-      { title: "Secret keys", detail: "Found: the payment key is sent to every visitor's browser. Move it to the server, about 1 hour." },
-      { title: "Running costs", detail: "Found: no spending cap on AI calls. Add a cap and an alert, about 1 hour." },
-      { title: "Your fix list", detail: "Ranked by risk, with time estimates, and a 30-minute call to go through it." },
+      { title: "A new enquiry arrives", detail: "It's saved, and an acknowledgement goes out straight away." },
+      { title: "An agent drafts the reply", detail: "From your own notes and prices, with the source for each answer." },
+      { title: "Your phone gets an alert", detail: "It shows the enquiry type and how urgent it is." },
+      { title: "You approve it", detail: "Nothing is sent until you've read it and said yes." },
     ],
   },
   /**
@@ -236,8 +223,8 @@ export const positioning = {
   },
   /** The home page's search description; under 160 characters (ADR-0031 D5). */
   seoDescription:
-    "Joseph Florendo checks and fixes apps built with AI tools like Lovable, Bolt and Cursor, so founders can launch safely, then automates the busywork.",
+    "Joseph Florendo designs and builds AI agents and automations for businesses and creators, and makes games, all built in public.",
   /** Third-person descriptor used by structured data. */
   personDescription:
-    "Joseph Florendo is an AI automation developer in Windsor, UK. He helps founders who built with AI tools make their apps safe and ready to launch, then automates the busywork.",
+    "Joseph Florendo is an AI automation developer in Windsor, UK. He designs and builds AI agents and automations for businesses and creators, and makes games, all in public.",
 } as const;
