@@ -35,6 +35,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${SITE_URL}/privacy`,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
   ];
 
   // One entry per project that has a dedicated case-study route.

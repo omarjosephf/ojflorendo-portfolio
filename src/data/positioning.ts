@@ -211,6 +211,56 @@ export const positioning = {
     link: "Read the full story",
   },
   /**
+   * "Your questions" (owner-approved 20 October 2026). Each answer restates
+   * what the services and How it works already say; nothing new is promised,
+   * and there is no reply time until the enquiry triage automation is live.
+   */
+  questions: {
+    heading: "Your questions",
+    intro: "Straight answers to what people ask before they start a project.",
+    items: [
+      {
+        question: "Do I need to be technical?",
+        answer:
+          "No. Describe the task in your own words. I'll ask which tools you use and what a finished job looks like, then explain the plan in plain language.",
+      },
+      {
+        question: "How much does a project cost?",
+        answer:
+          "Every project is quoted after a free 30-minute call, in writing, before any work starts. The quote is the total you pay. Your hosting and AI running costs stay in your own accounts, and I estimate them in the quote.",
+      },
+      {
+        question: "How long does a build take?",
+        answer:
+          "It depends on the task. The written quote states the timing, and I share progress as I build so you can check the work along the way.",
+      },
+      {
+        question: "Who owns what you build?",
+        answer:
+          "You do. It's built in code you own, with no per-task fees, and you get a handover guide so you can run it yourself.",
+      },
+      {
+        question: "Will the AI act without asking me?",
+        answer:
+          "Not for anything that matters. Automations include an approval step, and agents ask you before they send, post or spend anything. Error alerts and spending caps are built in.",
+      },
+      {
+        question: "You build in public. Will you share my project?",
+        answer:
+          "Not without your permission. Your data and details stay private, and anything that handles personal data gets its own privacy review before work starts.",
+      },
+      {
+        question: "Do you work outside the UK?",
+        answer: "Yes. I'm based in Windsor and work remotely with businesses and creators anywhere.",
+      },
+      {
+        question: "What happens after handover?",
+        answer:
+          "You can run it yourself with the handover guide. For anything I've built, a monthly care plan keeps it healthy with updates, checks and small fixes. It's not an emergency service.",
+      },
+    ],
+  },
+  /**
    * The contact section (ADR-0033). No reply-time promise until the enquiry
    * triage automation is live; the call length matches "How it works".
    */

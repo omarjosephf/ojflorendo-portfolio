@@ -53,6 +53,11 @@ export function Footer() {
         <div className="jf-footer-base">
           <p>© {new Date().getFullYear()} {site.name}. All rights reserved.</p>
           <p>Designed and built by Joseph Florendo.</p>
+          <p>
+            <Link className="jf-footer-link" href="/privacy">
+              Privacy notice
+            </Link>
+          </p>
         </div>
       </Container>
     </footer>

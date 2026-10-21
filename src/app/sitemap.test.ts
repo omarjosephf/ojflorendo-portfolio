@@ -13,6 +13,7 @@ describe("sitemap", () => {
     expect(entries.some((e) => e.url === `${SITE_URL}/`)).toBe(true);
     expect(entries.some((e) => e.url === `${SITE_URL}/about`)).toBe(true);
     expect(entries.some((e) => e.url === `${SITE_URL}/blog`)).toBe(true);
+    expect(entries.some((e) => e.url === `${SITE_URL}/privacy`)).toBe(true);
   });
 
   it("includes one absolute entry per project case study", () => {
@@ -21,10 +22,10 @@ describe("sitemap", () => {
       const url = `${SITE_URL}/projects/${project.slug}`;
       expect(entries.some((e) => e.url === url)).toBe(true);
     }
-    // Three standalone pages plus one entry per case study and published blog
+    // Four standalone pages plus one entry per case study and published blog
     // post. Drafts are filtered by the blog repository before they reach here.
     expect(entries.length).toBe(
-      3 + withCaseStudy.length + getPublishedPosts().length,
+      4 + withCaseStudy.length + getPublishedPosts().length,
     );
   });
 

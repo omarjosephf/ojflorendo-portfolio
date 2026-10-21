@@ -531,6 +531,18 @@ export function ContactForm({
             enquiry.{" "}
             <span className="text-accent">*</span>
           </label>
+          <p className="mt-1 text-sm text-muted">
+            How they&apos;re handled is in the{" "}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ink underline decoration-accent underline-offset-4"
+            >
+              privacy notice (opens in a new tab)
+            </a>
+            .
+          </p>
           {errors.consent ? (
             <p
               id={`${fid("consent")}-error`}

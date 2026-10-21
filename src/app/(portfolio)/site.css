@@ -1466,3 +1466,30 @@
     padding-bottom: 24px;
   }
 }
+
+/* ---------- Notices and the privacy page (21 October 2026) ---------- */
+/* The 404 and error pages: one heading, one sentence, the ways out. */
+.jf-notice {
+  display: flex;
+  min-height: 70vh;
+  align-items: center;
+}
+.jf-notice-label {
+  margin: 0 0 16px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.jf-notice-actions {
+  margin-top: 40px;
+}
+/* The privacy notice reads as rows; paragraphs inside a row keep a gap. */
+.jf-privacy {
+  padding-top: clamp(112px, 12vw, 160px);
+}
+.jf-privacy-text {
+  display: grid;
+  gap: 14px;
+}
