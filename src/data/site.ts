@@ -10,7 +10,7 @@ import type { SiteConfig } from "@/types";
 export const site: SiteConfig = {
   name: "Joseph Florendo",
   // Rendered on the social preview card; the on-page hero owns its own copy.
-  headline: "AI automations that take repetitive work off your business.",
+  headline: "I make apps built with AI tools safe, solid and ready to launch.",
   descriptor: "AI Automation Developer",
   location: "Windsor, Berkshire, United Kingdom",
   email: "ojflorendo.connect@gmail.com",

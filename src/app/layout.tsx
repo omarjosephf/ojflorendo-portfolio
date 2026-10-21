@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     "workflow automation",
     "AI agents",
     "AI assistants",
-    "automation audit",
+    "AI build check",
     "business automation",
     "portfolio",
     "Python",

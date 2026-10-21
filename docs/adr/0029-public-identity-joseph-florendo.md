@@ -1,7 +1,8 @@
 # ADR-0029: Public identity — Joseph Florendo, AI Automation Developer
 
 - Status: Accepted — owner decisions of 13 and 14 October 2026. The handbook
-  v1.3.0 text that carries it is ratified at pull-request review.
+  v1.3.0 text that carries it is ratified at pull-request review. D3 is
+  amended by [ADR-0031](0031-build-check-services-and-prices.md).
 - Date: 2026-10-14
 - Owner: OJ Florendo
 - Risk: R2. Public identity, metadata and the assistant corpus change; no trust

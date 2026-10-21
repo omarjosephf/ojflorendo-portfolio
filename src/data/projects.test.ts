@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { getProjectBySlug, projects } from "./projects";
 
+describe("case-study search descriptions (ADR-0031 D5)", () => {
+  // Search results cut long descriptions, and a sliced overview ended mid-word.
+  it("gives every case study a whole-sentence description under 160 characters", () => {
+    const caseStudies = projects.filter((project) => project.caseStudy);
+    expect(caseStudies.length).toBeGreaterThan(0);
+    for (const project of caseStudies) {
+      const description = project.caseStudy!.seoDescription;
+      expect(description.length, project.slug).toBeLessThanOrEqual(160);
+      expect(description, project.slug).toMatch(/\.$/);
+    }
+  });
+});
+
 describe("getProjectBySlug", () => {
   it("returns the live portfolio platform with a case study", () => {
     const project = getProjectBySlug("personal-portfolio-website");

@@ -31,6 +31,8 @@ export const projects: ProjectItem[] = [
     caseStudy: {
       tagline:
         "A website that makes my work easier to explore and gives prospective clients a clear way to get in touch.",
+      seoDescription:
+        "How Joseph Florendo built this site with Next.js and TypeScript: tested on every change, served under a strict security policy, with an AI assistant on board.",
       overview:
         "This is my own professional platform. It brings together project case studies, background information and a contact journey in a responsive website. Its development shows how I approach content, interface decisions, accessibility, testing and ongoing improvement.",
       context:
@@ -146,6 +148,8 @@ export const projects: ProjectItem[] = [
     caseStudy: {
       tagline:
         "Explore answers alongside the document passages used to produce them.",
+      seoDescription:
+        "Cited answers questions from a set of documents, shows the passage behind every answer and refuses what they don't cover. How it was built and tested.",
       overview:
         "Cited is my document-assistant demo. It retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It also tests how the assistant handles questions the documents do not cover. It is deployed as a containerised web service with a command-line interface, and every claim made about its quality is reproducible from the repository with a single command.",
       context:

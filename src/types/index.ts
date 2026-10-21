@@ -70,6 +70,8 @@ export interface CaseStudyChallenge {
 
 export interface CaseStudy {
   tagline: string;
+  /** The page's search description: a whole sentence under 160 characters. */
+  seoDescription: string;
   overview: string;
   context: string;
   goals: string[];

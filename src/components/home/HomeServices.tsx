@@ -3,8 +3,6 @@ import { HomeSection } from "@/components/home/HomeSection";
 
 const { services } = positioning;
 const [lead, ...rest] = services.offers;
-const detailed = rest.filter((offer) => offer.includes.length > 0);
-const oneLiners = rest.filter((offer) => offer.includes.length === 0);
 
 function Status({ label }: { label: string }) {
   return (
@@ -15,18 +13,29 @@ function Status({ label }: { label: string }) {
   );
 }
 
+/** The total the client pays, then the terms that go with it. */
+function Price({ price, detail }: { price: string; detail: string }) {
+  return (
+    <div className="jf-offer-price">
+      <p className="jf-offer-price-amount">{price}</p>
+      <p className="jf-offer-price-detail">{detail}</p>
+    </div>
+  );
+}
+
 /**
- * The owner's order (ADR-0029 D3). The lead offer gets the room; the next two
- * are rows; websites stay one line, as decided. Every offer shows its §6.2
- * label beside its title.
+ * The owner's order (ADR-0031). The build check is the lead offer and gets the
+ * room; the next three are rows. Every offer shows its §6.2 label and its
+ * approved price beside its title.
  */
 export function HomeServices() {
   return (
-    <HomeSection id="services" title="What I build for you" intro={services.intro}>
+    <HomeSection id="services" title="Services and prices" intro={services.intro}>
       <article className="jf-offer-lead" aria-labelledby="offer-lead-title">
         <div className="jf-offer-lead-copy">
           <h3 id="offer-lead-title" className="jf-offer-lead-title">{lead.title}</h3>
           <Status label={lead.status} />
+          <Price price={lead.price} detail={lead.priceDetail} />
           <p className="jf-offer-text">{lead.description}</p>
         </div>
         <ul className="jf-offer-includes" aria-label={`Included in ${lead.title.toLowerCase()}`}>
@@ -37,11 +46,12 @@ export function HomeServices() {
       </article>
 
       <div className="jf-offer-rows">
-        {detailed.map((offer) => (
+        {rest.map((offer) => (
           <article key={offer.title} className="jf-offer-row">
             <div>
               <h3 className="jf-offer-title">{offer.title}</h3>
               <Status label={offer.status} />
+              <Price price={offer.price} detail={offer.priceDetail} />
             </div>
             <div>
               <p className="jf-offer-text">{offer.description}</p>
@@ -53,19 +63,12 @@ export function HomeServices() {
             </div>
           </article>
         ))}
-        {oneLiners.map((offer) => (
-          <article key={offer.title} className="jf-offer-row jf-offer-row-short">
-            <div>
-              <h3 className="jf-offer-title">{offer.title}</h3>
-              <Status label={offer.status} />
-            </div>
-            <p className="jf-offer-text">{offer.description}</p>
-          </article>
-        ))}
       </div>
 
       <div className="jf-notes">
         <p>{services.scopeNote}</p>
+        <p>{services.priceNote}</p>
+        <p>{services.foundingNote}</p>
         <p>{services.relatedWork}</p>
       </div>
     </HomeSection>

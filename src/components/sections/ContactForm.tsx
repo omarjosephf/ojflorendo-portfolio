@@ -331,8 +331,8 @@ export function ContactForm({ nonce }: { nonce?: string } = {}) {
             textarea alongside the character counter.
           */}
           <p id={`${fid("message")}-guide`} className="mb-1.5 text-xs leading-relaxed text-muted">
-            Which task do you repeat, which tools are involved and what would a finished job look like?
-            Include timing and budget if useful.
+            What does your app do, which tools did you build it with, and when do you want to launch?
+            A link helps. Or describe the task you&apos;d like automated.
           </p>
           <textarea
             id={fid("message")}

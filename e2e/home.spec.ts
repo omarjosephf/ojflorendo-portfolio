@@ -16,7 +16,7 @@ test.describe("Homepage", () => {
       /Joseph Florendo \| AI Automation Developer/,
     );
     await expect(
-      page.getByRole("link", { name: "Automate a task" }),
+      page.getByRole("link", { name: "Get your app checked" }),
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "See my work" }),
@@ -98,7 +98,7 @@ test.describe("Homepage", () => {
       await expect(page.locator("canvas")).toHaveCount(0);
     }
   });
-  // The hero's one orchestrated moment: an example automation plays once,
+  // The hero's one orchestrated moment: an example build check plays once,
   // step by step, then rests with every step visible. Replay repeats it.
   test("the example run plays once, then rests", async ({ page }) => {
     await page.goto("/");
@@ -136,7 +136,7 @@ test.describe("Homepage", () => {
     await page.goto("/");
     // Playwright's actionability check fails if another element would receive
     // the click, so this also proves no background layer intercepts it.
-    await page.getByRole("link", { name: "Automate a task" }).click();
+    await page.getByRole("link", { name: "Get your app checked" }).click();
     await expect(page).toHaveURL(/#contact$/);
   });
 
