@@ -17,6 +17,14 @@ row and its "Checked" cell.
 
 ### Now
 
+- **Launch moved ahead of phase 15a by owner decision on 30 October 2026**
+  ("Launch now anyway"). The launch pull request carries the redesign (rows 8,
+  9 and 11 as built), `josephflorendo.com` as the main address (row 12's
+  domain move only), the dependency fixes (row 7) and Next.js 16.4.3. E.V's
+  knowledge files stay at the pinned corpus `7bddb04`, so phase 15a is still
+  valid; row 10 still follows it. Not in the launch: row 12's service pages,
+  row 9's owner items (privacy wording, booking link, CV) and row 13's smoke
+  pass beyond the live checks recorded on the pull request.
 - **The owner's next step is phase 15a**, the answer captures. Its date gate
   passed on 1 October and no capture has run. It blocks the launch, E.V's
   sign-off, E.V's knowledge update and blog phase 18.6. Phase 15-prep's free
