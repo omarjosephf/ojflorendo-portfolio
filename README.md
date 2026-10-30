@@ -28,7 +28,7 @@ security treated as first-class requirements.
 
 ## Live demo
 
-> 🔗 **Live site:** https://ojfr.me
+> 🔗 **Live site:** https://josephflorendo.com
 
 ## Screenshots of the earlier design
 
@@ -238,7 +238,7 @@ env files). All values below are placeholders.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | optional | Overrides the canonical site URL (defaults to `https://ojfr.me`); useful for preview deployments. |
+| `NEXT_PUBLIC_SITE_URL` | optional | Overrides the canonical site URL (defaults to `https://josephflorendo.com`); useful for preview deployments. |
 | `RESEND_API_KEY` | optional | Enables real contact-email delivery (server-only). Without it, the form uses a safe mock transport. |
 | `CONTACT_TO_EMAIL` | optional | Inbox that receives contact enquiries (server-only). |
 | `CONTACT_FROM_EMAIL` | optional | Verified sender address for enquiries (server-only). |
@@ -411,7 +411,7 @@ updates.
 **Joseph Florendo** — AI Automation Developer, Windsor, Berkshire, United Kingdom
 Final-year BSc (Honours) Computing and IT (Software) student.
 
-- Website: https://ojfr.me
+- Website: https://josephflorendo.com
 - LinkedIn: <https://www.linkedin.com/in/ojflorendo>
 - GitHub: <https://github.com/omarjosephf>
 - Email: ojflorendo.connect@gmail.com

@@ -20,7 +20,7 @@ describe("getProjectBySlug", () => {
     expect(project).toBeDefined();
     expect(project?.title).toBe("Personal Portfolio & Professional Platform");
     expect(project?.status).toBe("Live");
-    expect(project?.liveUrl).toBe("https://ojfr.me/");
+    expect(project?.liveUrl).toBe("https://josephflorendo.com/");
     expect(project?.caseStudy).toBeDefined();
   });
 

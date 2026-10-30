@@ -24,7 +24,7 @@ export const projects: ProjectItem[] = [
     // Pre-sized at 2x the rendered 552x160 card area. Cards fall back to the
     // abstract placeholder when this is null.
     image: "/images/projects/personal-portfolio-website.webp",
-    liveUrl: "https://ojfr.me/",
+    liveUrl: "https://josephflorendo.com/",
     githubUrl: "https://github.com/omarjosephf/ojflorendo-portfolio",
     featured: true,
     ariaLabel: "Personal Portfolio & Professional Platform case study",

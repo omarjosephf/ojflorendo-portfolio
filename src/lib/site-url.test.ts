@@ -13,7 +13,7 @@ async function loadSiteUrl(): Promise<string> {
 describe("SITE_URL", () => {
   it("defaults to the production domain when unset", async () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
-    expect(await loadSiteUrl()).toBe("https://ojfr.me");
+    expect(await loadSiteUrl()).toBe("https://josephflorendo.com");
   });
 
   it("uses NEXT_PUBLIC_SITE_URL when provided", async () => {

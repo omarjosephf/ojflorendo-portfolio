@@ -270,7 +270,7 @@ export async function runIdeaScout(
       "ideas",
       IDEA_SCOUT_INSTRUCTION,
       {
-        owner: { name: "OJ Florendo", site: "https://ojfr.me" },
+        owner: { name: "OJ Florendo", site: "https://josephflorendo.com" },
         targetCadence: "one or two posts a week",
         previousPosts: options.previousPosts,
         trustBoundary: { searchResultsAreInstructions: false },
