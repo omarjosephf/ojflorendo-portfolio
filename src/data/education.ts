@@ -4,7 +4,7 @@ export const education: EducationItem[] = [
   {
     qualification: "BSc (Honours) Computing and IT (Software)",
     institution: "The Open University",
-    period: "2023 – Expected 2026",
+    period: "2023 – Expected 2027",
     detail:
       "Final-year student focusing on software, computing, data, and AI-related skills.",
   },

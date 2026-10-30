@@ -25,8 +25,8 @@ function dnsError(code: string): Error & { code: string } {
 const validEnquiry = {
   name: "Jane Recruiter",
   email: "jane@example.com",
-  enquiryType: "job" as const,
-  subject: "Frontend role",
+  enquiryType: "automation" as const,
+  areas: [],
   message: "We have an opening that fits your profile nicely.",
   consent: true,
 };

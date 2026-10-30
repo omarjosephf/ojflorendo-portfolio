@@ -8,10 +8,13 @@ import { positioning } from "@/data/positioning";
 import { site } from "@/data/site";
 import { SITE_URL } from "@/lib/site-url";
 
+// Inter and Barlow serve /manage only; the public site sets Archivo in its own
+// layout. Not preloaded, so public pages never download them (ADR-0030).
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  preload: false,
 });
 
 const display = Barlow_Condensed({
@@ -19,9 +22,10 @@ const display = Barlow_Condensed({
   weight: ["500", "600", "700"],
   variable: "--font-display",
   display: "swap",
+  preload: false,
 });
 
-const title = "OJ Florendo Rayatchi | Websites for Service Businesses";
+const title = "Joseph Florendo | AI Automation Developer";
 const description = positioning.seoDescription;
 
 export const metadata: Metadata = {
@@ -35,13 +39,14 @@ export const metadata: Metadata = {
   authors: [{ name: site.name }],
   creator: site.name,
   keywords: [
-    "OJ Florendo Rayatchi",
-    "OJ Florendo",
-    "web developer",
-    "websites for small businesses",
-    "service business website",
-    "AI product builder",
-    "AI document assistant",
+    "Joseph Florendo",
+    "AI automation developer",
+    "AI automation",
+    "workflow automation",
+    "AI agents",
+    "AI assistants",
+    "AI workflows",
+    "business automation",
     "portfolio",
     "Python",
     "AI training",

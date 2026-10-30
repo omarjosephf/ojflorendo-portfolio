@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { watchPage, hasNoHorizontalOverflow } from "./helpers";
+import { watchPage, hasNoHorizontalOverflow, simulateHardwareWebGL, SCENE_VIEWPORT } from "./helpers";
 
 test.describe("Homepage", () => {
   test("loads with the approved identity and no page/CSP errors", async ({
@@ -9,16 +9,14 @@ test.describe("Homepage", () => {
     const watcher = await watchPage(page);
     await page.goto("/");
 
-    // The h1 states the offer; the name is carried by the hero meta line, the
-    // nav wordmark, About and the footer.
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Make your services clear.Make the next step easy.",
-    );
+    // The h1 is the name (ADR-0029); the role and the offer follow it.
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Joseph Florendo");
+    await expect(page.getByText("AI Automation Developer in Windsor, UK")).toBeVisible();
     await expect(page).toHaveTitle(
-      /OJ Florendo Rayatchi \| Websites for Service Businesses/,
+      /Joseph Florendo \| AI Automation Developer/,
     );
     await expect(
-      page.getByRole("link", { name: "Discuss your website" }),
+      page.getByRole("link", { name: "Start a project" }),
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "See my work" }),
@@ -44,59 +42,101 @@ test.describe("Homepage", () => {
     expect(await hasNoHorizontalOverflow(page)).toBe(true);
   });
 
-  test("the redesign loads no continuous canvas on phones or desktop", async ({ page }) => {
-    for (const width of [390, 1440]) {
-      await page.setViewportSize({ width, height: 900 });
+  // ADR-0030: one decorative canvas behind the home page, never in the way.
+  test("the star sky is one decorative canvas behind the page, with no large chunk", async ({ page }) => {
+    await simulateHardwareWebGL(page);
+    // Both sides of the 768 px compact breakpoint, kept short (SCENE_VIEWPORT).
+    for (const width of [390, 1024]) {
+      await page.setViewportSize({ width, height: SCENE_VIEWPORT.height });
       await page.goto("/");
       await page.waitForLoadState("load");
-      await expect(page.locator("canvas")).toHaveCount(0);
+      const sky = page.locator("canvas");
+      await expect(sky).toHaveCount(1);
+      await expect(sky).toHaveAttribute("aria-hidden", "true");
+      await expect(sky).toHaveCSS("pointer-events", "none");
+      await expect(sky).toHaveCSS("position", "fixed");
+      await expect(sky).toHaveAttribute("data-engine", "running");
       const oversizedChunks = await page.evaluate(() => performance.getEntriesByType("resource").filter((r) => /chunks/.test(r.name) && (r as PerformanceResourceTiming).transferSize > 150_000).length);
       expect(oversizedChunks).toBe(0);
     }
   });
 
-  // The rotating project-preview stack was replaced by the owner-approved
-  // portrait, which is deliberately static. The finite-entrance contract now
-  // belongs to the hero heading, which is what still animates.
-  test("hero heading visibly settles, then stops animating", async ({ page }) => {
+  test("the star sky pauses in a hidden tab and resumes", async ({ page }) => {
+    await simulateHardwareWebGL(page);
+    await page.setViewportSize(SCENE_VIEWPORT);
     await page.goto("/");
-    const line = page.locator(".hero-offer > span").first();
-    await page.evaluate(async () => {
-      await document.fonts.ready;
-      for (const animation of document.getAnimations()) {
-        animation.pause();
-        animation.currentTime = 0;
-      }
-    });
-    const start = await line.evaluate((el) => getComputedStyle(el).transform);
-    // Text must retain its reviewed contrast even at the entrance's first frame.
-    expect(await page.locator(".hero-offer > span").evaluateAll((elements) =>
-      elements.every((el) => getComputedStyle(el).opacity === "1")
-    )).toBe(true);
+    const sky = page.locator("canvas.jf-sky");
+    await expect(sky).toHaveAttribute("data-engine", "running");
     await page.evaluate(() => {
-      for (const animation of document.getAnimations()) animation.finish();
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => true });
+      document.dispatchEvent(new Event("visibilitychange"));
     });
-    const end = await line.evaluate((el) => getComputedStyle(el).transform);
-    expect(end).not.toBe(start);
-    expect(await page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === "running").length)).toBe(0);
+    await expect(sky).toHaveAttribute("data-engine", "paused");
+    await page.evaluate(() => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => false });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(sky).toHaveAttribute("data-engine", "running");
+  });
+
+  test("a software WebGL renderer draws no sky, like no WebGL at all", async ({ page }) => {
+    await page.goto("/");
+    const sky = page.locator("canvas.jf-sky");
+    await expect(sky).toHaveAttribute("data-renderer", "software");
+    await expect(sky).toHaveAttribute("data-engine", "off");
+  });
+
+  // ADR-0027: the blog front page shares the sky; post pages and case studies keep none.
+  test("other public pages carry no star canvas", async ({ page }) => {
+    await page.goto("/blog");
+    await page.waitForLoadState("load");
+    await expect(page.locator("canvas.jf-sky")).toHaveCount(1);
+    await expect(page.locator("canvas")).toHaveCount(1);
+    for (const path of ["/blog/evaluating-retrieval-systems-refusal-testing-and-quote-integrity", "/projects/cited"]) {
+      await page.goto(path);
+      await page.waitForLoadState("load");
+      await expect(page.locator("canvas")).toHaveCount(0);
+    }
+  });
+  // The hero's one orchestrated moment: an example automation plays once,
+  // step by step, then rests with every step visible. Replay repeats it.
+  test("the example run plays once, then rests", async ({ page }) => {
+    await page.goto("/");
+    const steps = page.locator(".jf-run-step");
+    await expect(steps).toHaveCount(4);
+    // Every step's text is visible at all times; only the markers change.
+    for (const step of await steps.all()) await expect(step).toBeVisible();
+    await expect(page.locator('.jf-run-step[data-state="done"]')).toHaveCount(4, { timeout: 10_000 });
+    const replay = page.getByRole("button", { name: "Replay" });
+    await expect(replay).toBeEnabled();
+    await expect
+      .poll(() => page.evaluate(() => document.getAnimations().filter((a) => a.playState === "running").length))
+      .toBe(0);
+    await replay.click();
+    await expect(page.locator('.jf-run-step[data-state="done"]')).not.toHaveCount(4);
+    await expect(page.locator('.jf-run-step[data-state="done"]')).toHaveCount(4, { timeout: 10_000 });
   });
 
   test("reduced motion is complete and static", async ({ page }) => {
+    await simulateHardwareWebGL(page);
+    await page.setViewportSize(SCENE_VIEWPORT);
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
-    await expect(page.locator(".hero-portrait-blend img")).toBeVisible();
     await expect(page.locator("#services-heading")).toBeVisible();
+    await expect(page.locator('.jf-run-step[data-state="done"]')).toHaveCount(4);
+    await expect(page.getByRole("button", { name: "Replay" })).toHaveCount(0);
+    // The sky draws one still frame and runs no loop.
+    await expect(page.locator("canvas.jf-sky")).toHaveAttribute("data-engine", "still");
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
-    expect(await page.locator(".hero-offer > span").first().evaluate((el) => getComputedStyle(el).transform)).toBe("none");
   });
+
   test("the project enquiry action is immediately available", async ({
     page,
   }) => {
     await page.goto("/");
-    // The particle-wave canvas is fixed over the whole viewport on every page.
     // Playwright's actionability check fails if another element would receive
-    // the click, so this asserts the canvas stays pointer-events: none.
-    await page.getByRole("link", { name: "Discuss your website" }).click();
+    // the click, so this also proves no background layer intercepts it.
+    await page.getByRole("link", { name: "Start a project" }).click();
     await expect(page).toHaveURL(/#contact$/);
   });
 

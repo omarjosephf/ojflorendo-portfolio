@@ -39,25 +39,20 @@ const SITE_KEY = "0xTEST_SITE_KEY";
 
 function fillValidForm() {
   fireEvent.change(screen.getByLabelText(/your name/i), {
-    target: { value: "Jane Recruiter" },
+    target: { value: "Jane Baker" },
   });
   fireEvent.change(screen.getByLabelText(/email address/i), {
     target: { value: "jane@example.com" },
   });
-  fireEvent.change(screen.getByLabelText(/enquiry type/i), {
-    target: { value: "job" },
+  fireEvent.click(screen.getByLabelText(/ai automation or workflow/i));
+  fireEvent.change(screen.getByLabelText(/how can i help/i), {
+    target: { value: "We answer the same booking questions every day." },
   });
-  fireEvent.change(screen.getByLabelText(/subject/i), {
-    target: { value: "Frontend role" },
-  });
-  fireEvent.change(screen.getByLabelText(/tell me about the project/i), {
-    target: { value: "We have an opening that fits your profile nicely." },
-  });
-  fireEvent.click(screen.getByLabelText(/happy for OJ Florendo/i));
+  fireEvent.click(screen.getByLabelText(/happy for Joseph Florendo/i));
 }
 
 const submitButton = () =>
-  screen.getByRole("button", { name: /send project enquiry/i });
+  screen.getByRole("button", { name: /send enquiry/i });
 
 /** Deliver a token from the mocked widget, as Cloudflare would. */
 function emitToken(token: string) {

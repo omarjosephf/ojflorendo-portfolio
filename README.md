@@ -1,4 +1,4 @@
-# OJ Florendo — Portfolio &amp; Platform
+# Joseph Florendo — Portfolio &amp; Platform
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
@@ -7,26 +7,28 @@
 ![License](https://img.shields.io/badge/license-All_Rights_Reserved-9E9E9E)
 
 A premium, accessible and security-conscious personal website — the foundation of
-a long-term platform documenting **OJ Florendo’s** journey across software
+a long-term platform documenting **Joseph Florendo’s** journey across AI automation, software
 engineering, AI, data, learning and entrepreneurship. The design uses warm editorial typography, real project imagery, finite motion, the existing experience timeline, an accessible contact form and dedicated project case-study routes.
 
 The owner approved the design and its publication on 7 September 2026. Its scope and validation are recorded in [the design notes](docs/portfolio-redesign-preview.md) and [release notes](docs/releases/2026-09-07-portfolio-redesign.md).
 
 ## Purpose
 
-This site presents **OJ Florendo** — a software developer and final-year BSc
-Computing and IT (Software) student — to small service businesses looking for a
-website, to collaborators, and to anyone reviewing his work. It leads with a
+This site presents **Joseph Florendo**, AI Automation Developer and final-year BSc
+Computing and IT (Software) student, to small businesses with repetitive work to
+automate, to collaborators, and to anyone reviewing his work. The public identity
+changed from OJ Florendo on 14 October 2026
+([ADR-0029](docs/adr/0029-public-identity-joseph-florendo.md)). It leads with a
 clear service offer and keeps verified experience, skills and qualifications as
 supporting background, and serves as a growing home for projects and case
-studies over time. Visitors can understand what OJ offers, explore project case
+studies over time. Visitors can understand what Joseph offers, explore project case
 studies, review that background, open LinkedIn and GitHub, and get in touch
 safely. It is built as a real product, with accessibility, performance and
 security treated as first-class requirements.
 
 ## Live demo
 
-> 🔗 **Live site:** https://ojfr.me
+> 🔗 **Live site:** https://josephflorendo.com
 
 ## Screenshots of the earlier design
 
@@ -236,7 +238,7 @@ env files). All values below are placeholders.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | optional | Overrides the canonical site URL (defaults to `https://ojfr.me`); useful for preview deployments. |
+| `NEXT_PUBLIC_SITE_URL` | optional | Overrides the canonical site URL (defaults to `https://josephflorendo.com`); useful for preview deployments. |
 | `RESEND_API_KEY` | optional | Enables real contact-email delivery (server-only). Without it, the form uses a safe mock transport. |
 | `CONTACT_TO_EMAIL` | optional | Inbox that receives contact enquiries (server-only). |
 | `CONTACT_FROM_EMAIL` | optional | Verified sender address for enquiries (server-only). |
@@ -406,10 +408,10 @@ updates.
 
 ## Author
 
-**OJ Florendo** — Windsor, Berkshire, United Kingdom
+**Joseph Florendo** — AI Automation Developer, Windsor, Berkshire, United Kingdom
 Final-year BSc (Honours) Computing and IT (Software) student.
 
-- Website: https://ojfr.me
+- Website: https://josephflorendo.com
 - LinkedIn: <https://www.linkedin.com/in/ojflorendo>
 - GitHub: <https://github.com/omarjosephf>
 - Email: ojflorendo.connect@gmail.com

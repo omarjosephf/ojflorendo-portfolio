@@ -61,13 +61,14 @@ this ADR is amended rather than superseded.
 
 ### Ratified document SHA-256
 
-**Current — the value to verify against.** Handbook v1.2.1 with §38 corrected to
-name the contact-delivery runbook that exists and §30 extended to list
-`docs:check-required-docs`, made under the second 17 September 2026 approval
-recorded below:
+**Current — the value to verify against.** Handbook v1.3.0, the public-identity
+amendment the owner approved on 14 October 2026
+([ADR-0029](0029-public-identity-joseph-florendo.md)). Its exact text is ratified
+at pull-request review; until that review this value describes a candidate, not
+a ratified document:
 
 ```text
-1d97c9166e36e4e300d6524a04a112e7b5ca4b79500fdb9ca0777bbf48e58f5f
+f1f915ded5aa4a7afef7a855d7b9594b164b74641a2612828c33bdd824daed18
 ```
 
 **This value is now enforced mechanically.** `npm run docs:check-handbook-checksum`
@@ -86,6 +87,7 @@ and none is authoritative now:
 
 | Version | Ratified | Commit | Committed bytes (LF) |
 | --- | --- | --- | --- |
+| 1.2.1 | re-ratified 2026-09-17 | `4cd21c9` | `1d97c916…e58f5f` — §38 and §30 corrected; current until v1.3.0 |
 | 1.2.1 | re-ratified 2026-09-17 | `f542749` | `060e0387…8c2ee` |
 | 1.2.1 | re-ratified 2026-09-17 | `3e9880c` | `ae68ad30…b5b021` |
 | 1.2.1 | 2026-09-08 | `2969c19` | `9bdf6a7c…d8f366` |

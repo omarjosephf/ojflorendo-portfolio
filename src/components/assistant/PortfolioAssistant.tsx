@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { OPEN_EV_EVENT } from "@/components/assistant/open-event";
 
 /**
  * The panel and its client-side validation form their own chunk,
@@ -29,6 +30,16 @@ export function PortfolioAssistant({storageEnabled=false,nonce}:{storageEnabled?
   const close = useCallback(() => {
     setOpen(false);
     toggleRef.current?.focus();
+  }, []);
+
+  // In-page "Ask E.V" buttons open the same panel instead of a second one.
+  useEffect(() => {
+    const openFromPage = () => {
+      setHasOpened(true);
+      setOpen(true);
+    };
+    window.addEventListener(OPEN_EV_EVENT, openFromPage);
+    return () => window.removeEventListener(OPEN_EV_EVENT, openFromPage);
   }, []);
 
   useEffect(() => {
@@ -88,7 +99,7 @@ export function PortfolioAssistant({storageEnabled=false,nonce}:{storageEnabled?
           decoding="async"
           className="h-7 w-7 rounded-full border border-night/40 bg-night/20 object-cover"
         />
-        Ask E.V
+        <span className="ev-launcher-label">Ask E.V</span>
       </button>
     </div>
   );

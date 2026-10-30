@@ -7,6 +7,9 @@
   (decision points 12–15). The boundary itself is unchanged; these record
   operating limits ahead of enabling real delivery.
   **Amendment ratified 2026-08-02 by OJ Florendo.**
+- Fields and allowlisted values updated by
+  [ADR-0033](0033-project-enquiry-form-and-call-booking-link.md) (2026-10-21);
+  the boundary below is unchanged.
 - Owner: OJ Florendo
 
 ## Context

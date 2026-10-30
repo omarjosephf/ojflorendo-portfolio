@@ -3,8 +3,8 @@ import { positioning } from "@/data/positioning";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "OJ Florendo Rayatchi — Portfolio & Professional Platform",
-    short_name: "OJ Florendo",
+    name: "Joseph Florendo — AI Automation Developer",
+    short_name: "Joseph Florendo",
     // One approved description, shared with the page metadata and structured
     // data so the three cannot drift apart.
     description: positioning.seoDescription,

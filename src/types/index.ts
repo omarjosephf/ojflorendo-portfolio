@@ -37,6 +37,8 @@ export interface ExperienceItem {
   location: string;
   period: string;
   current: boolean;
+  /** A training role, listed again in the About page's Teaching stage. */
+  teaching?: boolean;
   responsibilities: string[];
 }
 
@@ -68,6 +70,8 @@ export interface CaseStudyChallenge {
 
 export interface CaseStudy {
   tagline: string;
+  /** The page's search description: a whole sentence under 160 characters. */
+  seoDescription: string;
   overview: string;
   context: string;
   goals: string[];
@@ -118,6 +122,8 @@ export interface SiteConfig {
   descriptor: string;
   location: string;
   email: string;
+  /** Public link for booking a free call; null hides every booking button. */
+  bookingUrl: string | null;
   about: string[];
   cvPath: string | null;
   profileImage: string | null;

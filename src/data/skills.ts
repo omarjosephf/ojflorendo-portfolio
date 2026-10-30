@@ -19,16 +19,17 @@ export const skillGroups: SkillGroup[] = [
     ],
   },
   {
-    title: "AI product exploration",
+    title: "AI products and automation",
     summary:
-      "Document-assistant prototypes, prompt and knowledge workflows, human review and evaluation of a defined use case.",
+      "Document assistants, AI automations and agents, prompt and knowledge workflows, with human review and evaluation built in.",
     skills: [
-      "Narrow AI assistant prototypes",
+      "AI assistants grounded in your documents",
+      "AI automations",
+      "Multi-agent systems with human approval",
       "Prompt and knowledge-workflow design",
       "AI-assisted research workflows",
       "Content workflows",
-      "Small automation prototypes",
-      "Responsible AI feature exploration",
+      "Responsible AI design",
       "Human-reviewed AI-assisted engineering",
     ],
   },

@@ -2,7 +2,7 @@
  * Inline brand glyphs for GitHub and LinkedIn.
  *
  * lucide-react removed trademarked brand icons, so these are provided as simple
- * self-authored SVG paths (nominative use — they link to OJ Florendo's own profiles).
+ * self-authored SVG paths (nominative use — they link to Joseph Florendo's own profiles).
  * `currentColor` lets them inherit text colour; decorative by default.
  */
 

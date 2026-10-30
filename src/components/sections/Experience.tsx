@@ -6,9 +6,9 @@ export function Experience() {
   return (
     <Section
       id="experience"
-      eyebrow="04 / Experience"
-      title="Experience that informs my work."
-      intro="My background includes front-end development, professional training, digital content and e-commerce operations."
+      stage
+      title="Where I've worked"
+      intro="AI training, digital content and e-commerce operations, and front-end work, newest first."
     >
       <ExperienceTimeline items={experience} />
     </Section>

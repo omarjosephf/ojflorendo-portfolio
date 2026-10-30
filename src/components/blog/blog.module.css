@@ -10,43 +10,267 @@
   text-transform: uppercase;
 }
 
-.indexHeader {
-  display: grid;
-  grid-template-columns: 8rem minmax(0, 1.45fr) minmax(16rem, 0.75fr);
-  gap: 2rem;
-  align-items: start;
-  padding-bottom: 4.5rem;
+/* ---------- Front page (ADR-0027) ---------- */
+
+/* globals.css paints every <header> black; this one lets the galaxy show. */
+.showcaseHeader {
+  max-width: 52rem;
+  padding-bottom: clamp(2.5rem, 5vw, 4rem);
+  background: none;
 }
 
-.indexHeader .eyebrow {
-  padding-top: 0.7rem;
-}
-
-.indexTitle,
-.articleTitle {
+.showcaseTitle {
+  margin-top: 1rem;
   color: var(--color-ink);
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-size: clamp(2.25rem, 5.6vw, 4.75rem);
+  font-weight: 800;
+  font-stretch: 112%;
   letter-spacing: -0.035em;
+  line-height: 0.98;
   text-wrap: balance;
 }
 
-.indexTitle {
-  max-width: 13ch;
-  font-size: clamp(3rem, 6vw, 5.75rem);
-  line-height: 0.94;
+.showcaseIntro {
+  max-width: 46ch;
+  margin-top: 1.25rem;
+  color: var(--color-muted);
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+  line-height: 1.55;
+  text-wrap: pretty;
 }
 
-.indexIntro {
-  max-width: 39ch;
-  padding-top: 0.55rem;
+/* Cards: a dark panel over the sky, one link each. The title's link stretches
+   over the whole card, so the card is named by its title alone. */
+.featured,
+.card {
+  position: relative;
+  height: 100%;
+  border: 1px solid var(--color-line);
+  border-radius: 24px;
+  background: var(--jf-panel);
+  transition: border-color 0.3s var(--jf-ease);
+}
+
+.featured {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+  padding: 0.75rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 0.625rem;
+}
+
+.featured:hover,
+.card:hover,
+.featured:has(.cardLink:focus-visible),
+.card:has(.cardLink:focus-visible) {
+  border-color: rgb(242 198 109 / 0.7);
+}
+
+.cardLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 24px;
+}
+
+.cardLink:focus-visible {
+  outline: none;
+}
+
+.cardLink:focus-visible::after {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 4px;
+}
+
+.featuredBody {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 1.25rem 0.75rem 0.75rem;
+}
+
+.featuredLabel {
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.featuredTitle {
+  margin-top: 0.75rem;
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: clamp(1.625rem, 3vw, 2.625rem);
+  font-weight: 750;
+  font-stretch: 106%;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.featuredExcerpt {
+  max-width: 56ch;
+  margin-top: 1rem;
+  color: var(--jf-text-2);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  margin-top: 1.5rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.rowSection {
+  margin-top: 1.5rem;
+}
+
+.cardRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cardBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1rem 0.5rem 0.5rem;
+}
+
+.cardTitle {
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-stretch: 104%;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.cardExcerpt {
+  display: -webkit-box;
+  margin-top: 0.6rem;
+  overflow: hidden;
   color: var(--color-muted);
   font-size: 0.9375rem;
-  line-height: 1.8;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
-.indexBody {
+.card .cardMeta {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+/* The post type: a small pill with a dark fill, a coloured border and text.
+   The tints are COVER_TINTS in src/lib/blog/cover-scene.ts, whose test checks
+   each has at least 4.5:1 contrast on the fill (ADR-0027). */
+.typeLabel {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  padding: 0.15rem 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.typeCaseStudy {
+  color: #f2c66d;
+}
+
+.typeBuildNotes {
+  color: #9ecbff;
+}
+
+.typeExplainer {
+  color: #c8b8ff;
+}
+
+.olderSection {
+  margin-top: 3.5rem;
+}
+
+.olderHeading {
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.olderList {
+  margin: 1rem 0 0;
+  padding: 0;
   border-top: 1px solid var(--color-line);
+  list-style: none;
+}
+
+.olderList > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.olderLink {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-line);
+  text-underline-offset: 0.3rem;
+}
+
+.olderLink:hover {
+  color: var(--color-accent);
+  text-decoration-color: currentColor;
+}
+
+.olderMeta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  color: var(--color-muted);
+  font-size: 0.875rem;
 }
 
 .emptyState {
@@ -54,6 +278,7 @@
   grid-template-columns: minmax(12rem, 0.65fr) minmax(16rem, 1fr);
   gap: 2rem;
   padding: 3rem 0;
+  border-top: 1px solid var(--color-line);
   border-bottom: 1px solid var(--color-line);
   color: var(--color-muted);
   font-size: 0.9375rem;
@@ -68,61 +293,198 @@
   line-height: 1.1;
 }
 
-.postList > li {
-  border-bottom: 1px solid var(--color-line);
+/* ---------- Star pictures (ADR-0027) ---------- */
+
+/* The picture sits on the slightly lighter navy, so it reads as a framed
+   picture over the sky. The SVG fills the frame and is cropped, centred. */
+.coverFrame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--color-surface);
 }
 
-.postCard {
-  display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr) auto;
-  gap: 2rem;
-  align-items: start;
-  padding: 2.5rem 0;
+.coverFeatured {
+  height: 9.5rem;
 }
 
-.postNumber {
-  padding-top: 0.35rem;
-  color: var(--color-accent);
-  font-size: 0.6875rem;
+.coverCard {
+  aspect-ratio: 3 / 2;
 }
 
-.postMeta,
-.articleMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem 1.25rem;
-  color: var(--color-muted);
-  font-size: 0.75rem;
-  line-height: 1.6;
+.coverArt,
+.coverImage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.postTitle {
-  margin-top: 0.75rem;
-  font-family: var(--font-heading);
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
-  text-wrap: balance;
+/* At rest the halos are hidden and every group is in place: that is the
+   finished picture, shown with reduced motion and without JavaScript. */
+.coverGlow {
+  opacity: 0;
 }
 
-.postTitle a {
-  text-decoration: none;
+.coverTilt,
+.coverOrbit {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
-.postTitle a:hover {
-  color: var(--color-accent);
+.coverStep1 {
+  --cover-step: 1;
 }
 
-.postExcerpt {
-  max-width: 62ch;
-  margin-top: 0.9rem;
-  color: var(--color-muted);
-  font-size: 0.9375rem;
-  line-height: 1.75;
+.coverStep2 {
+  --cover-step: 2;
 }
 
-.readLink,
+.coverStep3 {
+  --cover-step: 3;
+}
+
+.coverStep4 {
+  --cover-step: 4;
+}
+
+.coverStep5 {
+  --cover-step: 5;
+}
+
+/* One short move, never looped: the first time a picture scrolls into view
+   (CoverMotion sets data-seen), and again on hover or keyboard focus. The
+   hover rules use their own keyframe names so they restart the move. */
+@media (prefers-reduced-motion: no-preference) {
+  .coverFrame[data-seen="play"] .coverGlow {
+    animation: cover-glow-first 0.5s ease-out calc(var(--cover-step, 0) * 0.14s) 1 both;
+  }
+
+  .coverFrame[data-seen="play"] .coverTilt {
+    animation: cover-tilt-first 1.2s var(--jf-ease) 1 both;
+  }
+
+  .coverFrame[data-seen="play"] .coverOrbit {
+    animation: cover-orbit-first 1.2s var(--jf-ease) 1 both;
+  }
+
+  .coverFrame[data-seen="play"] .coverDrift {
+    animation: cover-drift-first 1.2s var(--jf-ease) 1 both;
+  }
+
+  .featured:hover .coverGlow,
+  .card:hover .coverGlow,
+  .featured:has(.cardLink:focus-visible) .coverGlow,
+  .card:has(.cardLink:focus-visible) .coverGlow {
+    animation: cover-glow 0.5s ease-out calc(var(--cover-step, 0) * 0.14s) 1 both;
+  }
+
+  .featured:hover .coverTilt,
+  .card:hover .coverTilt,
+  .featured:has(.cardLink:focus-visible) .coverTilt,
+  .card:has(.cardLink:focus-visible) .coverTilt {
+    animation: cover-tilt 1.2s var(--jf-ease) 1 both;
+  }
+
+  .featured:hover .coverOrbit,
+  .card:hover .coverOrbit,
+  .featured:has(.cardLink:focus-visible) .coverOrbit,
+  .card:has(.cardLink:focus-visible) .coverOrbit {
+    animation: cover-orbit 1.2s var(--jf-ease) 1 both;
+  }
+
+  .featured:hover .coverDrift,
+  .card:hover .coverDrift,
+  .featured:has(.cardLink:focus-visible) .coverDrift,
+  .card:has(.cardLink:focus-visible) .coverDrift {
+    animation: cover-drift 1.2s var(--jf-ease) 1 both;
+  }
+}
+
+@keyframes cover-glow-first {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+
+@keyframes cover-glow {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+
+@keyframes cover-tilt-first {
+  0%,
+  100% {
+    transform: none;
+  }
+  45% {
+    transform: rotate(-5deg);
+  }
+}
+
+@keyframes cover-tilt {
+  0%,
+  100% {
+    transform: none;
+  }
+  45% {
+    transform: rotate(-5deg);
+  }
+}
+
+@keyframes cover-orbit-first {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+}
+
+@keyframes cover-orbit {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+}
+
+@keyframes cover-drift-first {
+  0%,
+  100% {
+    transform: none;
+  }
+  45% {
+    transform: translate(9px, 8px);
+  }
+}
+
+@keyframes cover-drift {
+  0%,
+  100% {
+    transform: none;
+  }
+  45% {
+    transform: translate(9px, 8px);
+  }
+}
+
+/* ---------- Post pages ---------- */
+
 .backLink {
   display: inline-flex;
   min-height: 2.75rem;
@@ -135,18 +497,11 @@
   text-underline-offset: 0.3rem;
 }
 
-.readLink {
-  align-self: center;
-  white-space: nowrap;
-}
-
-.readLink:hover,
 .backLink:hover {
   color: var(--color-accent);
   text-decoration-color: currentColor;
 }
 
-.readLink svg,
 .backLink svg {
   width: 1rem;
   height: 1rem;
@@ -162,8 +517,13 @@
 .articleTitle {
   max-width: 15ch;
   margin-top: 1rem;
+  color: var(--color-ink);
+  font-family: var(--font-heading);
   font-size: clamp(3.25rem, 7vw, 6.5rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 0.94;
+  text-wrap: balance;
 }
 
 .articleExcerpt {
@@ -175,7 +535,14 @@
 }
 
 .articleMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 1.25rem;
   margin-top: 1.5rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
 }
 
 .articleMeta a {
@@ -362,16 +729,53 @@
   margin-top: 0.25rem;
 }
 
+/* Tablet: the featured card still stacks; the row holds two cards. */
+@media (min-width: 48rem) {
+  .featured {
+    padding: 0.875rem;
+  }
+
+  .featuredBody {
+    padding: 1.75rem 1.25rem 1.25rem;
+  }
+
+  .coverFeatured {
+    height: 18rem;
+  }
+
+  .cardRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Wide: the picture fills the featured card's left half; three cards a row. */
+@media (min-width: 64rem) {
+  .featured {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.5rem;
+    min-height: 27rem;
+  }
+
+  .coverFeatured {
+    height: auto;
+    min-height: 22rem;
+  }
+
+  .featuredBody {
+    padding: clamp(1.75rem, 3vw, 2.75rem);
+  }
+
+  .featured .cardMeta {
+    margin-top: auto;
+    padding-top: 2rem;
+  }
+
+  .cardRow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 64rem) {
-  .indexHeader {
-    grid-template-columns: 6rem minmax(0, 1fr);
-  }
-
-  .indexIntro {
-    grid-column: 2;
-    padding-top: 0;
-  }
-
   .articleLayout {
     grid-template-columns: minmax(0, 1fr);
     gap: 4rem;
@@ -387,37 +791,26 @@
     padding: 7rem 0 5rem;
   }
 
-  .indexHeader {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1rem;
-    padding-bottom: 3rem;
+  .showcaseHeader {
+    padding-bottom: 1.75rem;
   }
 
-  .indexHeader .eyebrow,
-  .indexIntro {
-    grid-column: auto;
-    padding-top: 0;
+  .showcaseTitle {
+    margin-top: 0.75rem;
   }
 
-  .indexTitle {
-    font-size: clamp(2.8rem, 14vw, 4.5rem);
+  .showcaseIntro {
+    margin-top: 0.875rem;
+  }
+
+  .featuredTitle {
+    margin-top: 0.5rem;
   }
 
   .emptyState {
     grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
     padding: 2.25rem 0;
-  }
-
-  .postCard {
-    grid-template-columns: 2rem minmax(0, 1fr);
-    gap: 1rem;
-    padding: 2rem 0;
-  }
-
-  .readLink {
-    grid-column: 2;
-    justify-self: start;
   }
 
   .articleHeader {
@@ -452,5 +845,10 @@
 @media (forced-colors: active) {
   .callout {
     border: 2px solid CanvasText;
+  }
+
+  .featured,
+  .card {
+    border-color: CanvasText;
   }
 }

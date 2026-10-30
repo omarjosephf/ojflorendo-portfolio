@@ -2,7 +2,7 @@
 // Server-only module: exercised under Node so AbortSignal and DOMException match
 // production. jsdom's differ and have hidden a vacuous test before.
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { isTurnstileEnforced, verifyTurnstile } from "./index";
+import { isTurnstileEnforced, TURNSTILE_TOKEN_MAX_LENGTH, verifyTurnstile } from "./index";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -214,5 +214,23 @@ describe("verifyTurnstile", () => {
     // The thrown error is never inspected, so it cannot reach a log.
     expect(loggedText(errorSpy)).not.toContain(FAKE_SECRET);
     expect(loggedText(warnSpy)).not.toContain(FAKE_SECRET);
+  });
+});
+
+describe("verifyTurnstile — token length", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("rejects a token longer than Cloudflare's maximum without calling Cloudflare", async () => {
+    vi.stubEnv("TURNSTILE_SECRET_KEY", "test-secret");
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    await expect(verifyTurnstile("x".repeat(TURNSTILE_TOKEN_MAX_LENGTH + 1))).resolves.toEqual({
+      ok: false,
+      outcome: "rejected",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

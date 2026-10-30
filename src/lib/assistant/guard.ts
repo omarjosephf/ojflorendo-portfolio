@@ -64,7 +64,7 @@ const personalDataPatterns: readonly RegExp[] = [
 
 const PERSONAL_DATA_RESPONSE =
   "Please don't enter personal, financial, account, or credential information " +
-  "here. Your message was not sent anywhere. For a private enquiry, use OJ's " +
+  "here. Your message was not sent anywhere. For a private enquiry, use Joseph's " +
   "contact options instead.";
 
 /**

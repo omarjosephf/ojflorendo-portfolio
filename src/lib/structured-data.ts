@@ -15,10 +15,9 @@ export function buildStructuredData() {
         "@type": "Person",
         "@id": `${SITE_URL}/#person`,
         name: site.name,
-        alternateName: positioning.professionalName,
         url: SITE_URL,
         jobTitle: site.descriptor,
-        // Third person: this describes OJ to a machine reader, not to a visitor.
+        // Third person: this describes Joseph to a machine reader, not to a visitor.
         // No Offer, Review, rating, price or service-area data is published here;
         // none of it would be verifiable.
         description: positioning.personDescription,
@@ -59,7 +58,6 @@ export function buildCaseStudyJsonLd(project: ProjectItem) {
     author: {
       "@type": "Person",
       name: site.name,
-      alternateName: positioning.professionalName,
       url: SITE_URL,
     },
     isPartOf: { "@id": `${SITE_URL}/#website` },

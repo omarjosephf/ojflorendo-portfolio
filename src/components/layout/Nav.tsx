@@ -3,9 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X, FileText } from "lucide-react";
-import { ThemeSelect } from "@/components/theme/ThemeSelect";
 import { site } from "@/data/site";
 import { Container } from "@/components/ui/Container";
 import { SocialIcon } from "@/components/ui/SocialIcon";
@@ -33,7 +31,6 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
   const firstLinkRef = useRef<HTMLAnchorElement | null>(null);
-  const reduceMotion = useReducedMotion();
 
   const close = useCallback(() => setOpen(false), []);
 
@@ -196,30 +193,22 @@ export function Nav() {
   }, [open, close]);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        scrolled || open
-          ? "nav-blur border-b border-line/60"
-          : "border-b border-transparent"
-      }`}
-    >
+    <header className="jf-header" data-scrolled={scrolled || open ? "true" : undefined}>
       <Container>
         <nav
           aria-label="Primary"
-          className="flex h-16 items-center justify-between gap-4"
+          className="jf-nav"
         >
           <Link
             href="/#top"
-            className="flex min-h-11 items-center rounded-lg"
+            className="jf-wordmark"
             aria-label={`${site.name} — home`}
           >
-            <span className="font-heading text-lg font-semibold text-ink">
-              OJ Florendo
-            </span>
+            {site.name}
           </Link>
 
           {/* Desktop navigation */}
-          <ul className="hidden items-center gap-1 lg:flex">
+          <ul className="jf-nav-links">
             {site.nav.map((item) => {
               // A route item is active on its own route; a section item is active
               // only while that section is in view on the landing page.
@@ -235,11 +224,7 @@ export function Nav() {
                     aria-current={
                       isActive ? (item.href ? "page" : "true") : undefined
                     }
-                    className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                      isActive
-                        ? "text-accent"
-                        : "text-muted hover:text-ink"
-                    }`}
+                    className="jf-nav-link"
                   >
                     {item.label}
                   </Link>
@@ -249,9 +234,8 @@ export function Nav() {
           </ul>
 
           {/* Right-hand actions */}
-          <div className="flex items-center gap-1">
-            <ThemeSelect label="Portfolio color theme" />
-            <div className="hidden items-center gap-1 2xl:flex">
+          <div className="jf-nav-actions">
+            <div className="jf-nav-socials">
               {site.socials
                 .filter((s) => s.external)
                 .map((s) => (
@@ -261,7 +245,7 @@ export function Nav() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.ariaLabel}
-                    className="rounded-md p-2 text-muted transition-colors hover:text-ink"
+                    className="jf-icon-link"
                   >
                     <SocialIcon name={s.icon} />
                   </a>
@@ -273,7 +257,7 @@ export function Nav() {
                 href={site.cvPath}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="ml-1 hidden items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent/60 xl:inline-flex"
+                className="jf-nav-cv"
               >
                 <FileText className="h-4 w-4" aria-hidden="true" />
                 View CV
@@ -288,7 +272,7 @@ export function Nav() {
               aria-expanded={open}
               aria-controls="mobile-menu"
               aria-label={open ? "Close menu" : "Open menu"}
-              className="ml-1 inline-flex items-center justify-center rounded-md p-2.5 text-ink lg:hidden"
+              className="jf-menu-toggle"
             >
               {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -296,17 +280,9 @@ export function Nav() {
         </nav>
       </Container>
 
-      {/* Mobile menu panel */}
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            id="mobile-menu"
-            initial={reduceMotion ? false : { opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            className="overflow-hidden border-t border-line/60 nav-blur lg:hidden"
-          >
+      {/* Mobile menu panel. Its short entrance is CSS, cancelled by reduced motion. */}
+      {open ? (
+          <div id="mobile-menu" className="jf-mobile-menu">
             <Container>
               <ul className="flex flex-col gap-1 py-4">
                 {site.nav.map((item, i) => {
@@ -322,7 +298,7 @@ export function Nav() {
                         aria-current={
                           isActive ? (item.href ? "page" : "true") : undefined
                         }
-                        className="block rounded-md px-3 py-3 text-base font-medium text-ink hover:bg-surface-2"
+                        className="jf-mobile-link"
                       >
                         {item.label}
                       </Link>
@@ -330,7 +306,7 @@ export function Nav() {
                   );
                 })}
               </ul>
-              <div className="flex items-center gap-2 border-t border-line/60 py-4">
+              <div className="jf-mobile-socials">
                 {site.socials.map((s) => (
                   <a
                     key={s.label}
@@ -339,7 +315,7 @@ export function Nav() {
                     rel={s.external ? "noopener noreferrer" : undefined}
                     aria-label={s.ariaLabel}
                     onClick={close}
-                    className="inline-flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink"
+                    className="jf-chip-link"
                   >
                     <SocialIcon name={s.icon} className="h-4 w-4" />
                     {s.label}
@@ -347,9 +323,8 @@ export function Nav() {
                 ))}
               </div>
             </Container>
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
     </header>
   );
 }

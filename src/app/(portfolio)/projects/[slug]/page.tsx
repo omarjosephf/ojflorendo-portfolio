@@ -21,7 +21,7 @@ export async function generateMetadata({
   if (!project?.caseStudy) return {};
 
   const title = `${project.title} — Case study`;
-  const description = project.caseStudy.overview.slice(0, 155);
+  const description = project.caseStudy.seoDescription;
   const path = `/projects/${slug}`;
 
   return {

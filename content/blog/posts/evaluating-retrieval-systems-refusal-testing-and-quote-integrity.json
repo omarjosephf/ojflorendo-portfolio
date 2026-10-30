@@ -1,16 +1,17 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "status": "published",
   "slug": "evaluating-retrieval-systems-refusal-testing-and-quote-integrity",
   "title": "Why Automated Evaluation of RAG Needs Refusal Tests, Not Just Accurate Answers",
   "excerpt": "Automated evaluation scores can conceal critical failure modes in retrieval systems if benchmarks test only positive outcomes rather than quote integrity and refusal handling.",
+  "postType": "explainer",
   "publishedAt": "2026-09-30",
   "updatedAt": null,
   "author": {
-    "name": "OJ Florendo",
+    "name": "Joseph Florendo",
     "url": "/about"
   },
-  "disclosure": "AI agents researched and drafted this article from OJ Florendo's own project notes, quoting them word for word; an independent AI reviewer and automated checks verified every citation. OJ Florendo reviewed and approved it and is responsible for it.",
+  "disclosure": "AI agents researched and drafted this article from Joseph Florendo's own project notes, quoting them word for word; an independent AI reviewer and automated checks verified every citation. Joseph Florendo reviewed and approved it and is responsible for it.",
   "blocks": [
     {
       "type": "paragraph",

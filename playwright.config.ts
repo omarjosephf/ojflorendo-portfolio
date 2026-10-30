@@ -20,7 +20,10 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   // Chromium-only for a fast, reliable first CI. Firefox/WebKit can be added later.
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  // The home page's star sky is WebGL (ADR-0030). CI machines have no GPU, and
+  // current Chromium only falls back to its software renderer when asked, so
+  // the tests ask; without it the sky stays "off" and its behaviour goes untested.
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], launchOptions: { args: ["--enable-unsafe-swiftshader"] } } }],
   webServer: {
     command: `npm run start -- --port ${PORT}`,
     url: `http://localhost:${PORT}`,

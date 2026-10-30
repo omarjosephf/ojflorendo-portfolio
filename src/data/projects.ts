@@ -24,13 +24,15 @@ export const projects: ProjectItem[] = [
     // Pre-sized at 2x the rendered 552x160 card area. Cards fall back to the
     // abstract placeholder when this is null.
     image: "/images/projects/personal-portfolio-website.webp",
-    liveUrl: "https://ojfr.me/",
+    liveUrl: "https://josephflorendo.com/",
     githubUrl: "https://github.com/omarjosephf/ojflorendo-portfolio",
     featured: true,
     ariaLabel: "Personal Portfolio & Professional Platform case study",
     caseStudy: {
       tagline:
         "A website that makes my work easier to explore and gives prospective clients a clear way to get in touch.",
+      seoDescription:
+        "How Joseph Florendo built this site with Next.js and TypeScript: tested on every change, served under a strict security policy, with an AI assistant on board.",
       overview:
         "This is my own professional platform. It brings together project case studies, background information and a contact journey in a responsive website. Its development shows how I approach content, interface decisions, accessibility, testing and ongoing improvement.",
       context:
@@ -47,7 +49,7 @@ export const projects: ProjectItem[] = [
         "Defined the product scope, audience, content model, and security-first delivery plan before implementation.",
         "Built the typed content foundation, design system, security headers, and nonce-based Content Security Policy.",
         "Implemented the main sections, experience timeline, project case studies, and the secure contact boundary.",
-        "Explored a procedural 3D hero as progressive enhancement. It was measured, then retired: the current presentation uses typography, project imagery, and finite interaction feedback instead (ADR-0010).",
+        "Explored a procedural 3D hero as progressive enhancement. It was measured, then retired (ADR-0010). In October 2026 much lighter WebGL star scenes returned, a sky behind the home page and a journey behind /about, under their own measured budget (ADR-0030).",
         "Organise the public content, review the important visitor journeys, and use tests and manual checks to assess changes — keeping each change small enough to inspect and release deliberately.",
       ],
       architecture: [
@@ -55,7 +57,7 @@ export const projects: ProjectItem[] = [
         "Typed content modules kept separate from presentation components.",
         "A per-request nonce Content Security Policy generated in the Next.js proxy, with complementary security headers configured centrally.",
         "Build-time font optimisation and no runtime third-party font dependency.",
-        "A server-side contact route with a swappable email transport. The 3D renderers remain in the repository with their unit coverage so the decision can be reversed, but no decorative scene is mounted in the current presentation.",
+        "A server-side contact route with a swappable email transport. The star scenes on the home page and /about are plain WebGL in their own small lazy chunks; the earlier 3D renderers remain retired.",
       ],
       features: [
         "Responsive and accessible interface with clear navigation and calls to action.",
@@ -72,7 +74,7 @@ export const projects: ProjectItem[] = [
         "The contact boundary uses bounded server-side validation, a honeypot, rate limiting, plain-text email output, generic errors, and server-only credentials.",
       ],
       performance: [
-        "No continuous decorative canvas or infinite CSS animation is mounted; interaction feedback is bounded and event-driven.",
+        "The star scenes are capped at 30 frames a second, start only after the page has loaded, stop in hidden tabs, draw a single still frame with reduced motion and do not draw at all on a software renderer; interaction feedback is bounded and event-driven.",
         "Expensive visual effects and unnecessary compositor layers were reduced after profiling.",
         "Scroll-linked behaviour uses requestAnimationFrame throttling and compositor-friendly transforms rather than per-frame React updates.",
         "Performance choices preserve readable content and navigation when animation is unavailable. The measurements recorded in ADR-0010 came from a 4x-throttled local sample and do not establish real-phone or universal smoothness.",
@@ -84,7 +86,7 @@ export const projects: ProjectItem[] = [
         },
         {
           title: "A distinctive 3D hero that had to earn its frames",
-          body: "A continuously rendering WebGL scene can harm scrolling and input responsiveness. I first kept it as progressive enhancement, capped its work, and paused it when it was not useful. On review the decorative scenes were unmounted altogether (ADR-0010); the source and its unit coverage remain so the decision can be reversed.",
+          body: "A continuously rendering WebGL scene can harm scrolling and input responsiveness. I first kept it as progressive enhancement, capped its work, and paused it when it was not useful. On review the decorative scenes were unmounted altogether (ADR-0010). The star sky that replaced them in October 2026 moves every star on the graphics card, so the page does almost no work per frame (ADR-0030).",
         },
         {
           title: "A distinctive site that still had to state an offer",
@@ -124,7 +126,7 @@ export const projects: ProjectItem[] = [
     summary:
       "Explore answers alongside the document passages used to produce them.",
     description:
-      "A document assistant that retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It is designed to decline questions its documents do not cover, and its small evaluation set tests both answerable questions and questions the documents cannot answer.",
+      "A document assistant that retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It is designed to decline questions its documents do not cover, and its evaluation set tests both answerable questions and questions the documents cannot answer.",
     status: "Live",
     technologies: [
       "Python",
@@ -146,10 +148,12 @@ export const projects: ProjectItem[] = [
     caseStudy: {
       tagline:
         "Explore answers alongside the document passages used to produce them.",
+      seoDescription:
+        "Cited answers questions from a set of documents, shows the passage behind every answer and refuses what they don't cover. How it was built and tested.",
       overview:
-        "Cited is my document-assistant demo. It retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It also tests how the assistant handles questions the documents do not cover. It is deployed as a small containerised web service with a command-line interface, and every claim made about its quality is reproducible from the repository with a single command.",
+        "Cited is my document-assistant demo. It retrieves relevant passages, generates an answer, and checks quoted text against the passages supplied to the model. It also tests how the assistant handles questions the documents do not cover. It is deployed as a containerised web service with a command-line interface, and every claim made about its quality is reproducible from the repository with a single command.",
       context:
-        "I wanted to explore a practical limitation of AI question answering: a plausible answer is difficult to trust without seeing what supports it. Ordinary search has the opposite problem — it returns a list of documents and leaves the reading to you. This project investigates retrieval, visible sources, and evaluation within a small, defined document set, and holds the result to a standard where the honesty is measured rather than claimed.",
+        "I wanted to explore a practical limitation of AI question answering: a plausible answer is difficult to trust without seeing what supports it. Ordinary search has the opposite problem — it returns a list of documents and leaves the reading to you. This project investigates retrieval, visible sources, and evaluation within a defined document set, and holds the result to a standard where the honesty is measured rather than claimed.",
       goals: [
         "Return answers grounded in supplied documents, with the source passage shown alongside each answer.",
         "Refuse questions the documents cannot answer, and treat wrongly refusing an answerable question as an equally real failure.",
@@ -184,7 +188,7 @@ export const projects: ProjectItem[] = [
         "The service sends a nonce-based Content Security Policy alongside HSTS, X-Content-Type-Options, and Referrer-Policy.",
         "Spend is bounded in three independent ways — request rate, a daily answer budget, and a cap on the size of any single question — and the documentation is explicit that only a provider-level spend cap truly bounds the loss, because the in-process budget resets on restart.",
         "The build fails if a secret reaches a tracked file, and a test guards the corpus against ignore rules that could silently empty it.",
-        "The demo interface is deliberately small and has the basics right — a language attribute, a single main heading, visible focus styling, and colour-scheme support — but it has not been through a full accessibility audit, and I would not describe it as meeting the standard the rest of my work is held to until it has.",
+        "The demo interface is deliberately minimal and has the basics right — a language attribute, a single main heading, visible focus styling, and colour-scheme support — but it has not been through a full accessibility audit, and I would not describe it as meeting the standard the rest of my work is held to until it has.",
       ],
       performance: [
         "The embedding stack runs through ONNX rather than PyTorch — 223 MB against roughly 2 GB — and was verified working on the target Python version and platform before anything depended on it.",

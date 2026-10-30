@@ -8,6 +8,7 @@ import {
   type AssistantHistoryTurn,
 } from "@/lib/assistant/types";
 import { createRateLimiter } from "@/lib/rate-limit";
+import { isSameOriginJson } from "@/lib/same-origin-json";
 
 /**
  * The assistant trust boundary.
@@ -194,6 +195,12 @@ export async function POST(req: NextRequest) {
     const config = readServiceConfig();
     if (!config) {
       return json({ state: "unavailable" }, 200);
+    }
+
+    // Only this site's own panel may ask (src/lib/same-origin-json.ts), so a
+    // foreign page cannot spend the answer allowance from its visitors' browsers.
+    if (!isSameOriginJson(req)) {
+      return json({ state: "unavailable" }, 415);
     }
 
     if (!limiter.check(clientIp(req))) {

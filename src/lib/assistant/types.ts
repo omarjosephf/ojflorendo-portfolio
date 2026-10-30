@@ -113,7 +113,7 @@ export type AssistantResult =
    * The visitor's own personal, financial or credential data was detected in
    * their input, so it was never transmitted.
    *
-   * Deliberately the *only* thing the browser decides. Questions about OJ, about
+   * Deliberately the *only* thing the browser decides. Questions about Joseph, about
    * his privacy boundary, and probes of either are product policy and belong to
    * the assistant service, which is the single authority for them — see
    * `guard.ts` and ADR-0006 D14. The `reason` field is a single-member union

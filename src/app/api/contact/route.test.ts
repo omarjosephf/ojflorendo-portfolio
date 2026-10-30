@@ -26,8 +26,7 @@ const validBody = {
   name: "Jane Recruiter",
   email: "jane@example.com",
   company: "Acme",
-  enquiryType: "job",
-  subject: "Frontend role",
+  enquiryType: "automation",
   message: "We have an opening that fits your profile nicely.",
   consent: true,
 };
@@ -105,13 +104,45 @@ describe("POST /api/contact", () => {
 
   it("rejects missing / too-short fields with 422 and field errors", async () => {
     const res = await POST(
-      post("t-missing", { ...validBody, name: "", subject: "" }),
+      post("t-missing", { ...validBody, name: "", enquiryType: "" }),
     );
     expect(res.status).toBe(422);
     const json = await res.json();
     expect(json.ok).toBe(false);
     expect(json.fieldErrors.name).toBeDefined();
-    expect(json.fieldErrors.subject).toBeDefined();
+    expect(json.fieldErrors.enquiryType).toBeDefined();
+  });
+
+  it("accepts the full project enquiry in mock mode (ADR-0033)", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    const res = await POST(
+      post("t-full", {
+        ...validBody,
+        role: "Owner",
+        companyUrl: "acme.example",
+        companySize: "11-50",
+        areas: ["enquiries", "reports"],
+        budget: "not-sure",
+      }),
+    );
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("refuses retired and unlisted choices server-side", async () => {
+    const res = await POST(
+      post("t-retired", {
+        ...validBody,
+        enquiryType: "job",
+        budget: "lots",
+        areas: ["admin", "anything"],
+      }),
+    );
+    expect(res.status).toBe(422);
+    const { fieldErrors } = await res.json();
+    expect(fieldErrors.enquiryType).toBeDefined();
+    expect(fieldErrors.budget).toBeDefined();
+    expect(fieldErrors.areas).toBeDefined();
   });
 
   it("rejects an invalid email server-side", async () => {
@@ -359,5 +390,35 @@ describe("POST /api/contact", () => {
       vi.doUnmock("@/lib/email");
       vi.resetModules();
     }
+  });
+});
+
+describe("POST /api/contact — only this site's own form", () => {
+  it("refuses a text/plain body a foreign page could send without a preflight", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const req = new NextRequest("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "content-type": "text/plain", "x-forwarded-for": "t-plain" },
+      body: JSON.stringify(validBody),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(415);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("refuses a JSON request the browser marks as cross-site", async () => {
+    const req = new NextRequest("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "content-type": "application/json", "sec-fetch-site": "cross-site", "x-forwarded-for": "t-cross" },
+      body: JSON.stringify(validBody),
+    });
+    expect((await POST(req)).status).toBe(415);
+  });
+
+  it("answers a honeypot submission with the same shape as a real success", async () => {
+    const honeypot = await (await POST(post("t-honeypot-shape", { ...validBody, website: "x" }))).json();
+    const real = await (await POST(post("t-real-shape", validBody))).json();
+    expect(honeypot).toEqual(real);
   });
 });

@@ -1,22 +1,25 @@
-import Link from "next/link";
-import { Container } from "@/components/ui/Container";
+import { SkipLink } from "@/components/layout/SkipLink";
+import { Nav } from "@/components/layout/Nav";
+import { Footer } from "@/components/layout/Footer";
+import { NotFoundContent } from "@/components/layout/NotFoundContent";
+import { archivo } from "./(portfolio)/font";
+import "./(portfolio)/site.css";
 
+/**
+ * The 404 for any address that matches no route. It renders outside the
+ * portfolio layout, so it brings the site's own shell: the night look, the
+ * navigation and the footer. A missing post or case study raises the 404 in
+ * `(portfolio)/not-found.tsx` instead, inside the layout it already has.
+ */
 export default function NotFound() {
   return (
-    <Container className="flex min-h-[70vh] flex-col items-center justify-center py-24 text-center">
-      <p className="font-heading text-6xl font-bold text-gradient">404</p>
-      <h1 className="mt-4 font-heading text-2xl font-semibold text-ink">
-        Page not found
-      </h1>
-      <p className="mt-3 max-w-md text-muted">
-        Sorry, the page you were looking for doesn&apos;t exist or may have moved.
-      </p>
-      <Link
-        href="/"
-        className="mt-8 inline-flex items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-night transition-transform hover:-translate-y-0.5"
-      >
-        Back to home
-      </Link>
-    </Container>
+    <div className={`jf-site ${archivo.variable}`}>
+      <SkipLink />
+      <Nav />
+      <main id="main" className="flex-1">
+        <NotFoundContent />
+      </main>
+      <Footer />
+    </div>
   );
 }

@@ -2,34 +2,34 @@ import type { NowData } from "@/types";
 
 /**
  * "What I'm working on now" snapshot. Data-driven in the same style as the other
- * content, ready for a Version 2 migration. Keep it concise, current and honest.
+ * content. Keep it concise, current and honest: work in progress is described
+ * as in progress, never as done.
  */
 export const now: NowData = {
-  updated: "September 2026",
+  updated: "October 2026",
   items: [
     {
-      iconKey: "portfolio",
-      title: "A clearer client offer",
-      description:
-        "Focusing this platform on websites and carefully scoped product work, with a clearer way to discuss a project.",
-    },
-    {
       iconKey: "build",
-      title: "Products as evidence",
+      title: "Building AI automations and agents",
       description:
-        "Developing my own software and AI ideas, with case studies that explain decisions, checks and limitations.",
+        "Automations and agents that take repetitive work off a business, built in public. On camera right now: an automation that writes and sends my newsletter.",
     },
     {
-      iconKey: "learn",
-      title: "Sharing the work",
+      iconKey: "portfolio",
+      title: "Building SaaS tools",
       description:
-        "Building a personal brand around the products I make and the useful lessons behind them.",
+        "The first is Learn Your Way. It turns any study material into lessons you can read, watch or listen to, so you study the way that suits you and studying becomes something to enjoy.",
     },
     {
       iconKey: "study",
-      title: "Learning through my own marketing",
+      title: "My final year, and CS50",
       description:
-        "Exploring how AI can help me explain and market my own products. I will distinguish experiments from results I can demonstrate.",
+        "Finishing my BSc in Computing and IT with The Open University, and working through CS50 alongside it.",
+    },
+    {
+      iconKey: "learn",
+      title: "Building games",
+      description: "Game development is my passion. I build games with Claude Code, and I'm working towards releasing my first.",
     },
   ],
   personalNote: "Outside work, I stay active with fitness and boxing.",

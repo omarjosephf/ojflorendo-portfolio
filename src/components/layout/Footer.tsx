@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { site } from "@/data/site";
 import { Container } from "@/components/ui/Container";
-import { Monogram } from "@/components/ui/Monogram";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 
 /** Mirrors the primary navigation so the page order is legible from the foot. */
@@ -13,23 +12,52 @@ const footerLinks = [
   { label: "Contact", href: "/#contact" },
 ];
 
+/**
+ * Only profiles that exist are linked. YouTube, Instagram and X join the list
+ * when the owner confirms the handles; there are no placeholder links.
+ */
 export function Footer() {
   return (
-    <footer className="border-t border-line py-12">
+    <footer className="jf-footer">
       <Container>
-        <p className="footer-name" aria-hidden="true">OJ Florendo<span className="text-accent">↗</span></p>
-        <div className="flex flex-col items-start justify-between gap-8 sm:flex-row sm:items-center">
-          <Link href="/#top" className="flex items-center gap-3" aria-label="Back to top">
-            <Monogram />
-            <div><p className="text-sm font-semibold">{site.name}</p><p className="mt-1 text-xs text-muted">Web developer &amp; AI product builder · Windsor, Berkshire</p></div>
-          </Link>
-          <div className="flex flex-wrap items-center gap-6">
-            {site.socials.map((social) => <a key={social.label} href={social.href} target={social.external ? "_blank" : undefined} rel={social.external ? "noopener noreferrer" : undefined} aria-label={social.ariaLabel} className="social-link"><SocialIcon name={social.icon} />{social.label}</a>)}
+        <p className="jf-footer-name" aria-hidden="true">{site.name}</p>
+        <div className="jf-footer-grid">
+          <div>
+            <p className="jf-footer-role">{site.descriptor}, Windsor, Berkshire</p>
+            <p className="jf-fine">Building AI automations in public.</p>
           </div>
+          <nav aria-label="Footer" className="jf-footer-links">
+            {footerLinks.map((link) => (
+              <Link key={link.href} className="jf-footer-link" href={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <ul className="jf-footer-socials" aria-label="Profiles">
+            {site.socials.map((social) => (
+              <li key={social.label}>
+                <a
+                  href={social.href}
+                  target={social.external ? "_blank" : undefined}
+                  rel={social.external ? "noopener noreferrer" : undefined}
+                  aria-label={social.ariaLabel}
+                  className="jf-footer-link"
+                >
+                  <SocialIcon name={social.icon} className="h-4 w-4" />
+                  {social.label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
+        <div className="jf-footer-base">
           <p>© {new Date().getFullYear()} {site.name}. All rights reserved.</p>
-          <div className="sm:text-right"><p>Designed and built by OJ Florendo Rayatchi.</p><p className="mt-1 footer-links">{footerLinks.map((link) => <Link key={link.href} className="text-link" href={link.href}>{link.label}</Link>)}</p></div>
+          <p>Designed and built by Joseph Florendo.</p>
+          <p>
+            <Link className="jf-footer-link" href="/privacy">
+              Privacy notice
+            </Link>
+          </p>
         </div>
       </Container>
     </footer>

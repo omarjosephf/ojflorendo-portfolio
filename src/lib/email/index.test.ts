@@ -14,8 +14,8 @@ afterEach(() => {
 const message = {
   name: "Jane",
   email: "jane@example.com",
-  enquiryType: "job" as const,
-  subject: "Hello",
+  enquiryType: "automation" as const,
+  areas: [],
   message: "A message long enough to pass validation.",
   consent: true,
 };
@@ -77,7 +77,7 @@ function loggedText(spy: ReturnType<typeof vi.spyOn>): string {
 describe("senderIdentity", () => {
   it("names a bare address so it is not treated as an anonymous sender", () => {
     expect(senderIdentity("enquiries@send.ojfr.me")).toBe(
-      "OJ Florendo Portfolio <enquiries@send.ojfr.me>",
+      "Joseph Florendo Portfolio <enquiries@send.ojfr.me>",
     );
   });
 
@@ -168,11 +168,12 @@ describe("resend transport", () => {
     const body = sentBody(fetchSpy);
 
     // Named sender: a bare address from a young domain gets filtered as spam.
-    expect(body.from).toBe("OJ Florendo Portfolio <enquiries@send.example.com>");
+    expect(body.from).toBe("Joseph Florendo Portfolio <enquiries@send.example.com>");
     expect(body.to).toEqual(["inbox@example.com"]);
     // Replies must reach the enquirer, not the configured sender address.
     expect(body.reply_to).toBe(message.email);
-    expect(body.subject).toBe("[Portfolio] Job opportunity: Hello");
+    // No company given, so the subject names the enquirer (ADR-0033).
+    expect(body.subject).toBe("[Portfolio] AI automation or workflow: Jane");
     expect(body.text).toContain(message.message);
     expect(body.text).toContain(message.email);
     // ADR-0001 item 7: outbound email is plain text; submitted HTML is never rendered.
@@ -180,6 +181,46 @@ describe("resend transport", () => {
     // The enquirer's name must never reach the From header — that is a header
     // injection surface, and they already appear in reply_to, subject and body.
     expect(body.from).not.toContain(message.name);
+  });
+
+  it("lists every answered field by its label, and leaves unanswered ones out (ADR-0033)", async () => {
+    const fetchSpy = stubResendResolves(new Response("{}", { status: 200 }));
+
+    await getEmailTransport().send({
+      ...message,
+      role: "Owner",
+      company: "Acme",
+      companyUrl: "https://acme.example",
+      companySize: "2-10",
+      areas: ["admin", "leads"],
+      budget: "1000-2500",
+    });
+    const body = sentBody(fetchSpy);
+
+    expect(body.subject).toBe("[Portfolio] AI automation or workflow: Acme");
+    expect(body.text).toBe(
+      [
+        "Needs: AI automation or workflow",
+        "Name: Jane",
+        "Email: jane@example.com",
+        "Role: Owner",
+        "Company: Acme",
+        "Website: https://acme.example",
+        "Company size: 2–10 people",
+        "Areas to improve: Admin and paperwork, Leads and sales",
+        "Budget: £1,000–£2,500",
+        "",
+        message.message,
+      ].join("\n"),
+    );
+
+    await getEmailTransport().send(message);
+    const minimal = (
+      JSON.parse(fetchSpy.mock.calls[1]![1]!.body as string) as { text: string }
+    ).text;
+    for (const unanswered of ["Role:", "Company:", "Website:", "Company size:", "Areas", "Budget:"]) {
+      expect(minimal).not.toContain(unanswered);
+    }
   });
 
   it("bounds the attempt with an abort signal so a hung provider cannot hang the request", async () => {

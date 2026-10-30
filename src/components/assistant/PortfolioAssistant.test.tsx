@@ -19,7 +19,7 @@ const GROUNDED: AssistantResult = {
   citations: [
     {
       quote: "OJ has two published projects",
-      label: "About OJ",
+      label: "About Joseph",
       href: "/about#about",
     },
   ],
@@ -75,7 +75,7 @@ describe("E.V experience", () => {
     expect(screen.getByRole("heading", { name: "E.V" })).toBeVisible();
     expect(screen.queryByText(/^beta$/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Chat color theme")).not.toBeInTheDocument();
-    expect(screen.getByText("OJ’s portfolio AI assistant", { exact: true })).toBeVisible();
+    expect(screen.getByText("Joseph’s portfolio AI assistant", { exact: true })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Hi, I'm E.V." })).toBeVisible();
     expect(screen.getByText("How can I help you?", { exact: true })).toBeVisible();
     expect(screen.getByLabelText("Message E.V", { exact: true })).toHaveAttribute(
@@ -101,12 +101,12 @@ describe("E.V experience", () => {
     ).toBeVisible();
     expect(
       screen.getByText(
-        "AI answers from OJ’s published portfolio, with sources. Not OJ.",
+        "AI answers from Joseph’s published portfolio, with sources. Not Joseph.",
         { exact: true },
       ),
     ).toBeVisible();
     expect(
-      screen.getByText(/questions go through oj's server to google, with openai as a backup/i),
+      screen.getByText(/questions go through joseph's server to google, with openai as a backup/i),
     ).toBeVisible();
     expect(screen.getByText(/up to 20 recent completed exchanges/i)).toBeVisible();
   });
@@ -132,7 +132,7 @@ describe("E.V experience", () => {
     expect(await screen.findByText(GROUNDED.answer)).toBeVisible();
     fireEvent.click(screen.getByText("1 source"));
     expect(screen.getByText(`“${GROUNDED.citations[0]!.quote}”`)).toBeVisible();
-    expect(screen.getByRole("link", { name: "About OJ" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "About Joseph" })).toHaveAttribute(
       "href",
       "/about#about",
     );
@@ -174,8 +174,8 @@ describe("E.V experience", () => {
 
     await screen.findByText(GROUNDED.answer);
     fireEvent.click(screen.getByText("1 source"));
-    expect(screen.queryByRole("link", { name: "About OJ" })).not.toBeInTheDocument();
-    expect(screen.getByText("About OJ")).toBeVisible();
+    expect(screen.queryByRole("link", { name: "About Joseph" })).not.toBeInTheDocument();
+    expect(screen.getByText("About Joseph")).toBeVisible();
   });
 
   it("echoes immediately, announces a quiet pending state and blocks duplicate submission", async () => {
@@ -215,7 +215,7 @@ describe("E.V experience", () => {
     expect(screen.getByRole("status")).toHaveTextContent(/i can't answer right now/i);
   });
 
-  it("shows humane not-covered and unavailable messages with a route to OJ", async () => {
+  it("shows humane not-covered and unavailable messages with a route to Joseph", async () => {
     respondWith({ state: "not-covered", answer: "OJ has not published that detail." });
     const view = render(<PortfolioAssistant />);
     await openAssistant();
@@ -223,7 +223,7 @@ describe("E.V experience", () => {
 
     expect(await screen.findByText(/i can.t answer that from the information i have/i, { selector: "article p" })).toBeVisible();
     expect(screen.queryByText(/not in oj's approved content/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /contact oj/i })).toBeVisible();
+    expect(screen.getByRole("link", { name: /contact joseph/i })).toBeVisible();
 
     view.unmount();
     window.sessionStorage.clear();
@@ -374,7 +374,7 @@ describe("tab continuity and privacy", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
 
     expect(sentBody(1).history).toEqual([
-      { question: "What projects has OJ built?", sources: ["About OJ"] },
+      { question: "What projects has OJ built?", sources: ["About Joseph"] },
     ]);
     expect(JSON.stringify(sentBody(1))).not.toContain(GROUNDED.answer);
     expect(JSON.stringify(sentBody(1))).not.toContain(GROUNDED.citations[0]!.quote);

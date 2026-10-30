@@ -1,9 +1,9 @@
 # Project Zero Engineering Handbook
 
-**Version:** 1.2.1  
+**Version:** 1.3.0  
 **Status:** Ratified and governing — the single authoritative version  
 **Owner:** OJ Florendo  
-**Project:** OJ Florendo Rayatchi Portfolio & Platform  
+**Project:** Joseph Florendo Portfolio & Platform  
 **Canonical repository path:** `docs/ENGINEERING_HANDBOOK.md`  
 **Prepared:** 28 August 2026  
 **Ratified:** 29 August 2026 by OJ Florendo  
@@ -15,9 +15,9 @@
 
 This handbook defines how Project Zero is planned, designed, implemented, tested, secured, reviewed, released, operated, and evolved.
 
-**OJ Florendo ratified v1.2.0 on 29 August 2026, and this patch release v1.2.1 on 8 September 2026. v1.2.1 is the governing policy for Project Zero.** v1.1.0 and v1.2.0 remain in Git history and are no longer governing.
+**OJ Florendo ratified v1.2.0 on 29 August 2026 and the patch release v1.2.1 on 8 September 2026, and approved the v1.3.0 public-identity amendment on 14 October 2026 ([ADR-0029](adr/0029-public-identity-joseph-florendo.md)). Once its exact text is ratified at pull-request review, v1.3.0 is the governing policy for Project Zero.** v1.1.0, v1.2.0 and v1.2.1 remain in Git history.
 
-v1.2.1 is a patch: it clarifies one sentence of §6.4 and changes no policy. The description of the v1.2.0 amendment below is retained unchanged, because v1.2.1 does not touch it.
+v1.3.0 is a minor version: it changes the public identity in §1, §6.1, §6.4 and Track B, and nothing else. v1.2.1 was a patch that clarified one sentence of §6.4. The description of the v1.2.0 amendment below is retained unchanged, because neither later version touches it.
 
 The ratification, with this file's effective checksum, is recorded in ADR-0000.
 
@@ -53,7 +53,7 @@ Every ratified version must include a changelog entry. Superseded versions remai
 
 ## 1. Purpose
 
-Project Zero exists to build and maintain the professional portfolio and personal platform of **OJ Florendo Rayatchi**, professionally known as **OJ Florendo**. The platform demonstrates verified software, AI, data, design, training, and operational experience; documents continued growth; and connects OJ with employers, recruiters, clients, collaborators, businesses, sponsors, learners, subscribers, and future content audiences.
+Project Zero exists to build and maintain the professional portfolio and personal platform of **Joseph Florendo**, AI Automation Developer (legal name Omar Joseph Florendo). The platform demonstrates verified software, AI, data, design, training, and operational experience; documents continued growth; and connects OJ with employers, recruiters, clients, collaborators, businesses, sponsors, learners, subscribers, and future content audiences.
 
 The product mission is to present and build practical, trustworthy digital products that solve real problems, make work easier, and create clear, useful experiences. Product expansion must serve that mission rather than add technology for its own sake.
 
@@ -158,11 +158,11 @@ The reviewer checks correctness, scope, test evidence, security, privacy, access
 
 ### 6.1 Public identity
 
-The website display name is **OJ Florendo Rayatchi**. The professional short name and social identity are **OJ Florendo**. The domain, repository naming, handles, and established professional profiles may continue to use `ojflorendo`.
+The public brand and website display name is **Joseph Florendo**, and the professional title is **AI Automation Developer** ([ADR-0029](adr/0029-public-identity-joseph-florendo.md)). Visible copy, metadata, structured data, social preview cards and the assistant corpus use that name. The domain, repository naming, handles, and established professional profiles may continue to use `ojflorendo` until each is changed deliberately. A new domain is attached only at launch, with separate owner approval. Governance records written before 14 October 2026 may name the owner as OJ Florendo and are not rewritten.
 
-Credentials must preserve the exact holder name printed or verified by the issuer. Public credential copy may state that some credentials display a legal name or a previously used professional name; it must not rewrite issuer records.
+Credentials must preserve the exact holder name printed or verified by the issuer. Public credential copy may state that some credentials display the legal name, Omar Joseph Florendo; it must not rewrite issuer records. Public copy uses only the brand name and, for credentials, the legal name.
 
-The website may accurately describe OJ as a final-year Computing and IT student, software developer, AI-focused builder, and creative developer with practical experience across web development, AI and Python training, data analysis, UX/UI, marketing, e-commerce, and digital operations.
+The website may accurately describe Joseph as an AI automation developer and a final-year Computing and IT student, with practical experience across AI automation, web development, co-delivered AI, Python and data training, data analysis, UX/UI, marketing, e-commerce, and digital operations.
 
 ### 6.2 Content rules
 
@@ -188,7 +188,7 @@ Reference websites may inspire general quality and interaction patterns, but the
 
 OJ Florendo is the project owner, product decision-maker, repository authority, and accountable human author. AI systems are tools, not autonomous owners or release authorities.
 
-- Public authorship should use wording such as **“Designed and built by OJ Florendo Rayatchi.”**
+- Public authorship should use wording such as **“Designed and built by Joseph Florendo.”**
 - AI assistance should be disclosed once in an appropriate case study, README section, or engineering note rather than repeatedly promoted as the product’s creator.
 - A truthful disclosure may identify Claude Code, ChatGPT, or other approved tools as support for research, planning, implementation, debugging, and review, while stating that OJ directed decisions, approved changes, verified output, and remains responsible for the result.
 - AI tools must not be added as Git co-authors by default. A `Co-authored-by` trailer requires explicit owner instruction. That instruction may be **standing** — given once for a defined body of work, such as a named phase or an agent session — rather than repeated for every commit, provided it is recorded alongside the work it authorises and its scope is stated. What this rule requires is that a human decided, not that a human decided repeatedly; a standing instruction that names its scope satisfies it, and silence never does.
@@ -1480,7 +1480,7 @@ Handbook versions and website release versions are separate. A handbook v1.1.0 a
 
 ### Track B — Identity, positioning, and conversion
 
-- Adopt the approved display name **OJ Florendo Rayatchi** and professional short name **OJ Florendo**.
+- Adopt the approved display name **Joseph Florendo** and professional title **AI Automation Developer** (ADR-0029, 14 October 2026; it replaced the earlier display name OJ Florendo Rayatchi).
 - Implement the approved hero, mission, About, capabilities, services, project, credentials, contact, footer, and AI-disclosure copy.
 - Replace repeated Claude Code branding with owner-focused authorship and a single transparent case-study disclosure.
 - Add accurate credential categories and verification links.
@@ -1902,6 +1902,30 @@ Privacy-reviewed: Yes / No / Not applicable
 ---
 
 # Changelog
+
+## 1.3.0 — approved 14 October 2026, text ratified at pull-request review
+
+The public identity changes from OJ Florendo Rayatchi to **Joseph Florendo,
+AI Automation Developer** ([ADR-0029](adr/0029-public-identity-joseph-florendo.md)).
+
+**Changed**
+
+- **Header and §1** — the project and the person it presents are named Joseph
+  Florendo, with the legal name Omar Joseph Florendo stated once.
+- **§6.1** — the display name, the title, the surfaces that must use them, the
+  legal-name disclosure for credentials, and the rule that a new domain is
+  attached only at launch with separate owner approval.
+- **§6.4** — the example credit line becomes "Designed and built by Joseph
+  Florendo."
+- **Track B** — records the new display name and the one it replaced.
+
+**Why this is a minor version**
+
+§6.1 is a rule, not a description: it states which name public copy must use.
+Changing that name is a materially changed rule, which the versioning section
+defines as a minor version. The authority model, risk classification, release
+control and every other §6 content rule are unchanged, including the ban on
+invented claims and the exact-issuer-record rule for credentials.
 
 ## 1.2.1 — ratified 8 September 2026
 

@@ -1,38 +1,30 @@
 import { skillGroups } from "@/data/skills";
 import { Section } from "@/components/ui/Section";
-import { Reveal } from "@/components/ui/Reveal";
 
+/** Skill groups as rows, each with its skills as a short two-column list. */
 export function Skills() {
   return (
     <Section
       id="skills"
-      eyebrow="03 / Skills"
-      title="The skills behind the work."
-      intro="My projects combine web development, interface design, testing and clear technical communication. My broader experience includes data, training and digital operations."
+      stage
+      title="The skills behind the work"
+      intro="My projects combine AI automation, web development, testing and clear technical communication. My broader experience includes data, training and digital operations."
     >
-      <div className="grid gap-5 sm:grid-cols-2">
-        {skillGroups.map((group, index) => (
-          <Reveal
-            key={group.title}
-            delay={((index % 4) + 1) as 1 | 2 | 3 | 4}
-            className="glass hover-card flex flex-col rounded-2xl p-6"
-          >
-            <h3 className="font-heading text-lg font-semibold text-ink">
-              {group.title}
-            </h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted">
-              {group.summary}
-            </p>
-            <ul className="mt-4 flex flex-wrap gap-2">
-              {group.skills.map((skill) => (
-                <li key={skill} className="chip">
-                  {skill}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
+      <ul className="jf-rows">
+        {skillGroups.map((group) => (
+          <li key={group.title} className="jf-row">
+            <h3 className="jf-row-title">{group.title}</h3>
+            <div>
+              <p className="jf-row-text">{group.summary}</p>
+              <ul className="jf-offer-list" aria-label={`${group.title} skills`}>
+                {group.skills.map((skill) => (
+                  <li key={skill}>{skill}</li>
+                ))}
+              </ul>
+            </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </Section>
   );
 }

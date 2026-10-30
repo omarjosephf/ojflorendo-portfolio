@@ -58,6 +58,44 @@ export function createProgram(
   return program;
 }
 
+/** KHR_parallel_shader_compile's query: true once a compile or link has finished. */
+const COMPLETION_STATUS_KHR = 0x91b1;
+
+/**
+ * Like createProgram, but where the browser offers KHR_parallel_shader_compile
+ * the GPU compiles and links in the background and this waits a frame at a
+ * time, instead of blocking the page until the link finishes (tens of
+ * milliseconds for a large shader on a cold cache). Resolves null on failure.
+ */
+export async function createProgramAsync(
+  gl: WebGLRenderingContext,
+  vertexSource: string,
+  fragmentSource: string,
+): Promise<WebGLProgram | null> {
+  if (!gl.getExtension("KHR_parallel_shader_compile")) return createProgram(gl, vertexSource, fragmentSource);
+  const vertex = gl.createShader(gl.VERTEX_SHADER);
+  const fragment = gl.createShader(gl.FRAGMENT_SHADER);
+  const program = gl.createProgram();
+  if (!vertex || !fragment || !program) return null;
+  gl.shaderSource(vertex, vertexSource);
+  gl.compileShader(vertex);
+  gl.shaderSource(fragment, fragmentSource);
+  gl.compileShader(fragment);
+  gl.attachShader(program, vertex);
+  gl.attachShader(program, fragment);
+  gl.linkProgram(program);
+  while (!gl.isContextLost() && !gl.getProgramParameter(program, COMPLETION_STATUS_KHR)) {
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 16));
+  }
+  gl.deleteShader(vertex);
+  gl.deleteShader(fragment);
+  if (gl.isContextLost() || !gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    gl.deleteProgram(program);
+    return null;
+  }
+  return program;
+}
+
 /** Standard OpenGL perspective projection. `fovY` is in radians. */
 export function perspective(
   fovY: number,
@@ -139,6 +177,35 @@ function dot(
 function normalise(v: [number, number, number]): [number, number, number] {
   const length = Math.hypot(v[0], v[1], v[2]) || 1;
   return [v[0] / length, v[1] / length, v[2] / length];
+}
+
+/**
+ * True when WebGL is drawn on the CPU (SwiftShader, llvmpipe, Microsoft Basic
+ * Render): virtual machines, remote desktops and machines whose GPU driver is
+ * blocked. The decorative star scenes do not draw there at all: compiling and
+ * drawing them on the CPU costs far more than a decoration is worth.
+ */
+export function isSoftwareRenderer(gl: WebGLRenderingContext): boolean {
+  const info = gl.getExtension("WEBGL_debug_renderer_info");
+  const renderer = String(info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+  return /swiftshader|llvmpipe|software|basic render/i.test(renderer);
+}
+
+/**
+ * Whether this browser draws WebGL on a GPU: false without WebGL or on a
+ * software (CPU) renderer (ADR-0030 D5). Cheap enough to ask before load, so
+ * a page can choose its fallback early; the probe's context is released.
+ */
+export function hasHardwareWebGL(): boolean {
+  try {
+    const gl = document.createElement("canvas").getContext("webgl");
+    if (!gl) return false;
+    const hardware = !isSoftwareRenderer(gl);
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return hardware;
+  } catch {
+    return false;
+  }
 }
 
 /** Parses `#rrggbb` into the 0..1 triple the shader's `vec3` uniforms expect. */

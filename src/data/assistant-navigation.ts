@@ -2,7 +2,7 @@
  * Deterministic navigation for the assistant panel.
  *
  * What survived the retirement of the deterministic *answering* engine. These
- * are links, not knowledge: nothing here asserts a fact about OJ, so nothing
+ * are links, not knowledge: nothing here asserts a fact about Joseph, so nothing
  * here can go stale in the way the old answer manifest did. That distinction is
  * the reason this file exists and the matcher does not.
  */
@@ -20,8 +20,8 @@ export interface AssistantLink {
  * so it reads as the destination rather than a brush-off.
  */
 export const assistantFallbackLinks: readonly AssistantLink[] = [
-  { label: "About OJ", href: "/about" },
+  { label: "About Joseph", href: "/about" },
   { label: "Work", href: "/#projects" },
   { label: "Services", href: "/#services" },
-  { label: "Contact OJ", href: "/#contact" },
+  { label: "Contact Joseph", href: "/#contact" },
 ];

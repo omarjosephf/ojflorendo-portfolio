@@ -1,5 +1,11 @@
 import type { ContactInput } from "@/lib/contact/schema";
-import { ENQUIRY_TYPES } from "@/lib/contact/schema";
+import {
+  BUDGET_RANGES,
+  COMPANY_SIZES,
+  ENQUIRY_TYPES,
+  IMPROVEMENT_AREAS,
+  labelOf,
+} from "@/lib/contact/schema";
 
 /**
  * Server-only email delivery abstraction.
@@ -39,7 +45,15 @@ export interface EmailTransport {
 }
 
 function enquiryLabel(value: ContactInput["enquiryType"]): string {
-  return ENQUIRY_TYPES.find((t) => t.value === value)?.label ?? value;
+  return labelOf(ENQUIRY_TYPES, value);
+}
+
+/**
+ * The subject names the need and who is asking: the company when given,
+ * otherwise the enquirer. Both are single-line by validation (ADR-0033).
+ */
+function buildSubject(input: ContactInput): string {
+  return `[Portfolio] ${enquiryLabel(input.enquiryType)}: ${input.company ?? input.name}`;
 }
 
 /**
@@ -55,7 +69,7 @@ function enquiryLabel(value: ContactInput["enquiryType"]): string {
  * nothing — the enquirer already appears in `reply_to`, the subject and the
  * body.
  */
-const SENDER_DISPLAY_NAME = "OJ Florendo Portfolio";
+const SENDER_DISPLAY_NAME = "Joseph Florendo Portfolio";
 
 /**
  * Present the configured address as a named sender. If `CONTACT_FROM_EMAIL`
@@ -66,17 +80,26 @@ export function senderIdentity(from: string): string {
   return from.includes("<") ? from : `${SENDER_DISPLAY_NAME} <${from}>`;
 }
 
+/** Plain text only; the website is written out, never turned into a link. */
 function buildText(input: ContactInput): string {
   return [
-    `Enquiry type: ${enquiryLabel(input.enquiryType)}`,
+    `Needs: ${enquiryLabel(input.enquiryType)}`,
     `Name: ${input.name}`,
     `Email: ${input.email}`,
+    input.role ? `Role: ${input.role}` : null,
     input.company ? `Company: ${input.company}` : null,
-    `Subject: ${input.subject}`,
+    input.companyUrl ? `Website: ${input.companyUrl}` : null,
+    input.companySize
+      ? `Company size: ${labelOf(COMPANY_SIZES, input.companySize)}`
+      : null,
+    input.areas.length > 0
+      ? `Areas to improve: ${input.areas.map((a) => labelOf(IMPROVEMENT_AREAS, a)).join(", ")}`
+      : null,
+    input.budget ? `Budget: ${labelOf(BUDGET_RANGES, input.budget)}` : null,
     "",
     input.message,
   ]
-    .filter(Boolean)
+    .filter((part) => part !== null)
     .join("\n");
 }
 
@@ -118,7 +141,7 @@ function createResendTransport(
             from: senderIdentity(from),
             to: [to],
             reply_to: input.email,
-            subject: `[Portfolio] ${enquiryLabel(input.enquiryType)}: ${input.subject}`,
+            subject: buildSubject(input),
             text: buildText(input),
           }),
           signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
@@ -155,8 +178,13 @@ export function getEmailTransport(): EmailTransport {
     from ? null : "CONTACT_FROM_EMAIL",
   ].filter((name): name is string => name !== null);
 
-  // All three absent is the expected local/dev default, not a misconfiguration.
-  if (missing.length < 3) {
+  // All three absent is the expected local/dev default, not a misconfiguration,
+  // except on Vercel's production deployment, where every enquiry would be lost.
+  if (missing.length === 3 && process.env.VERCEL_ENV === "production") {
+    console.error(
+      "[contact] email delivery is NOT configured in production: RESEND_API_KEY, CONTACT_TO_EMAIL and CONTACT_FROM_EMAIL are all missing. No enquiry will be sent.",
+    );
+  } else if (missing.length < 3) {
     console.warn(
       `[contact] email delivery is NOT configured: missing ${missing.join(", ")}. Falling back to the mock transport — no email will be sent.`,
     );

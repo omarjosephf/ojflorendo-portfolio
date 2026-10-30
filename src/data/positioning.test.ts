@@ -14,14 +14,19 @@ function flatten(value: unknown): string {
 }
 
 describe("approved Track B positioning", () => {
-  it("uses the approved display and professional identities", () => {
-    expect(site.name).toBe("OJ Florendo Rayatchi");
-    expect(positioning.professionalName).toBe("OJ Florendo");
-    expect(site.descriptor).toBe("Web developer · AI product builder");
+  it("uses the approved display identity and title (ADR-0029)", () => {
+    expect(site.name).toBe("Joseph Florendo");
+    expect(positioning.professionalName).toBe("Joseph Florendo");
+    expect(site.descriptor).toBe("AI Automation Developer");
+  });
+
+  it("never publishes the previous or private names in site copy", () => {
+    const content = flatten({ positioning, site: { ...site, cvPath: null } });
+    expect(content).not.toMatch(/Rayatchi|\bOJ\b/);
   });
 
   it("labels every service with a status the handbook permits", () => {
-    expect(positioning.services.offers).toHaveLength(3);
+    expect(positioning.services.offers).toHaveLength(4);
 
     /*
      * Handbook 6.2 allows exactly three maturity labels. Asserting membership
@@ -38,24 +43,45 @@ describe("approved Track B positioning", () => {
     }
   });
 
-  it("keeps the document-assistant offer scoped rather than open-ended", () => {
+  it("orders the offers as the owner decided and keeps them scoped", () => {
     /*
-     * This offer moved from "Experimental" to "Available now" on the strength
-     * of two systems that were actually built and deployed. That is a claim
-     * about capability, not a promise to run anything a visitor asks for — so
-     * the scope note is load-bearing and is asserted here. Removing it would
-     * turn an honest "available" into an unscoped yes.
+     * ADR-0032 D1: automations and workflows lead, then AI agents, games and
+     * websites with care plans. Games stay "Future roadmap" until the owner's
+     * first game is released (D2); the rest are "Available now". That is a
+     * claim about what is offered, not a promise to run anything a visitor
+     * asks for, so the scope note is load-bearing and is asserted here.
+     * Removing it would turn an honest "available" into an unscoped yes.
      */
-    const assistant = positioning.services.offers.at(-1);
-    expect(assistant?.status).toBe("Available now");
-    expect(assistant?.title.toLowerCase()).toContain("document assistant");
-    expect(positioning.services.scopeNote).toContain("defined set of documents");
+    const titles = positioning.services.offers.map((offer) => offer.title);
+    expect(titles).toEqual([
+      "AI automations and workflows",
+      "AI agents",
+      "Games",
+      "Websites and care plans",
+    ]);
+    expect(positioning.services.offers.map((offer) => offer.status)).toEqual([
+      "Available now",
+      "Available now",
+      "Future roadmap",
+      "Available now",
+    ]);
+    expect(positioning.services.scopeNote).toContain("defined task");
     expect(positioning.services.scopeNote).toContain("privacy review");
+    expect(positioning.services.scopeNote).toContain("without your permission");
+  });
+
+  it("offers building, not checks or fixes of other people's apps", () => {
+    // ADR-0032 retires the build check and the fixes offer (amending ADR-0031);
+    // ADR-0033 removed the last mentions from the contact section.
+    const content = flatten({ positioning, site }).toLowerCase();
+    for (const retired of ["build check", "fixes before launch", "get your app checked"]) {
+      expect(content).not.toContain(retired);
+    }
   });
 
   it("keeps verified background visible rather than deleting it", () => {
     // Training and digital/e-commerce work are verified experience. The offer
-    // narrowed to websites; the background must not silently disappear with it.
+    // moved to automation; the background must not silently disappear with it.
     expect(positioning.services.relatedWork).toContain("training");
     expect(positioning.services.relatedWork).toContain("e-commerce");
   });
@@ -72,7 +98,7 @@ describe("approved Track B positioning", () => {
     }
   });
 
-  it("does not imply clients, outcomes or prices that do not exist", () => {
+  it("does not imply clients or outcomes that do not exist", () => {
     /*
      * The client-focused rewrite is the first copy on this site that could
      * plausibly imply a customer base. Handbook 6.2 forbids invented clients,
@@ -88,15 +114,47 @@ describe("approved Track B positioning", () => {
       "happy customers",
       "guaranteed",
       "increase your revenue",
-      "starting from £",
     ]) {
       expect(content).not.toContain(claim);
     }
   });
 
+  it("publishes no fixed prices (ADR-0032)", () => {
+    /*
+     * On 21 October 2026 the owner withdrew the fixed prices of ADR-0031: every
+     * project is quoted after a free call. A published price is an offer, so
+     * any currency amount in the copy is an unapproved one.
+     */
+    const content = flatten({ positioning, site });
+    expect(content).not.toMatch(/[£$€]\s?\d/);
+    for (const offer of positioning.services.offers) {
+      expect(Object.keys(offer)).not.toContain("price");
+    }
+    expect(positioning.services.intro).toContain("quote");
+    expect(positioning.services.priceNote).toContain("not VAT-registered");
+  });
+
+  it("publishes no amounts outside the contact form's budget choices (ADR-0033)", async () => {
+    // ADR-0033 lets the budget bands show amounts, and nothing else.
+    const schema = await import("@/lib/contact/schema");
+    const { BUDGET_RANGES, ...rest } = schema;
+    expect(flatten(rest)).not.toMatch(/[£$€]\s?\d/);
+    expect(BUDGET_RANGES.some((band) => /£\d/.test(band.label))).toBe(true);
+  });
+
+  it("invites a free call in the contact section, with no reply-time promise", () => {
+    // No reply-time promise until the enquiry triage automation is live, and
+    // the call length must match "How it works".
+    const contact = flatten(positioning.contact).toLowerCase();
+    expect(contact).not.toMatch(/working day|within \d|reply within|hours?\b/);
+    expect(positioning.contact.bookingAction).toBe("Book a free 30-minute call");
+    expect(flatten(positioning)).toContain("free 30-minute call. Then I send a written quote");
+    expect(site.bookingUrl === null || site.bookingUrl.startsWith("https://")).toBe(true);
+  });
+
   it("states that scope, timing and price are agreed individually", () => {
     expect(positioning.hero.availability).toContain(
-      "Scope and timing agreed individually",
+      "Scope, timing and price agreed individually",
     );
   });
 });

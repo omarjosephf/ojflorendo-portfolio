@@ -6,7 +6,7 @@ export function SavedChatControls({storage,disabled,nonce}:{storage:Conversation
   const locked=disabled||storage.busy||storage.checking;
   return <div className="space-y-2 border-b border-line bg-surface-2/40 px-4 py-3 text-xs leading-5 text-muted">
     {!storage.connected?<>
-      <p>Saved chats stay on the server for 30 days and can be reviewed by OJ to improve answers. Use this browser to return to them. Avoid private or sensitive information.</p>
+      <p>Saved chats stay on the server for 30 days and can be reviewed by Joseph to improve answers. Use this browser to return to them. Avoid private or sensitive information.</p>
       <SavedChatSignup siteKey={storage.captchaSiteKey} nonce={nonce} disabled={locked} connect={storage.connect}/>
       <p>Your current chat stays in this tab unless you start a saved chat.</p>
     </>:<>
