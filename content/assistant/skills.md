@@ -21,10 +21,9 @@ projects are the evidence for what he can actually build.
 
 ## AI and machine learning skills, and AI-assisted product development
 
-OJ's AI skills cover AI assistants grounded in approved documents, AI
-automations, multi-agent systems with human approval, prompt and
-knowledge-workflow design, AI-assisted research workflows, content workflows,
-and human-reviewed AI-assisted engineering. He has delivered
+OJ's AI skills cover narrow AI assistant prototypes, prompt and knowledge-workflow
+design, AI-assisted research workflows, content workflows, small automation
+prototypes, and human-reviewed AI-assisted engineering. He has delivered
 professional training in prompt engineering and in AI and machine-learning
 fundamentals.
 

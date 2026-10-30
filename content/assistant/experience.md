@@ -46,9 +46,9 @@ material to non-specialist professional audiences.
 Between June 2023 and July 2023 OJ worked remotely as a self-employed freelance
 UX/UI developer. This was his first paid client-facing development work.
 
-He designed and developed landing pages with clear, responsive layouts,
+He designed and developed simple landing pages with clear, responsive layouts,
 applied UX and UI skills to wireframing, page structure, and visual improvement,
-and focused on user-friendly presentation and front-end build quality.
+and focused on user-friendly presentation and basic front-end implementation.
 
 ## OJ's earliest role: Pharmacy Assistant at Windsor Pharmacy
 

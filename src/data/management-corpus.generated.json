@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "corpusSha256": "c9b26214891bcf9a10590d91a386f0a8fbe6ebd46371e0d833998281ace579e2",
+  "corpusSha256": "7bddb04dedc79de8c689b5f8c6f4e276c5ae1f383a9cc29353111c26de9654bc",
   "model": "BAAI/bge-small-en-v1.5",
   "tokenizerSha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
   "tokenLimit": 512,
   "targetWords": 180,
   "overlapWords": 40,
-  "generatedAt": "2026-10-20T09:58:17.445449+00:00",
+  "generatedAt": "2026-09-12T18:48:01.555992+00:00",
   "chunks": [
     {
       "index": 0,
@@ -76,9 +76,9 @@
       "source": "about-oj.md",
       "section": "OJ's current services and marketing background",
       "page": null,
-      "text": "OJ builds practical digital products with software and AI. His leading offer is a focused website or landing page for a service business, with AI document assistants over an approved set of documents as a second line of work. He has built and deployed document assistants twice, so that is a capability he offers rather than an idea he is exploring. He focuses on real needs rather than creating technology for its own sake, combining thoughtful product decisions, responsible AI-assisted engineering, and clear communication. He aims to build products that help people understand information, complete a task, or run part of their work more easily. OJ is also developing his personal brand and exploring how AI can help him explain and market his own products. That is a direction of work rather than evidence of an established growth-marketing service, and it does not mean he sells marketing outcomes.",
-      "tokens": 181,
-      "indexedSha256": "79f3eee729d469012aa845377facde9397842c5d364f13a0c2fdc2bfcf3c0104"
+      "text": "OJ builds practical digital products with software and AI. His leading offer is a focused website or landing page for a small service business, with AI document assistants over an approved set of documents as a second line of work. He has built and deployed document assistants twice, so that is a capability he offers rather than an idea he is exploring. He focuses on real needs rather than creating technology for its own sake, combining thoughtful product decisions, responsible AI-assisted engineering, and clear communication. He aims to build products that help people understand information, complete a task, or run part of their work more easily. OJ is also developing his personal brand and exploring how AI can help him explain and market his own products. That is a direction of work rather than evidence of an established growth-marketing service, and it does not mean he sells marketing outcomes.",
+      "tokens": 182,
+      "indexedSha256": "f384480cad5db6718eb0d4c306f334b6e2618634948f9784fe81ef41dbc97160"
     },
     {
       "index": 8,
@@ -130,9 +130,9 @@
       "source": "contact-and-this-assistant.md",
       "section": "What E.V is and how it answers questions",
       "page": null,
-      "text": "E.V is this website’s AI assistant. Its knowledge source is a set of OJ’s approved portfolio documents. It works by retrieval: it searches those approved documents for the passages most relevant to a question, answers using only those passages, and shows the source behind each claim so the answer can be checked rather than taken on trust. It is connected to a real knowledge source — that set of documents — rather than answering from general knowledge or from a fixed list of pre-written replies. It runs on the same engine as OJ's Cited project, pointed at his portfolio content instead of Cited's demo documents. Its approved model configuration is Gemini 3.5 Flash-Lite from Google as the primary model, with GPT-5.6 Luna from OpenAI as a backup when the primary service is unavailable. Both receive the same retrieved passages and bounded conversation context. A backup response is labelled \"Backup model used.\" Refusals and failed policy or citation checks do not trigger the backup.",
-      "tokens": 218,
-      "indexedSha256": "9a5ab8a1346a23e1b68ec6606bf9fde3b55484d76346e14c58b2981c1171cc23"
+      "text": "E.V is this website’s AI assistant. Its knowledge source is a small collection of OJ’s approved portfolio documents. It works by retrieval: it searches those approved documents for the passages most relevant to a question, answers using only those passages, and shows the source behind each claim so the answer can be checked rather than taken on trust. It is connected to a real knowledge source — that set of documents — rather than answering from general knowledge or from a fixed list of pre-written replies. It runs on the same engine as OJ's Cited project, pointed at his portfolio content instead of Cited's demo documents. Its approved model configuration is Gemini 3.5 Flash-Lite from Google as the primary model, with GPT-5.6 Luna from OpenAI as a backup when the primary service is unavailable. Both receive the same retrieved passages and bounded conversation context. A backup response is labelled \"Backup model used.\" Refusals and failed policy or citation checks do not trigger the backup.",
+      "tokens": 219,
+      "indexedSha256": "077c378645f4e348885d92f7b11d70dcffa08b34ec8590d3b53319a39674f1cd"
     },
     {
       "index": 14,
@@ -274,9 +274,9 @@
       "source": "experience.md",
       "section": "OJ's freelance web development work: Freelance UX/UI Developer",
       "page": null,
-      "text": "Between June 2023 and July 2023 OJ worked remotely as a self-employed freelance UX/UI developer. This was his first paid client-facing development work. He designed and developed landing pages with clear, responsive layouts, applied UX and UI skills to wireframing, page structure, and visual improvement, and focused on user-friendly presentation and front-end build quality.",
-      "tokens": 98,
-      "indexedSha256": "fdc9dac54b8a0150665b365db2cf440db52bb9675f937ecc473d53d29b1bd5d1"
+      "text": "Between June 2023 and July 2023 OJ worked remotely as a self-employed freelance UX/UI developer. This was his first paid client-facing development work. He designed and developed simple landing pages with clear, responsive layouts, applied UX and UI skills to wireframing, page structure, and visual improvement, and focused on user-friendly presentation and basic front-end implementation.",
+      "tokens": 99,
+      "indexedSha256": "37d27691e1b6c64448e2039f20e0196515370a5a1f39ac96864f79043fe2adb4"
     },
     {
       "index": 30,
@@ -436,9 +436,9 @@
       "source": "project-cited.md",
       "section": "Cited: honest limitations",
       "page": null,
-      "text": "The demo interface is deliberately minimal and has the basics right — a language attribute, a single main heading, visible focus styling, colour-scheme support — but it has not been through a full accessibility audit, and OJ does not describe it as meeting the standard the rest of his work is held to until it has. Spend is bounded by request rate, a daily answer budget, and a cap on question length. The documentation is explicit that only a provider-level spend cap truly bounds the loss, because the in-process budget resets on restart.",
+      "text": "The demo interface is deliberately small and has the basics right — a language attribute, a single main heading, visible focus styling, colour-scheme support — but it has not been through a full accessibility audit, and OJ does not describe it as meeting the standard the rest of his work is held to until it has. Spend is bounded by request rate, a daily answer budget, and a cap on question length. The documentation is explicit that only a provider-level spend cap truly bounds the loss, because the in-process budget resets on restart.",
       "tokens": 118,
-      "indexedSha256": "967ed479b1985934daae38440e1e808227dea8d667fd6d9bc16eda1fa389a3d5"
+      "indexedSha256": "bae914801de7782bc3ced2d8aa6285403ce5e8d85a3686a7211ab675d64804fe"
     },
     {
       "index": 48,
@@ -526,9 +526,9 @@
       "source": "services.md",
       "section": "Website development services: the work OJ takes on now",
       "page": null,
-      "text": "OJ currently offers website and landing-page development for service businesses. This is his main service for new project enquiries. He can build a focused new website or landing page, with scope, suitability and timing agreed directly with OJ. It begins with understanding the offer, the intended visitor and the enquiry journey. Work may include content structure and page priorities, responsive design, front-end implementation, a clear contact or enquiry route, keyboard, readability and mobile checks, page titles, descriptions and technical search foundations, and agreed handover notes. He works with Next.js, React, TypeScript, HTML and CSS, and builds to the same accessibility and security standards used on his own platform. These services are available for discussion now; individual scope and timing require OJ's agreement.",
-      "tokens": 182,
-      "indexedSha256": "96b1212958a614f4588fd67df755273c32c9806484d52276af03f1090681b374"
+      "text": "OJ currently offers website and landing-page development for small service businesses. This is his main service for new project enquiries. He can build a focused new website or landing page, with scope, suitability and timing agreed directly with OJ. It begins with understanding the offer, the intended visitor and the enquiry journey. Work may include content structure and page priorities, responsive design, front-end implementation, a clear contact or enquiry route, keyboard, readability and mobile checks, page titles, descriptions and technical search foundations, and agreed handover notes. He works with Next.js, React, TypeScript, HTML and CSS, and builds to the same accessibility and security standards used on his own platform. These services are available for discussion now; individual scope and timing require OJ's agreement.",
+      "tokens": 183,
+      "indexedSha256": "1e3a81ab0ac86cb31e69353c9951812acc5272e2550ff1830b3ad5d1ff464296"
     },
     {
       "index": 58,
@@ -598,9 +598,9 @@
       "source": "skills.md",
       "section": "AI and machine learning skills, and AI-assisted product development",
       "page": null,
-      "text": "OJ's AI skills cover AI assistants grounded in approved documents, AI automations, multi-agent systems with human approval, prompt and knowledge-workflow design, AI-assisted research workflows, content workflows, and human-reviewed AI-assisted engineering. He has delivered professional training in prompt engineering and in AI and machine-learning fundamentals. Specific AI techniques he has built with rather than only read about: retrieval-augmented generation over a document corpus, local text embeddings running through ONNX, vector similarity search with NumPy, verified citations computed against supplied documents, refusal behaviour for questions a corpus cannot answer, and evaluation sets that score answer quality reproducibly. He has worked with the Anthropic API and Claude models in a deployed, cost-controlled production service. His approach to AI is deliberately cautious: he uses it as a tool for research, prototyping, implementation, and review, tests the output, and remains accountable for the result rather than presenting AI work as self-verifying.",
-      "tokens": 228,
-      "indexedSha256": "d18dee9be4de19b4921d92e5504a84d7234b5fc2a2b194fe24909cd0d9f1c5ed"
+      "text": "OJ's AI skills cover narrow AI assistant prototypes, prompt and knowledge-workflow design, AI-assisted research workflows, content workflows, small automation prototypes, and human-reviewed AI-assisted engineering. He has delivered professional training in prompt engineering and in AI and machine-learning fundamentals. Specific AI techniques he has built with rather than only read about: retrieval-augmented generation over a document corpus, local text embeddings running through ONNX, vector similarity search with NumPy, verified citations computed against supplied documents, refusal behaviour for questions a corpus cannot answer, and evaluation sets that score answer quality reproducibly. He has worked with the Anthropic API and Claude models in a deployed, cost-controlled production service. His approach to AI is deliberately cautious: he uses it as a tool for research, prototyping, implementation, and review, tests the output, and remains accountable for the result rather than presenting AI work as self-verifying.",
+      "tokens": 218,
+      "indexedSha256": "428d180551420390de76797e8c65c5482671985ba598b6136f25bad6804f393b"
     },
     {
       "index": 66,
