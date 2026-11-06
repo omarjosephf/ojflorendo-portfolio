@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Launcher for the Phase 18.4 blog agents (ADR-0026). The owner runs it on
+ * Launcher for the live blog agents (ADR-0026). The owner runs it on
  * their own machine; it is not part of the site, the build or CI.
  *
  *   node --env-file=<path-to-key-file> scripts/blog-agents.mjs ideas
  *
- * The key file sits outside the repository and holds BLOG_GEMINI_API_KEY.
+ * The key file sits outside the repository and holds OPENROUTER_API_KEY.
  * BLOG_AGENTS_DATA_DIR (absolute, outside the repository) receives private
  * run records and the spend ledger. This launcher transpiles src/lib/blog with
  * the repository's pinned TypeScript into a temporary folder and runs it; it

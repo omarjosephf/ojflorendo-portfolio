@@ -21,6 +21,25 @@ import type { SelectableSpan } from "./sources";
  */
 
 type JsonSchema = Readonly<Record<string, unknown>>;
+
+/**
+ * Wire schemas keep to the subset OpenRouter passes through to Gemini intact.
+ * Measured 13 October 2026: a schema with `schemaVersion: { type: "integer",
+ * enum: [1] }` and array bounds reached the model as an empty object and came
+ * back `{}`; the same shape without them was enforced. So the schemas carry no
+ * integer enum, const, numeric range or array bound. Every such rule is
+ * checked in code by the parsers instead, and the version is stamped by code.
+ */
+export const WIRE_SCHEMA_DISALLOWED_KEYWORDS = ["const", "minimum", "maximum", "minItems", "maxItems", "minLength", "maxLength", "pattern", "$ref", "$defs"] as const;
+
+/**
+ * Adds `schemaVersion: 1` to a wire object that has none, so the unchanged
+ * parsers still check the version. A model-supplied version is left as it is
+ * and checked like any other field.
+ */
+export function stampWireVersion(output: unknown): unknown {
+  return isRecord(output) && !Object.hasOwn(output, "schemaVersion") ? { schemaVersion: 1, ...output } : output;
+}
 const str = { type: "string" } as const;
 const strArray = { type: "array", items: str } as const;
 const exact = (properties: Record<string, unknown>, required = Object.keys(properties)) => ({
@@ -33,7 +52,6 @@ const exact = (properties: Record<string, unknown>, required = Object.keys(prope
 const CLAIM_ASSESSMENTS = ["supported", "contradicted", "insufficient"] as const;
 
 export const RESEARCH_SELECTION_SCHEMA: JsonSchema = exact({
-  schemaVersion: { type: "integer", enum: [1] },
   decision: {
     anyOf: [
       exact({
@@ -62,7 +80,7 @@ export const RESEARCH_SELECTION_SCHEMA: JsonSchema = exact({
 
 const blockSchema = {
   anyOf: [
-    exact({ type: { type: "string", enum: ["heading"] }, id: str, level: { type: "integer", enum: [2, 3] }, text: str }),
+    exact({ type: { type: "string", enum: ["heading"] }, id: str, level: { type: "string", enum: ["2", "3"] }, text: str }),
     exact({ type: { type: "string", enum: ["paragraph"] }, text: str }),
     exact({
       type: { type: "string", enum: ["list"] },
@@ -90,7 +108,6 @@ const locationSchema = {
 };
 
 export const WRITER_DRAFT_SCHEMA: JsonSchema = exact({
-  schemaVersion: { type: "integer", enum: [1] },
   slug: str,
   title: str,
   excerpt: str,
@@ -100,7 +117,6 @@ export const WRITER_DRAFT_SCHEMA: JsonSchema = exact({
 });
 
 export const REVIEWER_OUTPUT_SCHEMA: JsonSchema = exact({
-  schemaVersion: { type: "integer", enum: [1] },
   recommendation: { type: "string", enum: ["approve", "revise", "reject"] },
   claimReviews: {
     type: "array",
@@ -146,19 +162,16 @@ export const REVIEWER_OUTPUT_SCHEMA: JsonSchema = exact({
   },
   requiredCorrections: strArray,
   scores: exact({
-    groundedness: { type: "integer", minimum: 0, maximum: 100 },
-    citationQuality: { type: "integer", minimum: 0, maximum: 100 },
-    writingAndVoice: { type: "integer", minimum: 0, maximum: 100 },
-    securityAndRobustness: { type: "integer", minimum: 0, maximum: 100 },
+    groundedness: { type: "integer" },
+    citationQuality: { type: "integer" },
+    writingAndVoice: { type: "integer" },
+    securityAndRobustness: { type: "integer" },
   }),
 });
 
 export const IDEA_SLATE_SCHEMA: JsonSchema = exact({
-  schemaVersion: { type: "integer", enum: [1] },
   ideas: {
     type: "array",
-    minItems: 0,
-    maxItems: 5,
     items: exact({
       topic: str,
       audience: str,
@@ -175,14 +188,12 @@ export const IDEA_SLATE_SCHEMA: JsonSchema = exact({
 export const SEO_AREAS = ["search-intent", "title", "description", "headings", "structure", "links", "readability", "keywords", "originality"] as const;
 
 export const SEO_REVIEW_SCHEMA: JsonSchema = exact({
-  schemaVersion: { type: "integer", enum: [1] },
   searchIntent: str,
-  score: { type: "integer", minimum: 0, maximum: 100 },
+  score: { type: "integer" },
   suggestedTitle: str,
   suggestedDescription: str,
   findings: {
     type: "array",
-    maxItems: 12,
     items: exact({
       area: { type: "string", enum: [...SEO_AREAS] },
       severity: { type: "string", enum: ["low", "medium", "high"] },
@@ -201,7 +212,6 @@ export const LIVE_AGENT_ROLES: readonly LiveAgentRole[] = [
 ];
 
 export const CRITIQUE_SCHEMA: JsonSchema = exact({
-  schemaVersion: { type: "integer", enum: [1] },
   lessons: {
     type: "array",
     items: exact({
@@ -356,6 +366,16 @@ export function projectResearchSelection(
  * citation placements. Quoted text, evidence ids and source records come from
  * the validated ledger, never from the model.
  */
+/**
+ * Heading levels travel as the strings "2" and "3", because a string enum is
+ * enforced on the wire and an integer one is not. Anything else is left as it
+ * is, so the Phase 18.2 block check still rejects it.
+ */
+function headingLevelFromWire(block: unknown): unknown {
+  if (!isRecord(block) || block.type !== "heading") return block;
+  return block.level === "2" || block.level === "3" ? { ...block, level: Number(block.level) } : block;
+}
+
 export function projectWriterDraft(value: unknown, ledger: EvidenceLedger): WriterOutput {
   const issues: string[] = [];
   const keys = ["schemaVersion", "slug", "title", "excerpt", "blocks", "seo", "citations"];
@@ -401,7 +421,7 @@ export function projectWriterDraft(value: unknown, ledger: EvidenceLedger): Writ
     updatedAt: null,
     author: { name: "OJ Florendo", url: "/about" },
     disclosure: BLOG_PIPELINE_DRAFT_DISCLOSURE,
-    blocks: (Array.isArray(value.blocks) ? value.blocks : []) as BlogContentBlock[],
+    blocks: (Array.isArray(value.blocks) ? value.blocks.map(headingLevelFromWire) : []) as BlogContentBlock[],
     sources: [...usedSourceIds]
       .sort((a, b) => a.localeCompare(b, "en-GB"))
       .map((id) => {
@@ -567,7 +587,7 @@ export function parseCritique(value: unknown, participants: ReadonlySet<LiveAgen
         ? {
             agent,
             participated: false,
-            lesson: "Ran in its own step before this run; not critiqued, because Google's grounding terms bar analysing grounded results.",
+            lesson: "Ran in its own step before this run; the Critique Agent reviews only the drafting run.",
             evidence: "The idea slate is kept in the private record only.",
           }
         : { agent, participated: false, lesson: "Did not run in this attempt.", evidence: "No run evidence exists for this agent." };

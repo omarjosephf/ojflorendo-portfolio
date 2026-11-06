@@ -1,10 +1,10 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { LIVE_PHASE_CEILING_MICRO_USD } from "./catalog";
+import { LIVE_SPEND_CEILING_MICRO_USD } from "./catalog";
 
 /**
- * Durable, one-way spend ledger shared by every Phase 18.4 run. A call's
+ * Durable, one-way spend ledger shared by every live run. A call's
  * worst-case cost is written to disk before it is sent; afterwards the entry
- * is settled to the cost Google reported. A crash between the two leaves the
+ * is settled to the cost the provider reported. A crash between the two leaves the
  * full reservation counted, so the ceiling can only ever be over-counted.
  * An unreadable ledger stops every run: it fails closed, never open.
  */
@@ -15,7 +15,7 @@ export interface LedgerEntry {
   role: string;
   model: string;
   reservedMicroUsd: number;
-  /** null until Google's usage is known; the reservation counts meanwhile. */
+  /** null until the provider's usage is known; the reservation counts meanwhile. */
   actualMicroUsd: number | null;
   reservedAt: string;
   settledAt: string | null;
@@ -42,7 +42,7 @@ function committed(entry: LedgerEntry) {
 export class SpendLedger {
   constructor(
     private readonly path: string,
-    private readonly ceilingMicroUsd = LIVE_PHASE_CEILING_MICRO_USD,
+    private readonly ceilingMicroUsd = LIVE_SPEND_CEILING_MICRO_USD,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
@@ -97,13 +97,13 @@ export class SpendLedger {
       throw new SpendLedgerError("This call could exceed the per-run ceiling, so it was not sent.");
     }
     if (total + entry.reservedMicroUsd > this.ceilingMicroUsd) {
-      throw new SpendLedgerError("This call could exceed the Phase 18.4 spend ceiling, so it was not sent.");
+      throw new SpendLedgerError("This call could exceed the approved spend ceiling, so it was not sent.");
     }
     file.entries.push({ ...entry, actualMicroUsd: null, reservedAt: this.now().toISOString(), settledAt: null });
     this.write(file);
   }
 
-  /** Records Google's reported cost. A cost above the reservation is kept, never trimmed. */
+  /** Records the provider's reported cost. A cost above the reservation is kept, never trimmed. */
   settle(callId: string, actualMicroUsd: number) {
     if (!Number.isSafeInteger(actualMicroUsd) || actualMicroUsd < 0) {
       throw new SpendLedgerError("A settled cost must be a whole, non-negative number of micro-USD.");
