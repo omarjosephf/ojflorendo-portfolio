@@ -25,8 +25,9 @@ export const site: SiteConfig = {
   ],
   // This path points only to the separately reviewed, phone-free public CV.
   // The editable DOCX source is stored under docs/cv/ for controlled updates.
-  // The file still carries the previous name until the CV phase (ADR-0029).
-  cvPath: "/documents/OJ_Florendo_Rayatchi_Public_CV.pdf",
+  // Since 10 November 2026 this is the Joseph Florendo CV (ADR-0029). The July CV stays in
+  // public/documents/ only as the copy E.V's pinned corpus cites, until phase EV-C swaps it.
+  cvPath: "/documents/JosephFlorendo_PublicCV.pdf",
   // The earlier circular profile photograph was retired by the owner.
   // The separately reviewed digital hero portrait is used only in the hero.
   profileImage: null,

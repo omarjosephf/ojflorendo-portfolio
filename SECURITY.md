@@ -238,7 +238,7 @@ This boundary and its limitations are recorded in
 
 - The owner's private phone number and street address are never displayed.
 - The private CV is never published. The reviewed, phone-free public CV is
-  available at `public/documents/OJ_Florendo_Rayatchi_Public_CV.pdf`; its editable
+  available at `public/documents/JosephFlorendo_PublicCV.pdf`; its editable
   public-safe source is maintained under `docs/cv/`.
 - Certificate documents under `public/documents/certificates/` are published by an
   explicit owner decision of 31 August 2026 and **do display the owner's legal
