@@ -53,6 +53,8 @@ next-env.d.ts
 *.pdf
 # Exact reviewed public CV permitted by the approved publication plan.
 !/public/documents/OJ_Florendo_Rayatchi_Public_CV.pdf
+# The Joseph Florendo public CV, linked from the site since 10 November 2026 (docs/cv/README.md).
+!/public/documents/JosephFlorendo_PublicCV.pdf
 # The assistant corpus copy of that same reviewed CV. A test asserts it stays
 # byte-identical to the file above, and its digest is part of the committed
 # corpus checksum — so leaving it ignored made the recorded checksum
